@@ -56,8 +56,8 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
         allowedRoles: ["OWNER", "MANAGER"],
       },
       {
-        title: "Items",
-        url: "/items",
+        title: "Stock",
+        url: "/stock",
         icon: Package,
         allowedRoles: ["OWNER", "MANAGER"],
       },

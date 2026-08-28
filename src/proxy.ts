@@ -18,12 +18,16 @@ const ALLOWED_TENANT_ROLES = ["OWNER", "MANAGER"];
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   const { userId, sessionClaims } = await auth();
-  const metadata = (sessionClaims?.metadata || {}) as {
+
+  // Extract metadata safely from sessionClaims
+  const metadata = (sessionClaims?.metadata || sessionClaims?.public_metadata || {}) as {
     role?: string;
     branchId?: string;
   };
+
   const userRole = metadata.role;
   const branchId = metadata.branchId;
+
   const isAllowedTenantUser =
     Boolean(userRole) &&
     ALLOWED_TENANT_ROLES.includes(userRole!) &&
@@ -34,20 +38,18 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     if (isPublicRoute(req)) {
       return NextResponse.next();
     }
-    const signInUrl = new URL("/sign-in", req.url);
-    return NextResponse.redirect(signInUrl);
+    return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 
-  // 2. Authenticated but Unauthorized (e.g., Droply SuperAdmin or unassigned user)
+  // 2. Authenticated but Unauthorized
   if (!isAllowedTenantUser) {
     if (isUnauthorizedRoute(req)) {
       return NextResponse.next();
     }
-    // Break the loop by sending to /unauthorized instead of /sign-in
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
-  // 3. Authenticated & Valid Tenant User visiting public/auth routes -> Redirect to /app
+  // 3. Authenticated & Valid Tenant User visiting public/auth routes
   if (isAuthRoute(req) || isUnauthorizedRoute(req)) {
     return NextResponse.redirect(new URL("/app", req.url));
   }
