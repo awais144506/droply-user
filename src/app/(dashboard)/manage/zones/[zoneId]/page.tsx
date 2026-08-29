@@ -14,12 +14,14 @@ import {
   Users,
   Bike,
   Pencil,
+  Trash2,
   AlertTriangle,
   ExternalLink,
   ChevronDown,
   UserCheck,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 // --- DUMMY DATA CONTRACTS ---
 interface CustomerRow {
   id: string;
@@ -157,7 +159,7 @@ export default function ZoneDetailPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-5">
         <div className="flex items-center gap-3">
           <Link
-            href="/zones"
+            href="/manage/zones"
             className="h-9 w-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-colors shadow-xs"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -172,25 +174,23 @@ export default function ZoneDetailPage() {
                 Active Zone
               </span>
             </div>
-            <p className="text-xs text-slate-500 mt-0.5 max-w-xl">
-              {zone.description}
-            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="h-9 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs">
-            <Pencil className="h-3.5 w-3.5 text-slate-400" />
-            <span>Edit Sector</span>
-          </button>
-
-          <Link
-            href={`/customers/create?zoneId=${zoneId}`}
-            className="h-9 px-3.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold inline-flex items-center gap-1.5 transition-colors shadow-xs"
+          <Button
+            variant={"editOutline"}
           >
-            <Plus className="h-4 w-4" />
-            <span>Add Customer</span>
-          </Link>
+            <Pencil />
+            Edit
+          </Button>
+
+          <Button
+            variant={"destructiveOutline"}
+          >
+            <Trash2 />
+            Delete
+          </Button>
         </div>
       </div>
 
@@ -211,7 +211,7 @@ export default function ZoneDetailPage() {
         <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Outstanding Khata
+              Outstanding (KHATA)
             </span>
             <div className="h-7 w-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
               <Wallet className="h-4 w-4" />
@@ -225,7 +225,7 @@ export default function ZoneDetailPage() {
         <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
           <div className="flex items-center justify-between text-slate-500 mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Bottles in Sector
+              Returnable Items 
             </span>
             <div className="h-7 w-7 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
               <RotateCcw className="h-4 w-4" />
@@ -233,23 +233,10 @@ export default function ZoneDetailPage() {
           </div>
           <p className="text-2xl font-bold text-slate-900">
             {totalReturnables}{" "}
-            <span className="text-xs font-normal text-slate-400">units</span>
+            <span className="text-xs font-normal text-slate-400">items</span>
           </p>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
-          <div className="flex items-center justify-between text-slate-500 mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Security Deposits
-            </span>
-            <div className="h-7 w-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-              <UserCheck className="h-4 w-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-slate-900">
-            Rs {totalSecurity.toLocaleString()}
-          </p>
-        </div>
       </div>
 
       {/* Assigned Riders Section */}
@@ -258,12 +245,9 @@ export default function ZoneDetailPage() {
           <div className="flex items-center gap-2">
             <Bike className="h-4 w-4 text-sky-600" />
             <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-              Assigned Route Riders ({zone.riders.length})
+              Assigned Riders ({zone.riders.length})
             </h3>
           </div>
-          <button className="text-xs text-sky-600 font-semibold hover:underline">
-            Manage Fleet
-          </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
@@ -308,33 +292,30 @@ export default function ZoneDetailPage() {
           <div className="flex items-center gap-1.5 self-start md:self-auto">
             <button
               onClick={() => setFilterType("ALL")}
-              className={`h-8 px-3 rounded-lg text-xs font-medium transition-colors ${
-                filterType === "ALL"
-                  ? "bg-slate-900 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
+              className={`h-8 px-3 rounded-lg text-xs font-medium transition-colors ${filterType === "ALL"
+                ? "bg-slate-900 text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
             >
               All ({zone.customers.length})
             </button>
             <button
               onClick={() => setFilterType("WITH_DEBT")}
-              className={`h-8 px-3 rounded-lg text-xs font-medium transition-colors ${
-                filterType === "WITH_DEBT"
-                  ? "bg-amber-600 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
+              className={`h-8 px-3 rounded-lg text-xs font-medium transition-colors ${filterType === "WITH_DEBT"
+                ? "bg-amber-600 text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
             >
               Has Outstanding
             </button>
             <button
               onClick={() => setFilterType("WITH_BOTTLES")}
-              className={`h-8 px-3 rounded-lg text-xs font-medium transition-colors ${
-                filterType === "WITH_BOTTLES"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}
+              className={`h-8 px-3 rounded-lg text-xs font-medium transition-colors ${filterType === "WITH_BOTTLES"
+                ? "bg-indigo-600 text-white"
+                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
             >
-              Holds Returnables
+              Holds Items
             </button>
           </div>
         </div>
@@ -347,7 +328,7 @@ export default function ZoneDetailPage() {
                 <th className="py-3 px-4">Customer & Address</th>
                 <th className="py-3 px-4">Contact</th>
                 <th className="py-3 px-4 text-right">Outstanding (Khata)</th>
-                <th className="py-3 px-4 text-center">Bottles Held</th>
+                <th className="py-3 px-4 text-center">Items Held</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 text-slate-700">
@@ -373,17 +354,16 @@ export default function ZoneDetailPage() {
                         </span>
                       ) : (
                         <span className="text-emerald-600 font-semibold font-mono">
-                          Rs 0 (Clear)
+                          Cleared
                         </span>
                       )}
                     </td>
 
                     <td className="py-3 px-4 text-center">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md font-bold font-mono text-xs ${
-                        c.returnablesHeld > 0 
-                          ? "bg-indigo-50 text-indigo-700 border border-indigo-200/60" 
-                          : "text-slate-400 bg-slate-50"
-                      }`}>
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md font-bold font-mono text-xs ${c.returnablesHeld > 0
+                        ? "bg-indigo-50 text-indigo-700 border border-indigo-200/60"
+                        : "text-slate-400 bg-slate-50"
+                        }`}>
                         {c.returnablesHeld}
                       </span>
                     </td>

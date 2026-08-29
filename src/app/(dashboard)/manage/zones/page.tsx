@@ -15,6 +15,7 @@ import { ZoneCard } from "@/features/zones/components/zone-card";
 import { ZoneFormModal } from "@/features/zones/components/zone-form-modal";
 import { ZoneItem } from "@/features/zones/types";
 import { useTenant } from "@/hooks/use-tenant";
+import { Button } from "@/components/ui/button";
 
 export default function ZonesPage() {
   const { branchId, isLoading: isTenantLoading } = useTenant();
@@ -75,20 +76,20 @@ export default function ZonesPage() {
             Delivery Zones
           </h1>
           <p className="text-xs text-slate-500 mt-1">
-            Manage distribution sectors, route riders, and track empty returnable bottle liabilities.
+            Manage distribution sectors, route riders, and track empty returnable items liabilities.
           </p>
         </div>
 
-        <button
+        <Button
           onClick={() => {
             setEditingZone(null);
             setIsModalOpen(true);
           }}
-          className="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-semibold transition-colors shadow-xs"
+          variant="create"
         >
           <Plus className="h-4 w-4" />
           <span>Add Zone</span>
-        </button>
+        </Button>
       </div>
 
       {/* Aggregate Metric Stats */}
@@ -102,7 +103,7 @@ export default function ZonesPage() {
           placeholder="Search zones by name..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full h-10 pl-10 pr-4 rounded-xl border border-slate-300 bg-white text-xs font-medium text-slate-900 placeholder:text-slate-400 shadow-2xs focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
+          className="w-full h-10 pl-10 pr-4 rounded-xl border border-slate-500 bg-white text-xs font-medium text-slate-900 placeholder:text-slate-500 shadow-2xs focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
         />
       </div>
 

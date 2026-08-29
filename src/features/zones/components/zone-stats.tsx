@@ -20,7 +20,7 @@ export function ZoneStats({ zones }: { zones: ZoneItem[] }) {
 
       <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
         <div className="flex items-center justify-between text-slate-500 mb-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Mapped Customers</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Customers</span>
           <div className="h-7 w-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
             <Users className="h-4 w-4" />
           </div>
@@ -30,7 +30,7 @@ export function ZoneStats({ zones }: { zones: ZoneItem[] }) {
 
       <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
         <div className="flex items-center justify-between text-slate-500 mb-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Outstanding</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Outstanding (KHATA)</span>
           <div className="h-7 w-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
             <Wallet className="h-4 w-4" />
           </div>
@@ -42,13 +42,13 @@ export function ZoneStats({ zones }: { zones: ZoneItem[] }) {
 
       <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
         <div className="flex items-center justify-between text-slate-500 mb-2">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Returnables Held</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Returnables Items Held</span>
           <div className="h-7 w-7 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
             <RotateCcw className="h-4 w-4" />
           </div>
         </div>
         <p className="text-2xl font-bold text-slate-900">
-          {totalReturnables} <span className="text-xs font-normal text-slate-400">assets</span>
+          {totalReturnables} <span className="text-xs font-normal text-slate-400">items</span>
         </p>
       </div>
     </div>

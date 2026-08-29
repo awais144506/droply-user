@@ -1,10 +1,8 @@
 import {
   MapPin,
   Package,
-  CreditCardIcon,
   Truck,
   FileText,
-  BadgeDollarSign,
   Navigation,
   Factory,
   PackageCheck,
@@ -13,10 +11,10 @@ import {
   Receipt,
   UserCog,
   BarChart3,
-  Settings,
   CreditCard,
   LucideIcon,
-  UserPlus
+  UserPlus,
+  HelpCircle,
 } from "lucide-react";
 
 export type UserRole = "OWNER" | "MANAGER";
@@ -52,19 +50,19 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     items: [
       {
         title: "Zones",
-        url: "/zones",
+        url: "/manage/zones",
         icon: MapPin,
         allowedRoles: ["OWNER", "MANAGER"],
       },
       {
         title: "Stock",
-        url: "/stock",
+        url: "/manage/stock",
         icon: Package,
         allowedRoles: ["OWNER", "MANAGER"],
       },
       {
         title: "Customers",
-        url: "/customers",
+        url: "/manage/customers",
         icon: UserPlus,
         allowedRoles: ["OWNER", "MANAGER"],
       },
@@ -81,25 +79,19 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     items: [
       {
         title: "Delivery / Sale",
-        url: "/orders",
+        url: "/sales/orders",
         icon: Truck,
         allowedRoles: ["OWNER", "MANAGER"],
       },
       {
         title: "Invoices",
-        url: "/invoices",
+        url: "/sales/invoices",
         icon: FileText,
         allowedRoles: ["OWNER", "MANAGER"],
       },
       {
-        title: "Payment In",
-        url: "/payments",
-        icon: BadgeDollarSign,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
         title: "Live Tracking",
-        url: "/tracking",
+        url: "/sales/tracking",
         icon: Navigation,
         badge: "GPS",
         allowedRoles: ["OWNER", "MANAGER"],
@@ -117,20 +109,20 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     items: [
       {
         title: "Production",
-        url: "/production",
+        url: "/stock/production",
         icon: Factory,
         allowedRoles: ["OWNER", "MANAGER"],
       },
       {
         title: "Bottle & Asset Ledger",
-        url: "/inventory",
+        url: "/stock/inventory",
         icon: PackageCheck,
         allowedRoles: ["OWNER", "MANAGER"],
       },
     ],
   },
   {
-    label: "PURCHASES & EXPENSES",
+    label: "PURCHASES",
     headerColor: {
       text: "text-amber-600 dark:text-amber-400",
       dot: "bg-amber-500",
@@ -140,25 +132,19 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     items: [
       {
         title: "Suppliers",
-        url: "/suppliers",
+        url: "/supply/suppliers",
         icon: Building,
         allowedRoles: ["OWNER", "MANAGER"],
       },
       {
         title: "Stock Order",
-        url: "/order",
+        url: "/supply/order",
         icon: Receipt,
         allowedRoles: ["OWNER", "MANAGER"],
       },
       {
-        title: "Purchases",
-        url: "/purchases",
-        icon: ShoppingCart,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
         title: "Payments",
-        url: "/payments",
+        url: "/supply/payments",
         icon: CreditCard,
         allowedRoles: ["OWNER", "MANAGER"],
       },
@@ -175,21 +161,33 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     items: [
       {
         title: "Users",
-        url: "/users",
+        url: "/admin/users",
         icon: UserCog,
         badge: "Owner",
         allowedRoles: ["OWNER"],
       },
       {
+        title: "Expenses",
+        url: "/admin/expenses",
+        icon: Receipt,
+        allowedRoles: ["OWNER", "MANAGER"],
+      },
+      {
         title: "Reports",
-        url: "/reports",
+        url: "/admin/reports",
         icon: BarChart3,
         allowedRoles: ["OWNER", "MANAGER"],
       },
       {
         title: "Subscription",
-        url: "/subscription",
+        url: "/admin/subscription",
         icon: CreditCard,
+        allowedRoles: ["OWNER", "MANAGER"],
+      },
+      {
+        title: "Help Center",
+        url: "/admin/help",
+        icon: HelpCircle,
         allowedRoles: ["OWNER", "MANAGER"],
       },
     ],

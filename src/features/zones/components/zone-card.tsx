@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MapPin, Pencil, Trash2, ArrowRight, Bike } from "lucide-react";
+import { MapPin, ArrowRight, Bike } from "lucide-react";
 import { ZoneItem } from "../types";
 
 interface ZoneCardProps {
@@ -21,21 +21,6 @@ export function ZoneCard({ zone, onEdit, onDelete }: ZoneCardProps) {
             <h3 className="text-sm font-bold text-slate-900 truncate">
               {zone.name}
             </h3>
-          </div>
-
-          <div className="flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => onEdit(zone)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
-            <button
-              onClick={() => onDelete(zone.id)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
           </div>
         </div>
 
@@ -103,10 +88,10 @@ export function ZoneCard({ zone, onEdit, onDelete }: ZoneCardProps) {
         </div>
 
         <Link
-          href={`/zones/${zone.id}`}
+          href={`/manage/zones/${zone.id}`}
           className="text-sky-600 font-semibold hover:text-sky-700 inline-flex items-center gap-1 group/link shrink-0"
         >
-          <span>Route Desk</span>
+          <span>Details</span>
           <ArrowRight className="h-3 w-3 group-hover/link:translate-x-0.5 transition-transform" />
         </Link>
       </div>

@@ -22,7 +22,9 @@ const buttonVariants = cva(
           "hover:bg-muted/80 hover:text-foreground active:bg-muted dark:hover:bg-muted/50",
         link:
           "text-primary underline-offset-4 hover:underline p-0 h-auto font-normal",
-        normal: "bg-gray-200 text-black"
+        normal: "bg-gray-200 text-black",
+        destructiveOutline:"border border-rose-500 hover:text-white hover:bg-rose-600",
+        editOutline:"border border-emerald-500 hover:text-white hover:bg-emerald-600",
       },
       size: {
         default: "h-9 px-4 py-2 gap-2 text-sm",
