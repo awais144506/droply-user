@@ -6,7 +6,6 @@ import { useUser } from "@clerk/nextjs";
 import {
   LayoutDashboard,
   ChevronDown,
-  Sparkles,
 } from "lucide-react";
 import {
   Collapsible,
@@ -82,9 +81,9 @@ export function NavMain() {
             key={group.label}
             className="rounded-2xl border border-border/70 bg-card p-1.5 shadow-xs transition-all duration-200"
           >
-            <Collapsible defaultOpen={true} className="group/collapsible w-full">
+            <Collapsible defaultOpen={true} className="group/collapsible w-full ">
               {/* Group Header */}
-              <CollapsibleTrigger className="flex w-full items-center justify-between px-2.5 py-2 rounded-xl text-[11px] font-bold tracking-wider hover:bg-muted/50 transition-colors uppercase">
+              <CollapsibleTrigger className="flex w-full cursor-pointer items-center justify-between px-2.5 py-2 rounded-xl text-[11px] font-bold tracking-wider hover:bg-muted/50 transition-colors uppercase">
                 <div className="flex items-center gap-2">
                   <span
                     className={`h-2 w-2 rounded-full shrink-0 transition-all ${
@@ -136,9 +135,6 @@ export function NavMain() {
                               : "border-sky-500/30 text-sky-600 bg-sky-500/10"
                           }`}
                         >
-                          {item.badge === "Owner" && (
-                            <Sparkles className="h-2.5 w-2.5 mr-0.5" />
-                          )}
                           {item.badge}
                         </Badge>
                       )}

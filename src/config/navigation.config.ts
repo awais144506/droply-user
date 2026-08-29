@@ -1,7 +1,7 @@
 import {
   MapPin,
   Package,
-  Users,
+  CreditCardIcon,
   Truck,
   FileText,
   BadgeDollarSign,
@@ -16,6 +16,7 @@ import {
   Settings,
   CreditCard,
   LucideIcon,
+  UserPlus
 } from "lucide-react";
 
 export type UserRole = "OWNER" | "MANAGER";
@@ -41,7 +42,7 @@ export interface NavGroup {
 
 export const BRANCH_NAV_CONFIG: NavGroup[] = [
   {
-    label: "DATA",
+    label: "MANAGE DATA",
     headerColor: {
       text: "text-sky-600 dark:text-sky-400",
       dot: "bg-sky-500",
@@ -64,7 +65,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
       {
         title: "Customers",
         url: "/customers",
-        icon: Users,
+        icon: UserPlus,
         allowedRoles: ["OWNER", "MANAGER"],
       },
     ],
@@ -144,15 +145,21 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
         allowedRoles: ["OWNER", "MANAGER"],
       },
       {
+        title: "Stock Order",
+        url: "/order",
+        icon: Receipt,
+        allowedRoles: ["OWNER", "MANAGER"],
+      },
+      {
         title: "Purchases",
         url: "/purchases",
         icon: ShoppingCart,
         allowedRoles: ["OWNER", "MANAGER"],
       },
       {
-        title: "Expenses",
-        url: "/expenses",
-        icon: Receipt,
+        title: "Payments",
+        url: "/payments",
+        icon: CreditCard,
         allowedRoles: ["OWNER", "MANAGER"],
       },
     ],
@@ -177,12 +184,6 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
         title: "Reports",
         url: "/reports",
         icon: BarChart3,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
-        title: "Branch Settings",
-        url: "/settings",
-        icon: Settings,
         allowedRoles: ["OWNER", "MANAGER"],
       },
       {
