@@ -7,7 +7,6 @@ import {
   Factory,
   PackageCheck,
   Building,
-  ShoppingCart,
   Receipt,
   UserCog,
   BarChart3,
