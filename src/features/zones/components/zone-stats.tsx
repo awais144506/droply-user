@@ -1,10 +1,13 @@
+"use client";
+
 import { MapPin, Users, Wallet, RotateCcw } from "lucide-react";
 import { ZoneItem } from "../types";
 
 export function ZoneStats({ zones }: { zones: ZoneItem[] }) {
-  const totalCustomers = zones.reduce((acc, z) => acc + z.metrics.customerCount, 0);
-  const totalLedger = zones.reduce((acc, z) => acc + z.metrics.outstandingAmount, 0);
-  const totalReturnables = zones.reduce((acc, z) => acc + z.metrics.itemsReturnable, 0);
+  // Safe reducers mapping to the new optimized backend structure
+  const totalCustomers = zones.reduce((acc, z) => acc + (z.customers?.length || 0), 0);
+  const totalLedger = zones.reduce((acc, z) => acc + Number(z.ledgerAmount || 0), 0);
+  const totalReturnables = zones.reduce((acc, z) => acc + Number(z.itemsReturnable || 0), 0);
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -36,7 +39,7 @@ export function ZoneStats({ zones }: { zones: ZoneItem[] }) {
           </div>
         </div>
         <p className="text-2xl font-bold text-amber-600">
-          Rs {totalLedger.toLocaleString()}
+          Rs {totalLedger.toLocaleString("en-PK", { maximumFractionDigits: 0 })}
         </p>
       </div>
 

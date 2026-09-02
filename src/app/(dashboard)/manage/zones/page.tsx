@@ -92,7 +92,7 @@ export default function ZonesPage() {
             setEditingZone(null);
             setIsModalOpen(true);
           }}
-          className="bg-sky-600 hover:bg-sky-700 text-white shadow-sm"
+          variant="create"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Zone

@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 
-// Types based on your Prisma schema
 export interface ZoneDetails {
   id: string;
   name: string;
@@ -25,8 +24,8 @@ export function useZoneDetails(branchId: string, zoneId: string) {
   return useQuery({
     queryKey: ["zone-details", branchId, zoneId],
     queryFn: async (): Promise<ZoneDetails> => {
-      const { data } = await apiClient.get(`/branches/${branchId}/zones/${zoneId}`);
-      return data;
+      const response: any = await apiClient.get(`/branches/${branchId}/zones/${zoneId}`);
+      return response;
     },
     enabled: Boolean(branchId && zoneId),
   });

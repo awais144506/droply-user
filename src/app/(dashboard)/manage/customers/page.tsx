@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Plus, Loader2 } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
 import { useCustomers, CustomerItem } from "@/features/customers/api/use-customers";
 import { CustomerStats } from "@/features/customers/components/customer-stats";
 import { CustomersTable } from "@/features/customers/components/customer-table";
-import { Button } from "@/components/ui/button";
-// import { CustomerFormModal } from "@/features/customers/components/customer-form-modal";
+import { Button, buttonVariants } from "@/components/ui/button";
 
 export default function CustomersPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
@@ -15,11 +15,6 @@ export default function CustomersPage() {
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<CustomerItem | null>(null);
-
-  const handleOpenCreate = () => {
-    setEditingCustomer(null);
-    setIsModalOpen(true);
-  };
 
   const handleOpenEdit = (customer: CustomerItem) => {
     setEditingCustomer(customer);
@@ -49,10 +44,10 @@ export default function CustomersPage() {
           </p>
         </div>
 
-        <Button onClick={handleOpenCreate} variant="create">
+        <Link href="/manage/customers/create-customer" className={buttonVariants({ variant: "create" })}>
           <Plus className="h-4 w-4 mr-2" />
           Add New Customer
-        </Button>
+        </Link>
       </div>
 
       {/* Aggregate Stats */}
@@ -64,12 +59,6 @@ export default function CustomersPage() {
         onEdit={handleOpenEdit} 
       />
 
-      {/* Modal Placeholder (To be implemented) */}
-      {/* <CustomerFormModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        customer={editingCustomer}
-      /> */}
     </div>
   );
 }

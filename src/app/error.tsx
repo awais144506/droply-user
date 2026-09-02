@@ -38,7 +38,7 @@ export default function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
             </button>
           )}
           <Link
-            href="/zones"
+            href="/app"
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
             <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
