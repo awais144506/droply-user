@@ -1,30 +1,19 @@
 "use client";
-import { Bell } from "lucide-react";
+
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
+import { NavUser } from "./nav-user";
+import { SubscriptionIndicator } from "./subscription-indicator";
+
 export function SiteHeader() {
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b bg-background px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-      {/* Left: Navigation & Breadcrumbs */}
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 z-20 sticky top-0">
+      {/* Left: Navigation Trigger */}
       <div className="flex items-center gap-2">
-        <SidebarTrigger className="-ml-1" />
+        <SidebarTrigger className="-ml-1 text-slate-500 hover:text-slate-800" />
+        <SubscriptionIndicator />
       </div>
-
-      {/* Right: Notifications Only */}
-      <div className="flex items-center">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative h-9 w-9 text-muted-foreground hover:text-foreground"
-          title="Notifications"
-        >
-          <Bell className="h-4 w-4" />
-          <span className="absolute top-2 right-2 flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-600" />
-          </span>
-        </Button>
+      <div className="flex items-center justify-between">
+        <NavUser />
       </div>
     </header>
   );

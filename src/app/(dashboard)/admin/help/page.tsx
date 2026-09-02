@@ -347,7 +347,7 @@ export default function UserHelpPage() {
           className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:border-emerald-500 hover:text-emerald-700 text-xs font-medium transition-all shadow-2xs"
         >
           <FaWhatsapp className="h-4 w-4 text-emerald-600" />
-          <span>WhatsApp Hotline</span>
+          <span>WhatsApp</span>
         </a>
 
         <a

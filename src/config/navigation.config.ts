@@ -10,10 +10,14 @@ import {
   Receipt,
   UserCog,
   BarChart3,
-  CreditCard,
   LucideIcon,
   UserPlus,
-  HelpCircle,
+  Settings,
+  ArchiveX,
+  TruckIcon,
+  BadgeDollarSign,
+  Undo2,
+  Headphones
 } from "lucide-react";
 
 export type UserRole = "OWNER" | "MANAGER";
@@ -47,24 +51,9 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
       bgHover: "hover:bg-sky-500/5",
     },
     items: [
-      {
-        title: "Zones",
-        url: "/manage/zones",
-        icon: MapPin,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
-        title: "Stock",
-        url: "/manage/stock",
-        icon: Package,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
-        title: "Customers",
-        url: "/manage/customers",
-        icon: UserPlus,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
+      { title: "Zones & Routes", url: "/manage/zones", icon: MapPin, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Customers", url: "/manage/customers", icon: UserPlus, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Products & Pricing", url: "/manage/products", icon: Package, allowedRoles: ["OWNER", "MANAGER"] },
     ],
   },
   {
@@ -76,29 +65,14 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
       bgHover: "hover:bg-emerald-500/5",
     },
     items: [
-      {
-        title: "Delivery / Sale",
-        url: "/sales/orders",
-        icon: Truck,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
-        title: "Invoices",
-        url: "/sales/invoices",
-        icon: FileText,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
-        title: "Live Tracking",
-        url: "/sales/tracking",
-        icon: Navigation,
-        badge: "GPS",
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
+      { title: "Deliveries & Sales", url: "/sales/orders", icon: Truck, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Sale Returns & Recovery", url: "/sales/recovery", icon: Undo2, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Invoices & Receipts", url: "/sales/invoices", icon: FileText, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Live Tracking", url: "/sales/tracking", icon: Navigation, badge: "GPS", allowedRoles: ["OWNER", "MANAGER"] },
     ],
   },
   {
-    label: "PRODUCTION & STOCK",
+    label: "INVENTORY & ASSETS",
     headerColor: {
       text: "text-indigo-600 dark:text-indigo-400",
       dot: "bg-indigo-500",
@@ -106,22 +80,13 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
       bgHover: "hover:bg-indigo-500/5",
     },
     items: [
-      {
-        title: "Production",
-        url: "/stock/production",
-        icon: Factory,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
-        title: "Bottle & Asset Ledger",
-        url: "/stock/inventory",
-        icon: PackageCheck,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
+      { title: "Production / Refill", url: "/stock/production", icon: Factory, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Asset Custody Ledger", url: "/stock/assets", icon: PackageCheck, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Wastage & Damages", url: "/stock/wastage", icon: ArchiveX, allowedRoles: ["OWNER", "MANAGER"] },
     ],
   },
   {
-    label: "PURCHASES",
+    label: "PROCUREMENT",
     headerColor: {
       text: "text-amber-600 dark:text-amber-400",
       dot: "bg-amber-500",
@@ -129,28 +94,13 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
       bgHover: "hover:bg-amber-500/5",
     },
     items: [
-      {
-        title: "Suppliers",
-        url: "/supply/suppliers",
-        icon: Building,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
-        title: "Stock Order",
-        url: "/supply/order",
-        icon: Receipt,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
-        title: "Payments",
-        url: "/supply/payments",
-        icon: CreditCard,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
+      { title: "Suppliers", url: "/supply/suppliers", icon: Building, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Purchase Orders", url: "/supply/order", icon: Receipt, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Purchase Returns", url: "/supply/returns", icon: Undo2, allowedRoles: ["OWNER", "MANAGER"] },
     ],
   },
   {
-    label: "ADMIN",
+    label: "OPERATIONS & ADMIN",
     headerColor: {
       text: "text-rose-600 dark:text-rose-400",
       dot: "bg-rose-500",
@@ -158,37 +108,13 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
       bgHover: "hover:bg-rose-500/5",
     },
     items: [
-      {
-        title: "Users",
-        url: "/admin/users",
-        icon: UserCog,
-        badge: "Owner",
-        allowedRoles: ["OWNER"],
-      },
-      {
-        title: "Expenses",
-        url: "/admin/expenses",
-        icon: Receipt,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
-        title: "Reports",
-        url: "/admin/reports",
-        icon: BarChart3,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
-        title: "Subscription",
-        url: "/admin/subscription",
-        icon: CreditCard,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
-      {
-        title: "Help Center",
-        url: "/admin/help",
-        icon: HelpCircle,
-        allowedRoles: ["OWNER", "MANAGER"],
-      },
+      { title: "Staff & Payroll", url: "/admin/staff", icon: UserCog, badge: "Owner", allowedRoles: ["OWNER"] },
+      { title: "Vehicles & Fuel", url: "/admin/fleet", icon: TruckIcon, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Assigned Tasks", url: "/admin/tasks", icon: FileText, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Expenses & Accounts", url: "/admin/expenses", icon: BadgeDollarSign, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Reports", url: "/admin/reports", icon: BarChart3, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Branch Settings", url: "/admin/settings", icon: Settings, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Help", url: "/admin/help", icon: Headphones, allowedRoles: ["OWNER", "MANAGER"] },
     ],
   },
 ];

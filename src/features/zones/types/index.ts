@@ -16,6 +16,9 @@ export interface ZoneItem {
   name: string;
   branchId: string;
   riders: ZoneRider[];
+  customers: [];
+  ledgerAmount: number;
+  itemsReturnable: number;
   metrics: ZoneMetrics;
   createdAt: string;
 }

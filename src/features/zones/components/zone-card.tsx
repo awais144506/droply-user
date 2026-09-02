@@ -1,98 +1,90 @@
-import Link from "next/link";
-import { MapPin, ArrowRight, Bike } from "lucide-react";
-import { ZoneItem } from "../types";
+"use client";
 
+import Link from "next/link";
+import { MapPin, Users, Package, Wallet, ArrowRight } from "lucide-react";
+import { ZoneItem } from "../types";
 interface ZoneCardProps {
-  zone: ZoneItem;
-  onEdit: (zone: ZoneItem) => void;
-  onDelete: (zoneId: string) => void;
+  zone: ZoneItem & { zoneNumber: number }; // Extended to accept the injected zone number
+  onEdit: () => void;
+  onDelete: () => void;
 }
 
-export function ZoneCard({ zone, onEdit, onDelete }: ZoneCardProps) {
+export function ZoneCard({ zone }: ZoneCardProps) {
+  
+  // Safe Currency Formatter: Handles strings, nulls, and undefined gracefully
+  const formatCurrency = (amount: number | string | null | undefined) => {
+    const numericAmount = Number(amount || 0);
+    if (isNaN(numericAmount)) return "Rs 0";
+    return `Rs ${numericAmount.toLocaleString("en-PK", { maximumFractionDigits: 0 })}`;
+  };
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/90 shadow-xs hover:border-slate-300 transition-all flex flex-col justify-between overflow-hidden group">
-      <div className="p-4">
-        {/* Header: Name + Actions */}
-        <div className="flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="h-8 w-8 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 shrink-0">
-              <MapPin className="h-4 w-4" />
+    <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow group flex flex-col h-full">
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-start gap-3">
+          <div className="h-10 w-10 shrink-0 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center">
+            <MapPin className="h-5 w-5 text-sky-600" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-0.5">
+              <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-500">
+                ZONE {zone.zoneNumber}
+              </span>
+              <h3 className="text-sm font-bold text-slate-900 leading-tight line-clamp-1">{zone.name}</h3>
             </div>
-            <h3 className="text-sm font-bold text-slate-900 truncate">
-              {zone.name}
-            </h3>
-          </div>
-        </div>
-
-        {/* Metrics Grid */}
-        <div className="grid grid-cols-3 gap-2 mt-4 pt-3 border-t border-slate-100 text-center">
-          <div className="bg-slate-50/70 rounded-xl p-2">
-            <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-              Customers
-            </span>
-            <span className="text-sm font-bold text-slate-800">
-              {zone.metrics.customerCount}
-            </span>
-          </div>
-
-          <div className="bg-slate-50/70 rounded-xl p-2">
-            <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-              Outstanding
-            </span>
-            <span
-              className={`text-sm font-bold ${
-                zone.metrics.outstandingAmount > 0
-                  ? "text-amber-600"
-                  : "text-slate-800"
-              }`}
-            >
-              {zone.metrics.outstandingAmount > 0
-                ? `Rs ${zone.metrics.outstandingAmount.toLocaleString()}`
-                : "Rs 0"}
-            </span>
-          </div>
-
-          <div className="bg-slate-50/70 rounded-xl p-2">
-            <span className="text-[10px] text-slate-400 uppercase font-semibold block">
-              Returnables
-            </span>
-            <span
-              className={`text-sm font-bold ${
-                zone.metrics.itemsReturnable > 0
-                  ? "text-indigo-600"
-                  : "text-slate-800"
-              }`}
-            >
-              {zone.metrics.itemsReturnable}
-            </span>
+            
+            <div className="flex items-center gap-1.5 mt-1">
+              <Users className="h-3.5 w-3.5 text-slate-400" />
+              <span className="text-xs text-slate-500 font-medium">
+                {zone.customers?.length || 0} Customers
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Footer: Riders & Route Desk Navigation */}
-      <div className="px-4 py-2.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-1.5 min-w-0 pr-2">
+      {/* Aggregate Metrics Panel */}
+      <div className="grid grid-cols-2 gap-3 mb-4 bg-slate-50 rounded-xl p-3 border border-slate-100">
+        <div>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Wallet className="h-3 w-3 text-amber-500" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Total Khata</span>
+          </div>
+          <span className="text-sm font-bold text-slate-900">{formatCurrency(zone.ledgerAmount)}</span>
+        </div>
+        <div>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Package className="h-3 w-3 text-indigo-500" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Assets Out</span>
+          </div>
+          <span className="text-sm font-bold text-slate-900">{zone.itemsReturnable || 0}</span>
+        </div>
+      </div>
+
+      {/* Assigned Riders (Pushes the footer to the bottom) */}
+      <div className="mb-4 grow">
+        <p className="text-[11px] text-slate-400 mb-2 font-semibold uppercase tracking-wider">Assigned Riders</p>
+        <div className="flex flex-wrap gap-2">
           {zone.riders && zone.riders.length > 0 ? (
-            <div className="flex items-center gap-1.5 text-slate-700 truncate">
-              <Bike className="h-3.5 w-3.5 text-sky-600 shrink-0" />
-              <span className="truncate font-medium text-[11px]">
-                {zone.riders.map((r) => r.name).join(", ")}
+            zone.riders.map((rider) => (
+              <span key={rider.id} className="inline-flex items-center px-2 py-1 rounded-md bg-white text-[11px] font-semibold text-slate-600 border border-slate-200 shadow-2xs">
+                {rider.name}
               </span>
-            </div>
+            ))
           ) : (
-            <div className="flex items-center gap-1 text-slate-400 italic text-[11px]">
-              <Bike className="h-3.5 w-3.5" />
-              <span>No riders assigned</span>
-            </div>
+            <span className="text-xs text-slate-400 italic">No riders assigned</span>
           )}
         </div>
+      </div>
 
-        <Link
+      {/* Card Footer: View Details Link */}
+      <div className="pt-3 border-t border-slate-100 flex items-center justify-end mt-auto">
+        <Link 
           href={`/manage/zones/${zone.id}`}
-          className="text-sky-600 font-semibold hover:text-sky-700 inline-flex items-center gap-1 group/link shrink-0"
+          className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center group transition-colors"
         >
-          <span>Details</span>
-          <ArrowRight className="h-3 w-3 group-hover/link:translate-x-0.5 transition-transform" />
+          View Zone Details
+          <ArrowRight className="h-3.5 w-3.5 ml-1 transition-transform group-hover:translate-x-1" />
         </Link>
       </div>
     </div>

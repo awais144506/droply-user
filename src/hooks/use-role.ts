@@ -2,18 +2,22 @@
 
 import { useUser } from "@clerk/nextjs";
 
-export function useTenant() {
+export function useRole() {
   const { user, isLoaded, isSignedIn } = useUser();
 
   const branchId = (user?.publicMetadata?.branchId as string) || "";
-  const role = (user?.publicMetadata?.role as "OWNER" | "MANAGER" | "RIDER") || "RIDER";
-
+  const role = (user?.publicMetadata?.role as "OWNER" | "MANAGER") || "MANAGER";
+  const userName = String(user?.fullName) || "XYZ";
+  const userEmail = String(user?.emailAddresses) ;
+  const userProfilePicture = user?.imageUrl;
   return {
     branchId,
     role,
+    userName,
+    userEmail,
+    userProfilePicture,
     isOwner: role === "OWNER",
     isManager: role === "MANAGER",
-    isRider: role === "RIDER",
     isLoading: !isLoaded,
     isAuthenticated: Boolean(isSignedIn && branchId),
   };
