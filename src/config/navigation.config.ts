@@ -17,7 +17,8 @@ import {
   TruckIcon,
   BadgeDollarSign,
   Undo2,
-  Headphones
+  Headphones,
+  CreditCard
 } from "lucide-react";
 
 export type UserRole = "OWNER" | "MANAGER";
@@ -96,6 +97,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     items: [
       { title: "Suppliers", url: "/supply/suppliers", icon: Building, allowedRoles: ["OWNER", "MANAGER"] },
       { title: "Purchase Orders", url: "/supply/order", icon: Receipt, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Payments", url: "/supply/payments", icon: CreditCard, allowedRoles: ["OWNER", "MANAGER"] },
       { title: "Purchase Returns", url: "/supply/returns", icon: Undo2, allowedRoles: ["OWNER", "MANAGER"] },
     ],
   },
@@ -113,6 +115,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
       { title: "Assigned Tasks", url: "/admin/tasks", icon: FileText, allowedRoles: ["OWNER", "MANAGER"] },
       { title: "Expenses & Accounts", url: "/admin/expenses", icon: BadgeDollarSign, allowedRoles: ["OWNER", "MANAGER"] },
       { title: "Reports", url: "/admin/reports", icon: BarChart3, allowedRoles: ["OWNER", "MANAGER"] },
+      { title: "Subscription", url: "/admin/subscription", icon: CreditCard, allowedRoles: ["OWNER", "MANAGER"] },
       { title: "Branch Settings", url: "/admin/settings", icon: Settings, allowedRoles: ["OWNER", "MANAGER"] },
       { title: "Help", url: "/admin/help", icon: Headphones, allowedRoles: ["OWNER", "MANAGER"] },
     ],
