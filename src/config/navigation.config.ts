@@ -87,7 +87,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     ],
   },
   {
-    label: "PROCUREMENT",
+    label: "SUPPLIES & PURCHASES",
     headerColor: {
       text: "text-amber-600 dark:text-amber-400",
       dot: "bg-amber-500",
