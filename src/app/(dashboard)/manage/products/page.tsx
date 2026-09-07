@@ -1,51 +1,53 @@
 "use client";
 
-import Link from "next/link";
-import { Plus } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
-import { useProducts } from "@/features/products/api/use-products";
+import { useProducts, useProductLogs } from "@/features/products/api/use-products";
 import { ProductStats } from "@/features/products/components/product-stats";
 import { ProductsTable } from "@/features/products/components/products-table";
-import { buttonVariants } from "@/components/ui/button";
+import PageHeader from "@/utils/page-header";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
+import ActivityLogsCard from "@/utils/activity-logs-card";
 
 export default function ProductsPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
   const { data: products = [], isLoading, isError, error } = useProducts(branchId);
+  const { data: logs = [] } = useProductLogs(branchId);
 
+
+  //PRODUCT STATS DATA TO PASS 
+  const totalItems = products.length;
+  const lowStockCount = products.filter(p => p.stockOnHand <= p.lowStockThreshold).length;
+  const returnablesCount = products.filter(p => p.trackingType === "RETURNABLE").length;
+  const recipeItemsCount = products.filter(p => p.hasRecipe).length;
+
+  //LOADING & ERROR
   if (isTenantLoading || isLoading) return <Loading />
   if (isError) return <ErrorBoundary error={error.message} />
 
+  //JSX COMPONENT
   return (
     <div className="space-y-6 max-w-350 mx-auto p-6">
-
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Catalog & Inventory
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Manage your finished goods, raw materials, returnables, and pricing.
-          </p>
-        </div>
-
-        <Link
-          href="/manage/products/create-item"
-          className={buttonVariants({ variant: "create" })}
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Add New Item
-        </Link>
-      </div>
-
-      {/* Analytics Summary */}
-      <ProductStats products={products} />
-
-      {/* Main Inventory Table */}
+      <PageHeader
+        heading="Products Inventory"
+        description="Manage your finished goods, raw materials, returnables, and pricing."
+        href="/manage/products/create-item"
+        btnText="Add New Item"
+      />
+      <ProductStats
+        totalItems={totalItems}
+        lowStockCount={lowStockCount}
+        returnablesCount={returnablesCount}
+        recipeItemsCount={recipeItemsCount}
+      />
       <ProductsTable products={products} />
 
+      <div className="mt-8">
+        <ActivityLogsCard
+          title="Inventory Activity Logs"
+          logs={logs}
+        />
+      </div>
     </div>
   );
 }

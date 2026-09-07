@@ -10,6 +10,7 @@ export function useRole() {
   const userName = String(user?.fullName) || "XYZ";
   const userEmail = String(user?.emailAddresses) ;
   const userProfilePicture = user?.imageUrl;
+  
   return {
     branchId,
     role,

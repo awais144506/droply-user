@@ -1,44 +1,26 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2 } from "lucide-react";
-import { buttonVariants } from "@/components/ui/button";
+
 import { ProductForm } from "@/features/products/components/product-form";
 import { CreateItemFormData } from "@/features/products/schema/create-item.schema";
 import { useProduct, useUpdateProduct } from "@/features/products/api/use-products";
+import CreateFormHeader from "@/utils/create-formHeader";
+import Loading from "@/app/loading";
+import { formatProductPayload } from "@/features/products/utils/format-product-payload";
 
 export default function EditItemPage() {
     const router = useRouter();
     const params = useParams();
     const productId = params.id as string;
 
-    // Fetch the specific product details
     const { data: product, isLoading: isFetching } = useProduct(productId);
-    
-    // Setup the update mutation
     const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
 
     const onSubmit = (data: CreateItemFormData) => {
-        // Map frontend form fields back to the DTO structure
-        const payload = {
-            category: data.category,
-            trackingType: data.trackingType,
-            name: data.name,
-            sku: data.sku,
-            unitCost: data.unitCost,
-            salePrice: data.salePrice,
-            lowStockThreshold: data.lowStockThreshold,
-            hasRecipe: data.hasRecipe,
-            recipeIngredients: data.hasRecipe && data.recipeItems 
-                ? data.recipeItems.map((item) => ({
-                    childItemId: item.rawMaterialId, 
-                    quantity: item.quantityRequired
-                }))
-                : []
-        };
-
+        const payload = formatProductPayload(data);
         updateProduct({ id: productId, data: payload }, {
             onSuccess: () => {
                 toast.success("Item updated successfully!");
@@ -50,14 +32,7 @@ export default function EditItemPage() {
         });
     };
 
-    if (isFetching) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
-                <Loader2 className="h-8 w-8 animate-spin mb-4" />
-                <p className="text-sm font-medium">Loading item details...</p>
-            </div>
-        );
-    }
+    if (isFetching) return <Loading />
 
     if (!product) {
         return (
@@ -76,33 +51,27 @@ export default function EditItemPage() {
         trackingType: product.trackingType,
         unitCost: product.unitCost,
         salePrice: product.salePrice,
-        openingStock: product.stockOnHand, // Binds current stock to the form input
+        openingStock: product.stockOnHand,
         lowStockThreshold: product.lowStockThreshold,
         hasRecipe: product.hasRecipe,
+        // Cleaned up the rawMaterialId mapping to directly use childItemId
         recipeItems: product.recipeIngredients?.map(recipe => ({
-            // Use childItemId (or fallback to id if Prisma nested include varies)
-            rawMaterialId: (recipe as any).childItemId || recipe.childItem?.sku, 
+            rawMaterialId: recipe.childItemId,
             quantityRequired: recipe.quantity
         })) || []
     };
 
     return (
         <div className="max-w-5xl mx-auto space-y-6 p-6">
-            <div className="flex items-center gap-3 border-b pb-4">
-                <Link href="/manage/products" className={buttonVariants({ variant: "outline", size: "icon-sm" })}>
-                    <ArrowLeft className="h-4 w-4" />
-                </Link>
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">Edit Item</h1>
-                    <p className="text-xs text-slate-500 mt-0.5">Update pricing, thresholds, and recipe mappings.</p>
-                </div>
-            </div>
-
-            <ProductForm 
-                initialValues={initialValues} 
-                onSubmit={onSubmit} 
-                isPending={isUpdating} 
-                submitText="Save Changes"
+            <CreateFormHeader
+                href="/manage/products"
+                text="Edit Product"
+            />
+            <ProductForm
+                initialValues={initialValues}
+                onSubmit={onSubmit}
+                isPending={isUpdating}
+                submitText="Save Changes" // Tweaked text for better UX
             />
         </div>
     );

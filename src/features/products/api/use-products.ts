@@ -1,27 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
-
-export interface ProductItem {
-    id: string;
-    name: string;
-    sku: string;
-    category: "FINISHED_GOOD" | "RAW_MATERIAL" | "PACKAGING" | "EQUIPMENT";
-    trackingType: "OUTRIGHT" | "RETURNABLE";
-    unitCost: number;
-    salePrice: number;
-    stockOnHand: number;
-    lowStockThreshold: number;
-    hasRecipe: boolean;
-    isActive: boolean;
-    recipeIngredients?: {
-        id: string;
-        quantity: number;
-        childItem: {
-            name: string;
-            sku: string;
-        };
-    }[];
-}
+import { ProductItem } from "../types/product-item";
+import { CreateItemFormData } from "../schema/create-item.schema";
+import { ActivityLog } from "@/types/ActivityLog";
 
 export const productKeys = {
     all: ["branch-products"] as const,
@@ -29,6 +11,8 @@ export const productKeys = {
     branchList: (branchId?: string) => [...productKeys.lists(), branchId] as const,
     details: () => [...productKeys.all, "detail"] as const,
     detail: (id: string) => [...productKeys.details(), id] as const,
+    logs: () => [...productKeys.all, "logs"] as const,
+    branchLogs: (branchId?: string) => [...productKeys.logs(), branchId] as const,
 };
 
 // 1. Fetch All Products for a Branch
@@ -70,12 +54,12 @@ export function useCreateProduct() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (payload: any) => {
-            // Payload should contain { branchId, ...formData }
+        mutationFn: async (payload: CreateItemFormData) => {
             return apiClient.post(`/product`, payload);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: productKeys.logs() });
         },
     });
 }
@@ -85,13 +69,13 @@ export function useUpdateProduct() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async ({ id, data }: { id: string; data: any }) => {
+        mutationFn: async ({ id, data }: { id: string; data: CreateItemFormData }) => {
             return apiClient.patch(`/product/${id}`, data);
         },
         onSuccess: (_, variables) => {
-            // Refresh both the list and the specific item's cache
             queryClient.invalidateQueries({ queryKey: productKeys.lists() });
             queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.id) });
+            queryClient.invalidateQueries({ queryKey: productKeys.logs() });
         },
     });
 }
@@ -106,6 +90,20 @@ export function useDeleteProduct() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: productKeys.all });
+            queryClient.invalidateQueries({ queryKey: productKeys.logs() });
         },
+    });
+}
+
+// 6. Activity Logs
+export function useProductLogs(branchId?: string) {
+    return useQuery({
+        queryKey: productKeys.branchLogs(branchId),
+        queryFn: async () => {
+            if (!branchId) return [];
+            const response = await apiClient.get<ActivityLog[]>(`/product/logs/${branchId}`);
+            return response;
+        },
+        enabled: !!branchId,
     });
 }
