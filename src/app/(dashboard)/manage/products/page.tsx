@@ -13,9 +13,6 @@ export default function ProductsPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
   const { data: products = [], isLoading, isError, error } = useProducts(branchId);
   const { data: logs = [] } = useProductLogs(branchId);
-
-
-  //PRODUCT STATS DATA TO PASS 
   const totalItems = products.length;
   const lowStockCount = products.filter(p => p.stockOnHand <= p.lowStockThreshold).length;
   const returnablesCount = products.filter(p => p.trackingType === "RETURNABLE").length;

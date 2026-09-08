@@ -1,34 +1,23 @@
-export interface ZoneRider {
+export interface ZoneDetails {
   id: string;
   name: string;
-  phone: string;
-  email?: string;
-}
-
-export interface ZoneMetrics {
-  customerCount: number;
-  outstandingAmount: number;
+  ledgerAmount: number | string;
   itemsReturnable: number;
-}
-
-export interface ZoneItem {
-  id: string;
-  name: string;
-  branchId: string;
-  riders: ZoneRider[];
-  customers: [];
-  ledgerAmount: number;
-  itemsReturnable: number;
-  metrics: ZoneMetrics;
   createdAt: string;
-}
-
-export interface CreateZonePayload {
-  name: string;
-  riderIds?: string[];
-}
-
-export interface UpdateZonePayload {
-  name?: string;
-  riderIds?: string[];
+  calculatedLedger?: number;
+  calculatedReturnables?: number;
+  latitude: number;
+  longitude: number;
+  riders: { id: string; name: string; phone: string }[];
+  customers: {
+    id: string;
+    name: string;
+    phone: string;
+    address: string;
+    status: "ACTIVE" | "INACTIVE" | "BLOCKED";
+    customerCredit: number | string;
+    customerAdvance: number | string;
+    openingReturnables: number;
+    currentReturnables: string
+  }[];
 }

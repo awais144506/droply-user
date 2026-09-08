@@ -19,10 +19,7 @@ export default function CreateItemPage() {
             toast.error("Authentication error: Branch context missing.");
             return;
         }
-
-        // Use the DRY mapper (automatically calculates profit margin!)
         const payload = formatProductPayload(data, branchId);
-
         createProduct(payload, {
             onSuccess: () => {
                 toast.success("Item created successfully!");

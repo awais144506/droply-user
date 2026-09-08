@@ -1,122 +1,166 @@
 "use client";
-
-import Link from "next/link";
-import { useParams } from "next/navigation";
-import { ArrowLeft, Loader2, Package, Wallet, Users, Truck } from "lucide-react";
-import { useRole } from "@/hooks/use-role";
-import { useZoneDetails } from "@/features/zones/api/use-zone-details";
+import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Package, Wallet, Users, MapPin, Trash2, Edit } from "lucide-react";
+import { toast } from "sonner";
+import { useZone, useDeleteZone } from "@/features/zones/api/use-zones";
 import { ZoneCustomersTable } from "@/features/zones/components/zone-customers-table";
+import { AssignedRidersCard } from "@/features/zones/components/assigned-riders-card";
+import PageStatsCard from "@/utils/page-stats-card";
+import PageDetailHeader from "@/utils/page-detail-header";
+import GeneralMap from "@/utils/general-map";
+import Loading from "@/app/loading";
+import NotFoundPage from "@/app/not-found";
+import { Button } from "@/components/ui/button";
+import ConfirmDeleteDialog from "@/utils/confirm-delete-dialog";
+import EditZoneDialog from "@/features/zones/components/edit-zone";
+import { formatCurrency } from "@/utils/format-currency";
 
 export default function ZoneDetailsPage() {
   const params = useParams();
+  const router = useRouter();
   const zoneId = params.zoneId as string;
-  const { branchId, isLoading: isTenantLoading } = useRole();
+  const { data: zone, isLoading } = useZone(zoneId);
+  const { mutate: deleteZone, isPending: isDeleting } = useDeleteZone();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  const { data: zone, isLoading } = useZoneDetails(branchId, zoneId);
+  if (isLoading) return <Loading />
+  if (!zone) return <NotFoundPage item="Zone" href="/manage/zones" />
 
-  const formatCurrency = (amount: number | string | null | undefined) => {
-    const numericAmount = Number(amount || 0);
-    if (isNaN(numericAmount)) return "Rs 0";
-    return `Rs ${numericAmount.toLocaleString("en-PK", { maximumFractionDigits: 0 })}`;
+  // 1. First Step: The Safety Check
+  const handleDeleteClick = () => {
+    const hasCustomers = (zone.customers?.length || 0) > 0;
+    const hasLedger = (zone.calculatedLedger || 0) > 0;
+    const hasReturnables = (zone.calculatedReturnables || 0) > 0;
+    const hasRiders = (zone.riders?.length || 0) > 0;
+
+    if (hasCustomers || hasLedger || hasReturnables || hasRiders) {
+      toast.error("Cannot Delete Zone", {
+        description: "This zone has active customers, assigned riders, or pending balances.",
+      });
+      return;
+    }
+    setIsDeleteDialogOpen(true);
   };
 
-  if (isLoading || isTenantLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
-        <Loader2 className="h-8 w-8 animate-spin mb-4" />
-        <p className="text-sm font-medium">Loading zone details...</p>
-      </div>
-    );
-  }
-
-  if (!zone) {
-    return (
-      <div className="max-w-7xl mx-auto p-6 text-center">
-        <p className="text-slate-500">Zone not found.</p>
-        <Link href="/manage/zones" className="text-sky-600 mt-4 inline-block hover:underline">
-          Return to Zones
-        </Link>
-      </div>
-    );
-  }
+  // 2. Second Step: The Actual Deletion
+  const handleConfirmDelete = () => {
+    deleteZone(zoneId, {
+      onSuccess: () => {
+        setIsDeleteDialogOpen(false);
+        toast.success("Zone deleted successfully");
+        router.push('/manage/zones');
+      },
+      onError: () => {
+        setIsDeleteDialogOpen(false);
+      }
+    });
+  };
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-6">
-      
-      {/* 1. Header Navigation */}
-      <div className="flex items-center gap-4">
-        <Link 
+    <>
+      <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <PageDetailHeader
+          heading={zone.name}
+          description="Zone Overview & Customer Directory"
           href="/manage/zones"
-          className="h-9 w-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-50 transition-colors"
         >
-          <ArrowLeft className="h-4 w-4" />
-        </Link>
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">{zone.name}</h1>
-          </div>
-          <p className="text-sm text-slate-500 mt-0.5">
-            Zone Overview & Customer Directory
-          </p>
+          <Button
+            type="button"
+            onClick={() => setIsEditDialogOpen(true)}
+            variant="outline"
+          >
+            <Edit className="h-4 w-4" />
+            Edit
+          </Button>
+
+          <Button
+            type="button"
+            onClick={handleDeleteClick}
+            variant="destructive"
+            disabled={isDeleting}
+          >
+            <Trash2 className="h-4 w-4" />
+            Delete
+          </Button>
+        </PageDetailHeader>
+
+        {/* Top Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <PageStatsCard
+            title="Total Customers"
+            value={zone.customers?.length || 0}
+            icon={Users}
+          />
+          <PageStatsCard
+            title="Zone Khata"
+            value={formatCurrency(zone.calculatedLedger)}
+            prefix="Rs."
+            icon={Wallet}
+            iconContainerClass="bg-amber-50 text-amber-600"
+            valueColorClass="text-amber-600"
+          />
+          <PageStatsCard
+            title="Assets Out"
+            value={zone.calculatedReturnables}
+            postfix="items"
+            icon={Package}
+            iconContainerClass="bg-indigo-50 text-indigo-600"
+            valueColorClass="text-indigo-600"
+          />
         </div>
+
+        {/* Map and Riders Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col h-full min-h-120 min-w-200">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 shrink-0 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+                <MapPin className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Coverage Area</h3>
+                <p className="text-xs text-slate-500">Center location and estimated service radius</p>
+              </div>
+            </div>
+
+            <div className="flex-1 rounded-xl overflow-hidden border border-slate-100">
+              {zone.latitude && zone.longitude ? (
+                <GeneralMap
+                  lat={zone.latitude}
+                  lng={zone.longitude}
+                  popupText={zone.name}
+                  showCircle={true}
+                  circleRadius={1500}
+                />
+              ) : (
+                <div className="h-full w-full flex items-center justify-center bg-slate-50 text-slate-400 text-sm italic">
+                  Coordinates not set for this zone
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="lg:col-span-1 min-h-75">
+            <AssignedRidersCard riders={zone.riders} />
+          </div>
+        </div>
+
+        <ZoneCustomersTable customers={zone.customers} />
       </div>
 
-      {/* 2. Top Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-8 w-8 rounded-lg bg-sky-50 flex items-center justify-center">
-              <Users className="h-4 w-4 text-sky-600" />
-            </div>
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Customers</h3>
-          </div>
-          <p className="text-2xl font-bold text-slate-900">{zone.customers?.length || 0}</p>
-        </div>
-
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-8 w-8 rounded-lg bg-amber-50 flex items-center justify-center">
-              <Wallet className="h-4 w-4 text-amber-600" />
-            </div>
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Zone Khata</h3>
-          </div>
-          <p className="text-2xl font-bold text-amber-600">{formatCurrency(zone.ledgerAmount)}</p>
-        </div>
-
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-8 w-8 rounded-lg bg-indigo-50 flex items-center justify-center">
-              <Package className="h-4 w-4 text-indigo-600" />
-            </div>
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Assets Out</h3>
-          </div>
-          <p className="text-2xl font-bold text-indigo-600">{zone.itemsReturnable}</p>
-        </div>
-
-        <div className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-              <Truck className="h-4 w-4 text-emerald-600" />
-            </div>
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Assigned Riders</h3>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {zone.riders && zone.riders.length > 0 ? (
-              zone.riders.map((rider) => (
-                <span key={rider.id} className="px-2 py-1 rounded bg-slate-100 text-[11px] font-bold text-slate-700">
-                  {rider.name}
-                </span>
-              ))
-            ) : (
-              <span className="text-xs text-slate-400 italic">Unassigned</span>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Customers Table */}
-      <ZoneCustomersTable customers={zone.customers} />
-      
-    </div>
+      <ConfirmDeleteDialog
+        itemName={`Zone "${zone.name}"`}
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+      />
+      <EditZoneDialog
+        zone={zone}
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+      />
+    </>
   );
 }

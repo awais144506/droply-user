@@ -9,13 +9,16 @@ interface ActivityLogsCardProps {
 
 export default function ActivityLogsCard({ title = "Recent Activity", logs }: ActivityLogsCardProps) {
     
-    const getActionText = (action: ActivityLog["action"]) => {
+    // 🔥 Dynamically build the exact action sentence
+    const getActionText = (action: ActivityLog["action"], type: string) => {
+        const lowerType = type.toLowerCase(); // e.g., "zone", "product"
+        
         switch (action) {
-            case "CREATED": return "created a new record";
-            case "UPDATED": return "updated a record";
-            case "DELETED": return "deleted a record";
-            case "RESTOCKED": return "restocked inventory";
-            default: return "performed an action";
+            case "CREATED": return `created a new ${lowerType}`;
+            case "UPDATED": return `updated ${lowerType} details for`;
+            case "DELETED": return `deleted ${lowerType}`;
+            case "RESTOCKED": return `restocked inventory for`;
+            default: return `modified ${lowerType}`;
         }
     };
 
@@ -44,6 +47,7 @@ export default function ActivityLogsCard({ title = "Recent Activity", logs }: Ac
                 <div className="max-h-96 overflow-y-auto custom-scrollbar p-4 space-y-4">
                     {logs.map((log) => {
                         const { icon: Icon, classes } = getActionBadge(log.action);
+                        const actionText = getActionText(log.action, log.entityType || "record");
                         
                         return (
                             <div key={log.id} className="flex gap-4 group">
@@ -59,7 +63,10 @@ export default function ActivityLogsCard({ title = "Recent Activity", logs }: Ac
                                         <span className="font-bold text-slate-900">
                                             {log.userName || "System User"}
                                         </span>{" "}
-                                        {getActionText(log.action)}.
+                                        {actionText}{" "}
+                                        <span className="font-bold text-slate-900">
+                                            &apos;{log.entityName || "Unknown"}&apos;
+                                        </span>.
                                     </p>
                                     <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mt-1">
                                         {log.createdAt && !isNaN(new Date(log.createdAt).getTime())

@@ -1,64 +1,60 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { Plus, Loader2 } from "lucide-react";
+import PageHeader from "@/utils/page-header";
+import ActivityLogsCard from "@/utils/activity-logs-card";
+import { useCustomers, useCustomerLogs } from "@/features/customers/api/use-customers";
 import { useRole } from "@/hooks/use-role";
-import { useCustomers, CustomerItem } from "@/features/customers/api/use-customers";
+import Loading from "@/app/loading";
+import ErrorBoundary from "@/app/error";
 import { CustomerStats } from "@/features/customers/components/customer-stats";
 import { CustomersTable } from "@/features/customers/components/customer-table";
-import { Button, buttonVariants } from "@/components/ui/button";
 
 export default function CustomersPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
-  const { data: customers = [], isLoading } = useCustomers(branchId);
-  
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState<CustomerItem | null>(null);
+  const { data: customers = [], isError, error, isLoading } = useCustomers(branchId);
+  const { data: logs = [] } = useCustomerLogs(branchId);
 
-  const handleOpenEdit = (customer: CustomerItem) => {
-    setEditingCustomer(customer);
-    setIsModalOpen(true);
-  };
+  // Stats
+  const activeCount = customers.filter((c) => c.status === "ACTIVE").length;
+  const totalDebt = customers.reduce((sum, c) => sum + Number(c.customerCredit || 0), 0);
+  const totalAssets = customers.reduce((sum, c) => sum + Number(c.openingReturnables || 0), 0);
 
-  if (isTenantLoading || isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
-        <Loader2 className="h-8 w-8 animate-spin mb-4 text-sky-600" />
-        <p className="text-sm font-medium">Loading customer directory...</p>
-      </div>
-    );
-  }
+  if (isTenantLoading || isLoading) return <Loading />;
+  if (isError) return <ErrorBoundary error={error.message} />;
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto p-6">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <PageHeader
+        heading="Customer Management"
+        description="Manage customer accounts, sector routes, outstanding balances, and returnable asset liabilities."
+        href="/manage/customers/create-customer"
+        btnText="Add New Customer"
+      />
       
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-            Customer Directory & Khata
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Manage customer accounts, sector routes, outstanding balances, and returnable asset liabilities.
-          </p>
-        </div>
-
-        <Link href="/manage/customers/create-customer" className={buttonVariants({ variant: "create" })}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add New Customer
-        </Link>
-      </div>
-
-      {/* Aggregate Stats */}
-      <CustomerStats customers={customers} />
-
-      {/* Main Table with Pagination */}
-      <CustomersTable 
-        customers={customers} 
-        onEdit={handleOpenEdit} 
+      <CustomerStats
+        totalCustomers={customers.length}
+        activeCount={activeCount}
+        totalDebt={totalDebt}
+        totalAssets={totalAssets}
       />
 
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
+        <div className="lg:col-span-2 space-y-4">
+          {/* Table now perfectly self-contained */}
+          <CustomersTable
+            customers={customers}
+          />
+        </div>
+
+        <div className="lg:col-span-1">
+          <div className="sticky top-6">
+            <ActivityLogsCard
+              title="Customer Activity Logs"
+              logs={logs}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

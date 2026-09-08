@@ -14,6 +14,7 @@ apiClient.interceptors.request.use(
         if (typeof window !== "undefined" && (window as any).Clerk) {
             try {
                 const token = await (window as any).Clerk.session?.getToken();
+                console.log("TOKEN>> ",token);
                 if (token) {
                     config.headers.Authorization = `Bearer ${token}`;
                 }

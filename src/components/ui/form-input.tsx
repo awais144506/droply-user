@@ -8,6 +8,7 @@ interface FormInputProps {
     register: UseFormRegisterReturn;
     error?: string;
     disabled?: boolean;
+    required?: boolean;
     prefix?: string;
     suffix?: string;
     helperText?: ReactNode;
@@ -20,15 +21,16 @@ export function FormInput({
     register,
     error,
     disabled = false,
+    required = false,
     prefix,
     suffix,
     helperText
 }: FormInputProps) {
-
     return (
         <div className="space-y-1.5">
-            <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">
+            <label className="flex items-center text-xs font-bold text-slate-700 uppercase tracking-wide">
                 {label}
+                {required && <span className="text-rose-500 ml-1">*</span>}
             </label>
             <div className="relative">
                 {prefix && (

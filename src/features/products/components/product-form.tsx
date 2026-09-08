@@ -71,14 +71,16 @@ export function ProductForm({ initialValues, onSubmit, isPending = false, submit
                     <CardContent className="pt-4 space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <FormInput
-                                label="Item Name *"
+                                label="Item Name"
                                 placeholder="e.g. 19-Liter Water"
+                                required
                                 register={register("name")}
                                 error={errors.name?.message}
                             />
                             <FormInput
-                                label="SKU / Code *"
+                                label="SKU / Code"
                                 placeholder="e.g. BOT-19L"
+                                required
                                 register={register("sku")}
                                 error={errors.sku?.message}
                             />
@@ -135,7 +137,7 @@ export function ProductForm({ initialValues, onSubmit, isPending = false, submit
                             <CardTitle className="text-sm font-semibold flex items-center gap-2">
                                 <Calculator className="h-4 w-4 text-emerald-600" /> Pricing & Margins
                             </CardTitle>
-                            <div className={`px-2.5 py-1 font-bold text-[10px] rounded-md border ${parseFloat(profitMargin) > 0 ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-600 border-slate-200"}`}>
+                            <div className={`px-2.5 py-1 font-bold text-xs rounded-md border ${parseFloat(profitMargin) > 0 ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-600 border-slate-200"}`}>
                                 {profitMargin}% Margin
                             </div>
                         </CardHeader>
@@ -143,6 +145,7 @@ export function ProductForm({ initialValues, onSubmit, isPending = false, submit
                             <FormInput
                                 label="Unit Cost"
                                 type="number"
+                                required
                                 prefix="Rs"
                                 register={register("unitCost", { valueAsNumber: true })}
                                 error={errors.unitCost?.message}
@@ -150,6 +153,7 @@ export function ProductForm({ initialValues, onSubmit, isPending = false, submit
                             <FormInput
                                 label="Sale Price"
                                 type="number"
+                                required
                                 prefix="Rs"
                                 register={register("salePrice", { valueAsNumber: true })}
                                 error={errors.salePrice?.message}
@@ -167,6 +171,7 @@ export function ProductForm({ initialValues, onSubmit, isPending = false, submit
                             <FormInput
                                 label={isEditMode ? "Adjust Current Stock" : "Opening Stock"}
                                 type="number"
+                                required
                                 register={register("openingStock", { valueAsNumber: true })}
                                 error={errors.openingStock?.message}
                                 helperText={isEditMode ? (
@@ -176,8 +181,9 @@ export function ProductForm({ initialValues, onSubmit, isPending = false, submit
                                 ) : undefined}
                             />
                             <FormInput
-                                label={<span className="flex items-center gap-1">Low Alert At <AlertCircle className="h-3 w-3 text-slate-400" /></span>}
+                                label={<span className="flex items-center gap-1">Low Stock Alert At</span>}
                                 type="number"
+                                required
                                 register={register("lowStockThreshold", { valueAsNumber: true })}
                                 error={errors.lowStockThreshold?.message}
                             />
