@@ -1,37 +1,8 @@
 import { MapPin, Phone, CalendarX2 } from "lucide-react";
 import { CustomerDetails } from "../types/customer";
 import { ColumnDef } from "@/utils/data-table";
+import { formatLastVisit, formatCurrency } from "@/utils/setFormat";
 
-// Helper: Format Currency
-const formatCurrency = (amount: number | string) => {
-    return Number(amount).toLocaleString("en-PK", { maximumFractionDigits: 0 });
-};
-
-// Helper: Calculate Last Visit (Days ago + Date)
-const formatLastVisit = (dateString: string | null) => {
-    if (!dateString) return null;
-    
-    const date = new Date(dateString);
-    const now = new Date();
-    
-    // Calculate difference in days
-    const diffTime = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
-    let daysAgo = "";
-    if (diffDays === 0) daysAgo = "Today";
-    else if (diffDays === 1) daysAgo = "Yesterday";
-    else daysAgo = `${diffDays} days ago`;
-    
-    // Format exact date (e.g., "12 Sep 2026")
-    const formattedDate = date.toLocaleDateString("en-PK", { 
-        day: "2-digit", 
-        month: "short", 
-        year: "numeric" 
-    });
-
-    return { daysAgo, formattedDate };
-};
 
 export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
     {
@@ -42,16 +13,26 @@ export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
     {
         header: "Customer & Contact",
         render: (customer) => (
+
             <div>
-                <p className="font-bold text-slate-900 text-sm mb-1">{customer.name}</p>
+                <div className="flex flex-row">
+                    <p className="font-bold text-slate-900 text-sm mb-1 mr-1">{customer.name}</p>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[8px] font-bold ${customer.status === 'ACTIVE'
+                        ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                        : "bg-rose-50 text-rose-600 border border-rose-100"
+                        }`}>
+                        {customer.status}
+                    </span>
+                </div>
+
                 <div className="flex items-center gap-3 text-xs text-slate-500">
                     <span className="flex items-center gap-1">
-                        <Phone className="h-3 w-3 text-slate-400" /> 
+                        <Phone className="h-3 w-3 text-slate-400" />
                         {customer.phone}
                     </span>
-                    <span className="flex items-center gap-1 max-w-45 truncate" title={customer.address || "No address"}>
-                        <MapPin className="h-3 w-3 text-slate-400 shrink-0" /> 
-                        {customer.address || "No address"}
+                    <span className="flex items-center gap-1 max-w-45 truncate" title={customer.zone?.name || "No address"}>
+                        <MapPin className="h-3 w-3 text-slate-400 shrink-0" />
+                        {customer.zone?.name || "No address"}
                     </span>
                 </div>
             </div>
@@ -81,7 +62,7 @@ export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
         render: (customer) => (
             <div className="text-center">
                 <span className="inline-flex items-center justify-center h-6 min-w-7 px-2 rounded-full bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100">
-                    {customer.currentReturnables}
+                    {customer.returnables.length || 0}
                 </span>
             </div>
         ),
@@ -102,9 +83,8 @@ export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
 
             return (
                 <div>
-                    <p className={`text-sm font-bold ${
-                        lastVisit.daysAgo === "Today" ? "text-emerald-600" : "text-slate-900"
-                    }`}>
+                    <p className={`text-sm font-bold ${lastVisit.daysAgo === "Today" ? "text-emerald-600" : "text-slate-900"
+                        }`}>
                         {lastVisit.daysAgo}
                     </p>
                     <p className="text-[11px] font-medium text-slate-500 mt-0.5">

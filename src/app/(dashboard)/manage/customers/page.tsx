@@ -17,7 +17,9 @@ export default function CustomersPage() {
   // Stats
   const activeCount = customers.filter((c) => c.status === "ACTIVE").length;
   const totalDebt = customers.reduce((sum, c) => sum + Number(c.customerCredit || 0), 0);
-  const totalAssets = customers.reduce((sum, c) => sum + Number(c.openingReturnables || 0), 0);
+  const totalAssets = customers
+    .flatMap((customer) => customer.returnables || [])
+    .reduce((sum, item) => sum + Number(item.currentBalance || 0), 0);
 
   if (isTenantLoading || isLoading) return <Loading />;
   if (isError) return <ErrorBoundary error={error.message} />;
@@ -30,7 +32,7 @@ export default function CustomersPage() {
         href="/manage/customers/create-customer"
         btnText="Add New Customer"
       />
-      
+
       <CustomerStats
         totalCustomers={customers.length}
         activeCount={activeCount}
@@ -40,7 +42,6 @@ export default function CustomersPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-4">
         <div className="lg:col-span-2 space-y-4">
-          {/* Table now perfectly self-contained */}
           <CustomersTable
             customers={customers}
           />

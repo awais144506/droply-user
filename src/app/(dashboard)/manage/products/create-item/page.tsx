@@ -26,7 +26,7 @@ export default function CreateItemPage() {
                 router.push("/manage/products");
             },
             onError: (err: any) => {
-                toast.error(err?.response?.data?.message || "Failed to create item.");
+                toast.error(err?.message || "Failed to create item.");
             }
         });
     };

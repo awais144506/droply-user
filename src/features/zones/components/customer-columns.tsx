@@ -1,37 +1,9 @@
-import { MapPin, Phone, CalendarX2 } from "lucide-react";
+import {Phone } from "lucide-react";
 import { CustomerDetails } from "@/features/customers/types/customer";
 import { ColumnDef } from "@/utils/data-table";
+import { formatCurrency } from "@/utils/setFormat";
 
-// Helper: Format Currency
-const formatCurrency = (amount: number | string) => {
-    return Number(amount).toLocaleString("en-PK", { maximumFractionDigits: 0 });
-};
 
-// Helper: Calculate Last Visit (Days ago + Date)
-const formatLastVisit = (dateString: string | null) => {
-    if (!dateString) return null;
-
-    const date = new Date(dateString);
-    const now = new Date();
-
-    // Calculate difference in days
-    const diffTime = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    let daysAgo = "";
-    if (diffDays === 0) daysAgo = "Today";
-    else if (diffDays === 1) daysAgo = "Yesterday";
-    else daysAgo = `${diffDays} days ago`;
-
-    // Format exact date (e.g., "12 Sep 2026")
-    const formattedDate = date.toLocaleDateString("en-PK", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric"
-    });
-
-    return { daysAgo, formattedDate };
-};
 
 export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
     {
@@ -54,8 +26,8 @@ export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
             const isActive = customer.status?.toLowerCase() === "active";
             return (
                 <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold ${isActive
-                        ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                        : "bg-rose-50 text-rose-600 border border-rose-100"
+                    ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                    : "bg-rose-50 text-rose-600 border border-rose-100"
                     }`}>
                     {customer.status}
                 </span>
@@ -86,7 +58,7 @@ export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
         render: (customer) => (
             <div className="text-center">
                 <span className="inline-flex items-center justify-center h-6 min-w-7 px-2 rounded-full bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100">
-                    {customer.currentReturnables}
+                    {customer.returnables.length || 0}
                 </span>
             </div>
         ),

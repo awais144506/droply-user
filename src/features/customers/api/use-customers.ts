@@ -1,10 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { CustomerDetails } from "../types/customer";
-import { CustomerFormValues } from "../schema/create-customer.schema";
+import { CreateCustomerFormData } from "../schema/create-customer.schema";
 import { ActivityLog } from "@/types/ActivityLog";
+import { formatPakistaniPhone, displayPakistaniPhone } from "@/utils/setFormat";
 
-// 1. Query Keys Factory
+
 export const customerKeys = {
   all: ["branch-customers"] as const,
   lists: () => [...customerKeys.all, "list"] as const,
@@ -15,23 +16,6 @@ export const customerKeys = {
   customerLogs: (branchId?: string) => [...customerKeys.logs(), branchId] as const,
 };
 
-// Helper: Format local PK numbers to E.164 (+92)
-const formatPakistaniPhone = (phone?: string) => {
-  if (!phone) return phone;
-  const cleaned = phone.replace(/[\s-]/g, '');
-  if (cleaned.startsWith('03') && cleaned.length === 11) {
-    return '+92' + cleaned.slice(1);
-  }
-  return cleaned;
-};
-
-const displayPakistaniPhone = (phone?: string) => {
-  if (!phone) return phone;
-  if (phone.startsWith('+923') && phone.length === 13) {
-    return '0' + phone.slice(3);
-  }
-  return phone;
-};
 
 // 2. Fetch All Customers for a Branch
 export function useCustomers(branchId?: string | null) {
@@ -67,8 +51,7 @@ export function useCreateCustomer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (payload: CustomerFormValues) => {
-      // Intercept and format the phone number
+    mutationFn: async (payload: CreateCustomerFormData) => {
       const formattedPayload = {
         ...payload,
         phone: formatPakistaniPhone(payload.phone),
@@ -77,6 +60,7 @@ export function useCreateCustomer() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: customerKeys.logs() });
     },
   });
 }
@@ -86,7 +70,7 @@ export function useUpdateCustomer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<CustomerFormValues> }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<CreateCustomerFormData> }) => {
       const formattedData = { ...data };
 
       // Format phone if it's being updated

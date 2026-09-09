@@ -14,7 +14,7 @@ import NotFoundPage from "@/app/not-found";
 import { Button } from "@/components/ui/button";
 import ConfirmDeleteDialog from "@/utils/confirm-delete-dialog";
 import EditZoneDialog from "@/features/zones/components/edit-zone";
-import { formatCurrency } from "@/utils/format-currency";
+import { formatCurrency } from "@/utils/setFormat";
 
 export default function ZoneDetailsPage() {
   const params = useParams();

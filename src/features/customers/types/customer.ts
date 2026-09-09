@@ -15,13 +15,16 @@ export interface CustomerDetails {
     status: CustomerStatus;
     customerCredit: number;
     customerAdvance: number;
-    openingReturnables: number;
-    currentReturnables: number;
     lastVisitDate: string | null;
     createdAt: string;
+    securityDeposit:number;
     updatedAt: string;
     zone?: {
         id: string;
         name: string;
     } | null;
+    returnables: [
+        openingReturnables: number,
+        currentReturnables: number,
+    ]
 }

@@ -19,7 +19,7 @@ const NotFoundPage = ({ item, href }: Props) => {
                 {item} Not Found
             </h2>
             <p className="text-sm text-slate-500 max-w-sm mb-8 leading-relaxed">
-                We couldn&apos;t find the {item.toLowerCase()} you&apos;re looking for. It may have been deleted, or the link might be incorrect.
+                We couldn&apos;t find the {item} you&apos;re looking for. It may have been deleted, or the link might be incorrect.
             </p>
             
             {/* Call to Action */}

@@ -17,7 +17,9 @@ export interface ZoneDetails {
     status: "ACTIVE" | "INACTIVE" | "BLOCKED";
     customerCredit: number | string;
     customerAdvance: number | string;
-    openingReturnables: number;
-    currentReturnables: string
+    returnables: [
+      openingBalance: number,
+      currentBalance: number
+    ]
   }[];
 }

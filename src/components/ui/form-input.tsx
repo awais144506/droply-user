@@ -3,7 +3,7 @@ import { UseFormRegisterReturn } from "react-hook-form";
 
 interface FormInputProps {
     label: string | ReactNode;
-    type?: "text" | "number";
+    type?: "text" | "number" | "date";
     placeholder?: string;
     register: UseFormRegisterReturn;
     error?: string;
@@ -44,17 +44,14 @@ export function FormInput({
                     placeholder={placeholder}
                     disabled={disabled}
                     {...register}
-                    className={`w-full h-10 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-all ${
-                        prefix ? "pl-8" : "px-3"
-                    } ${
-                        suffix ? "pr-8" : "px-3"
-                    } ${
-                        disabled
+                    className={`w-full h-10 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-all ${prefix ? "pl-8" : "px-3"
+                        } ${suffix ? "pr-8" : "px-3"
+                        } ${disabled
                             ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
                             : error
-                            ? "border-rose-300 focus:ring-rose-500 bg-rose-50/20"
-                            : "bg-slate-50 border-slate-200 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white text-slate-900"
-                    }`}
+                                ? "border-rose-300 focus:ring-rose-500 bg-rose-50/20"
+                                : "bg-slate-50 border-slate-200 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white text-slate-900"
+                        }`}
                 />
                 {suffix && (
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase">

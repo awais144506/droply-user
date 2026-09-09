@@ -2,7 +2,7 @@ export interface ProductItem {
     id: string;
     name: string;
     sku: string;
-    category: "FINISHED_GOOD" | "RAW_MATERIAL" | "RETURNABLE_CONTAINER" | "EQUIPMENT";
+    category: "FINISHED_GOOD" | "RAW_MATERIAL" | "TRADE" | "EQUIPMENT" | "PACKAGING";
     trackingType: "OUTRIGHT" | "RETURNABLE";
     unitCost: number;
     salePrice: number;
@@ -10,7 +10,7 @@ export interface ProductItem {
     lowStockThreshold: number;
     hasRecipe: boolean;
     isActive: boolean;
-    isUsedInRecipes?: boolean; 
+    isUsedInRecipes?: boolean;
     recipeIngredients?: {
         id: string;
         quantity: number;

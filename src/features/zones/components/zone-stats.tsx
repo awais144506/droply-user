@@ -17,7 +17,6 @@ export function ZoneStats({
   totalReturnables
 }: ZoneStatsProps) {
 
-  // Format the number with commas, but leave the "Rs." symbol to the card component
   const totalLedgerRupees = totalLedger.toLocaleString("en-PK", { maximumFractionDigits: 0 });
 
   return (

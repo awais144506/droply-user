@@ -1,11 +1,12 @@
 export const categoryOptions = [
     { value: "FINISHED_GOOD", label: "Finished Good" },
-    { value: "RAW_MATERIAL", label: "Raw Material (Caps, Seals)" },
-    { value: "RETURNABLE_CONTAINER", label: "Returnable Container" },
-    { value: "EQUIPMENT", label: "Equipment (Dispensers)" },
+    { value: "RAW_MATERIAL", label: "Raw Material" },
+    { value: "TRADE", label: "Trade Item" },
+    { value: "PACKAGING", label: "Packaging" },
+    { value: "EQUIPMENT", label: "Equipment" },
 ];
 
 export const trackingOptions = [
-    { value: "OUTRIGHT", label: "Outright (Consumed/Sold)" },
-    { value: "RETURNABLE", label: "Returnable (Asset Tracked)" },
+    { value: "OUTRIGHT", label: "Outright (Sold)" },
+    { value: "RETURNABLE", label: "Returnable (Trackable)" },
 ];

@@ -30,29 +30,28 @@ export function useZones(branchId?: string | null) {
         queryKey: zoneKeys.branchList(branchId || ""),
         queryFn: async () => {
             const zones: ZoneDetails[] = await apiClient.get(`/zone/branch/${branchId}`);
+            const enrichedZones = zones.map((zone) => {
+                const calculatedLedger = (zone.customers || []).reduce(
+                    (sum, c) => sum + Number(c.customerCredit || 0),
+                    0
+                );
+                const calculatedReturnables = (zone.customers || []).reduce(
+                    (sum, c) => sum + (c.returnables?.length || 0),
+                    0
+                );
+                return {
+                    ...zone,
+                    calculatedLedger,
+                    calculatedReturnables,
+                };
+            });
 
-            // 1. Calculate Grand Totals
-            const totalZones = zones.length;
-            const totalCustomers = zones.reduce((acc, z) => acc + (z.customers?.length || 0), 0);
+            const totalZones = enrichedZones.length;
+            const totalCustomers = enrichedZones.reduce((acc, z) => acc + (z.customers?.length || 0), 0);
+            const totalLedger = enrichedZones.reduce((acc, z) => acc + z.calculatedLedger, 0);
+            const totalReturnables = enrichedZones.reduce((acc, z) => acc + z.calculatedReturnables, 0);
 
-            const totalLedger = zones.reduce((acc, z) => {
-                const zoneTotal = z.customers?.reduce((sum, c) => sum + Number(c.customerCredit || 0), 0) || 0;
-                return acc + zoneTotal;
-            }, 0);
-
-            const totalReturnables = zones.reduce((acc, z) => {
-                const zoneTotal = z.customers?.reduce((sum, c) => sum + Number(c.currentReturnables || 0), 0) || 0;
-                return acc + zoneTotal;
-            }, 0);
-
-            // 2. Enrich individual zones so ZoneCard doesn't have to calculate them
-            const enrichedZones = zones.map((zone) => ({
-                ...zone,
-                calculatedLedger: zone.customers?.reduce((sum, c) => sum + Number(c.customerCredit || 0), 0) || 0,
-                calculatedReturnables: zone.customers?.reduce((sum, c) => sum + Number(c.currentReturnables || 0), 0) || 0,
-            }));
-
-            // 3. Return a neatly packaged object
+            // 3. Return neatly packaged object
             return {
                 zones: enrichedZones,
                 stats: {
@@ -73,11 +72,14 @@ export function useZone(id?: string) {
         queryKey: zoneKeys.detail(id || ""),
         queryFn: async (): Promise<ZoneDetails> => {
             const data: ZoneDetails = await apiClient.get(`/zone/${id}`);
-
-            // Calculate totals once before returning to the UI
-            const calculatedLedger = data.customers?.reduce((sum, c) => sum + Number(c.customerCredit || 0), 0) || 0;
-            const calculatedReturnables = data.customers?.reduce((sum, c) => sum + Number(c.currentReturnables || 0), 0) || 0;
-
+            const calculatedLedger = (data.customers || []).reduce(
+                (sum, c) => sum + Number(c.customerCredit || 0),
+                0
+            );
+            const calculatedReturnables = (data.customers || []).reduce(
+                (sum, c) => sum + (c.returnables?.length || 0),
+                0
+            );
             return {
                 ...data,
                 calculatedLedger,
