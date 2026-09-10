@@ -8,6 +8,18 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'utfs.io', // (Keep for backwards compatibility with your old test images)
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.ufs.sh', // 🔥 Trust all UploadThing App ID domains
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

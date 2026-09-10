@@ -1,54 +1,53 @@
 "use client";
-
-import { useState } from "react";
-import { Plus, Loader2 } from "lucide-react";
-import { useRole } from "@/hooks/use-role";
-import { useFleet, Vehicle } from "@/features/fleet/api/use-fleet";
+import { useSearchParams } from "next/navigation";
+import FleetMainPageHeader from "@/utils/page-header";
 import { FleetStats } from "@/features/fleet/components/fleet-stats";
+import { useVehicles } from "@/features/fleet/api/use-fleet";
+import { useRole } from "@/hooks/use-role";
+import Loading from "@/app/loading";
+import ErrorBoundary from "@/app/error";
+import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { FleetTable } from "@/features/fleet/components/fleet-table";
-import { Button } from "@/components/ui/button";
 
-export default function FleetPage() {
-  const { branchId, isLoading: isTenantLoading } = useRole();
-  const { data: fleet = [], isLoading } = useFleet(branchId);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+export default function FleetManagementPage() {
+  const searchParams = useSearchParams();
+  const search = searchParams.get("search") || undefined;
+  const status = searchParams.get("status") || undefined;
+  const { branchId } = useRole();
+  const { data, isLoading, isError, error } = useVehicles(branchId, status, search);
+  const { list: vehicles, stats } = data || { list: [], stats: { total: 0, active: 0, inMaintenance: 0, retired: 0 } };
 
-  if (isTenantLoading || isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
-        <Loader2 className="h-8 w-8 animate-spin mb-4 text-sky-600" />
-        <p className="text-sm font-medium">Loading fleet data...</p>
-      </div>
-    );
-  }
-
+  if (isLoading) return <Loading />
+  if (isError) return <ErrorBoundary error={error.message} />
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Fleet & Fuel</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Manage delivery vehicles, track maintenance, and log fuel expenses.
-          </p>
-        </div>
-        <Button 
-          onClick={() => { setEditingVehicle(null); setIsModalOpen(true); }}
-          className="bg-sky-600 hover:bg-sky-700 text-white h-10 px-4 rounded-xl shadow-sm cursor-pointer"
-        >
-          <Plus className="h-4 w-4 mr-2" /> Add Vehicle
-        </Button>
-      </div>
-
-      <FleetStats fleet={fleet} />
-      
-      <FleetTable 
-        fleet={fleet} 
-        onEdit={(vehicle) => {
-          setEditingVehicle(vehicle);
-          setIsModalOpen(true);
-        }}
+    <div className="p-6 space-y-8">
+      <FleetMainPageHeader
+        heading="Fleet & Fuel"
+        description="Manage your delivery vehicles, track maintenance, and monitor fuel expenses."
+        href="/admin/fleet/create-fleet"
+        btnText="Add Vehicle"
+      />
+      <FleetStats
+        total={stats.total}
+        active={stats.active}
+        inMaintenance={stats.inMaintenance}
+        retired={stats.retired}
+      />
+      <DataTableFilterBar
+        searchPlaceholder="Search registration or model..."
+        searchParamName="search"
+        tabParamName="status"
+        tabs={[
+          { label: "All", value: "" },
+          { label: "Active", value: "ACTIVE" },
+          { label: "Maintenance", value: "MAINTENANCE" },
+          { label: "Retired", value: "RETIRED" }
+        ]}
+      />
+      <FleetTable
+        vehicles={vehicles}
+        onRowClick={(v) => console.log("Clicked vehicle:", v.registration)}
       />
     </div>
   );

@@ -5,7 +5,7 @@ import { useState } from "react";
 import { Search } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
 import PageHeader from "@/utils/page-header";
-import TierLimitCard from "@/utils/tier-limit-card";
+import TierLimitCard from "@/features/staff/components/tier-limit-card";
 import Loading from "@/app/loading";
 import { useStaffList, useStaffLogs } from "@/features/staff/api/use-staff";
 import ErrorBoundary from "@/app/error";

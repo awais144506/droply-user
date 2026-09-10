@@ -9,6 +9,7 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",
   "/unauthorized(.*)",
   "/api/webhooks(.*)",
+  "/api/uploadthing(.*)"
 ]);
 const isAuthRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/"]);
 const isUnauthorizedRoute = createRouteMatcher(["/unauthorized(.*)"]);

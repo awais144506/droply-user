@@ -1,12 +1,11 @@
 import { ReactNode } from "react";
 import { X } from "lucide-react";
 
-// T represents the data type (e.g., ProductItem, UserItem, CustomerDetails)
 export interface ColumnDef<T> {
     header: string;
-    accessorKey?: keyof T; // Used if you just want to print text directly
-    className?: string;    // Useful for alignment (e.g., "text-right")
-    render?: (item: T) => ReactNode; // Used for custom UI (badges, buttons, formatting)
+    accessorKey?: keyof T;
+    className?: string;
+    render?: (item: T) => ReactNode;
 }
 
 interface DataTableProps<T> {
@@ -23,7 +22,7 @@ export default function DataTable<T>({
     onRowClick 
 }: DataTableProps<T>) {
     return (
-        <div className="overflow-x-auto min-h-100"> {/* Fixed min-h-100 typo to Tailwind valid min-h-[400px] */}
+        <div className="overflow-x-auto min-h-100">
             <table className="w-full text-left text-sm text-slate-600">
                 <thead className="bg-white text-[10px] uppercase font-bold text-slate-400 tracking-wider border-b border-slate-100">
                     <tr>

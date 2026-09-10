@@ -5,8 +5,8 @@ import { Plus } from "lucide-react";
 type Props = {
     heading: string;
     description: string;
-    href?: string;     
-    btnText?: string; 
+    href?: string;
+    btnText?: string;
 }
 
 export default function PageHeader({ heading, description, href, btnText }: Props) {

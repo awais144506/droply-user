@@ -1,42 +1,42 @@
+// src/features/fleet/api/use-vehicles.ts
 import { useQuery } from "@tanstack/react-query";
+import { fleetKeys } from "./query-keys";
+import { fleetApi } from "./fleet.service";
+import { displayPakistaniPhone } from "@/utils/setFormat";
 
-export type VehicleStatus = "ACTIVE" | "IN_MAINTENANCE" | "OUT_OF_SERVICE";
-export type VehicleType = "TRUCK_MAZDA" | "MINI_PICKUP" | "CARGO_TRICYCLE" | "MOTORCYCLE";
-
-export interface Vehicle {
-  id: string;
-  registrationNumber: string;
-  type: VehicleType;
-  capacityDesc: string;
-  assignedRider: string;
-  status: VehicleStatus;
-  monthlyFuelCost: number;
-  lastMaintenanceDate: string;
-}
-
-export function useFleet(branchId: string) {
+export function useVehicles(branchId: string, statusFilter?: string, searchFilter?: string) {
   return useQuery({
-    queryKey: ["fleet", branchId],
-    queryFn: async (): Promise<Vehicle[]> => {
-      return [
-        {
-          id: "1", registrationNumber: "LXZ-9921", type: "TRUCK_MAZDA", capacityDesc: "350 Bottles (19L)",
-          assignedRider: "Chaudhry Bilal", status: "ACTIVE", monthlyFuelCost: 45000, lastMaintenanceDate: "2026-08-15"
-        },
-        {
-          id: "2", registrationNumber: "SAQ-402", type: "MINI_PICKUP", capacityDesc: "150 Bottles (19L)",
-          assignedRider: "Rider Usman", status: "ACTIVE", monthlyFuelCost: 28500, lastMaintenanceDate: "2026-07-22"
-        },
-        {
-          id: "3", registrationNumber: "RI-99", type: "CARGO_TRICYCLE", capacityDesc: "40 Bottles (19L)",
-          assignedRider: "Rider Ali", status: "IN_MAINTENANCE", monthlyFuelCost: 12000, lastMaintenanceDate: "2026-09-01"
-        },
-        {
-          id: "4", registrationNumber: "MN-4412", type: "MOTORCYCLE", capacityDesc: "Khata/Recovery",
-          assignedRider: "Manager Tariq", status: "ACTIVE", monthlyFuelCost: 8500, lastMaintenanceDate: "2026-08-30"
+    queryKey: fleetKeys.vehicles.list({ branchId }),
+    queryFn: () => fleetApi.getVehicles(branchId),
+    select: (vehicles) => {
+      const activeCount = vehicles.filter(v => v.status === "ACTIVE").length;
+      const maintenanceCount = vehicles.filter(v => v.status === "MAINTENANCE").length;
+      const retiredCount = vehicles.filter(v => v.status === "RETIRED").length;
+      const filteredVehicles = vehicles.filter(vehicle => {
+        const matchesStatus = statusFilter ? vehicle.status === statusFilter : true;
+        const searchLower = searchFilter?.toLowerCase() || "";
+        const matchesSearch = searchFilter
+          ? (vehicle.registration?.toLowerCase() || "").includes(searchLower) ||
+          (vehicle.modelInfo?.toLowerCase() || "").includes(searchLower)
+          : true;
+        return matchesStatus && matchesSearch;
+      });
+      const formattedList = filteredVehicles.map(vehicle => ({
+        ...vehicle,
+        driverPhone: displayPakistaniPhone(vehicle.driverPhone),
+        displayName: `${vehicle.modelInfo} (${vehicle.registration})`,
+      }));
+
+      return {
+        list: formattedList,
+        stats: {
+          total: vehicles.length,
+          active: activeCount,
+          inMaintenance: maintenanceCount,
+          retired: retiredCount,
         }
-      ];
+      }
     },
-    enabled: Boolean(branchId),
-  });
+    staleTime: 5 * 60 * 1000,
+  })
 }
