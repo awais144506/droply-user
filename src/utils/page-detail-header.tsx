@@ -8,7 +8,7 @@ const PageDetailHeader = ({
     children
 }: {
     href: string;
-    heading: string;
+    heading?: string;
     description: string;
     children?: React.ReactNode; 
 }) => {

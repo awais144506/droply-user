@@ -1,6 +1,7 @@
-import { Plus, Pen, Trash2, PackagePlus, Info, History } from "lucide-react";
+import { History } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ActivityLog } from "@/types/ActivityLog";
+import { getActionBadge, getActionText } from "./activity-logs-functions"
 
 interface ActivityLogsCardProps {
     title?: string;
@@ -8,29 +9,6 @@ interface ActivityLogsCardProps {
 }
 
 export default function ActivityLogsCard({ title = "Recent Activity", logs }: ActivityLogsCardProps) {
-    
-    // 🔥 Dynamically build the exact action sentence
-    const getActionText = (action: ActivityLog["action"], type: string) => {
-        const lowerType = type.toLowerCase(); // e.g., "zone", "product"
-        
-        switch (action) {
-            case "CREATED": return `created a new ${lowerType}`;
-            case "UPDATED": return `updated ${lowerType} details for`;
-            case "DELETED": return `deleted ${lowerType}`;
-            case "RESTOCKED": return `restocked inventory for`;
-            default: return `modified ${lowerType}`;
-        }
-    };
-
-    const getActionBadge = (action: ActivityLog["action"]) => {
-        switch (action) {
-            case "CREATED": return { icon: Plus, classes: "bg-emerald-50 text-emerald-600 border-emerald-100" };
-            case "UPDATED": return { icon: Pen, classes: "bg-sky-50 text-sky-600 border-sky-100" };
-            case "DELETED": return { icon: Trash2, classes: "bg-rose-50 text-rose-600 border-rose-100" };
-            case "RESTOCKED": return { icon: PackagePlus, classes: "bg-indigo-50 text-indigo-600 border-indigo-100" };
-            default: return { icon: Info, classes: "bg-slate-50 text-slate-600 border-slate-200" };
-        }
-    };
 
     return (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
@@ -38,7 +16,7 @@ export default function ActivityLogsCard({ title = "Recent Activity", logs }: Ac
                 <History className="h-4 w-4 text-slate-400" />
                 <h3 className="text-sm font-bold text-slate-900">{title}</h3>
             </div>
-            
+
             {logs.length === 0 ? (
                 <div className="p-8 text-center text-xs text-slate-400">
                     No recent activity found.
@@ -48,7 +26,7 @@ export default function ActivityLogsCard({ title = "Recent Activity", logs }: Ac
                     {logs.map((log) => {
                         const { icon: Icon, classes } = getActionBadge(log.action);
                         const actionText = getActionText(log.action, log.entityType || "record");
-                        
+
                         return (
                             <div key={log.id} className="flex gap-4 group">
                                 <div className="flex flex-col items-center">
@@ -57,7 +35,7 @@ export default function ActivityLogsCard({ title = "Recent Activity", logs }: Ac
                                     </div>
                                     <div className="w-px h-full bg-slate-100 mt-2 group-last:hidden" />
                                 </div>
-                                
+
                                 <div className="pb-4">
                                     <p className="text-sm text-slate-700 leading-tight">
                                         <span className="font-bold text-slate-900">

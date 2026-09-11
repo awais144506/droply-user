@@ -1,16 +1,15 @@
 import * as yup from "yup";
 
 export const vehicleSchema = yup.object({
-  branchId: yup.string().required("Branch assignment is required"),
   registration: yup.string()
     .trim()
     .required("Registration number is required")
     .min(4, "Registration must be at least 4 characters")
-    .uppercase("Registration must be uppercase"), // e.g., LEB-22-9988
+    .uppercase("Registration must be uppercase"),
   modelInfo: yup.string().trim().required("Make and model info is required"),
   capacityInfo: yup.string().trim().optional(),
   type: yup.string()
-    .oneOf(["MOTORCYCLE", "VAN", "TRUCK"], "Invalid vehicle type")
+    .oneOf(["MOTORCYCLE", "RIKSHAW", "TRUCK", "VAN", "OTHER"], "Invalid vehicle type")
     .default("MOTORCYCLE")
     .required("Vehicle type is required"),
   fuelType: yup.string()
@@ -25,22 +24,10 @@ export const vehicleSchema = yup.object({
     .typeError("Odometer must be a number")
     .min(0, "Odometer cannot be negative")
     .required("Current odometer reading is required"),
-  driverPhone: yup.string()
-    .trim()
-    .matches(/^\+?[0-9\s\-]{10,15}$/, "Enter a valid phone number (e.g., +92 300 1234567)")
-    .optional(),
   assignedStaffId: yup.string().optional(),
-  tokenTaxExpiry: yup.date()
-    .typeError("Please enter a valid date")
-    .optional(),
-  insuranceExpiry: yup.date()
-    .typeError("Please enter a valid date")
-    .optional(),
 });
 
 export type VehicleFormValues = yup.InferType<typeof vehicleSchema>;
-
-
 
 export const fuelExpenseSchema = yup.object({
   vehicleId: yup.string().required("Please select a vehicle"),

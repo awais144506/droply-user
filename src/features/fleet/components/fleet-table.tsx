@@ -5,17 +5,16 @@ import TablePagination from "@/utils/table-pagination";
 import { Vehicle } from "../types/fleet";
 import { usePagination } from "@/utils/pagination-calculation";
 import { getFleetColumns } from "./fleet-columns";
+import { useRouter } from "next/navigation";
 
 interface FleetTableProps {
   vehicles: Vehicle[];
-  onRowClick?: (vehicle: Vehicle) => void;
 }
 
 export function FleetTable({
   vehicles,
-  onRowClick,
 }: FleetTableProps) {
-
+  const router = useRouter();
   const {
     currentPage,
     setCurrentPage,
@@ -33,7 +32,7 @@ export function FleetTable({
         data={paginatedData}
         columns={columns}
         emptyMessage="No vehicles found matching your criteria."
-        onRowClick={onRowClick}
+        onRowClick={(vehicle) => router.push(`/admin/fleet/${vehicle.id}`)}
       />
       <TablePagination
         currentPage={currentPage}

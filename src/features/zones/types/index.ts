@@ -6,20 +6,14 @@ export interface ZoneDetails {
   createdAt: string;
   calculatedLedger?: number;
   calculatedReturnables?: number;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   riders: { id: string; name: string; phone: string }[];
   customers: {
-    id: string;
-    name: string;
-    phone: string;
-    address: string;
-    status: "ACTIVE" | "INACTIVE" | "BLOCKED";
+    name:string;
+    phone:string;
     customerCredit: number | string;
-    customerAdvance: number | string;
-    returnables: [
-      openingBalance: number,
-      currentBalance: number
-    ]
+    returnablesLength: number;
   }[];
 }
+

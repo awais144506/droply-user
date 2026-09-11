@@ -63,10 +63,10 @@ export const getFleetColumns = (): ColumnDef<Vehicle>[] => [
                 <div className="text-sm font-bold text-slate-800">
                     {v.assignedTo?.name || "Unassigned"}
                 </div>
-                {v.driverPhone && (
+                {v.assignedTo?.phone && (
                     <div className="text-[11px] text-slate-600 flex items-center gap-1 mt-0.5 font-mono">
                         <Phone className="h-3 w-3 text-slate-600" />
-                        {v.driverPhone}
+                        {v.assignedTo.phone}
                     </div>
                 )}
             </div>

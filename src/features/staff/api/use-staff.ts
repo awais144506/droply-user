@@ -20,7 +20,20 @@ export function useStaffList(branchId?: string | null) {
     queryKey: staffKeys.branchList(branchId || ""),
     queryFn: async () => {
       const response = await apiClient.get(`/staff/branch/${branchId}`);
-      return response ?? []; 
+      return response ?? [];
+    },
+    select: (staff) => {
+      const riderOptions = staff
+        .filter((member: { designation: string }) => member.designation === "RIDER")
+        .map((rider: { name: string; phone: string; id: string }) => ({
+          label: `${rider.name} (${rider.phone})`,
+          value: rider.id,
+        }));
+
+      return {
+        staff,
+        riderOptions,
+      };
     },
     enabled: !!branchId,
   });

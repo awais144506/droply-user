@@ -12,13 +12,18 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ZoneDetails } from "../types";
-import { useUpdateZone } from "../api/use-zones";
+import { useUpdateZone } from "../api/use-mutate-zone";
 import { toast } from "sonner"
 import { FormInput } from "@/components/ui/form-input";
+import { FormProvider } from "react-hook-form";
 
 interface EditZoneDialogProps {
-    zone: ZoneDetails;
+    zone: {
+        id: string;
+        name: string;
+        latitude?: number;
+        longitude?: number;
+    };
     isOpen: boolean;
     onClose: () => void;
 }
@@ -27,12 +32,7 @@ export default function EditZoneDialog({ zone, isOpen, onClose }: EditZoneDialog
 
     const { mutate: updateZone, isPending } = useUpdateZone();
 
-    const {
-        register,
-        handleSubmit,
-        reset,
-        formState: { errors, isValid },
-    } = useForm<EditZoneFormValues>({
+    const form = useForm<EditZoneFormValues>({
         resolver: yupResolver(editZoneSchema),
         mode: "onChange",
         defaultValues: {
@@ -45,13 +45,13 @@ export default function EditZoneDialog({ zone, isOpen, onClose }: EditZoneDialog
     // Reset form when dialog opens with new zone data
     useEffect(() => {
         if (isOpen) {
-            reset({
+            form.reset({
                 name: zone.name || "",
                 latitude: zone.latitude || null,
                 longitude: zone.longitude || null,
             });
         }
-    }, [isOpen, zone, reset]);
+    }, [isOpen, zone, form.reset, form]);
 
     const onSubmit = (data: EditZoneFormValues) => {
         updateZone(
@@ -72,42 +72,41 @@ export default function EditZoneDialog({ zone, isOpen, onClose }: EditZoneDialog
                     <DialogTitle>Edit Zone</DialogTitle>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
-                    <FormInput
-                        label="Zone Name"
-                        required
-                        placeholder="e.g. Johar Town Lahore"
-                        register={register("name")}
-                        error={errors.name?.message}
-                    />
-                    <div className="grid grid-cols-2 gap-4">
+                <FormProvider {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
                         <FormInput
-                            label="Latitude"
-                            type="number"
-                            placeholder='e.g. 31.5152'
-                            register={register("latitude")}
-                            error={errors.latitude?.message}
+                            label="Zone Name"
+                            required
+                            placeholder="e.g. Johar Town Lahore"
+                            name="name"
                         />
-                        <FormInput
-                            label="Longitude"
-                            type="number"
-                            placeholder='e.g. 74.2882'
-                            register={register("longitude")}
-                            error={errors.longitude?.message}
-                        />
-                    </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormInput
+                                label="Latitude"
+                                type="number"
+                                placeholder='e.g. 31.5152'
+                                name="latitude"
+                            />
+                            <FormInput
+                                label="Longitude"
+                                type="number"
+                                placeholder='e.g. 74.2882'
+                                name="longitude"
+                            />
+                        </div>
 
-                    {/* Form Actions */}
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-6">
-                        <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
-                            Cancel
-                        </Button>
-                        <Button type="submit" variant="create" disabled={!isValid || isPending}>
-                            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isPending ? "Saving..." : "Save Changes"}
-                        </Button>
-                    </div>
-                </form>
+                        {/* Form Actions */}
+                        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-6">
+                            <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" variant="create" disabled={!form.formState.isValid || !form.formState.isDirty || isPending}>
+                                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isPending ? "Saving..." : "Save Changes"}
+                            </Button>
+                        </div>
+                    </form>
+                </FormProvider>
             </DialogContent>
         </Dialog>
     );

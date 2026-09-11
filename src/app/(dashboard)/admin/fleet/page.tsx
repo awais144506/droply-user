@@ -47,7 +47,6 @@ export default function FleetManagementPage() {
       />
       <FleetTable
         vehicles={vehicles}
-        onRowClick={(v) => console.log("Clicked vehicle:", v.registration)}
       />
     </div>
   );

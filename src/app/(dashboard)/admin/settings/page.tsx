@@ -7,10 +7,10 @@ import ErrorBoundary from "@/app/error";
 
 export default function BranchSettingsPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
-  const { query, mutation } = useBranchSettings(branchId);
+  const { fetchBranchSettings, updateBranchSettings } = useBranchSettings(branchId);
 
-  if (isTenantLoading || query.isLoading) return <Loading />
-  if (query.isError || !query.data) return <ErrorBoundary error="Error Loading Data" />
+  if (isTenantLoading || fetchBranchSettings.isLoading) return <Loading />
+  if (fetchBranchSettings.isError || !fetchBranchSettings.data) return <ErrorBoundary error="Error Loading Data" />
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -22,9 +22,9 @@ export default function BranchSettingsPage() {
       </div>
 
       <BranchSettingsForm
-        initialData={query.data}
-        onSubmit={(data) => mutation.mutate(data)}
-        isPending={mutation.isPending}
+        initialData={fetchBranchSettings.data}
+        onSubmit={(data) => updateBranchSettings.mutate(data)}
+        isPending={updateBranchSettings.isPending}
       />
     </div>
   );

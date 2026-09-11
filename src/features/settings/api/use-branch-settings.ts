@@ -1,72 +1,60 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
 import { toast } from "sonner";
-import { displayPakistaniPhone, formatPakistaniPhone } from "@/utils/setFormat";
+import { displayPakistaniPhone } from "@/utils/setFormat";
+import { BranchSettingData } from "../types/settings";
+import { branchSettingsKeys } from "./branch-setting-keys";
+import { branchSettingApi } from "./branch-settings.service";
 
-export const settingsKeys = {
-  all: ["settings"] as const,
-  branch: (branchId: string) => [...settingsKeys.all, "branch", branchId] as const,
-};
 
-export interface BranchSettingData {
-  id?: string;
-  displayName?: string;
-  displayPhone?: string;
-  displayEmail?: string;
-  displayAddress?: string;
-  logoUrl?: string;
-  branchId?: string;
-}
-
-export function useBranchSettings(branchId?: string | null) {
+export function useBranchSettings(branchId: string) {
   const queryClient = useQueryClient();
 
-  // 1. Fetch Query: Format FOR the UI
-  const query = useQuery({
-    queryKey: settingsKeys.branch(branchId || ""),
-    queryFn: async (): Promise<BranchSettingData> => {
-      const response = await apiClient.get(`/settings/branch/${branchId}`);
-      const data = response;
-
-      // Format the phone number nicely before the UI sees it
-      return {
-        ...data,
-        displayPhone: data.displayPhone ? displayPakistaniPhone(data.displayPhone) : "",
-      };
-    },
+  //FETCH BRANCH SETTINGS
+  const fetchBranchSettings = useQuery({
+    queryKey: branchSettingsKeys.branch(branchId || ""),
+    queryFn: () => branchSettingApi.getBranchSettings(branchId),
+    select: (settings) => ({
+      ...settings,
+      displayPhone: settings.displayPhone ? displayPakistaniPhone(settings.displayPhone) : "",
+    }),
     enabled: !!branchId,
   });
 
-  // 2. Update Mutation: Format FOR the Database
-  const mutation = useMutation({
+
+  //UPDATE BRANCH SETTINGS
+  const updateBranchSettings = useMutation({
     mutationFn: async (data: Partial<BranchSettingData>) => {
-      const payloadToSave = {
-        displayName: data.displayName,
-        displayEmail: data.displayEmail,
-        displayAddress: data.displayAddress,
-        logoUrl: data.logoUrl,
-        displayPhone: data.displayPhone ? formatPakistaniPhone(data.displayPhone) : undefined,
-      };
-      if (payloadToSave.displayPhone) {
-        payloadToSave.displayPhone = formatPakistaniPhone(payloadToSave.displayPhone);
+      return branchSettingApi.updateBranchSettings(branchId, data);
+    },
+
+    onMutate: async (newData) => {
+      await queryClient.cancelQueries({ queryKey: branchSettingsKeys.branch(branchId || "") });
+      const previousSettings = queryClient.getQueryData(branchSettingsKeys.branch(branchId || ""));
+      queryClient.setQueryData(branchSettingsKeys.branch(branchId || ""), (old: any) => ({
+        ...old,
+        ...newData,
+      }));
+      return { previousSettings };
+    },
+    onError: (error: any, newData, context: any) => {
+      if (context?.previousSettings) {
+        queryClient.setQueryData(branchSettingsKeys.branch(branchId || ""), context.previousSettings);
       }
-      const response = await apiClient.patch(`/settings/branch/${branchId}`, payloadToSave);
-      return response;
-    },
-    onSuccess: () => {
-      toast.success("Branch settings updated successfully!");
-      queryClient.invalidateQueries({
-        queryKey: settingsKeys.branch(branchId || ""),
-      });
-    },
-    onError: (error: any) => {
       console.error("Settings Update Error:", error);
       toast.error(
         error?.response?.data?.message || "Failed to update settings. Please try again."
       );
     },
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: branchSettingsKeys.branch(branchId || ""),
+      });
+    },
+    onSuccess: () => {
+      toast.success("Branch settings updated successfully!");
+    },
   });
 
-  return { query, mutation };
+  return { fetchBranchSettings, updateBranchSettings };
 }

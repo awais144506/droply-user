@@ -58,7 +58,7 @@ export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
         render: (customer) => (
             <div className="text-center">
                 <span className="inline-flex items-center justify-center h-6 min-w-7 px-2 rounded-full bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100">
-                    {customer.returnables.length || 0}
+                    {customer.returnablesLength || 0}
                 </span>
             </div>
         ),

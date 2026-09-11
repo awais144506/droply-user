@@ -12,7 +12,7 @@ export interface FilterTab {
 interface DataTableFilterBarProps {
     searchPlaceholder?: string;
     searchParamName?: string;
-    tabs: FilterTab[];
+    tabs?: FilterTab[];
     tabParamName?: string;
 }
 
@@ -36,7 +36,7 @@ export function DataTableFilterBar({
                 params.delete(name);
             }
             params.delete("page");
-            router.push(`${pathName}?${params.toString()}`)
+            router.push(`${pathName}?${params.toString()}`, { scroll: false });
         },
         [pathName, router, searchParams]
     );

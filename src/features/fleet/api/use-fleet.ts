@@ -23,7 +23,7 @@ export function useVehicles(branchId: string, statusFilter?: string, searchFilte
       });
       const formattedList = filteredVehicles.map(vehicle => ({
         ...vehicle,
-        driverPhone: displayPakistaniPhone(vehicle.driverPhone),
+        driverPhone: displayPakistaniPhone(vehicle.assignedTo?.phone),
         displayName: `${vehicle.modelInfo} (${vehicle.registration})`,
       }));
 

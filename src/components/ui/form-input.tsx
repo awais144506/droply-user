@@ -1,12 +1,13 @@
-import { ReactNode } from "react";
-import { UseFormRegisterReturn } from "react-hook-form";
+"use client";
+
+import { ReactNode, useId } from "react";
+import { useFormContext } from "react-hook-form";
 
 interface FormInputProps {
+    name: string;
     label: string | ReactNode;
     type?: "text" | "number" | "date";
     placeholder?: string;
-    register: UseFormRegisterReturn;
-    error?: string;
     disabled?: boolean;
     required?: boolean;
     prefix?: string;
@@ -15,20 +16,24 @@ interface FormInputProps {
 }
 
 export function FormInput({
+    name,
     label,
     type = "text",
     placeholder,
-    register,
-    error,
     disabled = false,
     required = false,
     prefix,
     suffix,
     helperText
 }: FormInputProps) {
+
+    const { register, formState: { errors } } = useFormContext();
+    const error = errors[name]?.message as string;
+    const inputId = useId();
+
     return (
         <div className="space-y-1.5">
-            <label className="flex items-center text-xs font-bold text-slate-700 uppercase tracking-wide">
+            <label htmlFor={inputId} className="flex items-center text-xs font-bold text-slate-700 uppercase tracking-wide cursor-pointer">
                 {label}
                 {required && <span className="text-rose-500 ml-1">*</span>}
             </label>
@@ -39,14 +44,17 @@ export function FormInput({
                     </span>
                 )}
                 <input
+                    id={inputId}
                     type={type}
                     step={type === "number" ? "any" : undefined}
                     placeholder={placeholder}
                     disabled={disabled}
-                    {...register}
-                    className={`w-full h-10 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-all ${prefix ? "pl-8" : "px-3"
-                        } ${suffix ? "pr-8" : "px-3"
-                        } ${disabled
+                    {...register(name)}
+                    aria-invalid={!!error}
+                    className={`w-full h-10 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-all 
+                        ${prefix ? "pl-8" : "px-3"} 
+                        ${suffix ? "pr-8" : "px-3"} 
+                        ${disabled
                             ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
                             : error
                                 ? "border-rose-300 focus:ring-rose-500 bg-rose-50/20"
@@ -60,7 +68,7 @@ export function FormInput({
                 )}
             </div>
             {error && <p className="text-[10px] text-rose-500 mt-1">{error}</p>}
-            {!error && helperText && <div className="mt-1">{helperText}</div>}
+            {!error && helperText && <div className="mt-1 text-[10px] text-slate-500">{helperText}</div>}
         </div>
     );
 }

@@ -13,9 +13,8 @@ export interface Vehicle {
     fuelType: FuelType;
     status: VehicleStatus;
     currentOdometer: number;
-    driverPhone?: string;
     assignedStaffId?: string;
-    assignedTo?: { id: string; name: string; email: string };
+    assignedTo?: { id: string; name: string; phone: string };
 }
 
 export interface FuelExpense {
