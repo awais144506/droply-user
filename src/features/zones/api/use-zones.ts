@@ -56,7 +56,7 @@ export function useZone(id: string, searchFilter?: string) {
         queryFn: () => zoneApi.getZone(id),
         select: (zone) => {
 
-            const calculatedLedger = formatCurrency(zone.customers.reduce((sum, l) => sum + Number(l.customerCredit || 0), 0));
+            const calculatedLedger = zone.customers.reduce((sum, l) => sum + Number(l.customerCredit || 0), 0);
             const calculatedReturnables = zone.customers.reduce((sum, l) => sum + Number(l.returnablesLength || 0), 0);
             const filterCustomer = searchFilter ? zone.customers.filter((c) => c.name.toLowerCase().includes(searchFilter.toLowerCase().trim())) : zone.customers;
 
@@ -64,7 +64,7 @@ export function useZone(id: string, searchFilter?: string) {
                 zone,
                 filterCustomer,
                 stats: {
-                    calculatedLedger: calculatedLedger,
+                    calculatedLedger: formatCurrency(calculatedLedger),
                     calculatedReturnables,
                 },
                 hasCustomers: (zone.customers?.length || 0) > 0,

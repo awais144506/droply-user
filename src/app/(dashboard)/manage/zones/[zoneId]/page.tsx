@@ -23,17 +23,15 @@ export default function ZoneDetailsPage() {
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || undefined;
 
-
   const { data, isLoading } = useZone(zoneId, search);
 
   const { mutate: deleteZone, isPending: isDeleting } = useDeleteZone();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-
-  const { zone, filterCustomer, stats, hasCustomers, hasLedger, hasReturnables, hasRiders } =
-    data || { zone: {}, stats: { calculatedLedger: 0, calculatedReturnables: 0 } };
   if (isLoading) return <Loading />
-  if (!zone || !data) return <NotFoundPage item="Zone" href="/manage/zones" />
+  if (!data || !data.zone) return <NotFoundPage item="Zone" href="/manage/zones" />
+
+  const { zone, filterCustomer, stats, hasCustomers, hasLedger, hasReturnables, hasRiders } = data;
 
   const handleDeleteClick = () => {
     if (hasCustomers || hasLedger || hasReturnables || hasRiders) {

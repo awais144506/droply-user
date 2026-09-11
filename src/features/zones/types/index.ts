@@ -12,7 +12,7 @@ export interface ZoneDetails {
   customers: {
     name:string;
     phone:string;
-    customerCredit: number | string;
+    customerCredit: number;
     returnablesLength: number;
   }[];
 }

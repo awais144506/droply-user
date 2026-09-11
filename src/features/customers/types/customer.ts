@@ -19,6 +19,7 @@ export interface CustomerDetails {
     createdAt: string;
     securityDeposit:number;
     updatedAt: string;
+    returnablesLength:number;
     zone?: {
         id: string;
         name: string;

@@ -5,7 +5,7 @@ import PageStatsCard from "@/utils/page-stats-card";
 
 interface ZoneStatsProps {
   totalCustomers?: number;
-  totalLedger?: number;
+  totalLedger?: string;
   totalReturnables?: number;
 }
 

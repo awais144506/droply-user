@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { reactSelectClassNames } from "@/utils/react-select-styles";
 import { FormInput } from "@/components/ui/form-input";
 
-const RiderZoneCard = ({ register, selectedRole, control, zoneOptions, errors, vehicleOptions }: any) => {
+const RiderZoneCard = ({ selectedRole, control, zoneOptions, vehicleOptions }: any) => {
     return (
         <div>  {selectedRole === "RIDER" && (
             <Card>
@@ -68,8 +68,7 @@ const RiderZoneCard = ({ register, selectedRole, control, zoneOptions, errors, v
                         <FormInput
                             label="License Number"
                             placeholder="e.g. LEX-14-123"
-                            register={register("licenseNumber")}
-                            error={errors.licenseNumber?.message}
+                            name="licenseNumber"
                         />
                     </div>
                 </CardContent>
