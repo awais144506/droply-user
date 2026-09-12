@@ -12,6 +12,7 @@ export function useVehicles(branchId: string, statusFilter?: string, searchFilte
       const activeCount = vehicles.filter(v => v.status === "ACTIVE").length;
       const maintenanceCount = vehicles.filter(v => v.status === "MAINTENANCE").length;
       const retiredCount = vehicles.filter(v => v.status === "RETIRED").length;
+
       const filteredVehicles = vehicles.filter(vehicle => {
         const matchesStatus = statusFilter ? vehicle.status === statusFilter : true;
         const searchLower = searchFilter?.toLowerCase() || "";
@@ -27,8 +28,11 @@ export function useVehicles(branchId: string, statusFilter?: string, searchFilte
         displayName: `${vehicle.modelInfo} (${vehicle.registration})`,
       }));
 
+      const vehicleOptions = vehicles.map(z => ({ value: z.id, label: z.registration }));
+
       return {
         list: formattedList,
+        vehicleOptions,
         stats: {
           total: vehicles.length,
           active: activeCount,

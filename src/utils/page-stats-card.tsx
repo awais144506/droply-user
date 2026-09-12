@@ -9,6 +9,7 @@ type Props = {
     description?: string;  // e.g., "Compared to last month"
     iconContainerClass?: string;
     valueColorClass?: string;
+    postfixTextColor?: string
 }
 
 export default function PageStatsCard({
@@ -18,6 +19,7 @@ export default function PageStatsCard({
     prefix,
     postfix,
     description,
+    postfixTextColor,
     iconContainerClass = "bg-sky-50 text-sky-600",
     valueColorClass = "text-slate-900"
 }: Props) {
@@ -38,7 +40,7 @@ export default function PageStatsCard({
                     <p className={`text-3xl font-bold ${valueColorClass}`}>
                         {value}
                     </p>
-                    {postfix && <span className="text-sm font-semibold text-slate-400 ml-0.5">{postfix}</span>}
+                    {postfix && <span className={`text-sm font-semibold ${postfixTextColor} ml-0.5`}>{postfix}</span>}
                 </div>
 
                 {description && (

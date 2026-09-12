@@ -1,33 +1,27 @@
-import { Controller, UseFieldArrayReturn } from "react-hook-form";
-import ReactSelect from "react-select";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useFormContext, useFieldArray } from "react-hook-form";
 import { Settings2, PlusCircle, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FormInput } from "@/components/ui/form-input"; // The new component above
-
-// Note: You can move `reactSelectClassNames` into a shared utils file like `src/utils/react-select-styles.ts`
-import { reactSelectClassNames } from "@/utils/react-select-styles";
+import { FormInput } from "@/components/ui/form-input";
+import { FormSelect } from "@/components/ui/form-select";
 
 interface RecipeSectionProps {
     hasRecipe: boolean;
-    register: any;
-    control: any;
-    errors: any;
-    fieldArray: UseFieldArrayReturn<any, "recipeItems">;
     dynamicRawMaterialOptions: { value: string; label: string }[];
     isProductsLoading: boolean;
 }
 
 export function ProductRecipeSection({
     hasRecipe,
-    register,
-    control,
-    errors,
-    fieldArray,
     dynamicRawMaterialOptions,
     isProductsLoading
 }: RecipeSectionProps) {
-    const { fields, append, remove } = fieldArray;
+    const { register, control, formState: { errors } } = useFormContext();
+    const { fields, append, remove } = useFieldArray({ control, name: "recipeItems" });
+
+    // Type assertion to handle the errors object safely
+    const recipeErrors = errors.recipeItems as any;
 
     return (
         <Card className="overflow-hidden border-slate-200">
@@ -40,65 +34,58 @@ export function ProductRecipeSection({
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" {...register("hasRecipe")} className="sr-only peer" />
-                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
                 </label>
             </div>
 
             {hasRecipe && (
                 <CardContent className="pt-4 pb-6">
                     <div className="space-y-3">
+
+                        {/* Header for the rows so we don't need repeating labels */}
+                        {fields.length > 0 && (
+                            <div className="flex items-center text-xs font-bold text-slate-700 uppercase tracking-wide px-1 mb-2">
+                                <span className="flex-1">Raw Material</span>
+                                <span className="w-32">Qty</span>
+                                <span className="w-10"></span>
+                            </div>
+                        )}
+
                         {fields.length === 0 ? (
                             <div className="text-xs text-slate-400 p-6 text-center border border-dashed border-slate-200 rounded-xl bg-slate-50">
                                 No components added yet.
                             </div>
                         ) : (
                             fields.map((field, index) => (
-                                <div key={field.id} className="flex items-start gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
-                                    <div className="flex-1 space-y-1.5">
-                                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wide">Raw Material</label>
-                                        <Controller
+                                <div key={field.id} className="flex items-start gap-2">
+                                    <div className="flex-1">
+                                        <FormSelect
                                             name={`recipeItems.${index}.rawMaterialId`}
-                                            control={control}
-                                            render={({ field: selectField }) => (
-                                                <ReactSelect
-                                                    options={dynamicRawMaterialOptions}
-                                                    isLoading={isProductsLoading}
-                                                    value={dynamicRawMaterialOptions.find(p => p.value === selectField.value) || null}
-                                                    onChange={(opt) => selectField.onChange(opt?.value || "")}
-                                                    placeholder="Search raw materials..."
-                                                    isClearable
-                                                    unstyled
-                                                    menuPortalTarget={typeof window !== "undefined" ? document.body : null}
-                                                    menuPosition="fixed"
-                                                    classNames={reactSelectClassNames}
-                                                />
-                                            )}
+                                            label="" // 🔥 Pass empty string to remove repeating label
+                                            options={dynamicRawMaterialOptions}
+                                            placeholder="Search material..."
+                                            isSearchable={true}
+                                            isLoading={isProductsLoading}
                                         />
-                                        {errors.recipeItems?.[index]?.rawMaterialId && (
-                                            <p className="text-[10px] text-rose-500">{errors.recipeItems[index].rawMaterialId.message}</p>
-                                        )}
                                     </div>
 
                                     <div className="w-32">
                                         <FormInput
-                                            label="Qty Required"
+                                            name={`recipeItems.${index}.quantityRequired`}
                                             type="number"
-                                            register={register(`recipeItems.${index}.quantityRequired`, { valueAsNumber: true })}
-                                            error={errors.recipeItems?.[index]?.quantityRequired?.message as string}
-                                            suffix="Qty"
+                                            label="" // 🔥 Pass empty string to remove repeating label
+                                            placeholder="Qty"
                                         />
                                     </div>
 
-                                    <div className="pt-[18px]">
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            onClick={() => remove(index)}
-                                            className="h-10 w-10 p-0 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl shrink-0"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        onClick={() => remove(index)}
+                                        className="h-10 w-10 p-0 mt-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl shrink-0"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
                                 </div>
                             ))
                         )}
@@ -114,8 +101,8 @@ export function ProductRecipeSection({
                                 <PlusCircle className="h-4 w-4 mr-1.5" /> Add Material to Recipe
                             </Button>
                         </div>
-                        {errors.recipeItems && !Array.isArray(errors.recipeItems) && (
-                            <p className="text-[10px] text-rose-500 mt-2">{errors.recipeItems.message as string}</p>
+                        {recipeErrors && !Array.isArray(recipeErrors) && (
+                            <p className="text-[10px] text-rose-500 mt-2">{recipeErrors.message as string}</p>
                         )}
                     </div>
                 </CardContent>

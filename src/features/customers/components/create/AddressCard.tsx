@@ -2,7 +2,7 @@ import { MapPin } from "lucide-react";
 import { FormInput } from "@/components/ui/form-input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function AddressCard({ register, errors }: any) {
+export default function AddressCard() {
     return (
         <Card>
             <CardHeader className="pb-3 border-b border-slate-100">
@@ -16,8 +16,8 @@ export default function AddressCard({ register, errors }: any) {
                     <FormInput
                         label="STREET ADDRESS"
                         placeholder="House / Shop No, Street, Area"
-                        register={register("address")}
-                        error={errors.address?.message}
+                        name="address"
+                        required
                     />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -26,8 +26,8 @@ export default function AddressCard({ register, errors }: any) {
                             label="Latitude"
                             placeholder="31.5189"
                             type="number"
-                            register={register("latitude")}
-                            error={errors.latitude?.message}
+                            name="latitude"
+                            required
                         />
                     </div>
                     <div className="space-y-1.5">
@@ -35,8 +35,8 @@ export default function AddressCard({ register, errors }: any) {
                             label="Longitude"
                             placeholder="74.3680"
                             type="number"
-                            register={register("longitude")}
-                            error={errors.longitude?.message}
+                            name="longitude"
+                            required
                         />
                     </div>
                 </div>

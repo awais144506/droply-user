@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ProductForm } from "@/features/products/components/product-form";
+import { ProductForm } from "@/features/products/components/Create_Product/CreateProductForm";
 import { CreateItemFormData } from "@/features/products/schema/create-item.schema";
-import { useCreateProduct } from "@/features/products/api/use-products";
+import { useCreateProduct } from "@/features/products/api/use-mutate-product";
 import { useRole } from "@/hooks/use-role";
 import CreateFormHeader from "@/utils/create-formHeader";
 import { formatProductPayload } from "@/features/products/utils/format-product-payload";
@@ -21,13 +20,7 @@ export default function CreateItemPage() {
         }
         const payload = formatProductPayload(data, branchId);
         createProduct(payload, {
-            onSuccess: () => {
-                toast.success("Item created successfully!");
-                router.push("/manage/products");
-            },
-            onError: (err: any) => {
-                toast.error(err?.message || "Failed to create item.");
-            }
+            onSuccess: () => router.back(),
         });
     };
 

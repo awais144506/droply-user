@@ -8,7 +8,6 @@ interface ProductStatsProps {
     lowStockCount: number;
     returnablesCount: number;
     recipeItemsCount: number;
-
 }
 export function ProductStats({
     totalItems,

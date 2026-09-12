@@ -16,20 +16,20 @@ export const createCustomerSchema = yup.object().shape({
     )
     .required("Phone number is required"),
   email: yup.string().email("Please enter a valid email address").optional().nullable(),
-  address: yup.string().optional().nullable(),
+  address: yup.string().required("Address is required"),
   zoneId: yup.string().required("Delivery zone is required"),
   latitude: yup
     .number()
     .transform((value, originalValue) => (originalValue === "" ? undefined : value))
     .min(-90, "Latitude must be between -90 and 90")
     .max(90, "Latitude must be between -90 and 90")
-    .optional(),
+    .required("Required for tracking."),
   longitude: yup
     .number()
     .transform((value, originalValue) => (originalValue === "" ? undefined : value))
     .min(-180, "Longitude must be between -180 and 180")
     .max(180, "Longitude must be between -180 and 180")
-    .optional(),
+    .required("Required for tracking."),
   customerCredit: yup
     .number()
     .transform((value, originalValue) => (originalValue === "" ? 0 : value))

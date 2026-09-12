@@ -18,6 +18,7 @@ export function useZones(branchId: string, searchFilter?: string) {
                     (sum, c) => sum + Number(c.returnablesLength || 0),
                     0
                 );
+
                 return {
                     ...zone,
                     calculatedLedger,
@@ -30,12 +31,15 @@ export function useZones(branchId: string, searchFilter?: string) {
                 )
                 : enrichedZones;
             const totalZones = enrichedZones.length;
-            const totalCustomers = enrichedZones.reduce((acc, z) => acc + (z.customers?.length || 0), 0);
-            const totalLedger = enrichedZones.reduce((acc, z) => acc + z.calculatedLedger, 0);
-            const totalReturnables = enrichedZones.reduce((acc, z) => acc + z.calculatedReturnables, 0);
+            const totalCustomers = filteredZones.reduce((acc, z) => acc + (z.customers?.length || 0), 0);
+            const totalLedger = filteredZones.reduce((acc, z) => acc + z.calculatedLedger, 0);
+            const totalReturnables = filteredZones.reduce((acc, z) => acc + z.calculatedReturnables, 0);
+
+            const zoneOptions = zones.map(z => ({ value: z.id, label: z.name }));
 
             return {
                 zones: filteredZones,
+                zoneOptions,
                 stats: {
                     totalZones,
                     totalCustomers,

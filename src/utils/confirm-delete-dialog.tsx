@@ -11,14 +11,16 @@ interface ConfirmDeleteDialogProps {
     onClose: () => void;
     onConfirm: () => void;
     isDeleting: boolean;
+    btnText?: string;
 }
 
-export default function ConfirmDeleteDialog({ 
-    itemName = "this item", 
-    isOpen, 
-    onClose, 
-    onConfirm, 
-    isDeleting 
+export default function ConfirmDeleteDialog({
+    itemName = "this item",
+    isOpen,
+    onClose,
+    onConfirm,
+    isDeleting,
+    btnText = "Delete"
 }: ConfirmDeleteDialogProps) {
     return (
         <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -32,7 +34,7 @@ export default function ConfirmDeleteDialog({
                 <AlertDialogFooter>
                     <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
                     <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
-                        {isDeleting ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Deleting...</> : "Delete"}
+                        {isDeleting ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Deleting...</> : btnText}
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>

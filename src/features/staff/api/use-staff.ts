@@ -1,28 +1,31 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client"; // Adjust path to your axios instance
-
-// 1. Centralized Query Keys
-export const staffKeys = {
-  all: ["staff"] as const,
-  branchList: (branchId: string) => [...staffKeys.all, "branch", branchId] as const,
-  detail: (id: string) => [...staffKeys.all, "detail", id] as const,
-  logs: (branchId: string) => [...staffKeys.all, "logs", branchId] as const,
-};
-
-// ============================================================================
-// DATA FETCHING HOOKS (QUERIES)
-// ============================================================================
+import { useQuery } from "@tanstack/react-query";
+import { staffKeys } from "./staff-keys";
+import { staffApi } from "./staff.service";
 
 // 2. Fetch All Staff for a Branch
-export function useStaffList(branchId?: string | null) {
+export function useStaffList(branchId: string, searchFilter?: string, roleFilter?: string, statusFilter?: string) {
   return useQuery({
     queryKey: staffKeys.branchList(branchId || ""),
-    queryFn: async () => {
-      const response = await apiClient.get(`/staff/branch/${branchId}`);
-      return response ?? [];
-    },
+    queryFn: () => staffApi.getAllStaff(branchId),
     select: (staff) => {
+      const activeStaffCount = staff.filter((s) => s.status === 'ACTIVE').length;
+      const disableStaff = staff.filter((s) => s.status === 'DISABLE').length;
+      const activeManagers = staff.filter((s) => s.designation === 'MANAGER').length;
+      const activeRiders = staff.filter((s) => s.designation === 'RIDER').length;
+      const filterStaff = staff.filter((st) => {
+        const matchesSearch = searchFilter
+          ? (st.name.toLowerCase() || "").includes(searchFilter.toLowerCase())
+          : true;
+        const matchesRole = roleFilter
+          ? st.designation === roleFilter
+          : true;
+
+        const matchesStatus = statusFilter
+          ? st.status === statusFilter
+          : true;
+        return matchesSearch && matchesRole && matchesStatus
+      })
+
       const riderOptions = staff
         .filter((member: { designation: string }) => member.designation === "RIDER")
         .map((rider: { name: string; phone: string; id: string }) => ({
@@ -31,7 +34,13 @@ export function useStaffList(branchId?: string | null) {
         }));
 
       return {
-        staff,
+        staff: filterStaff,
+        stats: {
+          activeStaffCount,
+          disableStaff,
+          activeManagers,
+          activeRiders
+        },
         riderOptions,
       };
     },
@@ -40,52 +49,20 @@ export function useStaffList(branchId?: string | null) {
 }
 
 // 3. Fetch Single Staff (for Edit/Details Page)
-export function useStaffDetail(id?: string) {
+export function useStaffDetail(id: string) {
   return useQuery({
     queryKey: staffKeys.detail(id || ""),
-    queryFn: async () => {
-      const response = await apiClient.get(`/staff/${id}`);
-      return response;
-    },
+    queryFn: () => staffApi.getStaff(id),
     enabled: !!id,
   });
 }
 
 // 4. Fetch Staff Activity Logs
-export function useStaffLogs(branchId?: string | null) {
+export function useStaffLogs(branchId: string) {
   return useQuery({
     queryKey: staffKeys.logs(branchId || ""),
-    queryFn: async () => {
-      const response = await apiClient.get(`/staff/logs/${branchId}`);
-      return response ?? [];
-    },
+    queryFn: () => staffApi.getStaffLogs(branchId),
     enabled: !!branchId,
   });
 }
 
-
-// ============================================================================
-// MUTATION HOOKS
-// ============================================================================
-
-// 5. Create Staff Member (which you already have)
-export function useCreateStaff() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (payload: any) => {
-      const response = await apiClient.post("/staff", payload);
-      return response.data;
-    },
-    onSuccess: (_, variables) => {
-      // Invalidate the cache to instantly show the new staff member
-      queryClient.invalidateQueries({
-        queryKey: staffKeys.branchList(variables.branchId),
-      });
-      // Also invalidate logs so the "CREATED" log appears instantly
-      queryClient.invalidateQueries({
-        queryKey: staffKeys.logs(variables.branchId),
-      });
-    },
-  });
-}

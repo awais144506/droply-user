@@ -7,8 +7,6 @@ import { Edit2, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
-// Import our new sub-components
 import ProfileHeader from "./profile-header";
 import PersonalInfoCard from "./personal-info-card";
 import AssignmentCard from "./assignment-card";
@@ -16,17 +14,18 @@ import AttendanceManager from "./attendance-manager";
 import AttendanceLedger from "./attendance-ledger";
 import PageDetailHeader from "@/utils/page-detail-header";
 import ConfirmDeleteDialog from "@/utils/confirm-delete-dialog";
+import { useStaffDisable } from "../api/use-mutate-staff";
 
-export function StaffProfile({ user }: { user: any }) {
+export function StaffProfile({ user, userId, branchId }: { user: any, userId: string, branchId: string }) {
   const router = useRouter();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  // 🔥 FIX: Map the backend 'status' to the frontend 'isActive' boolean on initial load
+  const { mutate: disableUser, isPending } = useStaffDisable(userId, branchId, () => setIsDeleteDialogOpen(false));
+
   const [localUser, setLocalUser] = useState<any>({
     ...user,
     isActive: user.status === "ACTIVE",
-    role: user.designation // Map designation to role for the UI
+    role: user.designation
   });
 
   useEffect(() => {
@@ -37,8 +36,7 @@ export function StaffProfile({ user }: { user: any }) {
     });
   }, [user]);
 
-  // --- Handlers ---
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const markAttendance = (status: any) => {
     const time = status === "PRESENT" || status === "HALF_DAY"
       ? new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
@@ -47,38 +45,8 @@ export function StaffProfile({ user }: { user: any }) {
     toast.success(`${user.name}'s attendance marked as ${status.replace("_", " ")}.`);
   };
 
-  const toggleStatus = () => {
-    // 🔥 FIX: Actually update the state when the button is clicked!
-    setLocalUser((prev: any) => {
-      const newIsActive = !prev.isActive;
-      toast.success(newIsActive ? "Staff member reactivated." : "Staff member disabled. Fleet access revoked.");
-      return {
-        ...prev,
-        isActive: newIsActive,
-        status: newIsActive ? "ACTIVE" : "DISABLE"
-      };
-    });
-  };
-
   const handleDelete = () => {
-    setIsDeleting(true);
-    // Simulate API call for now. Replace with actual mutation.
-    setTimeout(() => {
-      toast.success("Staff member deleted successfully.");
-      setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
-      router.push("/manage/staff");
-    }, 1000);
-
-    /* Actual Implementation:
-    deleteStaff(user.id, {
-      onSuccess: () => {
-        toast.success("Staff member deleted.");
-        router.push("/manage/staff");
-      },
-      onSettled: () => setIsDeleting(false)
-    });
-    */
+    disableUser(userId);
   };
 
   return (
@@ -132,7 +100,8 @@ export function StaffProfile({ user }: { user: any }) {
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleDelete}
-        isDeleting={isDeleting}
+        isDeleting={isPending}
+        btnText="Disable"
       />
     </div>
   );

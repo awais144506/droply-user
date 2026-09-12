@@ -53,8 +53,8 @@ export function FormSelect({
                 name={name}
                 render={({ field: { onChange, onBlur, value, ref } }) => {
                     const selectedValue = isMulti
-                        ? options.filter((c) => (value as Array<string | number>)?.includes(c.value))
-                        : options.find((c) => c.value === value) || null;
+                        ? options?.filter((c) => (value as Array<string | number>)?.includes(c.value))
+                        : options?.find((c) => c.value === value) || null;
 
                     return (
                         <Select

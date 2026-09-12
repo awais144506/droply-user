@@ -2,8 +2,9 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { Package, Network, Pen, Trash2, TrendingUp, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@/utils/data-table";
-import { ProductItem } from "../types/product-item";
+import { ProductList } from "../types/product";
 import { toast } from "sonner";
+import { formatCurrency } from "@/utils/setFormat";
 // Helper function just for this file
 const calculateMargin = (sale: number, cost: number) => {
     if (sale <= 0) return 0;
@@ -14,8 +15,8 @@ const calculateMargin = (sale: number, cost: number) => {
 export const getProductColumns = (
     router: AppRouterInstance,
     isOwner: boolean,
-    setProductToDelete: (product: ProductItem) => void
-): ColumnDef<ProductItem>[] => [
+    setProductToDelete: (product: ProductList) => void
+): ColumnDef<ProductList>[] => [
         {
             header: "Code",
             accessorKey: "sku",
@@ -57,31 +58,37 @@ export const getProductColumns = (
         },
         {
             header: "Sale Price",
-            className: "font-bold text-slate-900",
-            render: (product) => `Rs ${product.salePrice.toLocaleString("en-PK", { minimumFractionDigits: 2 })}`
+            render: (product) => (
+                <p className="font-black text-center text-slate-900">{formatCurrency(product.salePrice)}</p>
+            )
         },
         {
             header: "Unit Cost",
             render: (product) => (
                 <div>
-                    <p className="text-sm font-medium text-slate-500">
-                        Rs {product.unitCost.toLocaleString("en-PK", { minimumFractionDigits: 2 })}
+                    <p className="text-sm font-black text-center text-slate-900">
+                        {formatCurrency(product.unitCost)}
                     </p>
-                    <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 mt-0.5">
-                        <TrendingUp className="h-3 w-3" /> ~{calculateMargin(product.salePrice, product.unitCost)}% margin
-                    </div>
                 </div>
+            )
+        },
+        {
+            header: "Margin",
+            render: (product) => (
+                    <div className="flex items-center gap-1 text-sm font-bold text-emerald-600 mt-0.5">
+                        <TrendingUp className="h-3 w-3" />{calculateMargin(product.salePrice, product.unitCost)}%
+                    </div>
             )
         },
         {
             header: "Stock On Hand",
             className: "text-center",
             render: (product) => {
-                const isLowStock = product.stockOnHand <= product.lowStockThreshold;
+                const isLowStock = product.currentStock <= product.lowStockThreshold;
                 return (
                     <div>
                         <p className={`text-base font-bold ${isLowStock ? "text-rose-600" : "text-slate-900"}`}>
-                            {product.stockOnHand.toLocaleString("en-PK")}
+                            {product.currentStock}
                         </p>
                         {isLowStock && (
                             <div className="flex items-center justify-center gap-1 text-[10px] font-medium text-rose-500 mt-0.5">
@@ -121,8 +128,8 @@ export const getProductColumns = (
                                     setProductToDelete(product);
                                 }}
                                 className={`h-8 w-8 rounded-lg ${isUsed
-                                        ? "text-slate-300 hover:bg-transparent cursor-not-allowed"
-                                        : "text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                                    ? "text-slate-300 hover:bg-transparent cursor-not-allowed"
+                                    : "text-slate-400 hover:text-rose-600 hover:bg-rose-50"
                                     }`}
                                 title={isUsed ? "Cannot delete: used in active recipes" : "Delete item"}
                             >

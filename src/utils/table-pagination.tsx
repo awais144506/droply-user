@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 interface TablePaginationProps {
     currentPage: number;
     totalPages: number;
-    totalItems: number;
-    itemsPerPage:number;
+    totalItems?: number;
+    itemsPerPage: number;
     onPageChange: (page: number) => void;
 }
 
@@ -20,7 +20,7 @@ export default function TablePagination({
     if (totalPages <= 1) return null;
 
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+    const endIndex = Math.min(startIndex + itemsPerPage, (totalItems || 0));
 
     return (
         <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/50">

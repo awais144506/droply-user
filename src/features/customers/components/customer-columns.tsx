@@ -1,10 +1,10 @@
 import { MapPin, Phone, CalendarX2 } from "lucide-react";
-import { CustomerDetails } from "../types/customer";
+import { CustomerList } from "../types/customer";
 import { ColumnDef } from "@/utils/data-table";
-import { formatLastVisit, formatCurrency } from "@/utils/setFormat";
+import { formatLastVisit, formatCurrency, displayPakistaniPhone } from "@/utils/setFormat";
 
 
-export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
+export const getCustomerColumns = (): ColumnDef<CustomerList>[] => [
     {
         header: "Code",
         className: "text-center text-xs font-bold text-slate-500 w-24",
@@ -28,7 +28,7 @@ export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
                 <div className="flex items-center gap-3 text-xs text-slate-500">
                     <span className="flex items-center gap-1">
                         <Phone className="h-3 w-3 text-slate-400" />
-                        {customer.phone}
+                        {displayPakistaniPhone(customer.phone)}
                     </span>
                     <span className="flex items-center gap-1 max-w-45 truncate" title={customer.zone?.name || "No address"}>
                         <MapPin className="h-3 w-3 text-slate-400 shrink-0" />
@@ -62,7 +62,7 @@ export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
         render: (customer) => (
             <div className="text-center">
                 <span className="inline-flex items-center justify-center h-6 min-w-7 px-2 rounded-full bg-indigo-50 text-indigo-700 font-bold text-xs border border-indigo-100">
-                    {customer.returnables.length || 0}
+                    {customer.returnablesLength || 0}
                 </span>
             </div>
         ),

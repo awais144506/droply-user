@@ -11,12 +11,11 @@ import ActivityLogsCard from "@/utils/activity-logs-card";
 
 export default function ProductsPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
-  const { data: products = [], isLoading, isError, error } = useProducts(branchId);
+  const { data, isLoading, isError, error } = useProducts(branchId);
   const { data: logs = [] } = useProductLogs(branchId);
-  const totalItems = products.length;
-  const lowStockCount = products.filter(p => p.stockOnHand <= p.lowStockThreshold).length;
-  const returnablesCount = products.filter(p => p.trackingType === "RETURNABLE").length;
-  const recipeItemsCount = products.filter(p => p.hasRecipe).length;
+
+  const products = data?.products;
+  const stats = data?.stats || { totalItems: 0, lowStockCount: 0, returnablesCount: 0, recipeItemsCount: 0 };
 
   //LOADING & ERROR
   if (isTenantLoading || isLoading) return <Loading />
@@ -32,16 +31,19 @@ export default function ProductsPage() {
         btnText="Add New Item"
       />
       <ProductStats
-        totalItems={totalItems}
-        lowStockCount={lowStockCount}
-        returnablesCount={returnablesCount}
-        recipeItemsCount={recipeItemsCount}
+        totalItems={stats?.totalItems}
+        lowStockCount={stats?.lowStockCount}
+        returnablesCount={stats?.returnablesCount}
+        recipeItemsCount={stats.recipeItemsCount}
       />
-      <ProductsTable products={products} />
+
+      <ProductsTable
+        products={products}
+      />
 
       <div className="mt-8">
         <ActivityLogsCard
-          title="Inventory Activity Logs"
+          title="Products Activity Logs"
           logs={logs}
         />
       </div>

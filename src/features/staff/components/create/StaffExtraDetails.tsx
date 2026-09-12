@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from "lucide-react";;
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormInput } from "@/components/ui/form-input";
 
-const StaffExtraDetails = ({ register, errors }: any) => {
+const StaffExtraDetails = () => {
     return (
         <div>
             <Card>
@@ -18,44 +17,38 @@ const StaffExtraDetails = ({ register, errors }: any) => {
                         <FormInput
                             label="Father Name"
                             placeholder="e.g. Ali"
-                            register={register("fatherName")}
-                            error={errors.fatherName?.message}
+                            name="fatherName"
                         />
                         <FormInput
                             label="Father CNIC"
                             placeholder="e.g. 3650214562317"
-                            register={register("fatherCnic")}
-                            error={errors.fatherCnic?.message}
+                            name="fatherCnic"
                         />
                     </div>
                     <div className="flex space-x-4">
                         <FormInput
                             label="Guarantor Name"
                             placeholder="e.g. Ali"
-                            register={register("guarantorName")}
-                            error={errors.guarantorName?.message}
+                            name="guarantorName"
                         />
                         <FormInput
                             label="Guarantor CNIC"
                             placeholder="e.g. 3650214562317"
-                            register={register("guarantorCnic")}
-                            error={errors.guarantorCnic?.message}
+                            name="guarantorCnic"
                         />
                     </div>
                     <div className="space-y-1.5">
                         <FormInput
                             label="Guarantor Phone"
                             placeholder="e.g. 03001234567"
-                            register={register("guarantorPhone")}
-                            error={errors.guarantorPhone?.message}
+                            name="guarantorPhone"
                         />
                     </div>
                     <div className="space-y-1.5">
                         <FormInput
                             label="Blood Group"
                             placeholder="e.g. O+"
-                            register={register("bloodGroup")}
-                            error={errors.bloodGroup?.message}
+                            name="bloodGroup"
                         />
                     </div>
                 </CardContent>

@@ -1,10 +1,10 @@
 "use client";
 
-import {  useMemo } from "react";
+import { useMemo } from "react";
 import { ZoneDetails } from "../types";
 import { useRouter } from "next/navigation";
 import DataTable from "@/utils/data-table";
-import { getCustomerColumns } from "./customer-columns";
+import { getCustomerColumns } from "./zone-customer-columns";
 import { usePagination } from "@/utils/pagination-calculation";
 import TablePagination from "@/utils/table-pagination";
 import { CustomerDetails } from "@/features/customers/types/customer";
@@ -41,7 +41,7 @@ export function ZoneCustomersTable({ customers }: ZoneCustomersTableProps) {
         onRowClick={(customer) => router.push(`/manage/customers/${customer.id}`)}
       />
 
-      {totalItems > 0 && (
+      {(totalItems || 0) > 0 && (
         <TablePagination
           currentPage={currentPage}
           totalPages={totalPages}

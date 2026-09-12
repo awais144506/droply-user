@@ -9,17 +9,17 @@ export interface ColumnDef<T> {
 }
 
 interface DataTableProps<T> {
-    data: T[];
+    data?: T[];
     columns: ColumnDef<T>[];
     emptyMessage?: string;
     onRowClick?: (item: T) => void;
 }
 
-export default function DataTable<T>({ 
-    data, 
-    columns, 
+export default function DataTable<T>({
+    data,
+    columns,
     emptyMessage = "No items found.",
-    onRowClick 
+    onRowClick
 }: DataTableProps<T>) {
     return (
         <div className="overflow-x-auto min-h-100">
@@ -34,10 +34,10 @@ export default function DataTable<T>({
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                    {data.length > 0 ? (
-                        data.map((item, rowIndex) => (
-                            <tr 
-                                key={rowIndex} 
+                    {(data?.length || 0) > 0 ? (
+                        data?.map((item, rowIndex) => (
+                            <tr
+                                key={rowIndex}
                                 className={`hover:bg-slate-50/50 transition-colors group ${onRowClick ? 'cursor-pointer' : ''}`}
                                 onClick={() => {
                                     if (onRowClick) onRowClick(item);

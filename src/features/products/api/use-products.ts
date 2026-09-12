@@ -1,33 +1,33 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
-import { ProductItem } from "../types/product-item";
-import { CreateItemFormData } from "../schema/create-item.schema";
-import { ActivityLog } from "@/types/ActivityLog";
-
-export const productKeys = {
-    all: ["branch-products"] as const,
-    lists: () => [...productKeys.all, "list"] as const,
-    branchList: (branchId?: string) => [...productKeys.lists(), branchId] as const,
-    details: () => [...productKeys.all, "detail"] as const,
-    detail: (id: string) => [...productKeys.details(), id] as const,
-    logs: () => [...productKeys.all, "logs"] as const,
-    branchLogs: (branchId?: string) => [...productKeys.logs(), branchId] as const,
-};
+import { ProductItem } from "../types/product";
+import { productKeys } from "./product-keys";
+import { productApi } from "./product.service";
 
 // 1. Fetch All Products for a Branch
-export function useProducts(branchId?: string | null) {
+export function useProducts(branchId: string) {
     return useQuery({
         queryKey: productKeys.branchList(branchId || ""),
-        queryFn: async (): Promise<ProductItem[]> => {
-            const response: any = await apiClient.get(`/product/branch/${branchId}`);
-            const data = response?.data || response;
-
-            return data.map((item: any) => ({
-                ...item,
-                stockOnHand: item.currentStock,
-            }));
+        queryFn: () => productApi.getAllProducts(branchId),
+        select: (products) => {
+            const totalItems = products.length;
+            const lowStockCount = products.filter(p => p.currentStock <= p.lowStockThreshold).length;
+            const returnablesCount = products.filter(p => p.trackingType === "RETURNABLE").length;
+            const recipeItemsCount = products.filter(p => p.hasRecipe).length;
+            const productOptions = products?.filter(p => p.trackingType === "RETURNABLE").map(p => ({ value: p.id, label: p.name })) || [];
+            return {
+                products,
+                stats: {
+                    totalItems,
+                    lowStockCount,
+                    returnablesCount,
+                    recipeItemsCount
+                },
+                productOptions
+            }
         },
+        staleTime: 5 * 60 * 1000,
         enabled: !!branchId,
     });
 }
@@ -49,61 +49,13 @@ export function useProduct(id: string) {
     });
 }
 
-// 3. Create Product
-export function useCreateProduct() {
-    const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async (payload: CreateItemFormData) => {
-            return apiClient.post(`/product`, payload);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: productKeys.logs() });
-        },
-    });
-}
-
-// 4. Update Product
-export function useUpdateProduct() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async ({ id, data }: { id: string; data: CreateItemFormData }) => {
-            return apiClient.patch(`/product/${id}`, data);
-        },
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: productKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: productKeys.detail(variables.id) });
-            queryClient.invalidateQueries({ queryKey: productKeys.logs() });
-        },
-    });
-}
-
-// 5. Delete Product
-export function useDeleteProduct() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: async (id: string) => {
-            return apiClient.delete(`/product/${id}`);
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: productKeys.all });
-            queryClient.invalidateQueries({ queryKey: productKeys.logs() });
-        },
-    });
-}
 
 // 6. Activity Logs
-export function useProductLogs(branchId?: string) {
+export function useProductLogs(branchId: string) {
     return useQuery({
         queryKey: productKeys.branchLogs(branchId),
-        queryFn: async () => {
-            if (!branchId) return [];
-            const response = await apiClient.get<ActivityLog[]>(`/product/logs/${branchId}`);
-            return response;
-        },
+        queryFn: () => productApi.getProductLogs(branchId),
         enabled: !!branchId,
     });
 }

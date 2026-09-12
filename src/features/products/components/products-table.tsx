@@ -1,11 +1,9 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 import { useRole } from "@/hooks/use-role";
-import { useDeleteProduct } from "../api/use-products";
+import { useDeleteProduct } from "../api/use-mutate-product";
 import { usePagination } from "@/utils/pagination-calculation";
-import { ProductItem } from "../types/product-item";
+import { ProductList } from "../types/product";
 import DataTable from "@/utils/data-table";
 import TablePagination from "@/utils/table-pagination";
 import ConfirmDeleteDialog from "@/utils/confirm-delete-dialog";
@@ -14,7 +12,7 @@ import { ProductsFilterBar } from "./products-filter-bar";
 // 1. Import your extracted column logic
 import { getProductColumns } from "./products-columns";
 
-export function ProductsTable({ products }: { products: ProductItem[] }) {
+export function ProductsTable({ products }: { products: ProductList[] | undefined }) {
     const router = useRouter();
     const { isOwner } = useRole();
     const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
@@ -25,12 +23,12 @@ export function ProductsTable({ products }: { products: ProductItem[] }) {
     const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
     const [trackingFilter, setTrackingFilter] = useState<string>("ALL");
     const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [productToDelete, setProductToDelete] = useState<ProductItem | null>(null);
+    const [productToDelete, setProductToDelete] = useState<ProductList | null>(null);
 
     // Filtering Logic
-    const filteredProducts = products.filter((p) => {
+    const filteredProducts = products?.filter((p) => {
         const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesLowStock = showLowStockOnly ? p.stockOnHand <= p.lowStockThreshold : true;
+        const matchesLowStock = showLowStockOnly ? p.currentStock <= p.lowStockThreshold : true;
         const matchesCategory = categoryFilter !== "ALL" ? p.category === categoryFilter : true;
         const matchesTracking = trackingFilter !== "ALL" ? p.trackingType === trackingFilter : true;
         return matchesSearch && matchesLowStock && matchesCategory && matchesTracking;
@@ -54,16 +52,7 @@ export function ProductsTable({ products }: { products: ProductItem[] }) {
 
     const confirmDelete = () => {
         if (!productToDelete) return;
-        deleteProduct(productToDelete.id, {
-            onSuccess: () => {
-                toast.success(`${productToDelete.name} deleted successfully`);
-                setProductToDelete(null);
-            },
-            onError: (err: any) => {
-                toast.error(err?.response?.data?.message || "Failed to delete product");
-                setProductToDelete(null);
-            }
-        });
+        deleteProduct(productToDelete.id)
     };
 
     return (

@@ -1,4 +1,5 @@
 import { CreateCustomerFormData } from "@/features/customers/schema/create-customer.schema";
+import { formatPakistaniPhone } from "@/utils/setFormat";
 
 export function formatCustomerPayload(data: CreateCustomerFormData, branchId: string) {
     return {
@@ -6,9 +7,9 @@ export function formatCustomerPayload(data: CreateCustomerFormData, branchId: st
         partyType: data.partyType,
         category: data.customerCategory,
         name: data.name,
-        phone: data.phone,
+        phone: formatPakistaniPhone(data.phone),
         email: data.email || undefined,
-        address: data.address || undefined,
+        address: data.address,
         zoneId: data.zoneId || undefined,
         latitude: data.latitude,
         longitude: data.longitude,

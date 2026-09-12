@@ -6,7 +6,7 @@ import PageStatsCard from "@/utils/page-stats-card";
 interface CustomerStatsProps {
   totalCustomers: number;
   activeCount: number;
-  totalDebt: number;
+  totalDebt: string;
   totalAssets: number;
 }
 
@@ -17,9 +17,6 @@ export function CustomerStats({
   totalAssets
 }: CustomerStatsProps) {
 
-
-  const totalDebtRupee = totalDebt.toLocaleString("en-PK", { maximumFractionDigits: 0 });
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <PageStatsCard
@@ -27,19 +24,20 @@ export function CustomerStats({
         value={totalCustomers}
         icon={Users}
         postfix={`(${activeCount} Active)`}
+        postfixTextColor="text-emerald-600"
       />
 
       <PageStatsCard
         title="Total Outstanding Khata"
         prefix="Rs."
-        value={totalDebtRupee}
+        value={totalDebt}
         icon={Wallet}
         iconContainerClass="bg-amber-50 text-amber-600"
       />
 
       <PageStatsCard
         title="Assets In Market"
-        postfix="units"
+        postfix="items"
         value={totalAssets}
         icon={Package}
         iconContainerClass="bg-indigo-50 text-indigo-600"

@@ -1,6 +1,5 @@
 export type CustomerStatus = "ACTIVE" | "INACTIVE" | "BLOCKED";
 
-// Represents the full customer object returned from the backend (GET)
 export interface CustomerDetails {
     id: string;
     branchId: string;
@@ -15,11 +14,13 @@ export interface CustomerDetails {
     status: CustomerStatus;
     customerCredit: number;
     customerAdvance: number;
+    partyType: string;
+    category: string;
     lastVisitDate: string | null;
     createdAt: string;
-    securityDeposit:number;
+    securityDeposit: number;
     updatedAt: string;
-    returnablesLength:number;
+    returnablesLength: number;
     zone?: {
         id: string;
         name: string;
@@ -28,4 +29,25 @@ export interface CustomerDetails {
         openingReturnables: number,
         currentReturnables: number,
     ]
+    orders: [
+
+    ]
+}
+
+export interface CustomerList {
+    id: string;
+    customerCode: string;
+    name: string;
+    phone: string;
+    status: CustomerStatus;
+    zone?: {
+        id: string;
+        name: string;
+    } | null;
+    returnables: [
+        currentReturnables: number,
+    ]
+    customerCredit: string;
+    returnablesLength: string;
+    lastVisitDate: string;
 }

@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-import { Controller } from "react-hook-form";
-import ReactSelect from "react-select";
 import { Bike } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { reactSelectClassNames } from "@/utils/react-select-styles";
 import { FormInput } from "@/components/ui/form-input";
+import { FormSelect } from "@/components/ui/form-select";
 
-const RiderZoneCard = ({ selectedRole, control, zoneOptions, vehicleOptions }: any) => {
+const RiderZoneCard = ({
+    selectedRole,
+    zoneOptions,
+    isZoneLoading,
+    vehicleOptions,
+    isVehiclesLoading
+}: any) => {
     return (
         <div>  {selectedRole === "RIDER" && (
             <Card>
@@ -19,48 +22,27 @@ const RiderZoneCard = ({ selectedRole, control, zoneOptions, vehicleOptions }: a
                 </CardHeader>
                 <CardContent className="pt-4 space-y-4">
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Assign Delivery Zones</label>
-                        <Controller
+                        <FormSelect
+                            isMulti={true}
                             name="zoneIds"
-                            control={control}
-                            render={({ field }) => (
-                                <ReactSelect
-                                    required
-                                    isMulti
-                                    options={zoneOptions}
-                                    value={zoneOptions.filter((z: { value: any; }) => field.value?.includes(z.value))}
-                                    onChange={(selected) => field.onChange(selected ? selected.map(s => s.value) : [])}
-                                    placeholder="Search & attach zones..."
-                                    unstyled
-                                    menuPortalTarget={typeof window !== "undefined" ? document.body : null}
-                                    menuPosition="fixed"
-                                    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-                                    classNames={reactSelectClassNames}
-                                />
-                            )}
+                            label="Assign Delivery Zones"
+                            options={zoneOptions}
+                            isSearchable={true}
+                            isLoading={isZoneLoading}
+                            required
+
                         />
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Assign Vehicle</label>
-                        <Controller
-                            name="zoneIds"
-                            control={control}
-                            render={({ field }) => (
-                                <ReactSelect
-                                    required
-                                    isMulti
-                                    options={vehicleOptions}
-                                    value={zoneOptions.filter((z: { value: any; }) => field.value?.includes(z.value))}
-                                    onChange={(selected) => field.onChange(selected ? selected.map(s => s.value) : [])}
-                                    placeholder="Search & attach vehicle..."
-                                    unstyled
-                                    menuPortalTarget={typeof window !== "undefined" ? document.body : null}
-                                    menuPosition="fixed"
-                                    styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
-                                    classNames={reactSelectClassNames}
-                                />
-                            )}
+                        <FormSelect
+                            isMulti={true}
+                            name="vehicleIds"
+                            label="Assign Vehicle"
+                            options={vehicleOptions}
+                            isSearchable={true}
+                            isLoading={isVehiclesLoading}
+                            required
                         />
                     </div>
 

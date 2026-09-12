@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -10,7 +11,8 @@ import {
 import { toast } from "sonner";
 
 // Adjust these imports based on your file structure
-import { useCustomer, useDeleteCustomer } from "@/features/customers/api/use-customers";
+import { useCustomer } from "@/features/customers/api/use-customer";
+import { useDeleteCustomer } from "@/features/customers/api/use-mutate-customer";
 import PageStatsCard from "@/utils/page-stats-card";
 import PageDetailHeader from "@/utils/page-detail-header";
 import GeneralMap from "@/utils/general-map";
@@ -117,7 +119,7 @@ export default function CustomerDetailsPage() {
             valueColorClass="text-amber-600"
           />
           <PageStatsCard
-            title="Total Assets Held"
+            title="Total Items Held"
             value={totalReturnables}
             postfix="items"
             icon={Package}
@@ -222,23 +224,23 @@ export default function CustomerDetailsPage() {
               </div>
 
               {customer.returnables && customer.returnables.length > 0 ? (
-                <div className="border border-slate-200 rounded-xl overflow-hidden">
-                  <table className="w-full text-sm text-left">
+                <div className="border border-slate-200 rounded-xl overflow-hidden ">
+                  <table className="w-full text-sm text-center">
                     <thead className="bg-slate-50 text-slate-500 font-bold text-xs uppercase">
                       <tr>
-                        <th className="px-4 py-3">Item / Product</th>
-                        <th className="px-4 py-3 text-right">Opening Bal.</th>
-                        <th className="px-4 py-3 text-right">Current Bal.</th>
+                        <th className="px-4 py-3">Product Name</th>
+                        <th className="px-4 py-3">Opening Balance</th>
+                        <th className="px-4 py-3">Current Items Held</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {customer.returnables.map((item: any) => (
                         <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                           <td className="px-4 py-3 font-medium text-slate-900">
-                            {item.product?.name || item.productId}
+                            {item.productName}
                           </td>
-                          <td className="px-4 py-3 text-right text-slate-500">{item.openingBalance}</td>
-                          <td className="px-4 py-3 text-right font-bold text-slate-900">{item.currentBalance}</td>
+                          <td className="px-4 py-3 font-bold text-slate-900">{item.openingBalance}</td>
+                          <td className="px-4 py-3 font-bold text-amber-600">{item.currentBalance}</td>
                         </tr>
                       ))}
                     </tbody>

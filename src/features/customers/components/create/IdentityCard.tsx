@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Controller } from "react-hook-form";
-import ReactSelect from "react-select";
 import { User } from "lucide-react";
 import { FormInput } from "@/components/ui/form-input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { reactSelectClassNames } from "@/utils/react-select-styles";
 import { partyOptions, categoryOptions } from "@/features/customers/data/dropdownOptions";
+import { FormSelect } from "@/components/ui/form-select";
 
-export default function IdentityCard({ control, register, errors, zoneOptions }: any) {
+export default function IdentityCard({ zoneOptions, isLoading }: any) {
     return (
         <Card>
             <CardHeader className="pb-3 border-b border-slate-100">
@@ -19,41 +17,19 @@ export default function IdentityCard({ control, register, errors, zoneOptions }:
             <CardContent className="pt-4 space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Party Type *</label>
-                        <Controller
+                        <FormSelect
+                            label="Party Type"
                             name="partyType"
-                            control={control}
-                            render={({ field }) => (
-                                <ReactSelect
-                                    options={partyOptions}
-                                    value={partyOptions.find(p => p.value === field.value || null)}
-                                    onChange={(opt) => field.onChange(opt?.value || "")}
-                                    isSearchable={false}
-                                    unstyled
-                                    menuPortalTarget={typeof window !== "undefined" ? document.body : null}
-                                    menuPosition="fixed"
-                                    classNames={reactSelectClassNames}
-                                />
-                            )}
+                            required
+                            options={partyOptions}
                         />
                     </div>
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Category *</label>
-                        <Controller
+                        <FormSelect
+                            label="Category Options"
                             name="customerCategory"
-                            control={control}
-                            render={({ field }) => (
-                                <ReactSelect
-                                    options={categoryOptions}
-                                    value={categoryOptions.find(c => c.value === field.value || null)}
-                                    onChange={(opt) => field.onChange(opt?.value || "")}
-                                    isSearchable={false}
-                                    unstyled
-                                    menuPortalTarget={typeof window !== "undefined" ? document.body : null}
-                                    menuPosition="fixed"
-                                    classNames={reactSelectClassNames}
-                                />
-                            )}
+                            required
+                            options={categoryOptions}
                         />
                     </div>
                 </div>
@@ -63,8 +39,7 @@ export default function IdentityCard({ control, register, errors, zoneOptions }:
                         label="Full Name / Business Name"
                         required
                         placeholder="e.g. Muhammad Awais"
-                        register={register("name")}
-                        error={errors.name?.message}
+                        name="name"
                     />
                 </div>
 
@@ -73,38 +48,27 @@ export default function IdentityCard({ control, register, errors, zoneOptions }:
                         label="Phone Number"
                         required
                         placeholder="e.g. 03211234567"
-                        register={register("phone")}
-                        error={errors.phone?.message}
+                        name="phone"
                     />
                 </div>
                 <div className="space-y-1.5">
                     <FormInput
                         label="Email"
                         placeholder="e.g. awais@gmail.com"
-                        register={register("email")}
-                        error={errors.email?.message}
+                        name="email"
                     />
                 </div>
 
 
                 <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Delivery Zone / Route</label>
-                    <Controller
+                    <FormSelect
+                        label="Select Zone Route"
                         name="zoneId"
-                        control={control}
-                        render={({ field }) => (
-                            <ReactSelect
-                                options={zoneOptions}
-                                value={zoneOptions?.find((z: any) => z.value === field.value) || null}
-                                onChange={(opt) => field.onChange(opt?.value || "")}
-                                placeholder="Search zones..."
-                                isClearable
-                                unstyled
-                                classNames={reactSelectClassNames}
-                            />
-                        )}
+                        required
+                        options={zoneOptions}
+                        isLoading={isLoading}
+                        isSearchable={true}
                     />
-                    {errors.zoneId && <p className="text-xs text-rose-500 mt-1">{errors.zoneId.message}</p>}
                 </div>
             </CardContent>
         </Card>
