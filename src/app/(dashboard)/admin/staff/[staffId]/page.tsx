@@ -15,7 +15,7 @@ export default function StaffMemberPage() {
 
   if (isLoading) return <Loading />
 
-  if (!user) return <NotFoundPage item="Staff" href="/admin/staff" />
+  if (!user) return <NotFoundPage />
 
   return (
     <div className=" p-6">

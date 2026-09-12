@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BranchUserItem, AttendanceStatus } from "../../../api/use-staff";
 
 // Helper function we can reuse in both manager and ledger
-export const getStatusBadge = (status: AttendanceStatus | undefined) => {
+export const getStatusBadge = (status: any | undefined) => {
   switch(status) {
     case "PRESENT": return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100">Present</span>;
     case "HALF_DAY": return <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-100">Half Day</span>;
@@ -13,12 +13,12 @@ export const getStatusBadge = (status: AttendanceStatus | undefined) => {
   }
 };
 
-export default function AttendanceManager({ user, markAttendance }: { user: BranchUserItem, markAttendance: (s: AttendanceStatus) => void }) {
+export default function AttendanceManager({ user, markAttendance }: { user: any, markAttendance: (s: any) => void }) {
   return (
     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h3 className="text-sm font-bold text-slate-900 mb-1">Today's Attendance</h3>
+          <h3 className="text-sm font-bold text-slate-900 mb-1">Today&apos;s Attendance</h3>
           <p className="text-xs text-slate-500">Log arrival time for payroll calculation.</p>
         </div>
         {getStatusBadge(user.todayAttendance)}

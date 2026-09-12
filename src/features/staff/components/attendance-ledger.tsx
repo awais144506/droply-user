@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Calendar } from "lucide-react";
-import { BranchUserItem } from "../../../api/use-staff";
 import { getStatusBadge } from "./attendance-manager";
+import { Key } from "react";
 
-export default function AttendanceLedger({ user }: { user: BranchUserItem }) {
+export default function AttendanceLedger({ user }: { user: any }) {
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col h-full">
       <div className="p-6 border-b border-slate-100 flex items-center justify-between">
@@ -23,7 +24,7 @@ export default function AttendanceLedger({ user }: { user: BranchUserItem }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {user.attendanceHistory?.map((log, idx) => (
+            {user.attendanceHistory?.map((log: { date: string | number | Date; status: any; checkInTime: any; }, idx: Key | null | undefined) => (
               <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-6 py-4 font-bold text-slate-900">
                   {new Date(log.date).toLocaleDateString("en-US", { weekday: 'short', month: 'short', day: 'numeric' })}

@@ -29,7 +29,7 @@ export default function ZoneDetailsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   if (isLoading) return <Loading />
-  if (!data || !data.zone) return <NotFoundPage item="Zone" href="/manage/zones" />
+  if (!data || !data.zone) return <NotFoundPage/>
 
   const { zone, filterCustomer, stats, hasCustomers, hasLedger, hasReturnables, hasRiders } = data;
 

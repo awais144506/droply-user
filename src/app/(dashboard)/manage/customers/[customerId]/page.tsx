@@ -43,7 +43,7 @@ export default function CustomerDetailsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   if (isLoading) return <Loading />;
-  if (!customer) return <NotFoundPage item="Customer" href="/manage/customers" />;
+  if (!customer) return <NotFoundPage />;
 
   // Calculate total returnables held
   const totalReturnables = customer.returnables?.reduce(

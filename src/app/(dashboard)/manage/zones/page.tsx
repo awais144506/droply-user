@@ -19,7 +19,6 @@ const ZonePage = () => {
   const zones = data?.zones || [];
   const stats = data?.stats || { totalZones: 0, totalCustomers: 0, totalLedger: 0, totalReturnables: 0 };
 
-
   if (isTenantLoading || isLoading) return <Loading />
   if (isError) return <ErrorBoundary error={error.message} />
 
