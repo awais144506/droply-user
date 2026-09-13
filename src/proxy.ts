@@ -2,7 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Route Categories
+// 1. Basic Route Categories
 const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
@@ -14,50 +14,100 @@ const isPublicRoute = createRouteMatcher([
 const isAuthRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/"]);
 const isUnauthorizedRoute = createRouteMatcher(["/unauthorized(.*)"]);
 
-// Allowed Tenant Roles
+// 2. Safe routes for suspended users
+const isBillingRoute = createRouteMatcher([
+  "/admin/subscription(.*)",
+  "/sign-out(.*)"
+]);
+
+// 3. Security Tier & Role Matchers
+const isOwnerOnlyRoute = createRouteMatcher(["/admin/staff(.*)"]);
+const isGoldPlusRoute = createRouteMatcher([
+  "/sales/recovery(.*)", "/stock/assets(.*)", "/stock/wastage(.*)",
+  "/supply/(.*)", "/admin/fleet(.*)", "/admin/reports(.*)"
+]);
+const isPlatinumRoute = createRouteMatcher([
+  "/sales/tracking(.*)", "/stock/production(.*)", "/admin/tasks(.*)"
+]);
+
 const ALLOWED_TENANT_ROLES = ["OWNER", "MANAGER"];
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
+  // 🔥 FAIL-SAFE 1: Never intercept static files, CSS, or Next.js internals
+  if (req.nextUrl.pathname.startsWith("/_next") || req.nextUrl.pathname.includes(".")) {
+    return NextResponse.next();
+  }
+
   const { userId, sessionClaims } = await auth();
 
-  // Extract metadata safely from sessionClaims
   const metadata = (sessionClaims?.metadata || sessionClaims?.public_metadata || {}) as {
-    role?: string;
-    branchId?: string;
+    role?: string; branchId?: string; tier?: string; status?: string; renewDate?: string;
   };
 
   const userRole = metadata.role;
   const branchId = metadata.branchId;
+  const tier = (metadata.tier || "SILVER").toUpperCase();
+  const status = (metadata.status || "ACTIVE").toUpperCase();
+  const renewDate = metadata.renewDate;
 
-  const isAllowedTenantUser =
-    Boolean(userRole) &&
-    ALLOWED_TENANT_ROLES.includes(userRole!) &&
-    Boolean(branchId);
+  const isAllowedTenantUser = Boolean(userRole) && ALLOWED_TENANT_ROLES.includes(userRole!) && Boolean(branchId);
 
-  // 1. Unauthenticated Users
+  // --- A. UNAUTHENTICATED USERS ---
   if (!userId) {
-    if (isPublicRoute(req)) {
-      return NextResponse.next();
-    }
+    if (isPublicRoute(req)) return NextResponse.next();
     return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 
-  // 2. Authenticated but Unauthorized
+  // --- B. AUTHENTICATED BUT UNAUTHORIZED ---
   if (!isAllowedTenantUser) {
-    if (isUnauthorizedRoute(req)) {
-      return NextResponse.next();
-    }
+    if (isUnauthorizedRoute(req)) return NextResponse.next();
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
 
-  // 3. Authenticated & Valid Tenant User visiting public/auth routes
+  // --- C. VALID USERS HITTING PUBLIC ROUTES ---
   if (isAuthRoute(req) || isUnauthorizedRoute(req)) {
     return NextResponse.redirect(new URL("/app", req.url));
+  }
+
+  // --- D. SUSPENDED ACCOUNT LOCKDOWN ---
+  let isDateSuspended = false;
+  if (renewDate) {
+    const expiration = new Date(renewDate);
+    const diffTime = new Date().getTime() - expiration.getTime();
+    const daysPastDue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (daysPastDue > 3) isDateSuspended = true;
+  }
+
+  const isStrictlySuspended = status === "SUSPENDED" || isDateSuspended;
+
+  if (isStrictlySuspended && !isBillingRoute(req)) {
+    // 🔥 FAIL-SAFE 2: Return JSON for API routes so the layout doesn't crash
+    if (req.nextUrl.pathname.startsWith("/api")) {
+      return NextResponse.json({ error: "Account Suspended" }, { status: 403 });
+    }
+    return NextResponse.redirect(new URL("/admin/subscription", req.url));
+  }
+
+  // --- E. ROLE & TIER-BASED ROUTE PROTECTION ---
+  if (isOwnerOnlyRoute(req) && userRole !== "OWNER") {
+    return NextResponse.redirect(new URL("/app", req.url));
+  }
+
+  const hasGoldPlus = tier === "GOLD" || tier === "PLATINUM";
+  const hasPlatinum = tier === "PLATINUM";
+
+  if (isPlatinumRoute(req) && !hasPlatinum) {
+    return NextResponse.redirect(new URL("/admin/subscription?upgrade=platinum", req.url));
+  }
+
+  if (isGoldPlusRoute(req) && !hasGoldPlus) {
+    return NextResponse.redirect(new URL("/admin/subscription?upgrade=gold", req.url));
   }
 
   return NextResponse.next();
 });
 
+// 🔥 Double check this is perfectly formatted at the very bottom!
 export const config = {
   matcher: [
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",

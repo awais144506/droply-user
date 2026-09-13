@@ -189,8 +189,8 @@ export function QuickSale({ items }: { items: StockItem[] }) {
       {slipToPrint && (
         <div id="thermal-receipt" className="hidden print:block text-black font-mono text-sm mx-auto p-4 bg-white">
           <div className="text-center mb-4">
-            <h1 className="font-bold text-xl">DROPLY WATER</h1>
-            <p className="text-xs">Main Plant - Sahiwal</p>
+            <h1 className="font-bold text-xl">Blue Mist</h1>
+            <p className="text-xs">Jan Muhammad Road - Lahore</p>
             <p className="text-xs">{slipToPrint.time}</p>
             <p className="text-xs mt-1 border-b border-black pb-1">Slip: {slipToPrint.id}</p>
           </div>

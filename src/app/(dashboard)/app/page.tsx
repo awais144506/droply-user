@@ -3,9 +3,7 @@
 import { Loader2 } from "lucide-react";
 import { useRole } from "@/hooks/use-role";
 import { useDashboard } from "@/features/dashboard/api/use-dashboard";
-import { DashboardStats } from "@/features/dashboard/components/dashboard-stats";
 import { QuickSale } from "@/features/dashboard/components/quick-sale";
-import { ActivityFeed } from "@/features/dashboard/components/activity-feed-card";
 
 export default function DashboardPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
@@ -21,22 +19,13 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto p-6 print:p-0 print:m-0">
-      {/* Hide headers during print */}
+    <div className="space-y-6 max-w-350 mx-auto p-6 print:p-0 print:m-0">
       <div className="print:hidden">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Branch Operations</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Real-time oversight of daily sales, inventory movement, and fleet execution.
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Quick Sale</h1>
       </div>
 
-      <div className="print:hidden">
-        <DashboardStats stats={data.stats} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-auto lg:h-[450px]">
+      <div className="h-150 w-150">
         <QuickSale items={data.quickSaleItems} />
-        <ActivityFeed logs={data.recentLogs} />
       </div>
     </div>
   );

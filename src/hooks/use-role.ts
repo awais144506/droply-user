@@ -10,16 +10,17 @@ export function useRole() {
   const userTier = (user?.publicMetadata.tier as string) || "SILVER";
   const tierCycle = (user?.publicMetadata.cycle as string) || "TRIAL";
   const userStatus = (user?.publicMetadata.status as string) || "SUSPENDED";
+  const renewDate = user?.publicMetadata.renewDate;
   const userName = String(user?.fullName) || "XYZ";
   const userEmail = String(user?.emailAddresses);
   const userProfilePicture = user?.imageUrl;
-
 
   return {
     branchId,
     role,
     userTier,
     tierCycle,
+    renewDate,
     userStatus,
     userName,
     userEmail,
