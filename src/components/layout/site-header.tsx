@@ -70,7 +70,7 @@ export function SiteHeader() {
   return (
     <header className="flex z-500 h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sticky top-0 shadow-sm">
       <div className="flex items-center gap-4">
-        <SubscriptionIndicator />
+        <SubscriptionIndicator roleData={roleData} />
       </div>
 
       <div className="flex items-center">

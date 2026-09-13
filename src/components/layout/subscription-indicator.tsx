@@ -1,11 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
 import { Zap, Clock, CalendarDays, AlertTriangle, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useRole } from "@/hooks/use-role";
-
-export function SubscriptionIndicator() {
-  const { userTier, tierCycle, userStatus, renewDate, isLoading } = useRole();
+export function SubscriptionIndicator({ roleData }: { roleData: any }) {
+  const { userTier, tierCycle, userStatus, renewDate, isLoading } = roleData;
 
   if (isLoading) {
     return (
@@ -18,19 +16,19 @@ export function SubscriptionIndicator() {
       </div>
     );
   }
-
+  const gracePeriod = parseInt(process.env.NEXT_PUBLIC_GRACE_PERIOD || "3", 10);
   const endDate = renewDate ? new Date(renewDate as string) : new Date();
   const today = new Date();
-
   const diffTime = endDate.getTime() - today.getTime();
   const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
+  const isHardSuspended = daysLeft < -gracePeriod;
   const isTrial = tierCycle === "TRIAL";
   const isExpired = daysLeft < 0;
-  const isPastDue = userStatus === "PAST_DUE" || (daysLeft < 0 && !isTrial);
-  const isSuspended = userStatus === "SUSPENDED";
-  const isEndingSoon = daysLeft <= 3 && daysLeft >= 0;
-  const hasIssue = isPastDue || isSuspended || isExpired;
+  const isSuspended = userStatus === "SUSPENDED" || (isHardSuspended && !isTrial);
+  const isPastDue = userStatus === "PAST_DUE" || (isExpired && !isTrial && !isSuspended);
+  const isEndingSoon = daysLeft <= gracePeriod && daysLeft >= 0;
+  const isCritical = isSuspended || (isTrial && isExpired);
+  const isWarning = (!isSuspended && isPastDue) || (isTrial && isEndingSoon);
 
   const formattedDate = endDate.toLocaleDateString("en-US", {
     month: "short",
@@ -38,10 +36,9 @@ export function SubscriptionIndicator() {
     year: "numeric",
   });
 
-  // 🔥 Tier-Specific Styling Configuration
   const getTierTheme = () => {
-    // If there's an account issue, override premium styling with danger styling
-    if (hasIssue) {
+    // 1. Critical Danger State (Red)
+    if (isCritical) {
       return {
         wrapper: "bg-white border-rose-200 hover:border-rose-300",
         iconBox: "bg-rose-50 text-rose-600",
@@ -52,18 +49,31 @@ export function SubscriptionIndicator() {
       };
     }
 
+    // 2. Warning / Grace Period State (Amber)
+    if (isWarning) {
+      return {
+        wrapper: "bg-white border-amber-300 hover:border-amber-400",
+        iconBox: "bg-amber-50 text-amber-600",
+        icon: <AlertTriangle className="h-4 w-4 text-amber-600" />,
+        tierText: "text-slate-900",
+        pill: "bg-amber-100 text-amber-700 animate-pulse border border-amber-200",
+        dateText: "text-amber-600 font-semibold",
+      };
+    }
+
+    // 3. Trial State
     if (isTrial) {
       return {
         wrapper: "bg-white border-sky-200 hover:border-sky-300",
         iconBox: "bg-sky-50 text-sky-600",
         icon: <Clock className="h-4 w-4" />,
         tierText: "text-slate-900",
-        pill: isEndingSoon ? "bg-rose-100 text-rose-700" : "bg-sky-100 text-sky-700",
+        pill: "bg-sky-100 text-sky-700",
         dateText: "text-slate-500",
       };
     }
 
-    // Active Premium States
+    // 4. Active Premium States
     switch (userTier?.toUpperCase()) {
       case "PLATINUM":
         return {
@@ -99,9 +109,6 @@ export function SubscriptionIndicator() {
 
   return (
     <div className="flex items-center gap-3">
-      {/* Urgent Action Banner */}
-
-
       {/* Main Indicator Card */}
       <Link
         href="/admin/subscription"
@@ -120,7 +127,7 @@ export function SubscriptionIndicator() {
             <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md tracking-wide uppercase ${theme.pill}`}>
               {isSuspended ? "Suspended"
                 : (isTrial && isExpired) ? "Expired"
-                  : isPastDue ? "Overdue"
+                  : isPastDue ? "Grace Period"
                     : `${daysLeft} Days Left`
               }
             </span>
@@ -129,24 +136,27 @@ export function SubscriptionIndicator() {
           <span className={`text-[10px] flex items-center gap-1 mt-0.5 ${theme.dateText}`}>
             <CalendarDays className="h-3 w-3 opacity-70" />
             {isTrial ? "Trial ends:" : "Renew Date:"}
-            <span className={userTier?.toUpperCase() === "PLATINUM" && !hasIssue ? "text-slate-200" : "text-slate-700 font-semibold"}>
+            <span className={userTier?.toUpperCase() === "PLATINUM" && !isCritical && !isWarning ? "text-slate-200" : "font-semibold"}>
               {formattedDate}
             </span>
           </span>
         </div>
       </Link>
-      {(hasIssue || (isTrial && isEndingSoon)) && (
-        <div className="hidden lg:flex items-center gap-2 px-3 py-2 bg-rose-50 border border-rose-200 rounded-xl shadow-sm animate-pulse">
-          <AlertTriangle className="h-4 w-4 text-rose-600" />
+
+      {/* Urgent Action Banner - Adapts color based on severity */}
+      {(isCritical || isWarning) && (
+        <div className={`hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl shadow-sm animate-pulse border ${isCritical ? "bg-rose-50 border-rose-200" : "bg-amber-50 border-amber-200"
+          }`}>
+          <AlertTriangle className={`h-4 w-4 ${isCritical ? "text-rose-600" : "text-amber-600"}`} />
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-rose-700 uppercase leading-none">
+            <span className={`text-[10px] font-bold uppercase leading-none ${isCritical ? "text-rose-700" : "text-amber-700"}`}>
               {isSuspended ? "Account Suspended"
                 : (isTrial && isExpired) ? "Trial Expired"
                   : isPastDue ? "Payment Overdue"
                     : "Trial Ending Soon"}
             </span>
-            <span className="text-[9px] font-medium text-rose-600 mt-0.5">
-              Update billing to avoid disruption
+            <span className={`text-[9px] font-medium mt-0.5 ${isCritical ? "text-rose-600" : "text-amber-600"}`}>
+              {isCritical ? "Update billing to restore access" : "Update billing to avoid disruption"}
             </span>
           </div>
         </div>

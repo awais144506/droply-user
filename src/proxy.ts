@@ -20,7 +20,6 @@ const isBillingRoute = createRouteMatcher([
   "/sign-out(.*)"
 ]);
 
-// 3. Security Tier & Role Matchers
 const isOwnerOnlyRoute = createRouteMatcher(["/admin/staff(.*)"]);
 const isGoldPlusRoute = createRouteMatcher([
   "/sales/recovery(.*)", "/stock/assets(.*)", "/stock/wastage(.*)",
@@ -33,13 +32,10 @@ const isPlatinumRoute = createRouteMatcher([
 const ALLOWED_TENANT_ROLES = ["OWNER", "MANAGER"];
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
-  // 🔥 FAIL-SAFE 1: Never intercept static files, CSS, or Next.js internals
   if (req.nextUrl.pathname.startsWith("/_next") || req.nextUrl.pathname.includes(".")) {
     return NextResponse.next();
   }
-
   const { userId, sessionClaims } = await auth();
-
   const metadata = (sessionClaims?.metadata || sessionClaims?.public_metadata || {}) as {
     role?: string; branchId?: string; tier?: string; status?: string; renewDate?: string;
   };
@@ -69,13 +65,13 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return NextResponse.redirect(new URL("/app", req.url));
   }
 
-  // --- D. SUSPENDED ACCOUNT LOCKDOWN ---
+  const gracePeriod = parseInt(process.env.NEXT_PUBLIC_GRACE_PERIOD || "3", 10);
   let isDateSuspended = false;
   if (renewDate) {
     const expiration = new Date(renewDate);
     const diffTime = new Date().getTime() - expiration.getTime();
     const daysPastDue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (daysPastDue > 3) isDateSuspended = true;
+    if (daysPastDue > gracePeriod) isDateSuspended = true;
   }
 
   const isStrictlySuspended = status === "SUSPENDED" || isDateSuspended;
