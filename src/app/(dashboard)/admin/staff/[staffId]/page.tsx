@@ -5,7 +5,7 @@ import Loading from "@/app/loading";
 import { useStaffDetail } from "@/features/staff/api/use-staff";
 import { StaffProfile } from "@/features/staff/components/staff-profile";
 import NotFoundPage from "@/app/not-found";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 
 export default function StaffMemberPage() {
   const params = useParams();

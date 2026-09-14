@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MapPin } from "lucide-react"
-import GeneralMap from "@/utils/general-map"
+import GeneralMap from "@/lib/utils/general-map"
 import { AssignedRidersCard } from "./assigned-riders-card"
 
 

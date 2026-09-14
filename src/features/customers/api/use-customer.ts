@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import { displayPakistaniPhone } from "@/utils/setFormat";
+import { displayPakistaniPhone } from "@/lib/utils/setFormat";
 import { customerKeys } from "./customer-keys";
 import { customerApi } from "./customer.service";
-import { formatCurrency } from "@/utils/setFormat";
+import { formatCurrency } from "@/lib/utils/setFormat";
 
 // 2. Fetch All Customers for a Branch
 export function useCustomers(
@@ -33,13 +33,26 @@ export function useCustomers(
         return matchesTab && matchesSearch;
       });
 
+      const customerOptions = customers
+        .filter((c) => c.status === "ACTIVE")
+        .map((c) => ({
+          id: c.id,
+          name: c.name,
+          category: c.category,
+          address: c.address || "No Address Provided",
+          customerCredit: Number(c.customerCredit || 0),
+          assetsHeld: Number(c.returnablesLength || 0),
+          zoneName: c.zone?.name || "",
+        }));
+
       return {
         customers: filteredCustomers,
         stats: {
           activeCount,
           totalLedger: formatCurrency(totalLedger),
           totalAssets,
-        }
+        },
+        customerOptions
       }
     },
     staleTime: 5 * 60 * 1000,

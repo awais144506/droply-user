@@ -1,7 +1,7 @@
 "use client";
 
 import { MapPin, Users, Wallet, RotateCcw } from "lucide-react";
-import PageStatsCard from "@/utils/page-stats-card";
+import PageStatsCard from "@/lib/utils/page-stats-card";
 
 interface ZoneStatsProps {
   totalZones: number;

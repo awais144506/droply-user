@@ -1,7 +1,7 @@
 "use client";
 
 import { Users, Wallet, Package } from "lucide-react";
-import PageStatsCard from "@/utils/page-stats-card";
+import PageStatsCard from "@/lib/utils/page-stats-card";
 
 interface CustomerStatsProps {
   totalCustomers: number;

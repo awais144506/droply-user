@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { displayPakistaniPhone } from "@/utils/setFormat";
+import { displayPakistaniPhone } from "@/lib/utils/setFormat";
 import { BranchSettingData } from "../types/settings";
 import { branchSettingsKeys } from "./branch-setting-keys";
 import { branchSettingApi } from "./branch-settings.service";

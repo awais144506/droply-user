@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { formatCurrency, formatDate } from "@/utils/setFormat";
+import { formatCurrency, formatDate } from "@/lib/utils/setFormat";
 import { User, Briefcase, ShieldAlert } from "lucide-react";
 // Safe helper to render fields
 const InfoRow = ({ label, value }: { label: string, value: string | number | undefined }) => (

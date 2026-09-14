@@ -1,7 +1,7 @@
 "use client";
 
 import { Users, Info, Shield, Zap } from "lucide-react";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 import { Button } from "@/components/ui/button";
 
 // Move the configuration outside the component so it doesn't recreate on every render

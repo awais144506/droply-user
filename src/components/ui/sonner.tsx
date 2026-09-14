@@ -28,7 +28,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast font-semibold tracking-wide",
+          toast: "cn-toast font-bold",
           success: "!bg-emerald-600 !text-white !border-emerald-600 [&>svg]:!text-white",
           error: "!bg-rose-600 !text-white !border-rose-600 [&>svg]:!text-white",
           warning: "!bg-amber-500 !text-white !border-amber-600 [&>svg]:!text-white",

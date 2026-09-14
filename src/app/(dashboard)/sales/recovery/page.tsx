@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 import { useRecoveries, RecoveryRecord } from "@/features/recovery/api/use-recoveries";
 import { RecoveryStats } from "@/features/recovery/components/recovery-stats";
 import { RecoveryTable } from "@/features/recovery/components/recovery-table";

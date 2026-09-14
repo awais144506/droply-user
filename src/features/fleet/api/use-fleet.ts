@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fleetKeys } from "./query-keys";
 import { fleetApi } from "./fleet.service";
-import { displayPakistaniPhone } from "@/utils/setFormat";
+import { displayPakistaniPhone } from "@/lib/utils/setFormat";
 
 export function useVehicles(branchId: string, statusFilter?: string, searchFilter?: string) {
   return useQuery({

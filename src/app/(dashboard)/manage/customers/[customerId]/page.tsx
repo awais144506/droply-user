@@ -13,10 +13,10 @@ import { toast } from "sonner";
 // Adjust these imports based on your file structure
 import { useCustomer } from "@/features/customers/api/use-customer";
 import { useDeleteCustomer } from "@/features/customers/api/use-mutate-customer";
-import PageStatsCard from "@/utils/page-stats-card";
-import PageDetailHeader from "@/utils/page-detail-header";
-import GeneralMap from "@/utils/general-map";
-import ConfirmDeleteDialog from "@/utils/confirm-delete-dialog";
+import PageStatsCard from "@/lib/utils/page-stats-card";
+import PageDetailHeader from "@/lib/utils/page-detail-header";
+import GeneralMap from "@/lib/utils/general-map";
+import ConfirmDeleteDialog from "@/lib/utils/confirm-delete-dialog";
 import Loading from "@/app/loading";
 import NotFoundPage from "@/app/not-found";
 import { Button } from "@/components/ui/button";

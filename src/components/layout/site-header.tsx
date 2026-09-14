@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { NavUser } from "./nav-user";
 import { SubscriptionIndicator } from "./subscription-indicator";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 
 
 function LiveClock({ tier }: { tier: string }) {
@@ -68,7 +68,7 @@ function LiveClock({ tier }: { tier: string }) {
 export function SiteHeader() {
   const roleData = useRole();
   return (
-    <header className="flex z-500 h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sticky top-0 shadow-sm">
+    <header className="flex z-50 h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sticky top-0 shadow-sm">
       <div className="flex items-center gap-4">
         <SubscriptionIndicator roleData={roleData} />
       </div>

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ZoneDetails } from "../types";
 import { zoneKeys } from "./zone-keys";
 import { zoneApi } from "./zone.service";
-import { formatCurrency } from "@/utils/setFormat";
+import { formatCurrency } from "@/lib/utils/setFormat";
 // 1. Fetch All Zones for a Branch
 export function useZones(branchId: string, searchFilter?: string) {
     return useQuery({

@@ -12,8 +12,8 @@ import PersonalInfoCard from "./personal-info-card";
 import AssignmentCard from "./assignment-card";
 import AttendanceManager from "./attendance-manager";
 import AttendanceLedger from "./attendance-ledger";
-import PageDetailHeader from "@/utils/page-detail-header";
-import ConfirmDeleteDialog from "@/utils/confirm-delete-dialog";
+import PageDetailHeader from "@/lib/utils/page-detail-header";
+import ConfirmDeleteDialog from "@/lib/utils/confirm-delete-dialog";
 import { useStaffDisable } from "../api/use-mutate-staff";
 
 export function StaffProfile({ user, userId, branchId }: { user: any, userId: string, branchId: string }) {

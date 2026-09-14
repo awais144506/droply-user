@@ -12,7 +12,7 @@ import { BranchSettingData } from "../types/settings";
 import { InvoicePreview } from "./invoice-preview";
 import { useUploadThing } from "@/lib/uploadthing";
 import { branchSettingsSchema, BranchSettingsFormValues } from "../schema/update-branch-settings.schema";
-import { formatPakistaniPhone } from "@/utils/setFormat";
+import { formatPakistaniPhone } from "@/lib/utils/setFormat";
 import { FormInput } from "@/components/ui/form-input";
 
 interface BranchSettingsFormProps {

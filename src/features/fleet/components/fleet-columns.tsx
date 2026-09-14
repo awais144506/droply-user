@@ -1,5 +1,5 @@
 import { Vehicle, VehicleStatus } from "../types/fleet";
-import { ColumnDef } from "@/utils/data-table";
+import { ColumnDef } from "@/lib/utils/data-table";
 import { Phone } from "lucide-react";
 export const getFleetColumns = (): ColumnDef<Vehicle>[] => [
     {

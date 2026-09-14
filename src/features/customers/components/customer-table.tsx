@@ -3,9 +3,9 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { CustomerList } from "../types/customer";
-import { usePagination } from "@/utils/pagination-calculation";
-import DataTable from "@/utils/data-table";
-import TablePagination from "@/utils/table-pagination";
+import { usePagination } from "@/lib/utils/pagination-calculation";
+import DataTable from "@/lib/utils/data-table";
+import TablePagination from "@/lib/utils/table-pagination";
 import { getCustomerColumns } from "./customer-columns";
 
 interface CustomersTableProps {

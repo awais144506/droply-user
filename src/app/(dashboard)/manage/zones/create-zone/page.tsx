@@ -1,7 +1,7 @@
 "use client"
-import CreateFormHeader from '@/utils/create-formHeader'
+import CreateFormHeader from '@/lib/utils/create-formHeader'
 import ZoneCreateForm from '@/features/zones/components/zone-create-form'
-import { useRole } from '@/hooks/use-role'
+import { useRole } from '@/lib/hooks/use-role'
 
 const CreateZone = () => {
     const { branchId } = useRole();

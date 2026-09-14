@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 import { useSubscription } from "@/features/subscription/api/use-subscription";
 import { PlanOverview } from "@/features/subscription/components/plan-overview";
 import { PaymentChannels } from "@/features/subscription/components/payment-channels";

@@ -1,9 +1,9 @@
 "use client";
 import { useMemo } from "react";
-import { usePagination } from "@/utils/pagination-calculation";
+import { usePagination } from "@/lib/utils/pagination-calculation";
 import { useRouter } from "next/navigation";
-import DataTable from "@/utils/data-table";
-import TablePagination from "@/utils/table-pagination";
+import DataTable from "@/lib/utils/data-table";
+import TablePagination from "@/lib/utils/table-pagination";
 import { getStaffColumns } from "./staff-columns";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

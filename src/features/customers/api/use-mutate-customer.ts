@@ -7,7 +7,7 @@ import { customerKeys } from "./customer-keys";
 import { customerApi } from "./customer.service";
 import { toast } from "sonner";
 import { formatCustomerPayload } from "../utils/formatCustomerPayload";
-import { formatPakistaniPhone } from "@/utils/setFormat";
+import { formatPakistaniPhone } from "@/lib/utils/setFormat";
 
 type CreateCustomerPayload = ReturnType<typeof formatCustomerPayload>;
 

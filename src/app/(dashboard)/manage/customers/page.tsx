@@ -1,8 +1,8 @@
 "use client";
-import PageHeader from "@/utils/page-header";
-import ActivityLogsCard from "@/utils/activity-logs-card";
+import PageHeader from "@/lib/utils/page-header";
+import ActivityLogsCard from "@/lib/utils/activity-logs-card";
 import { useCustomers, useCustomerLogs } from "@/features/customers/api/use-customer";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
 import { CustomerStats } from "@/features/customers/components/customer-stats";

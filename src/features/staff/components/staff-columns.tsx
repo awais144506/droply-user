@@ -1,5 +1,5 @@
 import { Phone, Mail, Calendar } from "lucide-react";
-import { ColumnDef } from "@/utils/data-table";
+import { ColumnDef } from "@/lib/utils/data-table";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getStaffColumns = (): ColumnDef<any>[] => [

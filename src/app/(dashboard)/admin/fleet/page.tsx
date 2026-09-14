@@ -1,9 +1,9 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import FleetMainPageHeader from "@/utils/page-header";
+import FleetMainPageHeader from "@/lib/utils/page-header";
 import { FleetStats } from "@/features/fleet/components/fleet-stats";
 import { useVehicles } from "@/features/fleet/api/use-fleet";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";

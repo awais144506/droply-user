@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 import { usePurchaseOrders, PurchaseOrder } from "@/features/purchases/api/use-purchase-orders";
 import { POStats } from "@/features/purchases/components/po-stats";
 import { POTable } from "@/features/purchases/components/po-table";

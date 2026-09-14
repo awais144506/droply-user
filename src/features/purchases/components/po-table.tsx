@@ -5,7 +5,7 @@ import { Search, Printer, PackagePlus, RotateCcw, CheckCircle2, Clock, Pencil } 
 import { toast } from "sonner";
 
 import { PurchaseOrder, POStatus } from "../api/use-purchase-orders";
-import { generatePOPdf } from "@/utils/generate-po-pdf";
+import { generatePOPdf } from "@/lib/utils/generate-po-pdf";
 import { Button } from "@/components/ui/button";
 import {
     AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,

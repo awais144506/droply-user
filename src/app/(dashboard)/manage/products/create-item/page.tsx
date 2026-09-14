@@ -4,8 +4,8 @@ import { toast } from "sonner";
 import { ProductForm } from "@/features/products/components/Create_Product/CreateProductForm";
 import { CreateItemFormData } from "@/features/products/schema/create-item.schema";
 import { useCreateProduct } from "@/features/products/api/use-mutate-product";
-import { useRole } from "@/hooks/use-role";
-import CreateFormHeader from "@/utils/create-formHeader";
+import { useRole } from "@/lib/hooks/use-role";
+import CreateFormHeader from "@/lib/utils/create-formHeader";
 import { formatProductPayload } from "@/features/products/utils/format-product-payload";
 
 export default function CreateItemPage() {

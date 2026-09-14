@@ -1,12 +1,12 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 import { useDeleteProduct } from "../api/use-mutate-product";
-import { usePagination } from "@/utils/pagination-calculation";
+import { usePagination } from "@/lib/utils/pagination-calculation";
 import { ProductList } from "../types/product";
-import DataTable from "@/utils/data-table";
-import TablePagination from "@/utils/table-pagination";
-import ConfirmDeleteDialog from "@/utils/confirm-delete-dialog";
+import DataTable from "@/lib/utils/data-table";
+import TablePagination from "@/lib/utils/table-pagination";
+import ConfirmDeleteDialog from "@/lib/utils/confirm-delete-dialog";
 import { ProductsFilterBar } from "./products-filter-bar";
 
 // 1. Import your extracted column logic

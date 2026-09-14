@@ -1,10 +1,10 @@
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { Package, Network, Pen, Trash2, TrendingUp, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ColumnDef } from "@/utils/data-table";
+import { ColumnDef } from "@/lib/utils/data-table";
 import { ProductList } from "../types/product";
 import { toast } from "sonner";
-import { formatCurrency } from "@/utils/setFormat";
+import { formatCurrency } from "@/lib/utils/setFormat";
 // Helper function just for this file
 const calculateMargin = (sale: number, cost: number) => {
     if (sale <= 0) return 0;

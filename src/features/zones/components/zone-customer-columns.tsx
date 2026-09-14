@@ -1,7 +1,7 @@
 import {Phone } from "lucide-react";
 import { CustomerDetails } from "@/features/customers/types/customer";
-import { ColumnDef } from "@/utils/data-table";
-import { formatCurrency } from "@/utils/setFormat";
+import { ColumnDef } from "@/lib/utils/data-table";
+import { formatCurrency } from "@/lib/utils/setFormat";
 
 
 

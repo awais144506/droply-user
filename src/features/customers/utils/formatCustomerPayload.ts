@@ -1,5 +1,5 @@
 import { CreateCustomerFormData } from "@/features/customers/schema/create-customer.schema";
-import { formatPakistaniPhone } from "@/utils/setFormat";
+import { formatPakistaniPhone } from "@/lib/utils/setFormat";
 
 export function formatCustomerPayload(data: CreateCustomerFormData, branchId: string) {
     return {

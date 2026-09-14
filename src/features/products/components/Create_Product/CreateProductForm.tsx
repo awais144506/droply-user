@@ -8,7 +8,7 @@ import { Plus, Loader2 } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 
 import { createItemSchema, CreateItemFormData } from "@/features/products/schema/create-item.schema";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 import { useProducts } from "@/features/products/api/use-products";
 import { ProductRecipeSection } from "./product-recipe-section";
 import ProductPriceCard from "./product-price-card";

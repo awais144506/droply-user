@@ -3,7 +3,7 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import { Loader2, Calendar, Radio, History, Info } from "lucide-react";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 import { useTracking, Rider } from "@/features/tracking/api/use-tracking";
 import { TrackingStats } from "@/features/tracking/components/tracking-stats";
 import { RiderSidebar } from "@/features/tracking/components/rider-sidebar";

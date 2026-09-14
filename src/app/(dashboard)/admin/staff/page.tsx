@@ -1,11 +1,11 @@
 "use client";
-import { useRole } from "@/hooks/use-role";
-import PageHeader from "@/utils/page-header";
+import { useRole } from "@/lib/hooks/use-role";
+import PageHeader from "@/lib/utils/page-header";
 import TierLimitCard from "@/features/staff/components/tier-limit-card";
 import Loading from "@/app/loading";
 import { useStaffList, useStaffLogs } from "@/features/staff/api/use-staff";
 import ErrorBoundary from "@/app/error";
-import ActivityLogsCard from "@/utils/activity-logs-card";
+import ActivityLogsCard from "@/lib/utils/activity-logs-card";
 import { StaffStats } from "@/features/staff/components/staff-stats";
 import { StaffTable } from "@/features/staff/components/staff-table";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";

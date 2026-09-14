@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 import { useExpenses, Expense } from "@/features/expenses/api/use-expenses";
 import { ExpenseStats } from "@/features/expenses/components/expenses-stats";
 import { ExpenseTable } from "@/features/expenses/components/expense-table";

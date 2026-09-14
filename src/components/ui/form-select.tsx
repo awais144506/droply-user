@@ -9,6 +9,7 @@ import { Loader } from "lucide-react";
 export interface SelectOption {
     label: string;
     value: string | number;
+    [key: string]: any;
 }
 
 interface FormSelectProps {
@@ -22,6 +23,7 @@ interface FormSelectProps {
     isSearchable?: boolean;
     helperText?: ReactNode;
     isLoading?: boolean;
+    formatOptionLabel?: (data: any) => ReactNode;
 }
 
 export function FormSelect({
@@ -34,7 +36,8 @@ export function FormSelect({
     isMulti = false,
     isSearchable = false,
     helperText,
-    isLoading
+    isLoading,
+    formatOptionLabel
 }: FormSelectProps) {
     const { control, formState: { errors } } = useFormContext();
     const error = errors[name]?.message as string;
@@ -58,6 +61,7 @@ export function FormSelect({
 
                     return (
                         <Select
+                            formatOptionLabel={formatOptionLabel}
                             ref={ref}
                             inputId={inputId}
                             options={options}

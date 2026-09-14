@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, Plus } from "lucide-react";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 import { useProduction } from "@/features/production/api/use-production";
 import { ProductionStats } from "@/features/production/components/production-stats";
 import { ProductionTable } from "@/features/production/components/production-table";

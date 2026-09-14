@@ -16,6 +16,15 @@ export function useProducts(branchId: string) {
             const returnablesCount = products.filter(p => p.trackingType === "RETURNABLE").length;
             const recipeItemsCount = products.filter(p => p.hasRecipe).length;
             const productOptions = products?.filter(p => p.trackingType === "RETURNABLE").map(p => ({ value: p.id, label: p.name })) || [];
+            const quickSaleOptions = products?.map(p =>
+            ({
+                id: p.id, name: p.name,
+                price: p.salePrice,
+                currentStock: p.currentStock,
+                trackingType: p.trackingType,
+                lowStockThreshold: p.lowStockThreshold,
+                securityDeposit: p.securityDeposit
+            })) || [];
             return {
                 products,
                 stats: {
@@ -24,7 +33,8 @@ export function useProducts(branchId: string) {
                     returnablesCount,
                     recipeItemsCount
                 },
-                productOptions
+                productOptions,
+                quickSaleOptions
             }
         },
         staleTime: 5 * 60 * 1000,

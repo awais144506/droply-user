@@ -3,10 +3,10 @@
 import { useMemo } from "react";
 import { ZoneDetails } from "../types";
 import { useRouter } from "next/navigation";
-import DataTable from "@/utils/data-table";
+import DataTable from "@/lib/utils/data-table";
 import { getCustomerColumns } from "./zone-customer-columns";
-import { usePagination } from "@/utils/pagination-calculation";
-import TablePagination from "@/utils/table-pagination";
+import { usePagination } from "@/lib/utils/pagination-calculation";
+import TablePagination from "@/lib/utils/table-pagination";
 import { CustomerDetails } from "@/features/customers/types/customer";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 

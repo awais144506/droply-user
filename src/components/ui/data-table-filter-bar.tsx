@@ -3,7 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
 import { Search } from "lucide-react";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useDebounce } from "@/lib/hooks/use-debounce";
 
 export interface FilterTab {
     label: string;

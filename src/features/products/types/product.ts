@@ -25,6 +25,7 @@ export interface ProductItem {
 }
 
 export interface ProductList {
+    securityDeposit: number;
     id: string;
     name: string;
     sku: string;

@@ -35,6 +35,8 @@ export interface CustomerDetails {
 }
 
 export interface CustomerList {
+    category: string;
+    address: string;
     id: string;
     customerCode: string;
     name: string;

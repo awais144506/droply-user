@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 import { useSupplierPayments, SupplierPayment } from "@/features/payments/api/use-supplier-payments";
 import { PaymentStats } from "@/features/payments/components/payment-stats";
 import { PaymentTable } from "@/features/payments/components/payment-table";

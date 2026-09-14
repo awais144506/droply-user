@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { BRANCH_NAV_CONFIG, UserRole, SubscriptionTier } from "@/config/navigation.config";
-import { useRole } from "@/hooks/use-role";
+import { useRole } from "@/lib/hooks/use-role";
 
 export function NavMain() {
   const pathname = usePathname();
@@ -48,7 +48,7 @@ export function NavMain() {
             className={`text-[10px] mt-1 font-normal truncate ${isDashboardActive ? "text-sky-100" : "text-muted-foreground"
               }`}
           >
-            Live branch metrics & trips
+            Quick Sale
           </span>
         </div>
       </Link>

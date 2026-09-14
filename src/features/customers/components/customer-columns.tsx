@@ -1,7 +1,7 @@
 import { MapPin, Phone, CalendarX2 } from "lucide-react";
 import { CustomerList } from "../types/customer";
-import { ColumnDef } from "@/utils/data-table";
-import { formatLastVisit, formatCurrency, displayPakistaniPhone } from "@/utils/setFormat";
+import { ColumnDef } from "@/lib/utils/data-table";
+import { formatLastVisit, formatCurrency, displayPakistaniPhone } from "@/lib/utils/setFormat";
 
 
 export const getCustomerColumns = (): ColumnDef<CustomerList>[] => [

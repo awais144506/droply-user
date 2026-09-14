@@ -1,6 +1,6 @@
 "use client";
 import { Users, Bike, Briefcase, UserX } from "lucide-react";
-import PageStatsCard from "@/utils/page-stats-card";
+import PageStatsCard from "@/lib/utils/page-stats-card";
 
 interface StaffStatsProps {
   activeStaffCount: number;
