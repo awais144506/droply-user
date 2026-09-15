@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
-import { usePurchaseOrders, PurchaseOrder } from "@/features/purchases/api/use-purchase-orders";
-import { POStats } from "@/features/purchases/components/po-stats";
-import { POTable } from "@/features/purchases/components/po-table";
+import { usePurchaseOrders, PurchaseOrder } from "@/features/supply/order/api/use-purchase-orders";
+import { POStats } from "@/features/supply/order/components/po-stats";
+import { POTable } from "@/features/supply/order/components/po-table";
 import { Button } from "@/components/ui/button";
 
 export default function PurchaseOrdersPage() {

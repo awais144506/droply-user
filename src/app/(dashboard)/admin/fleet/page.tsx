@@ -1,13 +1,13 @@
 "use client";
 import { useSearchParams } from "next/navigation";
-import FleetMainPageHeader from "@/lib/utils/page-header";
-import { FleetStats } from "@/features/fleet/components/fleet-stats";
-import { useVehicles } from "@/features/fleet/api/use-fleet";
+import FleetMainPageHeader from "@/lib/utils/components/MainPageHeader";
+import { FleetStats } from "@/features/admin/fleet/components/fleet-stats";
+import { useVehicles } from "@/features/admin/fleet/api/use-fleet";
 import { useRole } from "@/lib/hooks/use-role";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
-import { FleetTable } from "@/features/fleet/components/fleet-table";
+import { FleetTable } from "@/features/admin/fleet/components/fleet-table";
 
 
 export default function FleetManagementPage() {

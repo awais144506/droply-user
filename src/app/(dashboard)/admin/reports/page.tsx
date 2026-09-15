@@ -1,6 +1,6 @@
 "use client";
 
-import { ReportGenerator } from "@/features/reports/components/report-generator";
+import { ReportGenerator } from "@/features/admin/reports/components/report-generator";
 
 export default function ReportsPage() {
   return (

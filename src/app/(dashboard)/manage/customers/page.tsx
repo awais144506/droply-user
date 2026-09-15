@@ -1,12 +1,12 @@
 "use client";
-import PageHeader from "@/lib/utils/page-header";
-import ActivityLogsCard from "@/lib/utils/activity-logs-card";
-import { useCustomers, useCustomerLogs } from "@/features/customers/api/use-customer";
+import PageHeader from "@/lib/utils/components/MainPageHeader";
+import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
+import { useCustomers, useCustomerLogs } from "@/features/manage/customers/api/use-customer";
 import { useRole } from "@/lib/hooks/use-role";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
-import { CustomerStats } from "@/features/customers/components/customer-stats";
-import { CustomersTable } from "@/features/customers/components/customer-table";
+import { CustomerStats } from "@/features/manage/customers/components/customer-stats";
+import { CustomersTable } from "@/features/manage/customers/components/customer-table";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
 

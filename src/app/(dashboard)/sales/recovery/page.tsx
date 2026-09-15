@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
-import { useRecoveries, RecoveryRecord } from "@/features/recovery/api/use-recoveries";
-import { RecoveryStats } from "@/features/recovery/components/recovery-stats";
-import { RecoveryTable } from "@/features/recovery/components/recovery-table";
+import { useRecoveries, RecoveryRecord } from "@/features/sales/recovery/api/use-recoveries";
+import { RecoveryStats } from "@/features/sales/recovery/components/recovery-stats";
+import { RecoveryTable } from "@/features/sales/recovery/components/recovery-table";
 import { Button } from "@/components/ui/button";
 
 export default function RecoveryPage() {

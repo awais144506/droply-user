@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
-import { useProducts } from "@/features/products/api/use-products";
+import { useProducts } from "@/features/manage/products/api/use-products";
 
 
 export default function DashboardPage() {

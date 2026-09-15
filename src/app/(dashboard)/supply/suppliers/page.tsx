@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
-import { useSuppliers, Supplier } from "@/features/suppliers/api/use-suppliers";
-import { SupplierStats } from "@/features/suppliers/components/supplier-stats";
-import { SupplierTable } from "@/features/suppliers/components/supplier-table";
+import { useSuppliers, Supplier } from "@/features/supply/suppliers/api/use-suppliers";
+import { SupplierStats } from "@/features/supply/suppliers/components/supplier-stats";
+import { SupplierTable } from "@/features/supply/suppliers/components/supplier-table";
 import { Button } from "@/components/ui/button";
 
 export default function SuppliersPage() {

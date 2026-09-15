@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
-import { useTasks, Task } from "@/features/tasks/api/use-tasks";
-import { TaskStats } from "@/features/tasks/components/task-stats";
-import { TaskTable } from "@/features/tasks/components/task-table";
+import { useTasks, Task } from "@/features/admin/tasks/api/use-tasks";
+import { TaskStats } from "@/features/admin/tasks/components/task-stats";
+import { TaskTable } from "@/features/admin/tasks/components/task-table";
 import { Button } from "@/components/ui/button";
 
 export default function AdminTasksPage() {

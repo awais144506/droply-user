@@ -3,17 +3,17 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Trash2, Edit } from "lucide-react";
 import { toast } from "sonner";
-import { useZone } from "@/features/zones/api/use-zones";
-import { useDeleteZone, } from "@/features/zones/api/use-mutate-zone";
-import { ZoneCustomersTable } from "@/features/zones/components/zone-customers-table";
-import PageDetailHeader from "@/lib/utils/page-detail-header";
+import { useZone } from "@/features/manage/zones/api/use-zones";
+import { useDeleteZone, } from "@/features/manage/zones/api/use-mutate-zone";
+import { ZoneCustomersTable } from "@/features/manage/zones/components/zone_details/zone-customers-table";
+import PageDetailHeader from "@/lib/utils/components/PageDetailHeader";
 import Loading from "@/app/loading";
 import NotFoundPage from "@/app/not-found";
 import { Button } from "@/components/ui/button";
-import ConfirmDeleteDialog from "@/lib/utils/confirm-delete-dialog";
-import EditZoneDialog from "@/features/zones/components/edit-zone";
-import { ZoneDetailStats } from "@/features/zones/components/zone-detail-stats";
-import ZoneDetailMap from "@/features/zones/components/zone-detail-map";
+import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import EditZoneDialog from "@/features/manage/zones/components/zone_details/edit-zone";
+import { ZoneDetailStats } from "@/features/manage/zones/components/zone_details/zone-detail-stats";
+import ZoneDetailMap from "@/features/manage/zones/components/zone_details/zone-detail-map";
 import { useSearchParams } from "next/navigation";
 
 export default function ZoneDetailsPage() {

@@ -15,7 +15,8 @@ interface FormInputProps {
     helperText?: ReactNode;
     min?: number;
     max?: number;
-    className?: string; // 🔥 Added to allow custom styling (like text-center)
+    className?: string;
+    lableTextColor?: string; // 🔥 Added to allow custom styling (like text-center)
 }
 
 export function FormInput({
@@ -30,7 +31,8 @@ export function FormInput({
     helperText,
     min,
     max,
-    className = "" // Default to empty string
+    className = "",
+    lableTextColor = "text-slate-700",
 }: FormInputProps) {
 
     const { register, formState: { errors } } = useFormContext();
@@ -41,7 +43,7 @@ export function FormInput({
         <div className="space-y-1.5 w-full">
             {/* Conditionally render the label only if it exists */}
             {label && (
-                <label htmlFor={inputId} className="flex items-center text-xs font-bold text-slate-700 uppercase tracking-wide cursor-pointer">
+                <label htmlFor={inputId} className={`flex items-center text-xs font-bold ${lableTextColor} uppercase tracking-wide cursor-pointer`}>
                     {label}
                     {required && <span className="text-rose-500 ml-1">*</span>}
                 </label>

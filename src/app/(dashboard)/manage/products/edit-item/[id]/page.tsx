@@ -1,12 +1,12 @@
 "use client";
 import { useRouter, useParams } from "next/navigation";
-import { ProductForm } from "@/features/products/components/Create_Product/CreateProductForm";
-import { CreateItemFormData } from "@/features/products/schema/create-item.schema";
-import { useProduct } from "@/features/products/api/use-products";
-import { useUpdateProduct } from "@/features/products/api/use-mutate-product";
-import CreateFormHeader from "@/lib/utils/create-formHeader";
+import { ProductForm } from "@/features/manage/products/components/Create_Product/CreateProductForm";
+import { CreateItemFormData } from "@/features/manage/products/schema/create-item.schema";
+import { useProduct } from "@/features/manage/products/api/use-products";
+import { useUpdateProduct } from "@/features/manage/products/api/use-mutate-product";
+import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
 import Loading from "@/app/loading";
-import { formatProductPayload } from "@/features/products/utils/format-product-payload";
+import { formatProductPayload } from "@/features/manage/products/utils/format-product-payload";
 import ErrorBoundary from "@/app/error";
 
 export default function EditItemPage() {

@@ -1,7 +1,7 @@
 "use client";
 import { useRole } from "@/lib/hooks/use-role";
-import { useBranchSettings } from "@/features/settings/api/use-branch-settings";
-import { BranchSettingsForm } from "@/features/settings/components/branch-settings-form";
+import { useBranchSettings } from "@/features/admin/settings/api/use-branch-settings";
+import { BranchSettingsForm } from "@/features/admin/settings/components/branch-settings-form";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
 

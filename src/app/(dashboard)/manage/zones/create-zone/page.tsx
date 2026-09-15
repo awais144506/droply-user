@@ -1,6 +1,6 @@
 "use client"
-import CreateFormHeader from '@/lib/utils/create-formHeader'
-import ZoneCreateForm from '@/features/zones/components/zone-create-form'
+import CreateFormHeader from '@/lib/utils/components/FormHeaderNavigation'
+import ZoneCreateForm from '@/features/manage/zones/components/create/CreateZoneForm'
 import { useRole } from '@/lib/hooks/use-role'
 
 const CreateZone = () => {

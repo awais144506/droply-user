@@ -1,9 +1,9 @@
 "use client";
 import { useRole } from "@/lib/hooks/use-role";
-import { useZones } from "@/features/zones/api/use-zones";
-import { useProducts } from "@/features/products/api/use-products";
-import CreateCustomerForm from "@/features/customers/components/create/CreateCustomerForm";
-import CreateFormHeader from "@/lib/utils/create-formHeader";
+import { useZones } from "@/features/manage/zones/api/use-zones";
+import { useProducts } from "@/features/manage/products/api/use-products";
+import CreateCustomerForm from "@/features/manage/customers/components/create/CreateCustomerForm";
+import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
 
 
 export default function CreateCustomerPage() {

@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
-import { useSupplierPayments, SupplierPayment } from "@/features/payments/api/use-supplier-payments";
-import { PaymentStats } from "@/features/payments/components/payment-stats";
-import { PaymentTable } from "@/features/payments/components/payment-table";
+import { useSupplierPayments, SupplierPayment } from "@/features/supply/payments/api/use-supplier-payments";
+import { PaymentStats } from "@/features/supply/payments/components/payment-stats";
+import { PaymentTable } from "@/features/supply/payments/components/payment-table";
 import { Button } from "@/components/ui/button";
 
 export default function SupplierPaymentsPage() {

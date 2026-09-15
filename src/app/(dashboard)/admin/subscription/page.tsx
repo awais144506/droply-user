@@ -2,10 +2,10 @@
 
 import { Loader2 } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
-import { useSubscription } from "@/features/subscription/api/use-subscription";
-import { PlanOverview } from "@/features/subscription/components/plan-overview";
-import { PaymentChannels } from "@/features/subscription/components/payment-channels";
-import { BillingLedger } from "@/features/subscription/components/billing-ledger";
+import { useSubscription } from "@/features/admin/subscription/api/use-subscription";
+import { PlanOverview } from "@/features/admin/subscription/components/plan-overview";
+import { PaymentChannels } from "@/features/admin/subscription/components/payment-channels";
+import { BillingLedger } from "@/features/admin/subscription/components/billing-ledger";
 
 export default function SubscriptionPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();

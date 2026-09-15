@@ -1,12 +1,12 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ProductForm } from "@/features/products/components/Create_Product/CreateProductForm";
-import { CreateItemFormData } from "@/features/products/schema/create-item.schema";
-import { useCreateProduct } from "@/features/products/api/use-mutate-product";
+import { ProductForm } from "@/features/manage/products/components/Create_Product/CreateProductForm";
+import { CreateItemFormData } from "@/features/manage/products/schema/create-item.schema";
+import { useCreateProduct } from "@/features/manage/products/api/use-mutate-product";
 import { useRole } from "@/lib/hooks/use-role";
-import CreateFormHeader from "@/lib/utils/create-formHeader";
-import { formatProductPayload } from "@/features/products/utils/format-product-payload";
+import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
+import { formatProductPayload } from "@/features/manage/products/utils/format-product-payload";
 
 export default function CreateItemPage() {
     const router = useRouter();

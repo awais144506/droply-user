@@ -114,19 +114,36 @@ export function NavMain() {
                       />
                       <span className="truncate">{item.title}</span>
 
-                      {item.badge && (
-                        <Badge
-                          variant="outline"
-                          className={`ml-auto text-[9px] px-1.5 py-0 font-medium ${isActive
-                            ? "bg-white/20 text-white border-white/30"
-                            : item.badge === "Admin"
-                              ? "border-amber-500/30 text-amber-600 bg-amber-500/10"
-                              : "border-sky-500/30 text-sky-600 bg-sky-500/10"
+                      {/* Right-side container for Badge & Dev Dot */}
+                      <div className="ml-auto flex items-center gap-2">
+                        {item.badge && (
+                          <Badge
+                            variant="outline"
+                            className={`text-[9px] px-1.5 py-0 font-medium ${isActive
+                              ? "bg-white/20 text-white border-white/30"
+                              : item.badge === "Admin"
+                                ? "border-amber-500/30 text-amber-600 bg-amber-500/10"
+                                : "border-sky-500/30 text-sky-600 bg-sky-500/10"
+                              }`}
+                          >
+                            {item.badge}
+                          </Badge>
+                        )}
+
+                        {/* 🔥 Render the Dev Status Dot (REMOVE BEFORE PROD) */}
+                        {item.devStatus && (
+                          <span
+                            title={`Status: ${item.devStatus}`}
+                            className={`h-2 w-2 rounded-full shrink-0 shadow-sm ${
+                              item.devStatus === "DONE"
+                                ? "bg-emerald-500" // Green
+                                : item.devStatus === "PARTIAL"
+                                ? "bg-amber-400" // Yellow
+                                : "bg-rose-500" // Red (TODO)
                             }`}
-                        >
-                          {item.badge}
-                        </Badge>
-                      )}
+                          />
+                        )}
+                      </div>
                     </Link>
                   );
                 })}

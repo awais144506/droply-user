@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
-import { usePurchaseReturns, PurchaseReturn } from "@/features/returns/api/use-purchase-returns";
-import { ReturnStats } from "@/features/returns/components/return-stats";
-import { ReturnTable } from "@/features/returns/components/return-table";
+import { usePurchaseReturns, PurchaseReturn } from "@/features/supply/returns/api/use-purchase-returns";
+import { ReturnStats } from "@/features/supply/returns/components/return-stats";
+import { ReturnTable } from "@/features/supply/returns/components/return-table";
 import { Button } from "@/components/ui/button";
 
 export default function PurchaseReturnsPage() {

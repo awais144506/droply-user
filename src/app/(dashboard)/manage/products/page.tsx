@@ -1,13 +1,13 @@
 "use client";
 
 import { useRole } from "@/lib/hooks/use-role";
-import { useProducts, useProductLogs } from "@/features/products/api/use-products";
-import { ProductStats } from "@/features/products/components/product-stats";
-import { ProductsTable } from "@/features/products/components/products-table";
-import PageHeader from "@/lib/utils/page-header";
+import { useProducts, useProductLogs } from "@/features/manage/products/api/use-products";
+import { ProductStats } from "@/features/manage/products/components/product-stats";
+import { ProductsTable } from "@/features/manage/products/components/products-table";
+import PageHeader from "@/lib/utils/components/MainPageHeader";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
-import ActivityLogsCard from "@/lib/utils/activity-logs-card";
+import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 
 export default function ProductsPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();

@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRole } from "@/lib/hooks/use-role";
-import ChooseSale from "@/features/orders/components/create/choose-sale";
-import CreateSaleForm from "@/features/orders/components/create/CreateSaleForm";
+import ChooseSale from "@/features/sales/orders/components/create/choose-sale";
+import CreateSaleForm from "@/features/sales/orders/components/create/CreateSaleForm";
 
 
 const CreateNewSalePage = () => {
