@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Trash2, Edit } from "lucide-react";
+import { Trash2, Edit} from "lucide-react";
 import { toast } from "sonner";
 import { useZone } from "@/features/manage/zones/api/use-zones";
 import { useDeleteZone, } from "@/features/manage/zones/api/use-mutate-zone";
@@ -28,8 +28,9 @@ export default function ZoneDetailsPage() {
   const { mutate: deleteZone, isPending: isDeleting } = useDeleteZone();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
   if (isLoading) return <Loading />
-  if (!data || !data.zone) return <NotFoundPage/>
+  if (!data || !data.zone) return <NotFoundPage />
 
   const { zone, filterCustomer, stats, hasCustomers, hasLedger, hasReturnables, hasRiders } = data;
 
@@ -47,8 +48,7 @@ export default function ZoneDetailsPage() {
     deleteZone(zoneId, {
       onSuccess: () => {
         setIsDeleteDialogOpen(false);
-        toast.success("Zone deleted successfully");
-        router.push('/manage/zones');
+        router.back();
       },
       onError: () => {
         setIsDeleteDialogOpen(false);
@@ -59,30 +59,36 @@ export default function ZoneDetailsPage() {
   return (
     <>
       <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
-        <PageDetailHeader
-          heading={zone.name}
-          description="Zone Overview & Customer Directory"
-          href="/manage/zones"
-        >
-          <Button
-            type="button"
-            onClick={() => setIsEditDialogOpen(true)}
-            variant="outline"
-          >
-            <Edit className="h-4 w-4" />
-            Edit
-          </Button>
 
-          <Button
-            type="button"
-            onClick={handleDeleteClick}
-            variant="destructive"
-            disabled={isDeleting}
+        {/* Header Section */}
+        <div className="flex flex-col gap-3">
+          <PageDetailHeader
+            heading={zone.name}
+            description="Zone Overview & Customer Directory"
+            href="/manage/zones"
+            createdAt={zone.createdAt}
+            updatedAt={zone.updatedAt}
           >
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
-        </PageDetailHeader>
+            <Button
+              type="button"
+              onClick={() => setIsEditDialogOpen(true)}
+              variant="outline"
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Edit
+            </Button>
+
+            <Button
+              type="button"
+              onClick={handleDeleteClick}
+              variant="destructive"
+              disabled={isDeleting}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete
+            </Button>
+          </PageDetailHeader>
+        </div>
 
         {/* Top Metric Cards */}
         <ZoneDetailStats

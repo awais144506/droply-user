@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useUpdateZone } from "../../api/use-mutate-zone";
-import { toast } from "sonner"
 import { FormInput } from "@/components/ui/form-input";
 import { FormProvider } from "react-hook-form";
 
@@ -55,13 +54,11 @@ export default function EditZoneDialog({ zone, isOpen, onClose }: EditZoneDialog
 
     const onSubmit = (data: EditZoneFormValues) => {
         updateZone(
-            { id: zone.id, data },
-            {
-                onSuccess: () => {
-                    toast.success("Zone updated successfully");
-                    onClose();
-                }
+            { id: zone.id, data }, {
+            onSuccess: () => {
+                onClose();
             }
+        }
         );
     };
 

@@ -1,4 +1,4 @@
-import {Phone } from "lucide-react";
+import { Phone, MapPin } from "lucide-react";
 import { CustomerDetails } from "@/features/manage/customers/types/customer";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
 import { formatCurrency } from "@/lib/utils/functions/setFormat";
@@ -13,8 +13,7 @@ export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
                 <p className="font-bold text-slate-900 text-sm mb-1">{customer.name}</p>
                 <div className="flex items-center gap-3 text-xs text-slate-500">
                     <span className="flex items-center gap-1">
-                        <Phone className="h-3 w-3 text-slate-400" />
-                        {customer.phone}
+                        <Phone className="h-3 w-3 text-slate-400" />{customer.phone} . <MapPin className="h-3 w-3 text-slate-400" />{customer.address}
                     </span>
                 </div>
             </div>

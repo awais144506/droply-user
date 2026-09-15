@@ -49,6 +49,7 @@ export function useUpdateZone() {
             return apiClient.patch(`/zone/${id}`, data);
         },
         onSuccess: (_, variables) => {
+            toast.success("Zone updated successfully");
             queryClient.invalidateQueries({ queryKey: zoneKeys.lists() });
             queryClient.invalidateQueries({ queryKey: zoneKeys.detail(variables.id) });
             queryClient.invalidateQueries({ queryKey: zoneKeys.logs() });
@@ -62,6 +63,7 @@ export function useDeleteZone() {
     return useMutation({
         mutationFn: async (id: string) => zoneApi.deletZone(id),
         onSuccess: () => {
+            toast.success("Zone deleted successfully");
             queryClient.invalidateQueries({ queryKey: zoneKeys.all });
         },
     });

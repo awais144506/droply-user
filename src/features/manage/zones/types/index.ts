@@ -1,4 +1,5 @@
 export interface ZoneDetails {
+  updatedAt: string | Date | undefined;
   id: string;
   name: string;
   ledgerAmount: number | string;

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Truck, Phone } from "lucide-react";
+import { BikeIcon, Phone } from "lucide-react";
 
 interface AssignedRider {
     id: string;
@@ -16,7 +16,7 @@ export function AssignedRidersCard({ riders = [] }: AssignedRidersCardProps) {
         <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col">
             <div className="flex items-center gap-3 mb-4">
                 <div className="h-10 w-10 shrink-0 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <Truck className="h-5 w-5" />
+                    <BikeIcon className="h-5 w-5" />
                 </div>
                 <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Assigned Riders ({riders.length})</h3>
             </div>

@@ -18,13 +18,16 @@ const ZoneCreateForm = ({ branchId }: { branchId: string }) => {
     resolver: yupResolver(createZoneSchema),
     mode: "onChange",
     defaultValues: {
-      branchId: branchId,
       name: "",
     }
   });
 
   const onSubmit = (data: ZoneFormValues) => {
-    createZone(data, {
+    const payload = {
+      ...data,
+      branchId: branchId,
+    }
+    createZone(payload, {
       onSuccess: () => router.back()
     });
   };
@@ -32,7 +35,6 @@ const ZoneCreateForm = ({ branchId }: { branchId: string }) => {
   return (
     <FormProvider {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-        <input type="hidden" {...form.register("branchId")} />
         <div className="space-y-5">
           <FormInput
             label="Zone Name"
@@ -55,7 +57,7 @@ const ZoneCreateForm = ({ branchId }: { branchId: string }) => {
             />
           </div>
         </div>
-        <div className="mt-8 pt-5 border-t border-slate-100 flex justify-end">
+        <div className="mt-8 pt-5 gap-2 border-t border-slate-100 flex justify-end">
           <Link
             href="/manage/zones"
             className={`${buttonVariants({ variant: "outline", size: "sm" })} ${isPending ? "pointer-events-none opacity-50" : ""}`}
@@ -65,7 +67,7 @@ const ZoneCreateForm = ({ branchId }: { branchId: string }) => {
           </Link>
           <Button
             type="submit"
-            disabled={isPending}
+            disabled={isPending || !form.formState.isValid}
             variant="create"
           >
             {isPending ? (
