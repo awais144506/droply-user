@@ -1,3 +1,4 @@
+export type OrderStatus = "PENDING" | "ON_ROUTE" | "COMPLETED" | "VOIDED"
 export type CustomerStatus = "ACTIVE" | "INACTIVE" | "BLOCKED";
 
 export interface CustomerDetails {
@@ -6,7 +7,7 @@ export interface CustomerDetails {
     zoneId: string | null;
     customerCode: string;
     name: string;
-    phone: string;
+    phone?: string;
     email: string | null;
     address: string | null;
     latitude: number | null;
@@ -29,9 +30,7 @@ export interface CustomerDetails {
         openingReturnables: number,
         currentReturnables: number,
     ]
-    orders: [
-
-    ]
+    orders: CustomerOrderHistory[],
 }
 
 export interface CustomerList {
@@ -52,4 +51,13 @@ export interface CustomerList {
     customerCredit: string;
     returnablesLength: string;
     lastVisitDate: string;
+}
+
+export interface CustomerOrderHistory {
+    orderCode: string;
+    id: string
+    status: OrderStatus;
+    totalAmount: number;
+    type: "WALK_IN" | "DELIVERY";
+    createdAt: string;
 }

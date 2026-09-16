@@ -53,7 +53,6 @@ const CreateStaffIdentityCard = () => {
                     <div className="space-y-1.5">
                         <FormInput
                             label="Joining Date"
-                            required
                             type="date"
                             name="joiningDate"
                         />

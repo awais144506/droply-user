@@ -25,7 +25,7 @@ export function ZoneDetailStats({
       />
       <PageStatsCard
         title="Zone Khata"
-        value={totalLedger}
+        value={totalLedger || 0}
         prefix="Rs."
         icon={Wallet}
         iconContainerClass="bg-amber-50 text-amber-600"

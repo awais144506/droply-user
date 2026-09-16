@@ -24,7 +24,6 @@ export const vehicleSchema = yup.object({
     .typeError("Odometer must be a number")
     .min(0, "Odometer cannot be negative")
     .required("Current odometer reading is required"),
-  assignedStaffId: yup.string().optional(),
 });
 
 export type VehicleFormValues = yup.InferType<typeof vehicleSchema>;

@@ -38,7 +38,7 @@ export default function DataTable<T>({
                         data?.map((item, rowIndex) => (
                             <tr
                                 key={rowIndex}
-                                className={`hover:bg-slate-50/50 transition-colors group ${onRowClick ? 'cursor-pointer' : ''}`}
+                                className={`hover:bg-slate-100 transition-colors group ${onRowClick ? 'cursor-pointer' : ''}`}
                                 onClick={() => {
                                     if (onRowClick) onRowClick(item);
                                 }}

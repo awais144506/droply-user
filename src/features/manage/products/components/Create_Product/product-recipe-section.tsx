@@ -1,14 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useFormContext, useFieldArray } from "react-hook-form";
-import { Settings2, PlusCircle, Trash2 } from "lucide-react";
+import { Settings2, PlusCircle, Trash2, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FormInput } from "@/components/ui/form-input";
 import { FormSelect } from "@/components/ui/form-select";
 
+// 🔥 1. Updated interface to include currentStock from your custom hook
 interface RecipeSectionProps {
     hasRecipe: boolean;
-    dynamicRawMaterialOptions: { value: string; label: string }[];
+    dynamicRawMaterialOptions: {
+        value: string;
+        label: string;
+        currentStock: number;
+        salePrice: number;
+        unitCost: number;
+    }[];
     isProductsLoading: boolean;
 }
 
@@ -17,11 +24,13 @@ export function ProductRecipeSection({
     dynamicRawMaterialOptions,
     isProductsLoading
 }: RecipeSectionProps) {
-    const { register, control, formState: { errors } } = useFormContext();
+    const { register, control, watch, formState: { errors } } = useFormContext();
     const { fields, append, remove } = useFieldArray({ control, name: "recipeItems" });
-
-    // Type assertion to handle the errors object safely
     const recipeErrors = errors.recipeItems as any;
+    const currentRecipeItems = watch("recipeItems") || [];
+    const selectedMaterialIds = currentRecipeItems
+        .map((item: any) => item?.rawMaterialId)
+        .filter(Boolean);
 
     return (
         <Card className="overflow-hidden border-slate-200">
@@ -40,9 +49,7 @@ export function ProductRecipeSection({
 
             {hasRecipe && (
                 <CardContent className="pt-4 pb-6">
-                    <div className="space-y-3">
-
-                        {/* Header for the rows so we don't need repeating labels */}
+                    <div className="space-y-4">
                         {fields.length > 0 && (
                             <div className="flex items-center text-xs font-bold text-slate-700 uppercase tracking-wide px-1 mb-2">
                                 <span className="flex-1">Raw Material</span>
@@ -56,38 +63,88 @@ export function ProductRecipeSection({
                                 No components added yet.
                             </div>
                         ) : (
-                            fields.map((field, index) => (
-                                <div key={field.id} className="flex items-start gap-2">
-                                    <div className="flex-1">
-                                        <FormSelect
-                                            name={`recipeItems.${index}.rawMaterialId`}
-                                            label="" // 🔥 Pass empty string to remove repeating label
-                                            options={dynamicRawMaterialOptions}
-                                            placeholder="Search material..."
-                                            isSearchable={true}
-                                            isLoading={isProductsLoading}
-                                        />
-                                    </div>
+                            fields.map((field, index) => {
+                                // 🔥 3. Get current row's data
+                                const currentRowData = currentRecipeItems[index];
+                                const currentMaterialId = currentRowData?.rawMaterialId;
+                                const currentQty = Number(currentRowData?.quantityRequired) || 0;
 
-                                    <div className="w-32">
-                                        <FormInput
-                                            name={`recipeItems.${index}.quantityRequired`}
-                                            type="number"
-                                            label="" // 🔥 Pass empty string to remove repeating label
-                                            placeholder="Qty"
-                                        />
-                                    </div>
+                                // Find the raw material in our options to check its stock
+                                const materialInfo = dynamicRawMaterialOptions.find(
+                                    (opt) => opt.value === currentMaterialId
+                                );
 
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        onClick={() => remove(index)}
-                                        className="h-10 w-10 p-0 mt-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl shrink-0"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            ))
+                                // Calculate how many recipes can be made
+                                let possibleYield = null;
+                                if (materialInfo && currentQty > 0) {
+                                    possibleYield = Math.floor(materialInfo.currentStock / currentQty);
+                                }
+
+
+                                const availableOptions = dynamicRawMaterialOptions.filter(
+                                    (opt) => !selectedMaterialIds.includes(opt.value) || opt.value === currentMaterialId
+                                );
+
+                                return (
+                                    <div key={field.id} className="flex items-start gap-2">
+                                        <div className="flex-1">
+                                            <FormSelect
+                                                name={`recipeItems.${index}.rawMaterialId`}
+                                                label=""
+                                                options={availableOptions}
+                                                placeholder="Search material..."
+                                                isSearchable={true}
+                                                isLoading={isProductsLoading}
+                                            />
+                                            {/* Show current stock helper text */}
+                                            {materialInfo && (
+                                                <div className="flex items-center gap-4 mt-1.5 ml-1">
+                                                    <p className="text-[10px] text-slate-500">
+                                                        In Stock: <span className="font-semibold text-slate-700">{materialInfo.currentStock}</span>
+                                                    </p>
+                                                    <p className="text-[10px] text-slate-500">
+                                                        Unit Cost: <span className="font-semibold text-slate-700">Rs. {materialInfo.unitCost || 0}</span>
+                                                    </p>
+                                                    <p className="text-[10px] text-slate-500">
+                                                        Sale Price: <span className="font-semibold text-slate-700">Rs. {materialInfo.salePrice || 0}</span>
+                                                    </p>
+                                                    {currentQty > 1 && (
+                                                        <p className="text-[10px] text-amber-600 font-medium">
+                                                            (Unit * Quantity) Total: Rs. {(materialInfo.unitCost * currentQty).toLocaleString()}
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        <div className="w-32">
+                                            <FormInput
+                                                name={`recipeItems.${index}.quantityRequired`}
+                                                type="number"
+                                                label=""
+                                                placeholder="Qty"
+                                                min={0}
+                                            />
+                                            {/* 🔥 5. Display the calculation */}
+                                            {possibleYield !== null && (
+                                                <p className={`text-[10px] mt-1.5 ml-1 flex items-center gap-1 ${possibleYield === 0 ? "text-rose-500 font-bold" : "text-sky-600 font-medium"}`}>
+                                                    {possibleYield === 0 && <AlertCircle className="h-3 w-3" />}
+                                                    Yields Recipe: {possibleYield} max
+                                                </p>
+                                            )}
+                                        </div>
+
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            onClick={() => remove(index)}
+                                            className="h-10 w-10 p-0 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl shrink-0"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                );
+                            })
                         )}
 
                         <div className="pt-2">

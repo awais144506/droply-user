@@ -37,6 +37,7 @@ export default function EditItemPage() {
         openingStock: product.stockOnHand,
         lowStockThreshold: product.lowStockThreshold,
         hasRecipe: product.hasRecipe,
+        securityDeposit:product.securityDeposit,
         recipeItems: product.recipeIngredients?.map(recipe => ({
             rawMaterialId: recipe.childItemId,
             quantityRequired: recipe.quantity

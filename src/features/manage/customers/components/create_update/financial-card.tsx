@@ -1,17 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { useFieldArray } from "react-hook-form";
+// 🔥 1. Import useWatch
+import { useFieldArray, useWatch } from "react-hook-form";
 import { Wallet, Trash2, PlusCircle, Package } from "lucide-react";
 import { FormInput } from "@/components/ui/form-input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormSelect } from "@/components/ui/form-select";
 
-export default function FinancialsCard({ control, productOptions, isLoadingProducts }: any) {
+export default function FinancialsCard({ control, productOptions = [], isLoadingProducts }: any) {
     const { fields, append, remove } = useFieldArray({
         control,
         name: "openingReturnables",
     });
+
+    const currentReturnables = useWatch({
+        control,
+        name: "openingReturnables",
+        defaultValue: []
+    }) || [];
+    const canAddNew = productOptions.length > fields.length;
 
     return (
         <Card>
@@ -61,8 +69,9 @@ export default function FinancialsCard({ control, productOptions, isLoadingProdu
                             type="button"
                             variant="outline"
                             size="sm"
+                            disabled={!canAddNew}
                             onClick={() => append({ productId: "", quantity: 1 })}
-                            className="h-7 text-[10px] rounded-lg px-2 text-sky-600 border-sky-200 hover:bg-sky-50"
+                            className="h-7 text-[10px] rounded-lg px-2 text-sky-600 border-sky-200 hover:bg-sky-50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <PlusCircle className="h-3 w-3 mr-1" /> Add Item
                         </Button>
@@ -74,39 +83,49 @@ export default function FinancialsCard({ control, productOptions, isLoadingProdu
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {fields.map((field, index) => (
-                                <div key={field.id} className="flex items-start gap-2">
+                            {fields.map((field, index) => {
 
-                                    <div className="flex-1">
-                                        <FormSelect
-                                            name={`openingReturnables.${index}.productId`}
-                                            label="" // Pass empty string since you don't want a label per-row
-                                            options={productOptions || []}
-                                            placeholder="Search item..."
-                                            isSearchable={true}
-                                            isLoading={isLoadingProducts}
-                                        />
+                                const availableOptions = productOptions.filter((option: any) => {
+
+                                    const isSelectedElsewhere = currentReturnables.some((item: any, i: number) =>
+                                        i !== index && item.productId === option.value
+                                    );
+                                    return !isSelectedElsewhere;
+                                });
+
+                                return (
+                                    <div key={field.id} className="flex items-start gap-2">
+                                        <div className="flex-1">
+                                            <FormSelect
+                                                name={`openingReturnables.${index}.productId`}
+                                                label=""
+                                                options={availableOptions}
+                                                placeholder="Search item..."
+                                                isSearchable={true}
+                                                isLoading={isLoadingProducts}
+                                            />
+                                        </div>
+
+                                        <div className="w-28">
+                                            <FormInput
+                                                name={`openingReturnables.${index}.quantity`}
+                                                type="number"
+                                                label=""
+                                                placeholder="Qty"
+                                            />
+                                        </div>
+
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            onClick={() => remove(index)}
+                                            className="h-10 w-10 p-0 mt-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl shrink-0"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </Button>
                                     </div>
-
-                                    <div className="w-28">
-                                        <FormInput
-                                            name={`openingReturnables.${index}.quantity`}
-                                            type="number"
-                                            label=""
-                                            placeholder="Qty"
-                                        />
-                                    </div>
-
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        onClick={() => remove(index)}
-                                        className="h-10 w-10 p-0 mt-1 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl shrink-0"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>

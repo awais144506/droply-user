@@ -43,3 +43,14 @@ export const getStartOfLocalDayUTC = (dateString: string): Date => {
     localDate.setHours(0, 0, 0, 0);
     return localDate;
 };
+
+// Helper function to calculate days ago
+export const getDaysAgoText = (dateString?: string | null) => {
+  if (!dateString) return "Never";
+  const diffTime = new Date().getTime() - new Date(dateString).getTime();
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  return `${diffDays} days ago`;
+};

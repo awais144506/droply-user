@@ -36,27 +36,33 @@ export default function MapComponent({
 
   return (
     <div className={`w-full rounded-xl overflow-hidden z-0 ${height}`}>
-      <MapContainer center={center} zoom={zoom} scrollWheelZoom={false} className="h-full w-full">
+      <MapContainer
+        center={center}
+        zoom={zoom}
+        scrollWheelZoom={false}
+        className="h-full w-full"
+        style={{ height: "100%", width: "100%", minHeight: "300px" }}
+      >
         {/* Using standard OpenStreetMap tiles */}
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
+
         <Marker position={center}>
           {popupText && <Popup className="font-bold text-slate-800">{popupText}</Popup>}
         </Marker>
 
         {showCircle && (
-          <Circle 
-            center={center} 
-            radius={circleRadius} 
-            pathOptions={{ 
+          <Circle
+            center={center}
+            radius={circleRadius}
+            pathOptions={{
               color: "#0ea5e9", // Sky 500
               fillColor: "#0ea5e9",
               fillOpacity: 0.1,
               weight: 2
-            }} 
+            }}
           />
         )}
       </MapContainer>

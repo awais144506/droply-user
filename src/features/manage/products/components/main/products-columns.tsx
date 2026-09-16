@@ -2,7 +2,7 @@ import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.share
 import { Package, Network, Pen, Trash2, TrendingUp, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
-import { ProductList } from "../types/product";
+import { ProductList } from "../../types/product";
 import { toast } from "sonner";
 import { formatCurrency } from "@/lib/utils/functions/setFormat";
 // Helper function just for this file

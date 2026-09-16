@@ -25,6 +25,18 @@ export function useProducts(branchId: string) {
                 lowStockThreshold: p.lowStockThreshold,
                 securityDeposit: p.securityDeposit
             })) || [];
+
+            const bomOptions = products?.map(p => ({
+                id: p.id,
+                name: p.name,
+                currentStock: p.currentStock,
+                lowStockThreshold: p.lowStockThreshold,
+                value: p.id,
+                label: p.name,
+                salePrice: p.salePrice,
+                unitCost: p.unitCost,
+            })) || [];
+
             return {
                 products,
                 stats: {
@@ -34,8 +46,10 @@ export function useProducts(branchId: string) {
                     recipeItemsCount
                 },
                 productOptions,
-                quickSaleOptions
+                quickSaleOptions,
+                bomOptions,
             }
+
         },
         staleTime: 5 * 60 * 1000,
         enabled: !!branchId,

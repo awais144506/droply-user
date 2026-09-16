@@ -10,14 +10,21 @@ import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
 import { formatStaffPayload, StaffRole } from "@/features/admin/staff/utils/formatStaffPayload";
 import { useVehicles } from "@/features/admin/fleet/api/use-fleet";
 import CreateStaffForm from "@/features/admin/staff/components/create/CreateStaffForm";
+import { useStaffList } from "@/features/admin/staff/api/use-staff";
 
 export default function CreateStaffPage() {
   const router = useRouter();
-  const { branchId } = useRole();
+  const { branchId, maxUsersLimit } = useRole();
 
   // Data Fetching
   const { data: zoneData, isLoading: isZoneLoading } = useZones(branchId);
   const { data: vehiclesData, isLoading: isVehiclesLoading } = useVehicles(branchId);
+  const { data: activeStaff } = useStaffList(branchId);
+
+  const stats = activeStaff?.stats || { totalStaff: 0, activeStaffCount: 0, activeManagers: 0, activeRiders: 0, disableStaff: 0 };
+
+  const isLimitReached = stats.activeStaffCount >= maxUsersLimit;
+
   const zoneOptions = zoneData?.zoneOptions;
   const vehicleOptions = vehiclesData?.vehicleOptions;
 
@@ -26,6 +33,7 @@ export default function CreateStaffPage() {
   // Wizard State
   const [step, setStep] = useState<"SELECT_ROLE" | "FORM">("SELECT_ROLE");
   const [selectedRole, setSelectedRole] = useState<"MANAGER" | "RIDER">("RIDER");
+
 
   const handleRoleSelect = (role: "MANAGER" | "RIDER") => {
     setSelectedRole(role);
@@ -55,6 +63,7 @@ export default function CreateStaffPage() {
           isVehiclesLoading={isVehiclesLoading}
           isPending={isPending}
           setStep={setStep}
+          isLimitReached={isLimitReached}
         />
       )}
     </div>

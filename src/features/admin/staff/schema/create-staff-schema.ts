@@ -19,20 +19,32 @@ export const createStaffSchema = yup.object().shape({
     .required("CNIC is required"),
 
   address: yup.string().optional().nullable(),
-  
+
   joiningDate: yup.string().optional().nullable(),
-  
+
   salary: yup
     .number()
     .transform((value, originalValue) => (originalValue === "" ? 0 : value))
     .min(0, "Salary cannot be negative")
     .optional(),
 
-  // Arrays for Rider assignments
-  zoneIds: yup.array().of(yup.string().required()).optional().default([]),
-  vehicleIds: yup.array().of(yup.string().required()).optional().default([]),
-  
-  licenseNumber: yup.string().optional().nullable(),
+  zoneIds: yup.array().of(yup.string().required()).when("$role", {
+    is: "RIDER",
+    then: (schema) => schema.min(1, "Please assign at least one zone").required(),
+    otherwise: (schema) => schema.optional().default([]),
+  }),
+
+  vehicleIds: yup.array().of(yup.string().required()).when("$role", {
+    is: "RIDER",
+    then: (schema) => schema.min(1, "Please assign at least one vehicle").required(),
+    otherwise: (schema) => schema.optional().default([]),
+  }),
+
+  // Optional: You can do the same for licenseNumber if it's mandatory for riders!
+  licenseNumber: yup.string().when("$role", {
+    is: "RIDER",
+    then: (schema) => schema.optional(),
+  }),
 
   // Extra Details
   fatherName: yup.string().optional().nullable(),
@@ -41,7 +53,7 @@ export const createStaffSchema = yup.object().shape({
     .transform(stripFormat)
     .matches(/^[0-9]{13}$/, { message: "Must be exactly 13 digits", excludeEmptyString: true })
     .optional().nullable(),
-    
+
   bloodGroup: yup.string().optional().nullable(),
   guarantorName: yup.string().optional().nullable(),
   guarantorCnic: yup

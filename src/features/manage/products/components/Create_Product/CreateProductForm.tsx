@@ -26,12 +26,9 @@ export function ProductForm({ initialValues, onSubmit, isPending = false, submit
     const { data, isLoading: isProductsLoading } = useProducts(branchId);
     const isEditMode = !!initialValues;
 
-    const products = data?.products;
+    const dynamicRawMaterialOptions = data?.bomOptions;
 
-    const dynamicRawMaterialOptions = products?.map((product) => ({
-        value: product.id,
-        label: `${product.name} (${product.sku})`
-    }));
+
 
     const form = useForm<CreateItemFormData>({
         resolver: yupResolver(createItemSchema),

@@ -9,3 +9,9 @@ export const categoryOptions = [
     { value: "COMMERCIAL", label: "Commercial (Shop)" },
     { value: "CORPORATE", label: "Corporate (Office)" },
 ]
+
+export const FilterTabs = [
+    { label: "All", value: "" },
+    { label: "Has Debt", value: "DEBT" },
+    { label: "Clear", value: "CLEAR" },
+]

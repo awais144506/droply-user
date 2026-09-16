@@ -5,16 +5,18 @@ import { useCustomers, useCustomerLogs } from "@/features/manage/customers/api/u
 import { useRole } from "@/lib/hooks/use-role";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
-import { CustomerStats } from "@/features/manage/customers/components/customer-stats";
-import { CustomersTable } from "@/features/manage/customers/components/customer-table";
+import { CustomerStats } from "@/features/manage/customers/components/main/customer-stats";
+import { CustomersTable } from "@/features/manage/customers/components/main/customer-table";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
+import { FilterTabs } from "@/features/manage/customers/components/data/dropdownOptions";
+
 
 export default function CustomersPage() {
   const { branchId } = useRole();
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || undefined;
-  const debt = searchParams.get("debt")  || undefined
+  const debt = searchParams.get("debt") || undefined
 
   const { data, isError, error, isLoading } = useCustomers(branchId, debt, search);
   const { data: logs = [] } = useCustomerLogs(branchId);
@@ -25,7 +27,7 @@ export default function CustomersPage() {
   if (isError) return <ErrorBoundary error={error.message} />;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       <PageHeader
         heading="Customer Management"
         description="Manage customer accounts, sector routes, outstanding balances, and returnable asset liabilities."
@@ -46,11 +48,7 @@ export default function CustomersPage() {
             searchPlaceholder="Search by customer name/code"
             searchParamName="search"
             tabParamName="debt"
-            tabs={[
-              { label: "All", value: "" },
-              { label: "Has Debt", value: "DEBT" },
-              { label: "Clear", value: "CLEAR" },
-            ]}
+            tabs={FilterTabs}
           />
           <CustomersTable
             customers={customers}

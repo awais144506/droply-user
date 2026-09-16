@@ -7,12 +7,11 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
   return useQuery({
     queryKey: staffKeys.branchList(branchId || ""),
     queryFn: () => staffApi.getAllStaff(branchId),
-    select: (staff) => {
-      const activeStaffCount = staff.filter((s) => s.status === 'ACTIVE').length;
-      const disableStaff = staff.filter((s) => s.status === 'DISABLE').length;
-      const activeManagers = staff.filter((s) => s.designation === 'MANAGER').length;
-      const activeRiders = staff.filter((s) => s.designation === 'RIDER').length;
-      const filterStaff = staff.filter((st) => {
+
+    select: (payload) => {
+
+      // 2. Access the array using 'payload.staff'
+      const filterStaff = payload.staff.filter((st) => {
         const matchesSearch = searchFilter
           ? (st.name.toLowerCase() || "").includes(searchFilter.toLowerCase())
           : true;
@@ -23,24 +22,19 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
         const matchesStatus = statusFilter
           ? st.status === statusFilter
           : true;
-        return matchesSearch && matchesRole && matchesStatus
-      })
-
-      const riderOptions = staff
+        return matchesSearch && matchesRole && matchesStatus;
+      });
+      const riderOptions = payload.staff
         .filter((member: { designation: string }) => member.designation === "RIDER")
         .map((rider: { name: string; phone: string; id: string }) => ({
           label: `${rider.name} (${rider.phone})`,
           value: rider.id,
         }));
 
+      // 4. Return everything cleanly
       return {
         staff: filterStaff,
-        stats: {
-          activeStaffCount,
-          disableStaff,
-          activeManagers,
-          activeRiders
-        },
+        stats: payload.stats,
         riderOptions,
       };
     },

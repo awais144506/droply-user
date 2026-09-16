@@ -54,6 +54,9 @@ export function useUpdateZone() {
             queryClient.invalidateQueries({ queryKey: zoneKeys.detail(variables.id) });
             queryClient.invalidateQueries({ queryKey: zoneKeys.logs() });
         },
+        onError: (err) => {
+            toast.error(err.message)
+        }
     });
 }
 
@@ -66,5 +69,8 @@ export function useDeleteZone() {
             toast.success("Zone deleted successfully");
             queryClient.invalidateQueries({ queryKey: zoneKeys.all });
         },
+        onError: (err) => {
+            toast.error(err.message)
+        }
     });
 }

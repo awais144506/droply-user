@@ -3,7 +3,7 @@
 import { useParams } from "next/navigation";
 import Loading from "@/app/loading";
 import { useStaffDetail } from "@/features/admin/staff/api/use-staff";
-import { StaffProfile } from "@/features/admin/staff/components/staff-profile";
+import { StaffProfile } from "@/features/admin/staff/components/staff_details/staff-profile";
 import NotFoundPage from "@/app/not-found";
 import { useRole } from "@/lib/hooks/use-role";
 

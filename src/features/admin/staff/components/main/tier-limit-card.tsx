@@ -3,15 +3,13 @@
 import { Users, Info, Shield, Zap } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
 import { Button } from "@/components/ui/button";
-
-// Move the configuration outside the component so it doesn't recreate on every render
-const getTierConfig = (tier: string) => {
+import { useRouter } from "next/navigation";
+export const getTierConfig = (tier: string) => {
     const normalizedTier = tier?.toUpperCase();
 
     switch (normalizedTier) {
         case "GOLD":
             return {
-                limit: 10,
                 badge: "Gold Plan",
                 colors: {
                     bg: "bg-amber-50",
@@ -24,7 +22,6 @@ const getTierConfig = (tier: string) => {
             };
         case "PLATINUM":
             return {
-                limit: 20,
                 badge: "Platinum Plan",
                 colors: {
                     bg: "bg-indigo-50",
@@ -38,7 +35,6 @@ const getTierConfig = (tier: string) => {
         case "SILVER":
         default:
             return {
-                limit: 5,
                 badge: "Silver Plan",
                 colors: {
                     bg: "bg-slate-50",
@@ -54,12 +50,14 @@ const getTierConfig = (tier: string) => {
 
 interface TierLimitCardProps {
     activeStaffCount: number;
+    maxUsersLimit: number;
+    isLimitReached: boolean;
 }
 
-export default function TierLimitCard({ activeStaffCount }: TierLimitCardProps) {
+export default function TierLimitCard({ activeStaffCount, maxUsersLimit, isLimitReached }: TierLimitCardProps) {
     const { userTier } = useRole();
+    const router = useRouter();
     const tierConfig = getTierConfig(userTier);
-    const isLimitReached = activeStaffCount >= (tierConfig.limit as number);
 
     return (
         <div className={`p-4 sm:p-5 rounded-2xl border ${tierConfig.colors.bg} ${tierConfig.colors.border} flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm`}>
@@ -75,7 +73,7 @@ export default function TierLimitCard({ activeStaffCount }: TierLimitCardProps) 
                         </h3>
                         <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-white border ${tierConfig.colors.border} ${tierConfig.colors.icon}`}>
                             {
-                                `${activeStaffCount} / ${tierConfig.limit} Slots Used`
+                                `${activeStaffCount} / ${maxUsersLimit} Slots Used`
                             }
                         </span>
                     </div>
@@ -88,7 +86,9 @@ export default function TierLimitCard({ activeStaffCount }: TierLimitCardProps) 
             </div>
 
             {isLimitReached && (
-                <Button variant="outline" className={`shrink-0 bg-white border-${tierConfig.colors.border} text-xs h-9`}>
+                <Button
+                    onClick={() => router.push(`/admin/subscription`)}
+                    variant="destructive">
                     Upgrade Plan
                 </Button>
             )}

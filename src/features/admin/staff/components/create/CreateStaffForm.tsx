@@ -4,13 +4,13 @@ import { FormProvider } from "react-hook-form";
 import Link from "next/link";
 import { Loader2, Plus } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
-import CreateStaffIdentityCard from "@/features/admin/staff/components/create/IdentityCard";
-import RiderZoneCard from "@/features/admin/staff/components/create/RiderZoneCard";
-import StaffExtraDetails from "@/features/admin/staff/components/create/StaffExtraDetails";
+import CreateStaffIdentityCard from "@/features/admin/staff/components/create/identity-card";
+import RiderZoneCard from "@/features/admin/staff/components/create/rider-zone";
+import StaffExtraDetails from "@/features/admin/staff/components/create/staff-extra-details";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { createStaffSchema, CreateStaffFormData } from "@/features/admin/staff/schema/create-staff-schema";
 import { useForm } from "react-hook-form";
-
+import { toast } from "sonner";
 
 const CreateStaffForm = ({ onSubmit,
     isPending,
@@ -19,9 +19,12 @@ const CreateStaffForm = ({ onSubmit,
     isZoneLoading,
     isVehiclesLoading,
     selectedRole,
-    setStep }: any) => {
+    setStep,
+    isLimitReached
+}: any) => {
     const form = useForm<CreateStaffFormData>({
         resolver: yupResolver(createStaffSchema),
+        context: { role: selectedRole },
         mode: "onChange",
         defaultValues: {
             name: "",
@@ -34,10 +37,21 @@ const CreateStaffForm = ({ onSubmit,
             vehicleIds: [],
         },
     });
+
+    const handleFormSubmit = (data: CreateStaffFormData) => {
+        if (isLimitReached) {
+            toast.error("Staff Limit Reached!", {
+                description: "You have used all available slots in your current plan. Please upgrade to add more staff."
+            });
+            return;
+        }
+        onSubmit(data);
+    };
+
     return (
         <FormProvider {...form}>
             <div>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
                     <div className="col-span-1 space-y-6">
                         <div className="grid grid-cols-3 gap-6">
                             <CreateStaffIdentityCard />

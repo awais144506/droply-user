@@ -1,15 +1,28 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Bike, MapPin, Truck } from "lucide-react";
+
+const getStatusStyles = (status: string) => {
+  switch (status?.toUpperCase()) {
+    case "ACTIVE":
+      return "bg-emerald-50 text-emerald-600";
+    case "MAINTENANCE":
+      return "bg-orange-50 text-orange-600";
+    case "RETIRED":
+      return "bg-rose-50 text-rose-600";
+    default:
+      return "bg-slate-50 text-slate-600";
+  }
+};
 export default function AssignmentCard({ user }: { user: any }) {
   return (
     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-5">
-      
+
       {/* 1. Vehicle Assignment */}
       <div>
         <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-3">
-          <Bike className="h-4 w-4 text-emerald-600" /> Fleet Assignment
+          <Bike className="h-4 w-4 text-emerald-600" /> Assigned Vehicle
         </h3>
-        
+
         {user.assignedVehicles && user.assignedVehicles.length > 0 ? (
           <div className="flex flex-col gap-2">
             {user.assignedVehicles.map((vehicle: any) => (
@@ -19,7 +32,12 @@ export default function AssignmentCard({ user }: { user: any }) {
                 </div>
                 <div>
                   <p className="text-xs font-bold text-slate-900">{vehicle.modelInfo}</p>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{vehicle.registration}</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+                    {vehicle.registration}
+                  </p>
+                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${getStatusStyles(vehicle.status)}`}>
+                    {vehicle.status}
+                  </span>
                 </div>
               </div>
             ))}
@@ -31,8 +49,8 @@ export default function AssignmentCard({ user }: { user: any }) {
         )}
 
         <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
-            <span className="text-xs font-bold text-slate-500">License Number:</span>
-            <span className="text-xs font-bold text-slate-900">{user.licenseNumber || "—"}</span>
+          <span className="text-xs font-bold text-slate-500">License Number:</span>
+          <span className="text-xs font-bold text-slate-900">{user.licenseNumber || "—"}</span>
         </div>
       </div>
 
@@ -43,11 +61,11 @@ export default function AssignmentCard({ user }: { user: any }) {
         </h3>
         {user.zones && user.zones.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-             {user.zones.map((z: any) => (
-               <span key={z.id} className="px-2.5 py-1 bg-indigo-50 border border-indigo-100 rounded-lg text-xs font-bold text-indigo-700">
-                 {z.name}
-               </span>
-             ))}
+            {user.zones.map((z: any) => (
+              <span key={z.id} className="px-2.5 py-1 bg-indigo-50 border border-indigo-100 rounded-lg text-xs font-bold text-indigo-700">
+                {z.name}
+              </span>
+            ))}
           </div>
         ) : (
           <p className="text-xs font-medium text-slate-500 italic bg-slate-50 p-3 rounded-xl border border-slate-100">

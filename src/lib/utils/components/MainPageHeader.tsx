@@ -7,9 +7,10 @@ type Props = {
     description: string;
     href?: string;
     btnText?: string;
+    isDisabled?: boolean;
 }
 
-export default function PageHeader({ heading, description, href, btnText }: Props) {
+export default function PageHeader({ heading, description, href, btnText, isDisabled = false }: Props) {
     return (
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -21,11 +22,13 @@ export default function PageHeader({ heading, description, href, btnText }: Prop
                 </p>
             </div>
 
-            {/* Only render the button if BOTH href and btnText are provided */}
             {href && btnText && (
                 <Link
-                    href={href}
-                    className={buttonVariants({ variant: "create" })}
+                    href={isDisabled ? "#" : href} // Prevent routing if disabled
+                    className={`${buttonVariants({ variant: "create" })} ${isDisabled ? "opacity-50 pointer-events-none cursor-not-allowed" : ""
+                        }`}
+                    aria-disabled={isDisabled}
+                    tabIndex={isDisabled ? -1 : undefined} // Removes it from keyboard navigation
                 >
                     <Plus className="h-4 w-4 mr-2" />
                     {btnText}

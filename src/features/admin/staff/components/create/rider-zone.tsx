@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormInput } from "@/components/ui/form-input";
 import { FormSelect } from "@/components/ui/form-select";
 
+
 const RiderZoneCard = ({
     selectedRole,
     zoneOptions,
@@ -43,6 +44,19 @@ const RiderZoneCard = ({
                             isSearchable={true}
                             isLoading={isVehiclesLoading}
                             required
+                            formatOptionLabel={(opt) => (
+                                <div className="flex items-center justify-between w-full pr-1">
+                                    <span className="font-medium truncate mr-2">
+                                        {opt.label}
+                                    </span>
+                                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm ${opt.status === "ACTIVE"
+                                        ? "bg-emerald-500"
+                                        : "bg-amber-500"
+                                        }`}>
+                                        {opt.status}
+                                    </span>
+                                </div>
+                            )}
                         />
                     </div>
 

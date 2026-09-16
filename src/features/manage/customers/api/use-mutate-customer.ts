@@ -1,13 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // 4. Create Customer
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
 import { CreateCustomerFormData } from "../schema/create-customer.schema";
 import { customerKeys } from "./customer-keys";
 import { customerApi } from "./customer.service";
 import { toast } from "sonner";
 import { formatCustomerPayload } from "../utils/formatCustomerPayload";
-import { formatPakistaniPhone } from "@/lib/utils/functions/setFormat";
 
 type CreateCustomerPayload = ReturnType<typeof formatCustomerPayload>;
 
@@ -17,7 +15,6 @@ export function useCreateCustomer() {
   return useMutation({
     mutationFn: (newCustomer: CreateCustomerPayload) =>
       customerApi.createNewCustomer(newCustomer),
-
     onMutate: async (newCustomer) => {
       const queryKey = customerKeys.branchList(newCustomer.branchId);
       await queryClient.cancelQueries({ queryKey });
@@ -59,19 +56,14 @@ export function useUpdateCustomer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<CreateCustomerFormData> }) => {
-      const formattedData = { ...data };
-
-      // Format phone if it's being updated
-      if (formattedData.phone) {
-        formattedData.phone = formatPakistaniPhone(formattedData.phone);
-      }
-
-      return apiClient.patch(`/customer/${id}`, formattedData);
-    },
+    mutationFn: async ({ id, data }: { id: string; data: Partial<CreateCustomerFormData> }) => customerApi.updateCustomer(id, data),
     onSuccess: (_, variables) => {
+      toast.success("Customer updated successfully");
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: customerKeys.detail(variables.id) });
+    },
+    onError: (err) => {
+      toast(err.message)
     },
   });
 }
@@ -81,12 +73,13 @@ export function useDeleteCustomer() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      return apiClient.delete(`/customer/${id}`);
-    },
+    mutationFn: async (id: string) => customerApi.deleteCustomer(id),
     onSuccess: () => {
-      // Wipes the cache so UI refreshes automatically
+      toast.success("Customer deleted successfully");
       queryClient.invalidateQueries({ queryKey: customerKeys.all });
     },
+    onError: (err) => {
+      toast.success(err.message);
+    }
   });
 }

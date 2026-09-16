@@ -4,9 +4,9 @@ type Props = {
     title: string;
     value: string | number | undefined;
     icon: ElementType;
-    prefix?: string;       // e.g., "Rs." or "$"
-    postfix?: string;      // e.g., "kg" or "%"
-    description?: string;  // e.g., "Compared to last month"
+    prefix?: string;
+    postfix?: string;
+    description?: string;
     iconContainerClass?: string;
     valueColorClass?: string;
     postfixTextColor?: string

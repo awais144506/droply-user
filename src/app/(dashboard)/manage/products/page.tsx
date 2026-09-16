@@ -2,8 +2,8 @@
 
 import { useRole } from "@/lib/hooks/use-role";
 import { useProducts, useProductLogs } from "@/features/manage/products/api/use-products";
-import { ProductStats } from "@/features/manage/products/components/product-stats";
-import { ProductsTable } from "@/features/manage/products/components/products-table";
+import { ProductStats } from "@/features/manage/products/components/main/product-stats";
+import { ProductsTable } from "@/features/manage/products/components/main/products-table";
 import PageHeader from "@/lib/utils/components/MainPageHeader";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
@@ -23,7 +23,7 @@ export default function ProductsPage() {
 
   //JSX COMPONENT
   return (
-    <div className="space-y-6 max-w-350 mx-auto p-6">
+    <div className="space-y-6 p-6">
       <PageHeader
         heading="Products Inventory"
         description="Manage your finished goods, raw materials, returnables, and pricing."

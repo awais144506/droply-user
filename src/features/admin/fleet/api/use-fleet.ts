@@ -28,7 +28,7 @@ export function useVehicles(branchId: string, statusFilter?: string, searchFilte
         displayName: `${vehicle.modelInfo} (${vehicle.registration})`,
       }));
 
-      const vehicleOptions = vehicles.map(z => ({ value: z.id, label: z.registration }));
+      const vehicleOptions = vehicles.map(z => ({ value: z.id, label: z.registration, status: z.status }));
 
       return {
         list: formattedList,

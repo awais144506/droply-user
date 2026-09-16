@@ -40,8 +40,8 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     headerColor: { text: "text-sky-600 dark:text-sky-400", dot: "bg-sky-500", border: "border-sky-500/20", bgHover: "hover:bg-sky-500/5" },
     items: [
       { title: "Zones & Routes", url: "/manage/zones", icon: MapPin, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
-      { title: "Customers", url: "/manage/customers", icon: UserPlus, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "PARTIAL" },
-      { title: "Products & Pricing", url: "/manage/products", icon: Package, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "PARTIAL" },
+      { title: "Customers", url: "/manage/customers", icon: UserPlus, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
+      { title: "Products & Pricing", url: "/manage/products", icon: Package, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
     ],
   },
   {

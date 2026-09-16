@@ -93,8 +93,8 @@ export default function ZoneDetailsPage() {
         {/* Top Metric Cards */}
         <ZoneDetailStats
           totalCustomers={zone.customers?.length}
-          totalLedger={stats.calculatedLedger}
-          totalReturnables={stats.calculatedReturnables}
+          totalLedger={stats?.calculatedLedger}
+          totalReturnables={stats?.calculatedReturnables}
         />
 
         {/* Map and Riders Grid */}

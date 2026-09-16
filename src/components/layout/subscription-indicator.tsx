@@ -17,16 +17,22 @@ export function SubscriptionIndicator({ roleData }: { roleData: any }) {
     );
   }
   const gracePeriod = parseInt(process.env.NEXT_PUBLIC_GRACE_PERIOD || "3", 10);
-  const endDate = renewDate ? new Date(renewDate as string) : new Date();
   const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const endDate = renewDate ? new Date(renewDate as string) : new Date();
+  endDate.setHours(0, 0, 0, 0);
+
   const diffTime = endDate.getTime() - today.getTime();
-  const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  const isHardSuspended = daysLeft < -gracePeriod;
+  const daysLeft = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+  const isHardSuspended = daysLeft <= -gracePeriod;
   const isTrial = tierCycle === "TRIAL";
-  const isExpired = daysLeft < 0;
+  const isExpired = daysLeft <= 0;
+
   const isSuspended = userStatus === "SUSPENDED" || (isHardSuspended && !isTrial);
   const isPastDue = userStatus === "PAST_DUE" || (isExpired && !isTrial && !isSuspended);
-  const isEndingSoon = daysLeft <= gracePeriod && daysLeft >= 0;
+  const isEndingSoon = daysLeft <= gracePeriod && daysLeft > 0
   const isCritical = isSuspended || (isTrial && isExpired);
   const isWarning = (!isSuspended && isPastDue) || (isTrial && isEndingSoon);
 

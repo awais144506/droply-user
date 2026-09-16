@@ -5,7 +5,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { vehicleSchema, VehicleFormValues } from "../../schema/fleet.schema";
 import { useCreateVehicle } from "../../api/use-create-fleet";
-import { useStaffList } from "@/features/admin/staff/api/use-staff";
 import { FormInput } from "@/components/ui/form-input";
 import { FormSelect } from "@/components/ui/form-select";
 import { Button } from "@/components/ui/button";
@@ -17,8 +16,6 @@ export default function CreateVehicleForm({ branchId }: { branchId: string }) {
 
     const router = useRouter();
     const { mutate: createVehicle, isPending: isSaving } = useCreateVehicle(branchId);
-    const { data, isLoading: isLoadingStaff } = useStaffList(branchId);
-    const riderOptions = data?.riderOptions ?? [];
 
     const form = useForm<VehicleFormValues>({
         resolver: yupResolver(vehicleSchema),
@@ -84,13 +81,6 @@ export default function CreateVehicleForm({ branchId }: { branchId: string }) {
                                 type="number"
                                 suffix="KM"
                                 required
-                            />
-                            <FormSelect
-                                name="assignedStaffId"
-                                label="Assign to Rider"
-                                options={riderOptions}
-                                isSearchable={true}
-                                isLoading={isLoadingStaff}
                             />
                         </div>
                     </CardContent>

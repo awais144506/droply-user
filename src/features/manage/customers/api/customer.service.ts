@@ -19,4 +19,12 @@ export const customerApi = {
     createNewCustomer: async (newCustomer: CreateCustomerPayload): Promise<CustomerDetails> => {
         return await apiClient.post('/customer', newCustomer);
     },
+
+    updateCustomer: async (id: string, updateCustomer: Partial<CreateCustomerFormData>): Promise<CustomerDetails> => {
+        return await apiClient.patch(`/customer/${id}`, updateCustomer);
+    },
+
+    deleteCustomer: async (id: string) => {
+        return await apiClient.delete(`/customer/${id}`);
+    }
 }

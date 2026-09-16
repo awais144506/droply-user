@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Phone, Mail, Calendar } from "lucide-react";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
 

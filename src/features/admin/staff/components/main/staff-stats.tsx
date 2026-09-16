@@ -6,17 +6,19 @@ interface StaffStatsProps {
   activeStaffCount: number;
   activeManagers: number;
   activeRiders: number;
-  disableStaff: number
+  disableStaff: number;
+  totalStaff?: number;
 }
 
-export function StaffStats({ activeStaffCount, activeManagers, activeRiders, disableStaff }: StaffStatsProps) {
+export function StaffStats({ activeStaffCount, activeManagers, activeRiders, disableStaff ,totalStaff}: StaffStatsProps) {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <PageStatsCard
-        title="Total Staff"
+        title="Active Staff"
         value={activeStaffCount}
         icon={Users}
+        postfix={`/ ${String(totalStaff)}`}
         iconContainerClass="bg-blue-50 text-blue-600"
       />
       <PageStatsCard

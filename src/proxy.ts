@@ -68,16 +68,18 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   const gracePeriod = parseInt(process.env.NEXT_PUBLIC_GRACE_PERIOD || "3", 10);
   let isDateSuspended = false;
   if (renewDate) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     const expiration = new Date(renewDate);
-    const diffTime = new Date().getTime() - expiration.getTime();
-    const daysPastDue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (daysPastDue > gracePeriod) isDateSuspended = true;
+    expiration.setHours(0, 0, 0, 0);
+    const diffTime = today.getTime() - expiration.getTime();
+    const daysPastDue = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    if (daysPastDue >= gracePeriod) isDateSuspended = true;
   }
 
   const isStrictlySuspended = status === "SUSPENDED" || isDateSuspended;
 
   if (isStrictlySuspended && !isBillingRoute(req)) {
-    // 🔥 FAIL-SAFE 2: Return JSON for API routes so the layout doesn't crash
     if (req.nextUrl.pathname.startsWith("/api")) {
       return NextResponse.json({ error: "Account Suspended" }, { status: 403 });
     }

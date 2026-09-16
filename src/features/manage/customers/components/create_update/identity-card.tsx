@@ -2,7 +2,7 @@
 import { User } from "lucide-react";
 import { FormInput } from "@/components/ui/form-input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { partyOptions, categoryOptions } from "@/features/manage/customers/data/dropdownOptions";
+import { partyOptions, categoryOptions } from "@/features/manage/customers/components/data/dropdownOptions";
 import { FormSelect } from "@/components/ui/form-select";
 
 export default function IdentityCard({ zoneOptions, isLoading }: any) {

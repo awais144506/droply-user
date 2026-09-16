@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useRole } from "@/lib/hooks/use-role";
-import { useDeleteProduct } from "../api/use-mutate-product";
+import { useDeleteProduct } from "../../api/use-mutate-product";
 import { usePagination } from "@/lib/utils/functions/pagination-calculation";
-import { ProductList } from "../types/product";
+import { ProductList } from "../../types/product";
 import DataTable from "@/lib/utils/components/TableCreateMachine";
 import TablePagination from "@/lib/utils/components/TablePagination";
 import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";

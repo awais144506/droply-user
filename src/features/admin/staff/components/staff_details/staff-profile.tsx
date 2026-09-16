@@ -14,7 +14,7 @@ import AttendanceManager from "./attendance-manager";
 import AttendanceLedger from "./attendance-ledger";
 import PageDetailHeader from "@/lib/utils/components/PageDetailHeader";
 import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
-import { useStaffDisable } from "../api/use-mutate-staff";
+import { useStaffDisable } from "../../api/use-mutate-staff";
 
 export function StaffProfile({ user, userId, branchId }: { user: any, userId: string, branchId: string }) {
   const router = useRouter();

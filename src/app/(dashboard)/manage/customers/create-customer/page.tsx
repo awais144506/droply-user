@@ -2,7 +2,7 @@
 import { useRole } from "@/lib/hooks/use-role";
 import { useZones } from "@/features/manage/zones/api/use-zones";
 import { useProducts } from "@/features/manage/products/api/use-products";
-import CreateCustomerForm from "@/features/manage/customers/components/create/CreateCustomerForm";
+import CreateCustomerForm from "@/features/manage/customers/components/create_update/CreateCustomerForm";
 import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
 
 
