@@ -33,7 +33,7 @@ export function RiderSidebar({ branchId, riders, selectedRider, onSelect }: Side
   // Merge Base Staff Data with Live Tracking & Presence Data
   const mergedRiders = allStaffRiders.map((staffRider) => {
     const activeTrackingData = riders.find((tr) => tr.id === staffRider.id);
-    const livePresence = presenceData?.find((p) => p.riderId === staffRider.id);
+    const livePresence = presenceData?.find((p: { riderId: string; }) => p.riderId === staffRider.id);
 
     // 1. Calculate how long it has been since they were last active
     const lastActiveDate = livePresence ? new Date(livePresence.lastActive) : null;

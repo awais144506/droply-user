@@ -2,7 +2,7 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { CustomerList } from "../types/customer";
+import { CustomerList } from "../../types/customer";
 import { usePagination } from "@/lib/utils/functions/pagination-calculation";
 import DataTable from "@/lib/utils/components/TableCreateMachine";
 import TablePagination from "@/lib/utils/components/TablePagination";

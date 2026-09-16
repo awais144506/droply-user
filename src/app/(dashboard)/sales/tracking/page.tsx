@@ -41,7 +41,7 @@ export default function TrackingPage() {
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
         setSelectedRider={setSelectedRider}
-
+        isFetching={isLoading}
       />
 
       <TrackingStats

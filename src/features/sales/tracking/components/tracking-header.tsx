@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Calendar, Radio, History, Info, RefreshCw } from "lucide-react";
 
 interface TrackingHeaderProps {
@@ -6,7 +7,7 @@ interface TrackingHeaderProps {
     selectedDate: string;
     setSelectedDate: (date: string) => void;
     setSelectedRider: (rider: any) => void;
-    onRefresh: () => void;
+  
     isFetching: boolean;
 }
 
@@ -16,7 +17,7 @@ const TrackingHeader = ({
     selectedDate,
     setSelectedDate,
     setSelectedRider,
-    onRefresh,
+
     isFetching
 }: TrackingHeaderProps) => {
     return (
@@ -47,7 +48,7 @@ const TrackingHeader = ({
             <div className="flex items-center gap-3 shrink-0">
                 {/* Manual Refresh Button */}
                 <button
-                    onClick={onRefresh}
+                   
                     disabled={isFetching}
                     title="Refresh Data"
                     className={`flex items-center justify-center h-11 w-11 rounded-xl border bg-white shadow-sm transition-all focus:outline-none focus:ring-2 ${isHistoryMode

@@ -1,5 +1,14 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
+import withSerwistInit from "@serwist/next";
+import type { NextConfig } from "next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "src/app/sw.ts",
+  swDest: "public/sw.js",
+  disable: false,
+});
+
+
+const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       {
@@ -10,13 +19,13 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'utfs.io', // (Keep for backwards compatibility with your old test images)
+        hostname: 'utfs.io',
         port: '',
         pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: '*.ufs.sh', // 🔥 Trust all UploadThing App ID domains
+        hostname: '*.ufs.sh',
         port: '',
         pathname: '/**',
       },
@@ -24,4 +33,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

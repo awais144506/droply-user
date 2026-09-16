@@ -1,5 +1,5 @@
 import { MapPin, Phone, CalendarX2 } from "lucide-react";
-import { CustomerList } from "../types/customer";
+import { CustomerList } from "../../types/customer";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
 import { formatLastVisit, formatCurrency, displayPakistaniPhone } from "@/lib/utils/functions/setFormat";
 

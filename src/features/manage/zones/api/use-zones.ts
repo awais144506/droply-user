@@ -48,7 +48,6 @@ export function useZones(branchId: string, searchFilter?: string) {
                 },
             };
         },
-        staleTime: 5 * 60 * 1000,
         enabled: !!branchId,
     });
 }
@@ -77,7 +76,6 @@ export function useZone(id: string, searchFilter?: string) {
                 hasRiders: (zone.riders?.length || 0) > 0,
             }
         },
-        staleTime: 5 * 60 * 1000,
         enabled: !!id,
     });
 }

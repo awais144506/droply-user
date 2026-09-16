@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { NavUser } from "./nav-user";
 import { SubscriptionIndicator } from "./subscription-indicator";
 import { useRole } from "@/lib/hooks/use-role";
-
+import { NetworkIndicator } from "./offline-indicator";
 
 function LiveClock({ tier }: { tier: string }) {
   const [mounted, setMounted] = useState(false);
@@ -74,6 +74,7 @@ export function SiteHeader() {
       </div>
 
       <div className="flex items-center">
+        <NetworkIndicator />
         <LiveClock tier={roleData.userTier} />
         <NavUser roleData={roleData} />
       </div>

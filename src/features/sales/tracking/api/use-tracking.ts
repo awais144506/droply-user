@@ -87,7 +87,7 @@ export const useRiderPresence = (branchId: string) => {
   return useQuery({
     queryKey: ["rider-presence", branchId],
     queryFn: async () => {
-      const data = await apiClient.get<RiderPresence[]>(`/tracking/presence`, {
+      const {data} = await apiClient.get<RiderPresence[]>(`/tracking/presence`, {
         params: { branchId },
       });
       return data;
