@@ -74,8 +74,9 @@ export function ProductsFilterBar(props: FilterBarProps) {
                                 <option value="ALL">All Categories</option>
                                 <option value="FINISHED_GOOD">Finished Goods</option>
                                 <option value="RAW_MATERIAL">Raw Materials</option>
-                                <option value="RETURNABLE_CONTAINER">Returnable Containers</option>
+                                <option value="TRADE">Trade</option>
                                 <option value="EQUIPMENT">Equipment</option>
+                                <option value="PACKAGING">Packaging</option>
                             </select>
                         </div>
 

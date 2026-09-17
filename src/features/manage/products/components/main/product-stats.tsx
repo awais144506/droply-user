@@ -33,7 +33,7 @@ export function ProductStats({
             />
 
             <PageStatsCard
-                title="Returnable Assets"
+                title="Returnable Items"
                 value={returnablesCount}
                 icon={RotateCcw}
                 iconContainerClass="bg-indigo-50 text-indigo-600"

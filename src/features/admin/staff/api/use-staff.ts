@@ -1,16 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { staffKeys } from "./staff-keys";
 import { staffApi } from "./staff.service";
+import { useRole } from "@/lib/hooks/use-role";
 
 // 2. Fetch All Staff for a Branch
 export function useStaffList(branchId: string, searchFilter?: string, roleFilter?: string, statusFilter?: string) {
+  const { maxUsersLimit } = useRole();
   return useQuery({
     queryKey: staffKeys.branchList(branchId || ""),
     queryFn: () => staffApi.getAllStaff(branchId),
 
     select: (payload) => {
 
-      // 2. Access the array using 'payload.staff'
+      const isLimitReached = payload.stats.activeStaffCount >= maxUsersLimit;
+
       const filterStaff = payload.staff.filter((st) => {
         const matchesSearch = searchFilter
           ? (st.name.toLowerCase() || "").includes(searchFilter.toLowerCase())
@@ -36,6 +39,7 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
         staff: filterStaff,
         stats: payload.stats,
         riderOptions,
+        isLimitReached
       };
     },
     enabled: !!branchId,

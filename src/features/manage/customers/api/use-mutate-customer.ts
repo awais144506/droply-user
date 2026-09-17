@@ -6,6 +6,7 @@ import { customerKeys } from "./customer-keys";
 import { customerApi } from "./customer.service";
 import { toast } from "sonner";
 import { formatCustomerPayload } from "../utils/formatCustomerPayload";
+import { zoneKeys } from "../../zones/api/zone-keys";
 
 type CreateCustomerPayload = ReturnType<typeof formatCustomerPayload>;
 
@@ -43,6 +44,7 @@ export function useCreateCustomer() {
       if (context?.queryKey) {
         queryClient.invalidateQueries({ queryKey: context.queryKey });
         queryClient.invalidateQueries({ queryKey: customerKeys.logs() });
+        queryClient.invalidateQueries({ queryKey: zoneKeys.lists() });
       }
     },
     onSuccess: () => {
@@ -61,9 +63,10 @@ export function useUpdateCustomer() {
       toast.success("Customer updated successfully");
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: customerKeys.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: zoneKeys.lists() });
     },
     onError: (err) => {
-      toast(err.message)
+      toast.error(err.message)
     },
   });
 }

@@ -14,16 +14,13 @@ import { useStaffList } from "@/features/admin/staff/api/use-staff";
 
 export default function CreateStaffPage() {
   const router = useRouter();
-  const { branchId, maxUsersLimit } = useRole();
+  const { branchId } = useRole();
 
   // Data Fetching
   const { data: zoneData, isLoading: isZoneLoading } = useZones(branchId);
   const { data: vehiclesData, isLoading: isVehiclesLoading } = useVehicles(branchId);
   const { data: activeStaff } = useStaffList(branchId);
-
-  const stats = activeStaff?.stats || { totalStaff: 0, activeStaffCount: 0, activeManagers: 0, activeRiders: 0, disableStaff: 0 };
-
-  const isLimitReached = stats.activeStaffCount >= maxUsersLimit;
+  const isLimitReached = activeStaff?.isLimitReached
 
   const zoneOptions = zoneData?.zoneOptions;
   const vehicleOptions = vehiclesData?.vehicleOptions;

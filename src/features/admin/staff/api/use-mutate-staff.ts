@@ -49,3 +49,28 @@ export function useStaffDisable(id: string, branchId: string, onCloseModal: () =
         },
     });
 }
+
+export function useStaffEnable(id: string, branchId: string, onCloseModal: () => void) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: string) => staffApi.enableStaff(id),
+        onSuccess: () => {
+            toast.success("Staff member enabled successfully");
+            queryClient.invalidateQueries({
+                queryKey: staffKeys.branchList(branchId),
+            });
+            queryClient.invalidateQueries({
+                queryKey: staffKeys.logs(branchId),
+            });
+            queryClient.invalidateQueries({
+                queryKey: staffKeys.detail(id),
+            });
+            onCloseModal();
+        },
+        onError: (err) => {
+            toast.error(err.message || "Failed to enable staff member");
+            onCloseModal();
+        },
+    });
+}

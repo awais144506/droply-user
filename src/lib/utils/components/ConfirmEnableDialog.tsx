@@ -10,17 +10,17 @@ interface ConfirmDeleteDialogProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
-    isDeleting: boolean;
+    isEnabling: boolean;
     btnText?: string;
 }
 
-export default function ConfirmDeleteDialog({
+export default function ConfirmEnableDialog({
     itemName = "this item",
     isOpen,
     onClose,
     onConfirm,
-    isDeleting,
-    btnText = "Delete"
+    isEnabling,
+    btnText = "Enable"
 }: ConfirmDeleteDialogProps) {
     return (
         <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -28,13 +28,13 @@ export default function ConfirmDeleteDialog({
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This will may permanently delete/disable <span className="font-bold text-slate-900">{itemName}</span> from your database.
+                        This will enable <span className="font-bold text-slate-900">{itemName}</span>.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-                    <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
-                        {isDeleting ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Deleting...</> : btnText}
+                    <AlertDialogCancel disabled={isEnabling}>Cancel</AlertDialogCancel>
+                    <Button variant="create" onClick={onConfirm} disabled={isEnabling}>
+                        {isEnabling ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Enabling...</> : btnText}
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>

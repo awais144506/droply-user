@@ -101,7 +101,7 @@ export const CustomerForm = ({
                     <Link href="/manage/customers" className={buttonVariants({ variant: "outline", size: "sm" })}>
                         Cancel
                     </Link>
-                    <Button type="submit" disabled={isPending || !form.formState.isValid} className="min-w-36 bg-emerald-600 hover:bg-emerald-700 rounded-xl h-10 text-white shadow-sm">
+                    <Button type="submit" disabled={isPending || !form.formState.isValid || !form.formState.isDirty} className="min-w-36 bg-emerald-600 hover:bg-emerald-700 rounded-xl h-10 text-white shadow-sm">
                         {isPending ? (
                             <><Loader2 className="h-4 w-4 animate-spin mr-1.5" /> {isEditMode ? 'Saving...' : 'Creating...'}</>
                         ) : (

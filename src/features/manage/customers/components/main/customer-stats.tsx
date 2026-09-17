@@ -28,7 +28,7 @@ export function CustomerStats({
       />
 
       <PageStatsCard
-        title="Total Outstanding Khata"
+        title="Total Outstanding"
         prefix="Rs."
         value={totalDebt}
         icon={Wallet}
@@ -36,7 +36,7 @@ export function CustomerStats({
       />
 
       <PageStatsCard
-        title="Assets In Market"
+        title="Returnable Items"
         postfix="items"
         value={totalAssets}
         icon={Package}

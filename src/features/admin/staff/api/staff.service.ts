@@ -20,6 +20,9 @@ export const staffApi = {
     createNewStaff: async (newStaff: CreateStaffPayload): Promise<Staff> => {
         return await apiClient.post(`/staff`, newStaff);
     },
+    updateStaff: async (updateStaff: Partial<CreateStaffPayload>): Promise<Staff> => {
+        return await apiClient.patch(`/staff`, updateStaff);
+    },
     disableStaff: async (id: string): Promise<Staff> => {
         return await apiClient.delete(`/staff/${id}`)
     },

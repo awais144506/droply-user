@@ -2,7 +2,6 @@
 import { Phone, Mail, Calendar } from "lucide-react";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getStaffColumns = (): ColumnDef<any>[] => [
     {
         header: "Staff Code",

@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, Info, Shield, Zap } from "lucide-react";
+import { Users, Info, Shield, Zap, Phone } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -51,7 +51,7 @@ export const getTierConfig = (tier: string) => {
 interface TierLimitCardProps {
     activeStaffCount: number;
     maxUsersLimit: number;
-    isLimitReached: boolean;
+    isLimitReached?: boolean;
 }
 
 export default function TierLimitCard({ activeStaffCount, maxUsersLimit, isLimitReached }: TierLimitCardProps) {
@@ -88,8 +88,8 @@ export default function TierLimitCard({ activeStaffCount, maxUsersLimit, isLimit
             {isLimitReached && (
                 <Button
                     onClick={() => router.push(`/admin/subscription`)}
-                    variant="destructive">
-                    Upgrade Plan
+                    variant="outline">
+                    <Phone className="h-3.5 w-3.5"/>Contact Us
                 </Button>
             )}
         </div>

@@ -24,9 +24,8 @@ export default function StaffPage() {
 
   const staffData = data?.staff || [];
   const stats = data?.stats || { totalStaff: 0, activeStaffCount: 0, activeManagers: 0, activeRiders: 0, disableStaff: 0 };
-
-  const isLimitReached = stats.activeStaffCount >= maxUsersLimit;
-
+  const isLimitReached = data?.isLimitReached
+  
   if (isLoading) return <Loading />;
   if (isError) return <ErrorBoundary error={error.message} />;
 

@@ -52,7 +52,12 @@ export function ProductsTable({ products }: { products: ProductList[] | undefine
 
     const confirmDelete = () => {
         if (!productToDelete) return;
-        deleteProduct(productToDelete.id)
+        deleteProduct(productToDelete.id, {
+            onSuccess: () => {
+                setProductToDelete(null);
+            },
+        });
+
     };
 
     return (
