@@ -110,7 +110,7 @@ export const getProductColumns = (
                     <div className="flex items-center justify-end gap-1">
                         <Button
                             variant="ghost"
-                            size="icon-sm"
+                            size="sm"
                             onClick={() => router.push(`/manage/products/edit-item/${product.id}`)}
                             className="text-slate-400 hover:text-sky-600"
                         >
@@ -120,7 +120,7 @@ export const getProductColumns = (
                         {isOwner && (
                             <Button
                                 variant="ghost"
-                                size="icon-sm"
+                                size="sm"
                                 onClick={() => {
                                     if (isUsed) {
                                         toast.error(`Cannot delete "${product.name}" because it is used in active recipes.`);

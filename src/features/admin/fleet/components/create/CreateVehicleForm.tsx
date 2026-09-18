@@ -68,7 +68,7 @@ export default function CreateVehicleForm({ branchId }: { branchId: string }) {
                     <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSaving}>
                         Cancel
                     </Button>
-                    <Button type="submit" variant="create" disabled={isSaving || !form.formState.isValid}>
+                    <Button type="submit" variant="default" disabled={isSaving || !form.formState.isValid}>
                         {isSaving ? "Creating..." : "Create Vehicle"}
                     </Button>
                 </div>

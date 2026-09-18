@@ -9,7 +9,7 @@ const CreateVehicle = () => {
     return (
         <div className="max-w-7xl mx-auto space-y-6 p-6">
             <CreateFormHeader
-                text="Create New Vehicle"
+                title="Create New Vehicle"
                 href="/admin/fleet"
             />
             <CreateVehicleForm

@@ -179,7 +179,7 @@ export function POTable({ orders, onEdit }: { orders: PurchaseOrder[], onEdit: (
                                             )}
                                             <Button
                                                 variant="ghost"
-                                                size="icon-sm"
+                                                size="sm"
                                                 onClick={() => onEdit(po)}
                                                 className="text-slate-400 hover:text-sky-600 h-8 w-8 rounded-lg cursor-pointer"
                                             >
@@ -187,7 +187,7 @@ export function POTable({ orders, onEdit }: { orders: PurchaseOrder[], onEdit: (
                                             </Button>
                                             <Button
                                                 variant="ghost"
-                                                size="icon-sm"
+                                                size="sm"
                                                 onClick={() => handlePrint(po)}
                                                 className="text-slate-400 hover:text-slate-700 h-8 w-8 rounded-lg cursor-pointer ml-2"
                                             >

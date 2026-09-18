@@ -79,7 +79,7 @@ const UpdateStaffEmailDialog = ({
                             </Button>
                             <Button
                                 type="submit"
-                                variant="create"
+                                variant="default"
                                 disabled={isSubmitting || !methods.formState.isValid || !methods.formState.isDirty}
                             >
                                 {isSubmitting ? "Saving..." : "Save Changes"}

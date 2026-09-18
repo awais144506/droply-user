@@ -110,7 +110,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
               <Button
                 type="submit"
                 disabled={!isFormDirty || !isValid || isPending || isUploading}
-                variant="create"
+                variant="default"
               >
                 {isPending || isUploading ? (
                   <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {isUploading ? "Uploading Logo..." : "Saving..."}</>

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -132,7 +133,7 @@ export function RecoveryTable({ records, onEdit }: { records: RecoveryRecord[], 
                           Mark Recovered
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon-sm" onClick={() => onEdit(r)} className="text-slate-400 hover:text-sky-600 h-8 w-8 rounded-lg cursor-pointer">
+                      <Button variant="ghost" size="sm" onClick={() => onEdit(r)} className="text-slate-400 hover:text-sky-600 h-8 w-8 rounded-lg cursor-pointer">
                         <Pencil className="h-4 w-4" />
                       </Button>
                     </div>
