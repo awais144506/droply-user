@@ -8,13 +8,14 @@ import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
 import Loading from "@/app/loading";
 import { formatProductPayload } from "@/features/manage/products/utils/format-product-payload";
 import ErrorBoundary from "@/app/error";
+import { mappedProductData } from "@/features/manage/products/utils/editProductInitialValues";
 
 export default function EditItemPage() {
     const router = useRouter();
     const params = useParams();
     const productId = params.id as string;
 
-    const { data: product, isLoading: isFetching, error } = useProduct(productId);
+    const { data: product, isLoading, error } = useProduct(productId);
     const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
 
     const onSubmit = (data: CreateItemFormData) => {
@@ -24,37 +25,21 @@ export default function EditItemPage() {
         });
     };
 
-    if (isFetching) return <Loading />
+    if (isLoading) return <Loading text="Loading Product..." />
     if (!product) return <ErrorBoundary error={error?.message} />
 
-    const initialValues: CreateItemFormData = {
-        name: product.name,
-        sku: product.sku,
-        category: product.category,
-        trackingType: product.trackingType,
-        unitCost: product.unitCost,
-        salePrice: product.salePrice,
-        openingStock: product.stockOnHand,
-        lowStockThreshold: product.lowStockThreshold,
-        hasRecipe: product.hasRecipe,
-        securityDeposit:product.securityDeposit,
-        recipeItems: product.recipeIngredients?.map(recipe => ({
-            rawMaterialId: recipe.childItemId,
-            quantityRequired: recipe.quantity
-        })) || []
-    };
+
 
     return (
         <div className="max-w-5xl mx-auto space-y-6 p-6">
             <CreateFormHeader
                 href="/manage/products"
-                text={`Edit Product ${product.name}`}
+                title={`Edit Product ${product.name}`}
             />
             <ProductForm
-                initialValues={initialValues}
+                initialValues={mappedProductData(product)}
                 onSubmit={onSubmit}
                 isPending={isUpdating}
-                submitText="Save Changes"
             />
         </div>
     );

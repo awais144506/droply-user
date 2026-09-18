@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/lib/api-client";
 import { zoneKeys } from "./zone-keys";
@@ -11,31 +10,16 @@ import { toast } from "sonner";
 export function useCreateZone() {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (payload: ZoneFormValues) => zoneApi.createNewZone(payload),
-        onMutate: async (newZone) => {
-            await queryClient.cancelQueries({ queryKey: zoneKeys.lists() });
-            const previousZonesData = queryClient.getQueriesData({ queryKey: zoneKeys.lists() });
-            queryClient.setQueriesData({ queryKey: zoneKeys.lists() }, (old: any) => {
-                const optimisticZone = {
-                    ...newZone,
-                    id: `temp-${Date.now}`,
-                };
-                return old ? [optimisticZone, ...old] : [optimisticZone];
-            });
-            return { previousZonesData };
-        },
-        onError: (err, newZone, context) => {
-            toast.error(err.message);
-            if (context?.previousZonesData) {
-                queryClient.setQueryData(zoneKeys.lists(), context.previousZonesData);
-            }
-        },
+        mutationFn: (payload: ZoneFormValues) => zoneApi.createNewZone(payload),
         onSuccess: () => {
-            toast.success("New Zone Created")
-        },
-        onSettled: () => {
+            toast.success("New Zone Created successfully");
             queryClient.invalidateQueries({ queryKey: zoneKeys.lists() });
             queryClient.invalidateQueries({ queryKey: zoneKeys.logs() });
+        },
+        onError: (err) => {
+            toast.error("Creation Failed", {
+                description: err.message
+            });
         }
     });
 }

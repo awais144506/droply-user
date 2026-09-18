@@ -19,8 +19,9 @@ export const getProductColumns = (
 ): ColumnDef<ProductList>[] => [
         {
             header: "Code",
-            accessorKey: "sku",
-            className: "text-center text-xs font-bold",
+            render: (product) => (
+                <p className="font-bold text-xs text-left text-slate-900">{product.productCode}</p>
+            )
         },
         {
             header: "Product",
@@ -75,9 +76,9 @@ export const getProductColumns = (
         {
             header: "Margin",
             render: (product) => (
-                    <div className="flex items-center gap-1 text-sm font-bold text-emerald-600 mt-0.5">
-                        <TrendingUp className="h-3 w-3" />{calculateMargin(product.salePrice, product.unitCost)}%
-                    </div>
+                <div className="flex items-center gap-1 text-sm font-bold text-emerald-600 mt-0.5">
+                    <TrendingUp className="h-3 w-3" />{calculateMargin(product.salePrice, product.unitCost)}%
+                </div>
             )
         },
         {

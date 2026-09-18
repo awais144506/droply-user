@@ -11,7 +11,6 @@ export function formatProductPayload(data: CreateItemFormData, branchId?: string
         category: data.category,
         trackingType: data.trackingType,
         name: data.name,
-        sku: data.sku,
         unitCost: data.unitCost,
         salePrice: data.salePrice,
         profitMargin: parseFloat(calculatedMargin.toFixed(2)),

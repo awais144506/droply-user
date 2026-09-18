@@ -12,8 +12,10 @@ import { useCreateZone } from "../../api/use-mutate-zone";
 import { useRouter } from "next/navigation";
 
 const ZoneCreateForm = ({ branchId }: { branchId: string }) => {
+
   const router = useRouter();
   const { mutate: createZone, isPending } = useCreateZone();
+
   const form = useForm<ZoneFormValues>({
     resolver: yupResolver(createZoneSchema),
     mode: "onChange",
@@ -68,7 +70,7 @@ const ZoneCreateForm = ({ branchId }: { branchId: string }) => {
           <Button
             type="submit"
             disabled={isPending || !form.formState.isValid}
-            variant="create"
+            variant="default"
           >
             {isPending ? (
               <>
@@ -82,12 +84,6 @@ const ZoneCreateForm = ({ branchId }: { branchId: string }) => {
               </>
             )}
           </Button>
-          {/* {Object.keys(form.formState.errors).length > 0 && (
-            <div className="bg-rose-50 p-4 rounded-lg w-full mb-4 font-mono text-xs text-rose-600">
-              <p className="font-bold mb-2">Why is the button disabled?</p>
-              <pre>{JSON.stringify(form.formState.errors, null, 2)}</pre>
-            </div>
-          )} */}
         </div>
       </form>
     </FormProvider>

@@ -66,7 +66,7 @@ export default function EditZoneDialog({ zone, isOpen, onClose }: EditZoneDialog
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <DialogContent className="sm:max-w-106.25">
                 <DialogHeader>
-                    <DialogTitle>Edit Zone</DialogTitle>
+                    <DialogTitle className="text-xl font-bold text-slate-600">Edit Zone</DialogTitle>
                 </DialogHeader>
 
                 <FormProvider {...form}>
@@ -97,7 +97,7 @@ export default function EditZoneDialog({ zone, isOpen, onClose }: EditZoneDialog
                             <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
                                 Cancel
                             </Button>
-                            <Button type="submit" variant="create" disabled={!form.formState.isValid || !form.formState.isDirty || isPending}>
+                            <Button type="submit" variant="default" disabled={!form.formState.isValid || !form.formState.isDirty || isPending}>
                                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {isPending ? "Saving..." : "Save Changes"}
                             </Button>

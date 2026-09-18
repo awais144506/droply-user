@@ -1,9 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { FormProvider } from "react-hook-form";
-import Link from "next/link";
-import { Loader2, Plus } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
 import CreateStaffIdentityCard from "@/features/admin/staff/components/create/identity-card";
 import RiderZoneCard from "@/features/admin/staff/components/create/rider-zone";
 import StaffExtraDetails from "@/features/admin/staff/components/create/staff-extra-details";
@@ -11,6 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { createStaffSchema, CreateStaffFormData } from "@/features/admin/staff/schema/create-staff-schema";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
 
 const CreateStaffForm = ({ onSubmit,
     isPending,
@@ -69,22 +67,13 @@ const CreateStaffForm = ({ onSubmit,
                         </div>
 
                     </div>
-
-                    <div className="flex items-center justify-end gap-3 border-t pt-4">
-                        <Button type="button" variant="outline" onClick={() => setStep("SELECT_ROLE")} className="mr-auto">
-                            Change Role
-                        </Button>
-                        <Link href="/admin/staff" className={buttonVariants({ variant: "outline" })}>
-                            Cancel
-                        </Link>
-                        <Button type="submit" disabled={isPending || !form.formState.isValid} className="min-w-36 bg-emerald-600 hover:bg-emerald-700 text-white">
-                            {isPending ? (
-                                <><Loader2 className="h-4 w-4 animate-spin mr-1.5" /> Creating...</>
-                            ) : (
-                                <><Plus className="h-4 w-4 mr-1.5" /> Create Account</>
-                            )}
-                        </Button>
-                    </div>
+                    <FormCTAFooter
+                        isPending={isPending}
+                        isDirty={form.formState.isDirty}
+                        isValid={form.formState.isValid}
+                        href="/admin/staff"
+                        setStep={setStep}
+                    />
                 </form>
             </div>
         </FormProvider>

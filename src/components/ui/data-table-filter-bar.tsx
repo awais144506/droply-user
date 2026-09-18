@@ -1,9 +1,14 @@
-"use client"
+"use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { useDebounce } from "@/lib/hooks/use-debounce";
+
+// Shadcn Imports
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export interface FilterTab {
     label: string;
@@ -18,10 +23,8 @@ export interface FilterDropdownOption {
 interface DataTableFilterBarProps {
     searchPlaceholder?: string;
     searchParamName?: string;
-    // Tabs (e.g., All | Manager | Rider)
     tabs?: FilterTab[];
     tabParamName?: string;
-    // Dropdown (e.g., Active | Disabled)
     dropdownOptions?: FilterDropdownOption[];
     dropdownParamName?: string;
     dropdownPlaceholder?: string;
@@ -31,7 +34,7 @@ export function DataTableFilterBar({
     searchPlaceholder = "Search...",
     searchParamName = "search",
     tabs = [],
-    tabParamName = "role", // Changed default to 'role' to separate from status
+    tabParamName = "role",
     dropdownOptions = [],
     dropdownParamName = "status",
     dropdownPlaceholder = "All Statuses"
@@ -43,10 +46,10 @@ export function DataTableFilterBar({
     const setQueryString = useCallback(
         (name: string, value: string) => {
             const params = new URLSearchParams(searchParams.toString());
-            if (value) {
+            // If value is empty or "all", we delete the param to keep the URL clean
+            if (value && value !== "all") {
                 params.set(name, value);
-            }
-            else {
+            } else {
                 params.delete(name);
             }
             params.delete("page"); // Reset page when filtering
@@ -65,64 +68,65 @@ export function DataTableFilterBar({
         }
     }, [debouncedSearchValue, currentSearchUrlValue, searchParamName, setQueryString]);
 
-    const currentTabValue = searchParams.get(tabParamName) || "";
-    const currentDropdownValue = searchParams.get(dropdownParamName) || "";
+    const currentTabValue = searchParams.get(tabParamName) || tabs[0]?.value || "";
+    const currentDropdownValue = searchParams.get(dropdownParamName) || "All";
 
     return (
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
-            
+
             {/* Left: Search Bar */}
-            <div className="relative w-full sm:w-72">
+            <div className="relative w-full sm:w-80">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Search className="h-4 w-4 text-slate-400" />
                 </div>
-                <input
+                <Input
                     type="text"
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
-                    className="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg text-sm placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 transition-colors"
+                    className="pl-9 bg-white"
                     placeholder={searchPlaceholder}
                 />
             </div>
 
             {/* Right: Tabs & Dropdown Container */}
             <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-                
-                {/* 1. The Tabs */}
+
+                {/* 1. Shadcn Tabs (Used as a Segmented Control) */}
                 {tabs.length > 0 && (
-                    <div className="flex bg-slate-100 p-1 rounded-lg">
-                        {tabs.map((tab) => {
-                            const isActive = currentTabValue === tab.value;
-                            return (
-                                <button
-                                    key={tab.label}
-                                    onClick={() => setQueryString(tabParamName, tab.value)}
-                                    className={`cursor-pointer px-4 py-1.5 text-sm font-medium rounded-md transition-all ${isActive
-                                        ? "bg-white text-slate-900 shadow-sm"
-                                        : "text-slate-500 hover:text-slate-700"
-                                        }`}
-                                >
+                    <Tabs
+                        value={currentTabValue}
+                        onValueChange={(val) => setQueryString(tabParamName, val)}
+                        className="w-full sm:w-auto"
+                    >
+                        <TabsList className="grid w-full grid-cols-3 h-10">
+                            {tabs.map((tab) => (
+                                <TabsTrigger key={tab.label} value={tab.value}>
                                     {tab.label}
-                                </button>
-                            );
-                        })}
-                    </div>
+                                </TabsTrigger>
+                            ))}
+                        </TabsList>
+                    </Tabs>
                 )}
 
-                {/* 2. The New Dropdown */}
+                {/* 2. Shadcn Select Dropdown */}
                 {dropdownOptions.length > 0 && (
-                    <select
+                    <Select
                         value={currentDropdownValue}
-                        onChange={(e) => setQueryString(dropdownParamName, e.target.value)}
-                        className="block w-full sm:w-auto pl-3 pr-8 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500 cursor-pointer"
+                        onValueChange={(val) => setQueryString(dropdownParamName, val || "")}
                     >
-                        <option value="">{dropdownPlaceholder}</option>
-                        {dropdownOptions.map((opt) => (
-                            <option key={opt.value} value={opt.value}>
-                                {opt.label}
-                            </option>
-                        ))}
-                    </select>
+                        <SelectTrigger className="w-full sm:w-40 bg-white h-10">
+                            <SelectValue placeholder={dropdownPlaceholder} />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {/* We use "all" instead of an empty string to keep Shadcn Select happy */}
+                            <SelectItem value="all">{dropdownPlaceholder}</SelectItem>
+                            {dropdownOptions.map((opt) => (
+                                <SelectItem key={opt.value} value={opt.value}>
+                                    {opt.label}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 )}
             </div>
         </div>

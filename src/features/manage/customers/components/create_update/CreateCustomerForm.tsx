@@ -1,11 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form'
-import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Loader2, Plus, Save } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
 import { createCustomerSchema, CreateCustomerFormData } from "@/features/manage/customers/schema/create-customer.schema";
 import FinancialsCard from "@/features/manage/customers/components/create_update/financial-card";
 import AddressCard from "@/features/manage/customers/components/create_update/address-card";
@@ -13,6 +10,7 @@ import IdentityCard from "@/features/manage/customers/components/create_update/i
 import { formatCustomerPayload } from "@/features/manage/customers/utils/formatCustomerPayload";
 import { useCreateCustomer, useUpdateCustomer } from "@/features/manage/customers/api/use-mutate-customer";
 import { useRouter } from 'next/navigation';
+import FormCTAFooter from '@/lib/utils/components/FormCTAFooter';
 
 export const CustomerForm = ({
     branchId,
@@ -96,21 +94,13 @@ export const CustomerForm = ({
                         />
                     </div>
                 </div>
-
-                <div className="flex items-center justify-end gap-3 border-t pt-4">
-                    <Link href="/manage/customers" className={buttonVariants({ variant: "outline", size: "sm" })}>
-                        Cancel
-                    </Link>
-                    <Button type="submit" disabled={isPending || !form.formState.isValid || !form.formState.isDirty} className="min-w-36 bg-emerald-600 hover:bg-emerald-700 rounded-xl h-10 text-white shadow-sm">
-                        {isPending ? (
-                            <><Loader2 className="h-4 w-4 animate-spin mr-1.5" /> {isEditMode ? 'Saving...' : 'Creating...'}</>
-                        ) : (
-                            <>{isEditMode ? <Save className="h-4 w-4 mr-1.5" /> : <Plus className="h-4 w-4 mr-1.5" />}
-                                {isEditMode ? 'Save Changes' : 'Create Customer'}
-                            </>
-                        )}
-                    </Button>
-                </div>
+                <FormCTAFooter
+                    isPending={isPending}
+                    isValid={form.formState.isValid}
+                    isDirty={form.formState.isDirty}
+                    isEditMode={isEditMode}
+                    href='/manage/customers'
+                />
             </form>
         </FormProvider>
     )

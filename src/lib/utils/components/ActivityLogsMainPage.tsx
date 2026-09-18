@@ -2,13 +2,17 @@ import { History } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ActivityLog } from "@/types/ActivityLog";
 import { getActionBadge, getActionText } from "../functions/activity-logs-badges"
+import Loading from "@/app/loading";
 
 interface ActivityLogsCardProps {
     title?: string;
     logs: ActivityLog[];
+    isLoading: boolean;
 }
 
-export default function ActivityLogsCard({ title = "Recent Activity", logs }: ActivityLogsCardProps) {
+export default function ActivityLogsCard({ title = "Recent Activity", logs, isLoading }: ActivityLogsCardProps) {
+
+
 
     return (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
@@ -16,7 +20,7 @@ export default function ActivityLogsCard({ title = "Recent Activity", logs }: Ac
                 <History className="h-4 w-4 text-slate-400" />
                 <h3 className="text-sm font-bold text-slate-900">{title}</h3>
             </div>
-
+            {isLoading && <Loading text="Loading Logs..."/>}
             {logs.length === 0 ? (
                 <div className="p-8 text-center text-xs text-slate-400">
                     No recent activity found.

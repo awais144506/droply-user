@@ -2,7 +2,6 @@ import * as yup from "yup";
 
 export const createItemSchema = yup.object().shape({
   name: yup.string().min(3, "Item name too short").required("Item name is required"),
-  sku: yup.string().required("SKU is required"),
   category: yup.string().oneOf(["FINISHED_GOOD", "RAW_MATERIAL", "TRADE", "EQUIPMENT", "PACKAGING"]).required(),
   trackingType: yup.string().oneOf(["OUTRIGHT", "RETURNABLE"]).required(),
 

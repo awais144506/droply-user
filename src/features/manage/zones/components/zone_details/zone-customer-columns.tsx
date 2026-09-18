@@ -34,7 +34,7 @@ export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
         }
     },
     {
-        header: "Khata Balance",
+        header: "Oustanding Balance",
         render: (customer) => {
             const debtAmount = Number(customer.customerCredit);
             const hasDebt = debtAmount > 0;
@@ -52,7 +52,7 @@ export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
         },
     },
     {
-        header: "Assets Held",
+        header: "Items Held",
         className: "text-center",
         render: (customer) => (
             <div className="text-center">

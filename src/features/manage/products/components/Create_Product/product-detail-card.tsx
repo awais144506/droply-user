@@ -13,18 +13,12 @@ const ProductDetailCard = () => {
                 </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="gap-3">
                     <FormInput
-                        label="Item Name"
+                        label="Product Name"
                         placeholder="e.g. 19-Liter Water"
                         required
                         name="name"
-                    />
-                    <FormInput
-                        label="SKU / Code"
-                        placeholder="e.g. BOT-CVRST8"
-                        required
-                        name="sku"
                     />
                 </div>
 

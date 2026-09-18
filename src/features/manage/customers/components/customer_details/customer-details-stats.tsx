@@ -16,7 +16,7 @@ const CustomerDetailsStats = ({
         <div>
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <PageStatsCard
-                    title="Current Khata (Payable)"
+                    title="Outstanding"
                     value={customerCredit}
                     prefix="Rs."
                     icon={CreditCard}
@@ -24,7 +24,7 @@ const CustomerDetailsStats = ({
                     valueColorClass="text-amber-600"
                 />
                 <PageStatsCard
-                    title="Total Items Held"
+                    title="Items Held"
                     value={totalReturnables}
                     postfix="items"
                     icon={Package}

@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-// 🔥 1. Import useWatch
 import { useFieldArray, useWatch } from "react-hook-form";
 import { Wallet, Trash2, PlusCircle, Package } from "lucide-react";
 import { FormInput } from "@/components/ui/form-input";

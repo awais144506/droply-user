@@ -28,7 +28,7 @@ export default function ConfirmDeleteDialog({
                 <AlertDialogHeader>
                     <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This will may permanently delete/disable <span className="font-bold text-slate-900">{itemName}</span> from your database.
+                        This will may permanently delete/disable <span className="font-bold text-slate-900">{itemName}</span>.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

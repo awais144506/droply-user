@@ -1,7 +1,13 @@
-import { User } from "lucide-react";;
+import { User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormInput } from "@/components/ui/form-input";
-const CreateStaffIdentityCard = () => {
+
+// Add props interface
+interface IdentityCardProps {
+    isEditMode?: boolean;
+}
+
+const CreateStaffIdentityCard = ({ isEditMode = false }: IdentityCardProps) => {
     return (
         <div>
             <Card>
@@ -19,16 +25,19 @@ const CreateStaffIdentityCard = () => {
                             placeholder="e.g. Ali Ahmad"
                             name="name"
                         />
-                        <FormInput
-                            label="Email Address (Login ID)"
-                            required
-                            placeholder="e.g. ahmad@gmail.com"
-                            name="email"
-                        />
+                        {/* Conditionally hide Email if in Edit Mode */}
+                        {!isEditMode && (
+                            <FormInput
+                                label="Email (Login ID)"
+                                required
+                                placeholder="e.g. ahmad@gmail.com"
+                                name="email"
+                            />
+                        )}
                     </div>
                     <div className="space-y-1.5">
                         <FormInput
-                            label="Phone / WhatsApp"
+                            label="Phone"
                             required
                             placeholder="e.g. 03001234567"
                             name="phone"
@@ -44,7 +53,7 @@ const CreateStaffIdentityCard = () => {
                     </div>
                     <div className="space-y-1.5">
                         <FormInput
-                            label="Current Address"
+                            label="Address"
                             required
                             placeholder="e.g. Shadman Town, District Lahore"
                             name="address"
@@ -62,12 +71,13 @@ const CreateStaffIdentityCard = () => {
                             label="Basic Salary"
                             type="number"
                             placeholder="e.g. 30000"
-                            name="salary"
+                            name="salary" // NOTE: Ensure this matches your yup schema! If your schema uses basicSalary, change this to basicSalary
                         />
                     </div>
                 </CardContent>
-            </Card></div>
+            </Card>
+        </div>
     )
 }
 
-export default CreateStaffIdentityCard
+export default CreateStaffIdentityCard;

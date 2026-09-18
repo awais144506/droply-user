@@ -5,7 +5,7 @@ const stripFormat = (value: string | undefined) => (value ? value.replace(/[\s-]
 
 export const createStaffSchema = yup.object().shape({
   name: yup.string().min(3, "Name must be at least 3 characters").required("Name is required"),
-  email: yup.string().email("Invalid email").optional().nullable(),
+  email: yup.string().email("Invalid email").required("Email is required"),
   phone: yup
     .string()
     .transform(stripFormat)

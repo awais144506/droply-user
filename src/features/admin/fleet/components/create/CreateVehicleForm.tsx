@@ -9,7 +9,7 @@ import { FormInput } from "@/components/ui/form-input";
 import { FormSelect } from "@/components/ui/form-select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Truck, User } from "lucide-react";
+import { Truck } from "lucide-react";
 import { vehicleTypeOption, vehicleFuelTypeOption, vehicleStatusOption } from "./create-vehicle-options";
 
 export default function CreateVehicleForm({ branchId }: { branchId: string }) {
@@ -59,32 +59,11 @@ export default function CreateVehicleForm({ branchId }: { branchId: string }) {
                             <FormSelect name="fuelType" label="Fuel Type" options={vehicleFuelTypeOption} required />
                             <FormSelect name="status" label="Vehicle Status" options={vehicleStatusOption} required />
                             <FormInput name="capacityInfo" label="Capacity Info" placeholder="e.g. 150 KG" />
+                            <FormInput name="currentOdometer" label="Current Odometer" type="number" suffix="KM" required />
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* ======================================= */}
-                {/* CARD 2: ASSIGNMENT & METRICS            */}
-                {/* ======================================= */}
-                <Card className="border-slate-200 shadow-sm">
-                    <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-4">
-                        <CardTitle className="text-lg font-bold flex items-center gap-2 text-slate-800">
-                            <User className="h-5 w-5 text-sky-600" />
-                            Assignment & Metrics
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="pt-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <FormInput
-                                name="currentOdometer"
-                                label="Current Odometer"
-                                type="number"
-                                suffix="KM"
-                                required
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
                 <div className="flex justify-end gap-3 pt-4">
                     <Button type="button" variant="outline" onClick={() => router.back()} disabled={isSaving}>
                         Cancel
@@ -92,13 +71,6 @@ export default function CreateVehicleForm({ branchId }: { branchId: string }) {
                     <Button type="submit" variant="create" disabled={isSaving || !form.formState.isValid}>
                         {isSaving ? "Creating..." : "Create Vehicle"}
                     </Button>
-
-                    {/* {Object.keys(form.formState.errors).length > 0 && (
-                        <div className="bg-rose-50 p-4 rounded-lg w-full mb-4 font-mono text-xs text-rose-600">
-                            <p className="font-bold mb-2">Why is the button disabled?</p>
-                            <pre>{JSON.stringify(form.formState.errors, null, 2)}</pre>
-                        </div>
-                    )} */}
                 </div>
             </form>
         </FormProvider>

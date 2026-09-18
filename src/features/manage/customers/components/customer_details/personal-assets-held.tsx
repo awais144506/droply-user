@@ -78,11 +78,11 @@ const PersonalInformationAssets = ({ customer }: Props) => {
             </div>
 
             {/* Returnable Assets Card */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm mt-6">
                 <div className="flex items-center justify-between mb-5">
                     <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
                         <Package className="h-5 w-5 text-indigo-600" />
-                        Returnable Assets Held
+                        Returnable Items Held
                     </h3>
                 </div>
 

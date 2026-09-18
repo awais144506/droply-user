@@ -19,11 +19,11 @@ export default function CustomersPage() {
   const debt = searchParams.get("debt") || undefined
 
   const { data, isError, error, isLoading } = useCustomers(branchId, debt, search);
-  const { data: logs = [] } = useCustomerLogs(branchId);
+  const { data: logs = [], isLoading: isLoadingLogs } = useCustomerLogs(branchId);
   const customers = data?.customers || [];
   const stats = data?.stats || { activeCount: 0, totalLedger: "0", totalAssets: 0 };
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <Loading text="Loading Customers..."/>;
   if (isError) return <ErrorBoundary error={error.message} />;
 
   return (
@@ -32,7 +32,7 @@ export default function CustomersPage() {
         heading="Customer Management"
         description="Manage customer accounts, sector routes, outstanding balances, and returnable asset liabilities."
         href="/manage/customers/create-customer"
-        btnText="Add New Customer"
+        btnText="Add Customer"
       />
 
       <CustomerStats
@@ -45,7 +45,7 @@ export default function CustomersPage() {
       <div>
         <div className="lg:col-span-2">
           <DataTableFilterBar
-            searchPlaceholder="Search by customer name/code"
+            searchPlaceholder="Search by customer name..."
             searchParamName="search"
             tabParamName="debt"
             tabs={FilterTabs}
@@ -60,6 +60,7 @@ export default function CustomersPage() {
             <ActivityLogsCard
               title="Customer Activity Logs"
               logs={logs}
+              isLoading={isLoadingLogs}
             />
           </div>
         </div>

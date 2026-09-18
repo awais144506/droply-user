@@ -28,6 +28,45 @@ export interface StaffApiResponse {
     maxUserLimit: number;
 }
 
+// types/staff.ts (or wherever you keep your types)
+
+export interface StaffZone {
+  id: string;      // Assuming your backend sends IDs along with the names
+  name: string;
+}
+
+export interface StaffVehicle {
+  id: string;      // Assuming your backend sends IDs
+  modelInfo: string;
+  registration: string;
+  status: "ACTIVE" | "MAINTENANCE" | "DISABLE"; 
+  type: string;
+}
+
 export interface Staff {
-    id: string
+  id: string;
+  branchId: string;
+  staffCode: string;
+  name: string;
+  designation: "RIDER" | "MANAGER";
+  status: "ACTIVE" | "DISABLE";
+  phone: string;
+  email: string;
+  currentAddress: string;
+  emergencyContact: string | null;
+  cnic: string;
+  imageUrl: string | null;
+  fatherName: string;
+  fatherCnic: string;
+  bloodGroup: string;
+  basicSalary: number;
+  joiningDate: string; // ISO Date string
+  licenseNumber: string | null;
+  guarantorName: string | null;
+  guarantorCnic: string | null;
+  guarantorPhone: string | null;
+  createdAt: string;
+  updatedAt: string;
+  zones?: StaffZone[];
+  assignedVehicles?: StaffVehicle[];
 }

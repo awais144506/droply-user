@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// 4. Create Customer
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CreateCustomerFormData } from "../schema/create-customer.schema";
 import { customerKeys } from "./customer-keys";
@@ -24,7 +23,7 @@ export function useCreateCustomer() {
         const optimisticCustomer = {
           id: `temp-${Date.now()}`,
           ...newCustomer,
-          status: "ACTIVE", // Default status
+          status: "ACTIVE",
           returnablesLength: newCustomer.returnables?.length || 0,
           createdAt: new Date().toISOString(),
         };
@@ -63,6 +62,7 @@ export function useUpdateCustomer() {
       toast.success("Customer updated successfully");
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: customerKeys.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: customerKeys.logs() });
       queryClient.invalidateQueries({ queryKey: zoneKeys.lists() });
     },
     onError: (err) => {

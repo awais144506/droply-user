@@ -29,12 +29,11 @@ export default function CreateItemPage() {
 
             <CreateFormHeader
                 href="/manage/products"
-                text="Create New Item"
+                title="Create New Item"
             />
             <ProductForm
                 onSubmit={onSubmit}
                 isPending={isPending}
-                submitText="Create Item"
             />
         </div>
     );

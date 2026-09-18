@@ -16,7 +16,7 @@ const StaffExtraDetails = () => {
                     <div className="flex space-x-4">
                         <FormInput
                             label="Father Name"
-                            placeholder="e.g. Ali"
+                            placeholder="e.g. Rasheed Anjum"
                             name="fatherName"
                         />
                         <FormInput
@@ -28,7 +28,7 @@ const StaffExtraDetails = () => {
                     <div className="flex space-x-4">
                         <FormInput
                             label="Guarantor Name"
-                            placeholder="e.g. Ali"
+                            placeholder="e.g. Umer"
                             name="guarantorName"
                         />
                         <FormInput

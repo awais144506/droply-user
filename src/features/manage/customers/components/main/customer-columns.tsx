@@ -1,4 +1,4 @@
-import { MapPin, Phone, CalendarX2 } from "lucide-react";
+import { Home, MapPin, Phone, CalendarX2 } from "lucide-react";
 import { CustomerList } from "../../types/customer";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
 import { formatLastVisit, formatCurrency, displayPakistaniPhone } from "@/lib/utils/functions/setFormat";
@@ -7,8 +7,9 @@ import { formatLastVisit, formatCurrency, displayPakistaniPhone } from "@/lib/ut
 export const getCustomerColumns = (): ColumnDef<CustomerList>[] => [
     {
         header: "Code",
-        className: "text-center text-xs font-bold text-slate-500 w-24",
-        render: (customer) => customer.customerCode,
+        render: (customer) => (
+            <span className="text-xs font-bold"> {customer.customerCode}</span>
+        ),
     },
     {
         header: "Customer & Contact",
@@ -25,11 +26,26 @@ export const getCustomerColumns = (): ColumnDef<CustomerList>[] => [
                     </span>
                 </div>
 
-                <div className="flex items-center gap-3 text-xs text-slate-500">
+                <div className="flex items-center gap-3 text-xs text-slate-700">
                     <span className="flex items-center gap-1">
                         <Phone className="h-3 w-3 text-slate-400" />
-                        {displayPakistaniPhone(customer.phone)}
+                        {displayPakistaniPhone(customer.phone)} . ({customer.category.toLowerCase()})
                     </span>
+                </div>
+            </div>
+        ),
+    },
+
+    {
+        header: "Adress & Zone",
+        render: (customer) => (
+
+            <div>
+                <span className="flex items-center text-xs gap-1 max-w-45" title={customer.address || "No address"}>
+                    <Home className="h-3 w-3 text-slate-400 shrink-0" />
+                    {customer.address || "No address"}
+                </span>
+                <div className="flex items-center gap-3 text-xs text-slate-500">
                     <span className="flex items-center gap-1 max-w-45 truncate" title={customer.zone?.name || "No address"}>
                         <MapPin className="h-3 w-3 text-slate-400 shrink-0" />
                         {customer.zone?.name || "No address"}
@@ -38,8 +54,9 @@ export const getCustomerColumns = (): ColumnDef<CustomerList>[] => [
             </div>
         ),
     },
+
     {
-        header: "Khata Balance",
+        header: "Outstanding Balance",
         render: (customer) => {
             const debtAmount = Number(customer.customerCredit);
             const hasDebt = debtAmount > 0;
@@ -57,7 +74,7 @@ export const getCustomerColumns = (): ColumnDef<CustomerList>[] => [
         },
     },
     {
-        header: "Assets Held",
+        header: "Items Held",
         className: "text-center",
         render: (customer) => (
             <div className="text-center">

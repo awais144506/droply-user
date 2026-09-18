@@ -17,7 +17,7 @@ const getStatusStyles = (status: string) => {
 export default function AssignmentCard({ user }: { user: any }) {
   return (
     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-5 w-full">
-      
+
       {/* 1. Vehicle Assignment */}
       <div>
         <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-3">
@@ -41,10 +41,13 @@ export default function AssignmentCard({ user }: { user: any }) {
                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 truncate">
                     {vehicle.registration}
                   </p>
-                  <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${getStatusStyles(vehicle.status)}`}>
-                    {vehicle.status}
-                  </span>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1 truncate">
+                    {vehicle.type}
+                  </p>
                 </div>
+                <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${getStatusStyles(vehicle.status)}`}>
+                  {vehicle.status}
+                </span>
               </div>
             ))}
           </div>

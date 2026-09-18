@@ -13,7 +13,7 @@ export default function StaffMemberPage() {
   const staffId = params.staffId as string;
   const { data: user, isLoading } = useStaffDetail(staffId);
 
-  if (isLoading) return <Loading />
+  if (isLoading) return <Loading text="Loading Staff Profile..."/>
 
   if (!user) return <NotFoundPage />
 

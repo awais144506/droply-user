@@ -1,5 +1,4 @@
 import { History, Receipt } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { CustomerOrderHistory as CustomerOrderHistoryType } from "../../types/customer";
 
 // Make sure your CustomerOrderHistoryType in types/customer.ts includes: type: string;
@@ -37,7 +36,6 @@ const CustomerOrderHistory = ({ orders }: Props) => {
                             <thead className="bg-slate-50 text-slate-500 font-bold text-xs uppercase">
                                 <tr>
                                     <th className="px-4 py-3">Order No</th>
-                                    {/* 🔥 Added Type Column */}
                                     <th className="px-4 py-3">Type</th>
                                     <th className="px-4 py-3">Date</th>
                                     <th className="px-4 py-3">Amount</th>

@@ -10,7 +10,6 @@ import { StaffStats } from "@/features/admin/staff/components/main/staff-stats";
 import { StaffTable } from "@/features/admin/staff/components/main/staff-table";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
-// You may no longer need getTierConfig here unless you use it for UI colors!
 
 export default function StaffPage() {
   const { branchId, maxUsersLimit } = useRole();
@@ -20,13 +19,13 @@ export default function StaffPage() {
   const status = searchParams.get("status") || undefined;
 
   const { data, isLoading, isError, error } = useStaffList(branchId, search, role, status);
-  const { data: logs = [] } = useStaffLogs(branchId);
+  const { data: logs = [], isLoading: isLoadingLogs } = useStaffLogs(branchId);
 
   const staffData = data?.staff || [];
   const stats = data?.stats || { totalStaff: 0, activeStaffCount: 0, activeManagers: 0, activeRiders: 0, disableStaff: 0 };
   const isLimitReached = data?.isLimitReached
-  
-  if (isLoading) return <Loading />;
+
+  if (isLoading) return <Loading text="Loading Staff..."/>;
   if (isError) return <ErrorBoundary error={error.message} />;
 
   return (
@@ -80,6 +79,7 @@ export default function StaffPage() {
             <ActivityLogsCard
               title="Staff Activity Logs"
               logs={logs}
+              isLoading={isLoadingLogs}
             />
           </div>
         </div>

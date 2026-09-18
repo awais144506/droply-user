@@ -10,16 +10,12 @@ export default function CreateCustomerPage() {
     const { branchId } = useRole();
     const { data: { zoneOptions = [] } = {}, isLoading: LoadingZones } = useZones(branchId);
     const { data, isLoading: LoadingProducts } = useProducts(branchId);
-
-
     const productOptions = data?.productOptions;
-
-
     return (
         <div className="max-w-5xl mx-auto space-y-6 p-6">
             <CreateFormHeader
                 href="/manage/customers"
-                text="Create New Customer"
+                title="Create New Customer"
             />
             <CreateCustomerForm
                 branchId={branchId}

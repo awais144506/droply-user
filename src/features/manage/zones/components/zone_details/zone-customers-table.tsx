@@ -21,15 +21,15 @@ export function ZoneCustomersTable({ customers }: ZoneCustomersTableProps) {
   const columns = useMemo(() => getCustomerColumns(), []);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+    <div>
       {/* Table Header & Search */}
-      <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
+      <div className=" pr-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
         <DataTableFilterBar
           searchParamName="search"
           searchPlaceholder="Search by customer name..."
         />
         <h3 className="text-sm font-bold text-slate-800">
-          Customers List ({customers.length})
+          Total Customers : {customers.length}
         </h3>
       </div>
 

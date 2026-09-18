@@ -10,15 +10,15 @@ import ErrorBoundary from "@/app/error";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 
 export default function ProductsPage() {
-  const { branchId, isLoading: isTenantLoading } = useRole();
+  const { branchId } = useRole();
   const { data, isLoading, isError, error } = useProducts(branchId);
-  const { data: logs = [] } = useProductLogs(branchId);
+  const { data: logs = [], isLoading: isLoadingLogs } = useProductLogs(branchId);
 
   const products = data?.products;
   const stats = data?.stats || { totalItems: 0, lowStockCount: 0, returnablesCount: 0, recipeItemsCount: 0 };
 
   //LOADING & ERROR
-  if (isTenantLoading || isLoading) return <Loading />
+  if (isLoading) return <Loading text="Loading Products..." />
   if (isError) return <ErrorBoundary error={error.message} />
 
   //JSX COMPONENT
@@ -45,6 +45,7 @@ export default function ProductsPage() {
         <ActivityLogsCard
           title="Products Activity Logs"
           logs={logs}
+          isLoading={isLoadingLogs}
         />
       </div>
     </div>

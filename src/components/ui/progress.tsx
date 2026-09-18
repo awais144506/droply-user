@@ -4,22 +4,27 @@ import { Progress as ProgressPrimitive } from "@base-ui/react/progress"
 
 import { cn } from "@/lib/utils"
 
+interface ProgressProps extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root> {
+  indicatorClassName?: string;
+}
 function Progress({
   className,
   children,
   value,
+  indicatorClassName, // Extracted here in the parent
   ...props
-}: ProgressPrimitive.Root.Props) {
+}: ProgressProps) {
   return (
     <ProgressPrimitive.Root
       value={value}
       data-slot="progress"
-      className={cn("flex flex-wrap gap-3", className)}
+      className={cn("flex flex-col gap-2 w-full", className)}
       {...props}
     >
       {children}
       <ProgressTrack>
-        <ProgressIndicator />
+        {/* Passed down as 'className' to the child! */}
+        <ProgressIndicator className={indicatorClassName} />
       </ProgressTrack>
     </ProgressPrimitive.Root>
   )
@@ -45,7 +50,7 @@ function ProgressIndicator({
   return (
     <ProgressPrimitive.Indicator
       data-slot="progress-indicator"
-      className={cn("h-full bg-primary transition-all", className)}
+      className={cn("h-full w-full flex-1 bg-primary transition-all duration-500 ease-in-out", className)}
       {...props}
     />
   )

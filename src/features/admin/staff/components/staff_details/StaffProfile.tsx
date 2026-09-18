@@ -11,17 +11,23 @@ import PersonalInfoCard from "./personal-info-card";
 import AssignmentCard from "./assignment-card";
 import PageDetailHeader from "@/lib/utils/components/PageDetailHeader";
 import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
-import { useStaffDisable } from "../../api/use-mutate-staff";
-// import { useStaffEnable } from "../../api/use-mutate-staff";
+import ConfirmEnableDialog from "@/lib/utils/components/ConfirmEnableDialog";
+import { useStaffDisable, useStaffEnable } from "../../api/use-mutate-staff";
+// import { useUpdateStaff } from "../../api/use-mutate-staff"; // <-- Import your update hook when ready
+import { useStaffList } from "../../api/use-staff";
+import { toast } from "sonner";
 
 export function StaffProfile({ user, userId, branchId }: { user: any, userId: string, branchId: string }) {
   const router = useRouter();
-  
+
   const [isDisableOpen, setIsDisableOpen] = useState(false);
   const [isEnableOpen, setIsEnableOpen] = useState(false);
 
   const { mutate: disableUser, isPending: isDisabling } = useStaffDisable(userId, branchId, () => setIsDisableOpen(false));
-  const isEnabling = false; // Replace with your useStaffEnable hook
+  const { mutate: enableUser, isPending: isEnabling } = useStaffEnable(userId, branchId, () => setIsEnableOpen(false));
+  const { data } = useStaffList(branchId);
+
+  const isLimitReached = data?.isLimitReached;
 
   const [localUser, setLocalUser] = useState<any>({
     ...user,
@@ -42,7 +48,14 @@ export function StaffProfile({ user, userId, branchId }: { user: any, userId: st
   };
 
   const handleEnableConfirm = () => {
-    // enableUser(userId);
+    if (isLimitReached) {
+      toast.error("Staff Limit Reached!", {
+        description: "You have used all available slots in your current plan. Please upgrade to add more staff."
+      });
+      setIsEnableOpen(false);
+      return;
+    }
+    enableUser(userId);
   };
 
   const isDisabled = user.status === "DISABLE";
@@ -57,14 +70,14 @@ export function StaffProfile({ user, userId, branchId }: { user: any, userId: st
         <Button
           variant="outline"
           size="sm"
-          onClick={() => router.push(`/admin/staff/${user.id}/edit`)}
+          onClick={() => router.push(`/admin/staff/${userId}/edit`)}
           className="bg-white border-slate-200 text-slate-700 hover:bg-slate-50 shadow-sm"
         >
           <Edit2 className="h-4 w-4 mr-1.5" /> Edit Profile
         </Button>
 
         <Button
-          variant={isDisabled ? "default" : "destructive"}
+          variant={isDisabled ? "success" : "destructive"}
           size="sm"
           onClick={() => {
             if (isDisabled) {
@@ -88,9 +101,9 @@ export function StaffProfile({ user, userId, branchId }: { user: any, userId: st
       </PageDetailHeader>
 
       {/* Top Header */}
-      <ProfileHeader user={localUser} />
+      <ProfileHeader user={localUser} branchId={branchId} />
 
-      {/* Clean 2-Column Grid - No Attendance Shit */}
+      {/* Clean 2-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <PersonalInfoCard user={localUser} />
         {localUser.role === "RIDER" && <AssignmentCard user={localUser} />}
@@ -105,12 +118,12 @@ export function StaffProfile({ user, userId, branchId }: { user: any, userId: st
         btnText="Disable"
       />
 
-      <ConfirmDeleteDialog
+      <ConfirmEnableDialog
         itemName={localUser.name}
         isOpen={isEnableOpen}
         onClose={() => setIsEnableOpen(false)}
         onConfirm={handleEnableConfirm}
-        isDeleting={isEnabling}
+        isEnabling={isEnabling}
         btnText="Enable"
       />
     </div>

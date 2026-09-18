@@ -27,7 +27,7 @@ export function ProductsTable({ products }: { products: ProductList[] | undefine
 
     // Filtering Logic
     const filteredProducts = products?.filter((p) => {
-        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.sku.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.productCode.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesLowStock = showLowStockOnly ? p.currentStock <= p.lowStockThreshold : true;
         const matchesCategory = categoryFilter !== "ALL" ? p.category === categoryFilter : true;
         const matchesTracking = trackingFilter !== "ALL" ? p.trackingType === trackingFilter : true;

@@ -24,7 +24,7 @@ export function ZoneDetailStats({
         icon={Users}
       />
       <PageStatsCard
-        title="Zone Khata"
+        title="Zone Outstanding"
         value={totalLedger || 0}
         prefix="Rs."
         icon={Wallet}
@@ -32,7 +32,7 @@ export function ZoneDetailStats({
         valueColorClass="text-amber-600"
       />
       <PageStatsCard
-        title="Assets Out"
+        title="Items Out"
         value={totalReturnables}
         postfix="items"
         icon={Package}

@@ -1,6 +1,6 @@
 export const formatCurrency = (amount: number | string | null | undefined) => {
     const numericAmount = Number(amount || 0);
-    if (isNaN(numericAmount) || numericAmount === 0) return "-";
+    if (isNaN(numericAmount) || numericAmount === 0) return "0";
     return `${numericAmount.toLocaleString("en-PK", { maximumFractionDigits: 0 })}`;
 };
 export const formatLastVisit = (dateString: string | null) => {

@@ -1,10 +1,10 @@
 export type CategoryType = "FINISHED_GOOD" | "RAW_MATERIAL" | "TRADE" | "EQUIPMENT" | "PACKAGING"
 export type TrackingType = "OUTRIGHT" | "RETURNABLE";
+
 export interface ProductItem {
     securityDeposit: number | null;
     id: string;
     name: string;
-    sku: string;
     category: CategoryType;
     trackingType: TrackingType;
     unitCost: number;
@@ -20,16 +20,16 @@ export interface ProductItem {
         childItemId: string;
         childItem: {
             name: string;
-            sku: string;
+            productCode: string;
         };
     }[];
 }
 
 export interface ProductList {
+    productCode: string;
     securityDeposit: number;
     id: string;
     name: string;
-    sku: string;
     category: CategoryType;
     trackingType: TrackingType;
     unitCost: number;

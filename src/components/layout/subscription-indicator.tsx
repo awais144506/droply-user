@@ -142,7 +142,7 @@ export function SubscriptionIndicator({ roleData }: { roleData: any }) {
           <span className={`text-[10px] flex items-center gap-1 mt-0.5 ${theme.dateText}`}>
             <CalendarDays className="h-3 w-3 opacity-70" />
             {isTrial ? "Trial ends:" : "Renew Date:"}
-            <span className={userTier?.toUpperCase() === "PLATINUM" && !isCritical && !isWarning ? "text-slate-200" : "font-semibold"}>
+            <span className={userTier?.toUpperCase() === "PLATINUM" && !isCritical && !isWarning ? "text-slate-500" : "font-semibold"}>
               {formattedDate}
             </span>
           </span>
