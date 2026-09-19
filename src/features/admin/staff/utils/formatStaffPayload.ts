@@ -1,7 +1,7 @@
 // utils/formatStaffPayload.ts
 import { CreateStaffFormData } from "../schema/create-staff-schema"
 import { UpdateStaffFormData } from "../schema/update-staff-schema";
-
+import { formatPakistaniPhone } from "@/lib/utils/functions/setFormat";
 
 export type StaffRole = "MANAGER" | "RIDER";
 
@@ -11,7 +11,7 @@ export function formatStaffPayload(data: CreateStaffFormData, branchId: string, 
         designation: role,
         name: data.name,
         email: data.email || undefined,
-        phone: data.phone,
+        phone: formatPakistaniPhone(data.phone),
         cnic: data.cnic,
         currentAddress: data.address || undefined,
         basicSalary: data.salary,

@@ -28,7 +28,7 @@ export const formatLastVisit = (dateString: string | null) => {
     return { daysAgo, formattedDate };
 };
 
-export const formatPakistaniPhone = (phone?: string) => {
+export const formatPakistaniPhone = (phone: string) => {
     if (!phone) return phone;
     const cleaned = phone.replace(/[\s-]/g, '');
     if (cleaned.startsWith('03') && cleaned.length === 11) {

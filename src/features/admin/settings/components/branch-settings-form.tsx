@@ -98,7 +98,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
         return;
       }
     }
-    onSubmit({ ...data, logoUrl: finalLogoUrl || "", displayPhone: formatPakistaniPhone(data.displayPhone) });
+    onSubmit({ ...data, logoUrl: finalLogoUrl || "", displayPhone: formatPakistaniPhone(data.displayPhone||"") });
   };
 
   return (

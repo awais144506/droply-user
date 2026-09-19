@@ -67,7 +67,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     label: "SUPPLIES & PURCHASES",
     headerColor: { text: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500", border: "border-amber-500/20", bgHover: "hover:bg-amber-500/5" },
     items: [
-      { title: "Suppliers", url: "/supply/suppliers", icon: Building, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "TODO" },
+      { title: "Suppliers", url: "/supply/suppliers", icon: Building, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "PARTIAL" },
       { title: "Purchase Orders", url: "/supply/order", icon: Receipt, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "TODO" },
       { title: "Payments", url: "/supply/payments", icon: CreditCard, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "TODO" },
       { title: "Purchase Returns", url: "/supply/returns", icon: Undo2, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "TODO" },
@@ -77,7 +77,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     label: "OPERATIONS & ADMIN",
     headerColor: { text: "text-rose-600 dark:text-rose-400", dot: "bg-rose-500", border: "border-rose-500/20", bgHover: "hover:bg-rose-500/5" },
     items: [
-      { title: "Staff & Payroll", url: "/admin/staff", icon: UserCog, badge: "Owner", allowedRoles: ["OWNER"], allowedTiers: ALL_TIERS, devStatus: "PARTIAL" },
+      { title: "Staff & Payroll", url: "/admin/staff", icon: UserCog, badge: "Owner", allowedRoles: ["OWNER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Vehicles & Fuel", url: "/admin/fleet", icon: TruckIcon, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "PARTIAL" },
       { title: "Assigned Tasks", url: "/admin/tasks", icon: FileText, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "TODO" },
       { title: "Expenses & Accounts", url: "/admin/expenses", icon: BadgeDollarSign, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "TODO" },
