@@ -1,37 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { PurchaseOrder } from "@/features/supply/order/types/po"; // Adjust path if needed
+import { BranchSettingData } from "@/features/admin/settings/types/settings";
 
-// 1. Define our Mock Data Interfaces
-interface BranchSettings {
-  displayName: string;
-  displayPhone: string;
-  displayEmail: string;
-  displayAddress: string;
-  logoUrl?: string;
-}
-
-interface PurchaseOrder {
-  poNumber: string;
-  orderDate: string;
-  status: string;
-  supplierName: string;
-  supplierPhone: string;
-  items: Array<{
-    description: string;
-    quantity: number;
-    unitPrice: number;
-    total: number;
-  }>;
-  subTotal: number;
-  advancePaid: number;
-  balanceDue: number;
-}
-
-// Helper to convert an Image URL to Base64 (Required by jsPDF)
 const getBase64ImageFromUrl = async (imageUrl: string): Promise<string> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = "Anonymous"; // Crucial for CORS
+    img.crossOrigin = "Anonymous";
     img.onload = () => {
       const canvas = document.createElement("canvas");
       canvas.width = img.width;
@@ -39,88 +15,78 @@ const getBase64ImageFromUrl = async (imageUrl: string): Promise<string> => {
       const ctx = canvas.getContext("2d");
       if (ctx) {
         ctx.drawImage(img, 0, 0);
-        const dataURL = canvas.toDataURL("image/png");
-        resolve(dataURL);
+        resolve(canvas.toDataURL("image/png"));
       } else {
         reject(new Error("Failed to get canvas context"));
       }
     };
-    img.onerror = error => reject(error);
+    img.onerror = (error) => reject(error);
     img.src = imageUrl;
   });
 };
 
-// 2. The PDF Generator Function (Now Async!)
-export const generatePOPdf = async (po: PurchaseOrder, branch: BranchSettings) => {
+export const generatePOPdf = async (po: PurchaseOrder, branch: BranchSettingData) => {
   const doc = new jsPDF();
-  
+
   const formatCurrency = (val: number) => `Rs ${val.toLocaleString("en-PK")}`;
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  
+  const formatDate = (date: string | Date) => new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
   const colors = {
-    primary: [2, 132, 199] as [number, number, number],   
-    slate900: [15, 23, 42] as [number, number, number],   
-    slate500: [100, 116, 139] as [number, number, number], 
-    slate200: [226, 232, 240] as [number, number, number], 
-    sky50: [240, 249, 255] as [number, number, number],    
+    primary: [2, 132, 199] as [number, number, number],
+    slate900: [15, 23, 42] as [number, number, number],
+    slate500: [100, 116, 139] as [number, number, number],
+    slate200: [226, 232, 240] as [number, number, number],
+    sky50: [240, 249, 255] as [number, number, number],
   };
 
-  // ==========================================
-  // HEADER SECTION WITH LOGO
-  // ==========================================
   let textStartX = 14;
 
-  // Render Logo if it exists
   if (branch.logoUrl) {
     try {
       const base64Logo = await getBase64ImageFromUrl(branch.logoUrl);
-      // addImage(imageData, format, x, y, width, height)
-      doc.addImage(base64Logo, 'PNG', 14, 15, 20, 20); 
-      textStartX = 38; // Push the text over so it doesn't overlap the logo
+      doc.addImage(base64Logo, 'PNG', 14, 15, 20, 20);
+      textStartX = 38;
     } catch (error) {
-      console.warn("Failed to load logo for PDF, skipping image.", error);
-      // textStartX remains 14
+      console.warn("Failed to load logo", error);
     }
   }
-  
-  // Left: Branch Info
+
+  // Header (Fixed optional chaining on toUpperCase)
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
   doc.setTextColor(...colors.primary);
-  doc.text(branch.displayName.toUpperCase(), textStartX, 22); // Y adjusted to align with logo
-  
+  doc.text((branch?.displayName?.toUpperCase() || ""), textStartX, 22);
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(...colors.slate500);
-  doc.text(branch.displayAddress, textStartX, 29);
-  doc.text(`Phone: ${branch.displayPhone}`, textStartX, 34);
-  doc.text(`Email: ${branch.displayEmail}`, textStartX, 39);
+  doc.text((branch?.displayAddress || ""), textStartX, 29);
+  doc.text(`Phone: ${branch?.displayPhone || ""}`, textStartX, 34);
+  doc.text(`Email: ${branch?.displayEmail || ""}`, textStartX, 39);
 
-  // Right: Document Meta
+  // Document Meta 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
+  doc.setFontSize(16); 
   doc.setTextColor(...colors.slate900);
   doc.text("PURCHASE ORDER", 196, 25, { align: "right" });
-  
+
   doc.setFontSize(10);
   doc.setTextColor(...colors.slate500);
-  doc.text(`PO Number:`, 160, 32);
-  doc.text(`Date Issued:`, 160, 37);
-  doc.text(`Order Status:`, 160, 42);
+  doc.text(`PO Number:`, 135, 32);
+  doc.text(`Date Issued:`, 135, 37);
+  doc.text(`Order Status:`, 135, 42);
 
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...colors.slate900);
   doc.text(po.poNumber, 196, 32, { align: "right" });
   doc.text(formatDate(po.orderDate), 196, 37, { align: "right" });
   doc.setTextColor(...colors.primary);
-  doc.text(po.status.toUpperCase(), 196, 42, { align: "right" });
+  doc.text(po.status.replace("_", " ").toUpperCase(), 196, 42, { align: "right" });
 
   doc.setDrawColor(...colors.slate200);
   doc.line(14, 48, 196, 48);
 
-  // ==========================================
-  // VENDOR SECTION
-  // ==========================================
+  // Vendor Section
   doc.setFont("helvetica", "bold");
   doc.setFontSize(10);
   doc.setTextColor(...colors.slate500);
@@ -128,31 +94,29 @@ export const generatePOPdf = async (po: PurchaseOrder, branch: BranchSettings) =
 
   doc.setFontSize(12);
   doc.setTextColor(...colors.slate900);
-  doc.text(po.supplierName, 14, 65);
-  
+  doc.text(po.supplier?.firmName || "Unknown Supplier", 14, 65);
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(...colors.slate500);
-  doc.text(`Phone: ${po.supplierPhone}`, 14, 70);
+  doc.text(`Phone: ${po.supplier?.phone || "N/A"}`, 14, 70);
 
-  // ==========================================
-  // ITEMS TABLE
-  // ==========================================
+  // Table Data Mapping
   const tableData = po.items.map(item => [
-    item.description,
+    item.supplierItemName,
     `${item.quantity}x`,
-    formatCurrency(item.unitPrice),
-    formatCurrency(item.total)
+    formatCurrency(item.unitCost),
+    formatCurrency(item.quantity * item.unitCost)
   ]);
-  
+
   autoTable(doc, {
     startY: 80,
-    head: [['Item Description', 'Qty', 'Unit Price', 'Total Amount']],
+    head: [['Item Description', 'Qty', 'Unit Cost', 'Total Amount']],
     body: tableData,
     theme: 'plain',
-    headStyles: { 
-      fillColor: colors.sky50, 
-      textColor: colors.primary, 
+    headStyles: {
+      fillColor: colors.sky50,
+      textColor: colors.primary,
       fontStyle: 'bold',
       lineColor: colors.slate200,
       lineWidth: { bottom: 0.5 }
@@ -170,18 +134,17 @@ export const generatePOPdf = async (po: PurchaseOrder, branch: BranchSettings) =
       3: { cellWidth: 40, halign: 'right', fontStyle: 'bold' }
     }
   });
-  
-  // ==========================================
-  // FINANCIALS FOOTER
-  // ==========================================
-  const finalY = (doc as any).lastAutoTable.finalY + 10;
-  
+
+  // Financials
+  const finalY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...colors.slate500);
-  doc.text("Notes:", 14, finalY);
-  doc.text("1. All goods must match the agreed quality standards.", 14, finalY + 5);
-  doc.text("2. Please reference this PO number on your invoice.", 14, finalY + 10);
+  doc.text("Notes & Instructions:", 14, finalY);
+
+  const splitNotes = doc.splitTextToSize(po.notes || "No additional notes provided.", 110);
+  doc.text(splitNotes, 14, finalY + 5);
 
   const labelX = 145;
   const valueX = 196;
@@ -193,10 +156,10 @@ export const generatePOPdf = async (po: PurchaseOrder, branch: BranchSettings) =
 
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...colors.slate900);
-  doc.text(formatCurrency(po.subTotal), valueX, finalY, { align: "right" });
-  
-  doc.setTextColor(16, 185, 129); 
-  doc.text(`- ${formatCurrency(po.advancePaid)}`, valueX, finalY + 7, { align: "right" });
+  doc.text(formatCurrency(po.totalAmount), valueX, finalY, { align: "right" });
+
+  doc.setTextColor(16, 185, 129);
+  doc.text(`- ${formatCurrency(po.advancePaid || 0)}`, valueX, finalY + 7, { align: "right" });
 
   doc.setFillColor(...colors.sky50);
   doc.roundedRect(labelX - 5, finalY + 12, 60, 10, 1, 1, "F");
@@ -204,16 +167,25 @@ export const generatePOPdf = async (po: PurchaseOrder, branch: BranchSettings) =
   doc.setFontSize(11);
   doc.setTextColor(...colors.primary);
   doc.text("Balance Due:", labelX, finalY + 19);
-  doc.text(formatCurrency(po.balanceDue), valueX, finalY + 19, { align: "right" });
+  doc.text(formatCurrency(po.balanceDue || 0), valueX, finalY + 19, { align: "right" });
 
-  // ==========================================
-  // PAGE FOOTER
-  // ==========================================
-  const pageHeight = doc.internal.pageSize.height;
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(8);
-  doc.setTextColor(...colors.slate500);
-  doc.text(`Generated by Droply Procurement System • ${new Date().toLocaleString()}`, 14, pageHeight - 10);
+  // Pagination Footer (Fixed TypeScript bypass for getting page count)
+  const pageCount = (doc as any).internal.getNumberOfPages(); // Cast as any to bypass TS complaints
+  
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    const pageHeight = doc.internal.pageSize.height;
+    
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(8);
+    doc.setTextColor(...colors.slate500);
+    
+    // Left side: Timestamp
+    doc.text(`Generated by Droply Procurement System • ${new Date().toLocaleString()}`, 14, pageHeight - 10);
+    
+    // Right side: Page X of Y
+    doc.text(`Page ${i} of ${pageCount}`, 196, pageHeight - 10, { align: "right" });
+  }
 
   doc.save(`${po.poNumber}-Purchase-Order.pdf`);
 };

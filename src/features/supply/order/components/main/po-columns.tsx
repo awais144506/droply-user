@@ -148,7 +148,7 @@ export const getPOColumns = (
                                 variant="ghost"
                                 size="sm"
                                 onClick={(e) => { e.stopPropagation(); handlers.onUndo(po); }}
-                                className="h-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 mr-2"
+                                className="h-8 text-amber-600 hover:text-rose-600 hover:bg-rose-50 mr-2"
                             >
                                 <RotateCcw className="h-4 w-4 mr-1.5" /> Undo
                             </Button>

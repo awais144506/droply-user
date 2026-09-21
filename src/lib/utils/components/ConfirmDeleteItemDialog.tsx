@@ -5,36 +5,44 @@ import {
     AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-interface ConfirmDeleteDialogProps {
-    itemName?: string;
+interface ConfirmActionDialogProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
-    isDeleting: boolean;
-    btnText?: string;
+    isLoading: boolean;
+    title: string;
+    description: React.ReactNode;
+    confirmText?: string;
+    confirmButtonClass?: string; // e.g. "bg-amber-600 hover:bg-amber-700"
 }
 
-export default function ConfirmDeleteDialog({
-    itemName = "this item",
+export default function ConfirmActionDialog({
     isOpen,
     onClose,
     onConfirm,
-    isDeleting,
-    btnText = "Delete"
-}: ConfirmDeleteDialogProps) {
+    isLoading,
+    title,
+    description,
+    confirmText = "Confirm",
+    confirmButtonClass = "bg-sky-600 hover:bg-sky-700 text-white"
+}: ConfirmActionDialogProps) {
     return (
         <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                    <AlertDialogTitle>{title}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This will may permanently delete/disable <span className="font-bold text-slate-900">{itemName}</span>.
+                        <div>{description}</div>
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-                    <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
-                        {isDeleting ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Deleting...</> : btnText}
+                    <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
+                    <Button 
+                        onClick={onConfirm} 
+                        disabled={isLoading}
+                        className={confirmButtonClass}
+                    >
+                        {isLoading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing...</> : confirmText}
                     </Button>
                 </AlertDialogFooter>
             </AlertDialogContent>

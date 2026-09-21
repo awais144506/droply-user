@@ -59,3 +59,40 @@ export function useDeletePO(branchId: string) {
         },
     })
 }
+
+export function useReceivePO() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        // No payload needed, the backend figures out what to do based on the user's token!
+        mutationFn: (id: string) => poApi.updateStatus(id),
+        onSuccess: () => {
+            toast.success("Order status updated successfully!");
+            queryClient.invalidateQueries({ queryKey: poKeys.lists() });
+        },
+        onError: (error) => {
+            toast.error("Failed to process order", {
+                description: error.message || "An unexpected error occurred",
+            });
+        },
+    });
+}
+
+export function useUndoPO() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => poApi.undoStatus(id),
+        onSuccess: () => {
+            toast.success("Receipt reversed", {
+                description: "Inventory levels have been decremented and the order is open again."
+            });
+            queryClient.invalidateQueries({ queryKey: poKeys.lists() });
+        },
+        onError: (error) => {
+            toast.error("Failed to undo receipt", {
+                description: error?.message || "An unexpected error occurred",
+            });
+        },
+    });
+}

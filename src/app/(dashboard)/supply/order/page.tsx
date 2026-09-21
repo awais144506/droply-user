@@ -38,7 +38,7 @@ export default function PurchaseOrdersPage() {
         tabs={[
           { label: "All", value: "" },
           { label: "Ordered", value: "ORDERED" },
-          { label: "Counted (Manager)", value: "PENDING_RESTOCK" },
+          { label: "Checked", value: "PENDING_RESTOCK" },
           { label: "Received", value: "RECEIVED" }
         ]}
       />

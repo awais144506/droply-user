@@ -18,5 +18,11 @@ export const poApi = {
     },
     delete: async (id: string) => {
         return await apiClient.delete(`/po/${id}`)
+    },
+    updateStatus: async (id: string) => {
+        return await apiClient.patch(`/po/${id}/receive`);
+    },
+    undoStatus: async (id: string) => {
+        return await apiClient.patch(`/po/${id}/undo`)
     }
 };
