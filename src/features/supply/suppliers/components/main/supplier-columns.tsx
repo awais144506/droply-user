@@ -59,7 +59,7 @@ export const getSupplierColumns = (
         {
             header: "Total Purchases",
             render: (supplier) => (
-                <span className="text-slate-600 font-medium text-sm">
+                <span className="text-slate-600 font-black text-sm">
                     Rs {formatCurrency(supplier.totalPurchases)}
                 </span>
             ),

@@ -5,11 +5,18 @@ import { SupplierStats } from "@/features/supply/suppliers/components/main/suppl
 import { SupplierTable } from "@/features/supply/suppliers/components/main/supplier-table";
 import Loading from "@/app/loading";
 import MainPageHeader from "@/lib/utils/components/MainPageHeader";
+import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
+import { useSearchParams } from "next/navigation";
+
 
 export default function SuppliersPage() {
   const { branchId } = useRole();
-  const { data: suppliers = [], isLoading } = useSuppliers(branchId);
+  const searchParams = useSearchParams();
+  const search = searchParams.get("search") || undefined;
+  const status = searchParams.get("status") || undefined
 
+  const { data, isLoading } = useSuppliers(branchId, search, status);
+  const { suppliers, totalDueAmount } = data || {};
   if (isLoading) return <Loading text="Loading Suppliers..." />
 
   return (
@@ -20,7 +27,19 @@ export default function SuppliersPage() {
         href="/supply/suppliers/create-supplier"
         btnText="Create Supplier"
       />
-      <SupplierStats />
+      <SupplierStats
+        totalDueAmount={totalDueAmount}
+      />
+      <DataTableFilterBar
+        searchParamName="search"
+        searchPlaceholder="Search by firm name..."
+        tabParamName="status"
+        tabs={[
+          { label: "All", value: "" },
+          { label: "Balance", value: "DEBT" },
+          { label: "Clear", value: "CLEAR" },]
+        }
+      />
       <SupplierTable suppliers={suppliers} />
 
     </div>

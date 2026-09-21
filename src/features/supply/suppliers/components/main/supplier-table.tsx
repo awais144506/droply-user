@@ -13,7 +13,7 @@ import { useDeleteSupplier } from "../../api/use-mutate-supplier";
 import { toast } from "sonner"
 
 interface SupplierTableProps {
-  suppliers: SupplierList[];
+  suppliers?: SupplierList[];
 }
 
 export function SupplierTable({ suppliers }: SupplierTableProps) {

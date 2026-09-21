@@ -35,6 +35,7 @@ export function useProducts(branchId: string) {
                 label: p.name,
                 salePrice: p.salePrice,
                 unitCost: p.unitCost,
+                category: p.category,
             })) || [];
 
             return {
