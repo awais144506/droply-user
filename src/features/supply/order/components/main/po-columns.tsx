@@ -3,8 +3,9 @@ import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
 import { formatCurrency, displayPakistaniPhone } from "@/lib/utils/functions/setFormat";
 import { Button } from "@/components/ui/button";
 import { PurchaseOrder } from "../../types/po";
-import { Printer, MessageCircle, Edit2, PackagePlus, RotateCcw, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Printer, Edit2, PackagePlus, RotateCcw, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
+import { FaWhatsapp } from "react-icons/fa";
 
 interface POActionHandlers {
     onReceive: (po: PurchaseOrder) => void;
@@ -165,7 +166,7 @@ export const getPOColumns = (
                             <Printer className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handlers.onWhatsApp(po); }} className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50">
-                            <MessageCircle className="h-4 w-4" />
+                            <FaWhatsapp className="h-4 w-4 text-green-600" />
                         </Button>
                     </div>
                 )

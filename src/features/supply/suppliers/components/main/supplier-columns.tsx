@@ -1,4 +1,4 @@
-import { MapPin, Phone, CalendarX2, Edit2, Trash2, Building2 } from "lucide-react";
+import { MapPin, Phone, CalendarX2, Edit2, Trash2, Building2, Mail } from "lucide-react";
 import { SupplierList } from "../../types/supplier";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
@@ -36,6 +36,12 @@ export const getSupplierColumns = (
                         <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                         {supplier.city}
                     </span>
+                    {supplier.email && (
+                        <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                            <Mail className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                            {supplier.email}
+                        </span>
+                    )}
                 </div>
             ),
         },
@@ -79,7 +85,7 @@ export const getSupplierColumns = (
                 }
 
                 return (
-                    <span className="text-sm text-slate-600 font-medium">
+                    <span className="text-sm text-slate-600 font-bold">
                         {lastVisit.formattedDate}
                     </span>
                 );

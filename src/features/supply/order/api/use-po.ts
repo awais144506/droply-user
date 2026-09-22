@@ -47,3 +47,12 @@ export function usePurchaseOrder(id: string) {
         enabled: !!id,
     });
 }
+
+// 7. Activity Logs for Customers
+export function usePoLogs(branchId: string) {
+  return useQuery({
+    queryKey: poKeys.logs(),
+    queryFn: () => poApi.getPoLogs(branchId),
+    enabled: !!branchId,
+  });
+}

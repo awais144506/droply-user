@@ -11,10 +11,9 @@ import {
     CheckCircle2, 
     Clock, 
     Edit2, 
-    Trash2, 
-    Printer, 
-    MessageCircle 
+    Printer,  
 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 interface PaymentActionHandlers {
     onEdit: (payment: SupplierPayment) => void;
@@ -103,17 +102,6 @@ export const getPaymentColumns = (
             ),
         },
         {
-            header: "Remaining",
-            render: (payment) => {
-                const remaining = payment.purchaseOrder?.balanceDue || 0;
-                return (
-                    <span className={`font-bold text-sm ${remaining > 0 ? "text-rose-600" : "text-slate-400"}`}>
-                        Rs {formatCurrency(remaining)}
-                    </span>
-                );
-            },
-        },
-        {
             header: "Status",
             render: (payment) => {
                 const isCleared = payment.status === "CLEARED";
@@ -141,7 +129,7 @@ export const getPaymentColumns = (
                         <Printer className="h-4 w-4" />
                     </Button>
                     <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handlers.onWhatsApp(payment); }} className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50">
-                        <MessageCircle className="h-4 w-4" />
+                        <FaWhatsapp className="h-4 w-4 text-green-600" />
                     </Button>
                 </div>
             ),

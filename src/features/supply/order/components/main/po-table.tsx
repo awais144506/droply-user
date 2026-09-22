@@ -73,10 +73,15 @@ export function POTable({ orders = [] }: POTableProps) {
       }
     },
     onWhatsApp: (po: PurchaseOrder) => {
-      sendPOWhatsApp(po);
+      // Guard clause to ensure settings are loaded before sending
+      if (!branchSettings) {
+        toast.error("Branch settings are still loading. Please wait a second.");
+        return;
+      }
+      sendPOWhatsApp(po, branchSettings);
     },
     onEdit: (po: PurchaseOrder) => {
-      router.push(`/supply/orders/${po.id}/edit`);
+      router.push(`/supply/order/${po.id}`);
     }
   }), [branchSettings, router]);
 

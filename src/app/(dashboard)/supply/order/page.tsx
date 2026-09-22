@@ -7,6 +7,8 @@ import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 import Loading from "@/app/loading";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
+import { usePoLogs } from "@/features/supply/order/api/use-po";
+import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 
 export default function PurchaseOrdersPage() {
   const { branchId } = useRole();
@@ -14,10 +16,10 @@ export default function PurchaseOrdersPage() {
   const search = searchParams.get("search") || undefined;
   const status = searchParams.get("status") || undefined
   const { data, isLoading } = usePurchaseOrders(branchId, search, status);
+  const { data: logs = [], isLoading: isLoadingLogs } = usePoLogs(branchId);
 
   const orders = data?.orders;
   const stats = data?.stats || { activeOrders: 0, pendingValue: 0, checkedByManager: 0, completedOrders: 0 };
-
   if (isLoading) return <Loading text="Loading Orders..." />
 
   return (
@@ -44,6 +46,12 @@ export default function PurchaseOrdersPage() {
       />
       <POTable
         orders={orders}
+      />
+
+      <ActivityLogsCard
+        title="Purchase Order Activity"
+        logs={logs}
+        isLoading={isLoadingLogs}
       />
     </div>
   );

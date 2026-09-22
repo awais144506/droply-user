@@ -1,17 +1,12 @@
 import {
-  MapPin, Package, Truck, FileText, Navigation, Factory, PackageCheck, Building,
+  MapPin, Package, Truck, FileText, Navigation, Factory, Building,
   Receipt, UserCog, BarChart3, LucideIcon, UserPlus, Settings, ArchiveX, TruckIcon,
   BadgeDollarSign, Undo2, Headphones, CreditCard
 } from "lucide-react";
 
 export type UserRole = "OWNER" | "MANAGER";
-// 🔥 1. Define the tiers
 export type SubscriptionTier = "SILVER" | "GOLD" | "PLATINUM";
-
-//DELETE IN PRODUCTION
 export type DevStatus = "DONE" | "PARTIAL" | "TODO";
-//DELETE IN PRODUCTION
-
 export interface NavItem {
   title: string;
   url: string;
@@ -59,7 +54,6 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     headerColor: { text: "text-indigo-600 dark:text-indigo-400", dot: "bg-indigo-500", border: "border-indigo-500/20", bgHover: "hover:bg-indigo-500/5" },
     items: [
       { title: "Production / Refill", url: "/stock/production", icon: Factory, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "TODO" },
-      { title: "Asset Custody Ledger", url: "/stock/assets", icon: PackageCheck, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "TODO" },
       { title: "Wastage & Damages", url: "/stock/wastage", icon: ArchiveX, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "TODO" },
     ],
   },
@@ -86,7 +80,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
       // Admin/Settings are always available to manage their account
       { title: "Subscription", url: "/admin/subscription", icon: CreditCard, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "TODO" },
       { title: "Branch Settings", url: "/admin/settings", icon: Settings, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "DONE" },
-      { title: "Help", url: "/admin/help", icon: Headphones, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "TODO" },
+      { title: "Help", url: "/admin/help", icon: Headphones, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "DONE" },
     ],
   },
 ];

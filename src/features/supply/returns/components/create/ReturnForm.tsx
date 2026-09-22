@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/incompatible-library */
 "use client";
 
 import { useEffect, useMemo } from "react";
@@ -38,7 +39,6 @@ export default function ReturnForm({ initialData }: ReturnFormProps) {
     const methods = useForm<CreateReturnFormValues>({
         resolver: yupResolver(createReturnSchema),
         defaultValues: {
-            branchId: branchId || "",
             supplierId: initialData?.supplierId || "",
             poId: initialData?.poId || "",
             notes: initialData?.notes || "",
@@ -173,7 +173,7 @@ export default function ReturnForm({ initialData }: ReturnFormProps) {
                         {fields.map((field, index) => (
                             <div key={field.id} className="flex flex-col md:flex-row gap-4 items-start p-4 border border-slate-100 rounded-xl relative hover:border-sky-100 transition-colors">
 
-                                <div className="flex-1 min-w-[250px]">
+                                <div className="flex-1 min-w-62.5">
                                     <FormSelect
                                         name={`items.${index}.branchProductId`}
                                         label="Inventory Product"

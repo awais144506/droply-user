@@ -51,7 +51,7 @@ export const generatePOPdf = async (po: PurchaseOrder, branch: BranchSettingData
     }
   }
 
-  // Header (Fixed optional chaining on toUpperCase)
+  // Header
   doc.setFont("helvetica", "bold");
   doc.setFontSize(24);
   doc.setTextColor(...colors.primary);
@@ -135,7 +135,7 @@ export const generatePOPdf = async (po: PurchaseOrder, branch: BranchSettingData
     }
   });
 
-  // Financials
+  // Financials - STRICT HISTORICAL VIEW
   const finalY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
 
   doc.setFont("helvetica", "normal");
@@ -146,13 +146,13 @@ export const generatePOPdf = async (po: PurchaseOrder, branch: BranchSettingData
   const splitNotes = doc.splitTextToSize(po.notes || "No additional notes provided.", 110);
   doc.text(splitNotes, 14, finalY + 5);
 
-  const labelX = 145;
+  const labelX = 140; // Shifted slightly left to accommodate longer text
   const valueX = 196;
 
   doc.setFontSize(10);
   doc.setTextColor(...colors.slate500);
-  doc.text("Subtotal:", labelX, finalY);
-  doc.text("Advance Paid:", labelX, finalY + 7);
+  doc.text("Order Total:", labelX, finalY);
+  doc.text("Initial Advance:", labelX, finalY + 7);
 
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...colors.slate900);
@@ -162,15 +162,18 @@ export const generatePOPdf = async (po: PurchaseOrder, branch: BranchSettingData
   doc.text(`- ${formatCurrency(po.advancePaid || 0)}`, valueX, finalY + 7, { align: "right" });
 
   doc.setFillColor(...colors.sky50);
-  doc.roundedRect(labelX - 5, finalY + 12, 60, 10, 1, 1, "F");
+  doc.roundedRect(labelX - 5, finalY + 12, 65, 10, 1, 1, "F");
 
   doc.setFontSize(11);
   doc.setTextColor(...colors.primary);
-  doc.text("Balance Due:", labelX, finalY + 19);
-  doc.text(formatCurrency(po.balanceDue || 0), valueX, finalY + 19, { align: "right" });
+  doc.text("Balance at Order:", labelX, finalY + 19);
+  
+  // Lock the balance to the original state
+  const historicalBalance = po.totalAmount - (po.advancePaid || 0);
+  doc.text(formatCurrency(historicalBalance), valueX, finalY + 19, { align: "right" });
 
-  // Pagination Footer (Fixed TypeScript bypass for getting page count)
-  const pageCount = (doc as any).internal.getNumberOfPages(); // Cast as any to bypass TS complaints
+  // Pagination Footer
+  const pageCount = (doc as any).internal.getNumberOfPages(); 
   
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);

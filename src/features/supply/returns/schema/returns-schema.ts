@@ -14,7 +14,6 @@ export const returnItemSchema = yup.object().shape({
 });
 
 export const createReturnSchema = yup.object().shape({
-    branchId: yup.string().required("Branch context is missing"),
     supplierId: yup.string().required("Please select a supplier"),
     poId: yup.string().nullable().optional(), // Optional, as some returns might be unlinked
     notes: yup.string().max(500, "Notes cannot exceed 500 characters").nullable().optional(),

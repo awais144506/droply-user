@@ -51,6 +51,7 @@ export function useDeletePO(branchId: string) {
             toast.success("Purchase Order deleted successfully");
             queryClient.invalidateQueries({ queryKey: poKeys.lists() });
             queryClient.invalidateQueries({ queryKey: supplierKeys.lists(branchId) });
+            queryClient.invalidateQueries({ queryKey: poKeys.logs() });
         },
         onError: (error) => {
             toast.error("Failed to delete PO", {
@@ -69,6 +70,7 @@ export function useReceivePO() {
         onSuccess: () => {
             toast.success("Order status updated successfully!");
             queryClient.invalidateQueries({ queryKey: poKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: poKeys.logs() });
         },
         onError: (error) => {
             toast.error("Failed to process order", {
@@ -88,6 +90,7 @@ export function useUndoPO() {
                 description: "Inventory levels have been decremented and the order is open again."
             });
             queryClient.invalidateQueries({ queryKey: poKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: poKeys.logs() });
         },
         onError: (error) => {
             toast.error("Failed to undo receipt", {
