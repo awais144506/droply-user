@@ -1,54 +1,32 @@
 "use client";
-
-import { useState } from "react";
-import { Plus, Loader2 } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
-import { useSupplierPayments, SupplierPayment } from "@/features/supply/payments/api/use-supplier-payments";
-import { PaymentStats } from "@/features/supply/payments/components/payment-stats";
-import { PaymentTable } from "@/features/supply/payments/components/payment-table";
-import { Button } from "@/components/ui/button";
+import { usePayments } from "@/features/supply/payments/api/use-payments";
+import { PaymentStats } from "@/features/supply/payments/components/main/payment-stats";
+import { PaymentsTable } from "@/features/supply/payments/components/main/payment-table";
+import MainPageHeader from "@/lib/utils/components/MainPageHeader";
+import Loading from "@/app/loading";
 
 export default function SupplierPaymentsPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
-  const { data, isLoading } = useSupplierPayments(branchId);
+  const { data, isLoading } = usePayments(branchId);
+  const stats = data?.stats || { totalAmountPaid: 0 }
+  const payments = data?.payments
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPayment, setEditingPayment] = useState<SupplierPayment | null>(null);
-
-  if (isTenantLoading || isLoading || !data) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
-        <Loader2 className="h-8 w-8 animate-spin mb-4 text-sky-600" />
-        <p className="text-sm font-medium">Loading payment ledgers...</p>
-      </div>
-    );
-  }
+  if (isTenantLoading || isLoading || !data) return <Loading text="Loading Payments..."/>
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Supplier Payments Out</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Record bank transfers, cash vouchers, and cheques issued to vendors.
-          </p>
-        </div>
-        <Button 
-          onClick={() => { setEditingPayment(null); setIsModalOpen(true); }}
-          className="bg-sky-600 hover:bg-sky-700 text-white h-10 px-4 rounded-xl shadow-sm cursor-pointer"
-        >
-          <Plus className="h-4 w-4 mr-2" /> Record Payment
-        </Button>
-      </div>
+    <div className="space-y-6 max-w-350 mx-auto p-6">
+      <MainPageHeader
+        heading="Supplier Payments Out"
+        description="Record bank transfers, cash vouchers, and cheques issued to vendors."
+        href="/supply/payments/create-payment"
+        btnText="New Payment"
+      />
 
-      <PaymentStats payments={data.payments} remainingPayable={data.totalRemainingPayable} />
-      
-      <PaymentTable 
-        payments={data.payments} 
-        onEdit={(payment) => {
-          setEditingPayment(payment);
-          setIsModalOpen(true);
-        }}
+      <PaymentStats payments={data.payments} remainingPayable={stats.totalAmountPaid} />
+
+      <PaymentsTable
+        payments={payments}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { Undo2, AlertCircle, Banknote, PackagePlus } from "lucide-react";
-import { PurchaseReturn } from "../api/use-purchase-returns";
+import PageStatsCard from "@/lib/utils/components/StatsMainPageCards";
 
 export function ReturnStats({ returns }: { returns: PurchaseReturn[] }) {
   const pendingValue = returns.filter(r => r.status === "PENDING").reduce((acc, r) => acc + r.totalValue, 0);

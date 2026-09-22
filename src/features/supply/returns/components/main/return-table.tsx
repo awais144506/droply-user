@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
-import { PurchaseReturn, ReturnResolution } from "../api/use-purchase-returns";
+import { PurchaseReturn, ReturnResolution } from "../api/use-returns";
 import { Button } from "@/components/ui/button";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
