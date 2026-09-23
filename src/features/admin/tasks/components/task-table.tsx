@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Search, Pencil, Trash2, CheckCircle, Circle, AlertCircle, Clock } from "lucide-react";
+import { Search, Pencil, Trash2, CheckCircle, Circle, Clock, UserCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Task, TaskStatus } from "../api/use-tasks";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,8 @@ export function TaskTable({ tasks, onEdit }: { tasks: Task[], onEdit: (t: Task) 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedTasks = filteredTasks.slice(startIndex, startIndex + itemsPerPage);
 
-  const formatDateTime = (isoString: string) => {
+  const formatDateTime = (isoString?: string) => {
+    if (!isoString) return "No date provided";
     return new Date(isoString).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   };
 
@@ -72,44 +73,41 @@ export function TaskTable({ tasks, onEdit }: { tasks: Task[], onEdit: (t: Task) 
           <thead className="bg-slate-50/50 text-[10px] uppercase font-bold text-slate-400 tracking-wider border-b border-slate-100">
             <tr>
               <th className="px-6 py-4 whitespace-nowrap w-12"></th>
-              <th className="px-6 py-4 whitespace-nowrap">Task Description</th>
-              <th className="px-6 py-4 whitespace-nowrap">Assigned To</th>
-              <th className="px-6 py-4 whitespace-nowrap">Priority</th>
-              <th className="px-6 py-4 whitespace-nowrap">Due Date</th>
+              <th className="px-6 py-4 whitespace-nowrap">Task Details</th>
               <th className="px-6 py-4 whitespace-nowrap text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {paginatedTasks.length > 0 ? (
               paginatedTasks.map((task) => (
-                <tr key={task.id} className={`hover:bg-slate-50/50 transition-colors group ${task.status === "COMPLETED" ? "opacity-60" : ""}`}>
-                  <td className="px-6 py-4">
-                    <button onClick={() => toggleStatus(task)} className="text-slate-400 hover:text-emerald-500 transition-colors">
+                <tr key={task.id} className="hover:bg-slate-50/50 transition-colors group">
+                  <td className="px-6 py-4 align-top pt-5 w-12">
+                    <button onClick={() => toggleStatus(task)} className="text-slate-400 hover:text-emerald-500 transition-colors cursor-pointer mt-0.5">
                       {task.status === "COMPLETED" ? <CheckCircle className="h-5 w-5 text-emerald-500" /> : <Circle className="h-5 w-5" />}
                     </button>
                   </td>
-                  <td className={`px-6 py-4 font-medium ${task.status === "COMPLETED" ? "line-through text-slate-400" : "text-slate-900"}`}>
-                    {task.description}
+                  <td className={`px-6 py-4 ${task.status === "COMPLETED" ? "opacity-60" : ""}`}>
+                    <p className={`font-semibold text-sm mb-2 ${task.status === "COMPLETED" ? "line-through text-slate-400" : "text-slate-900"}`}>
+                      {task.description}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-3.5 w-3.5 text-slate-400" />
+                        <span>{formatDateTime(task.createdAt || task.updatedAt)}</span>
+                      </div>
+                      <span className="w-1 h-1 rounded-full bg-slate-300 hidden sm:block"></span>
+                      <div className="flex items-center gap-1.5">
+                        <UserCircle2 className="h-3.5 w-3.5 text-slate-400" />
+                        <span>
+                          <span className="font-bold text-slate-700">{task.assignedToName}</span>
+                          <span className="ml-1 text-[10px] uppercase tracking-wider font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded">
+                            {task.assignedToRole}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
                   </td>
-                  <td className="px-6 py-4">
-                    <p className="font-bold text-slate-700">{task.assignedToName}</p>
-                    <p className="text-[10px] font-bold text-slate-400 mt-0.5">{task.assignedToRole}</p>
-                  </td>
-                  <td className="px-6 py-4">
-                    {task.type === "URGENT" ? (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-[10px] font-bold border border-rose-100">
-                        <AlertCircle className="h-3 w-3" /> Urgent
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold border border-slate-200">
-                        <Clock className="h-3 w-3" /> Normal
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 text-xs font-semibold text-slate-500">
-                    {formatDateTime(task.dueDate)}
-                  </td>
-                  <td className="px-6 py-4 text-right">
+                  <td className="px-6 py-4 text-right align-middle">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button variant="ghost" size="sm" onClick={() => onEdit(task)} className="text-slate-400 hover:text-sky-600 h-8 w-8 rounded-lg cursor-pointer">
                         <Pencil className="h-4 w-4" />
@@ -122,7 +120,7 @@ export function TaskTable({ tasks, onEdit }: { tasks: Task[], onEdit: (t: Task) 
                 </tr>
               ))
             ) : (
-              <tr><td colSpan={6} className="px-6 py-12 text-center text-slate-500 text-sm">No tasks match your filters.</td></tr>
+              <tr><td colSpan={3} className="px-6 py-12 text-center text-slate-500 text-sm">No tasks match your filters.</td></tr>
             )}
           </tbody>
         </table>

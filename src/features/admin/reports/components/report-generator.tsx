@@ -1,35 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, ShoppingCart, Package, Truck, Calendar, Download, Loader2, CheckCircle2 } from "lucide-react";
+import { ShoppingCart, Calendar, Download, Loader2, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { generateDynamicReportPdf } from "@/lib/utils/functions/generatePdfs/report-pdf";
+import { useRole } from "@/lib/hooks/use-role";
+
+// 1. IMPORT YOUR ACTUAL HOOKS HERE (Update paths to match your project structure)
+import { usePayments } from "@/features/supply/payments/api/use-payments";
+import { usePurchaseOrders } from "@/features/supply/order/api/use-po";
 
 const reportCategories = [
   {
-    id: "sales",
-    label: "Sales & Khata",
-    icon: FileText,
-    reports: ["Daily Sales Summary", "Customer Dues & Ledger", "Route Wise Collection", "Returnable Asset Tracking"]
-  },
-  {
     id: "supply",
-    label: "Procurement",
+    label: "Supplies & Purchases",
     icon: ShoppingCart,
     reports: ["Supplier Payment History", "Purchase Orders Summary", "Debit Notes & Returns"]
   },
-  {
-    id: "inventory",
-    label: "Inventory",
-    icon: Package,
-    reports: ["Stock Movement Ledger", "Wastage & Damages Report"]
-  },
-  {
-    id: "fleet",
-    label: "Fleet & Fuel",
-    icon: Truck,
-    reports: ["Vehicle Fuel & Mileage Log", "Maintenance Expense History"]
-  }
 ];
 
 export function ReportGenerator() {
@@ -38,10 +26,16 @@ export function ReportGenerator() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const { branchId } = useRole();
+
+  // 2. CALL YOUR HOOKS TO GET REAL DATA
+  const { data: paymentsData } = usePayments(branchId);
+  const { data: ordersData } = usePurchaseOrders(branchId);
+
+  const payments = paymentsData?.payments
+  const orders = ordersData?.orders
 
   const activeCategory = reportCategories.find(c => c.id === activeTab);
-  
-  // Format today's date as YYYY-MM-DD for the HTML input 'max' attribute
   const todayStr = new Date().toISOString().split("T")[0];
 
   const handleTabChange = (tabId: string) => {
@@ -58,33 +52,82 @@ export function ReportGenerator() {
 
     const start = new Date(startDate);
     const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); // Include full end day
 
     if (start > end) {
       toast.error("Start date cannot be after the end date.");
       return;
     }
 
-    // Performance Guard: Limit range to 365 days maximum
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays > 365) {
-      toast.error("Please generate report with in range.");
+    setIsGenerating(true);
+    await new Promise(resolve => setTimeout(resolve, 600)); // Smooth loading feedback
+
+    let columns: string[] = [];
+    let rows: any[][] = [];
+    let totalAmount = 0;
+
+    // 3. FILTER REAL DATA FROM YOUR HOOKS INSTEAD OF MOCK DATA
+    if (selectedReport === "Supplier Payment History") {
+      // Replace 'payments' with your actual hook array variable name
+      const filtered = payments.filter((p: any) => {
+        const pDate = new Date(p.paymentDate);
+        return pDate >= start && pDate <= end;
+      });
+
+      columns = ["Date", "Voucher Number", "Supplier", "Method", "Amount Paid"];
+      rows = filtered.map((p: any) => [
+        new Date(p.paymentDate).toLocaleDateString(),
+        p.voucherNumber,
+        p.supplier?.firmName || "N/A",
+        p.paymentMethod,
+        `Rs ${p.amountPaid.toLocaleString("en-PK")}`
+      ]);
+      totalAmount = filtered.reduce((sum: number, p: any) => sum + p.amountPaid, 0);
+
+    } else if (selectedReport === "Purchase Orders Summary") {
+      // Replace 'orders' with your actual hook array variable name
+      const filtered = orders.filter((o: any) => {
+        const oDate = new Date(o.orderDate);
+        return oDate >= start && oDate <= end;
+      });
+
+      columns = ["Order Date", "PO Number", "Supplier", "Status", "Order Total"];
+      rows = filtered.map((o: any) => [
+        new Date(o.orderDate).toLocaleDateString(),
+        o.poNumber,
+        o.supplier?.firmName || "N/A",
+        o.status,
+        `Rs ${o.totalAmount.toLocaleString("en-PK")}`
+      ]);
+      totalAmount = filtered.reduce((sum: number, o: any) => sum + o.totalAmount, 0);
+
+    } else {
+      toast.error("Report type mapping not fully implemented yet.");
+      setIsGenerating(false);
       return;
     }
 
-    setIsGenerating(true);
-    
-    // Simulate report generation delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    if (rows.length === 0) {
+      toast.error("No records found for the selected date range.");
+      setIsGenerating(false);
+      return;
+    }
+
+    // 4. GENERATE THE PDF WITH LIVE DATA
+    generateDynamicReportPdf(
+      selectedReport,
+      `${startDate} to ${endDate}`,
+      columns,
+      rows,
+      `Rs ${totalAmount.toLocaleString("en-PK")}`
+    );
+
     setIsGenerating(false);
     toast.success(`"${selectedReport}" generated successfully!`);
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden flex flex-col md:flex-row min-h-[600px]">
-      
+    <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden flex flex-col md:flex-row min-h-150">
       {/* Left Sidebar: Categories */}
       <div className="w-full md:w-64 bg-slate-50 border-r border-slate-100 p-4 shrink-0">
         <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-2">Report Categories</h3>
@@ -96,9 +139,8 @@ export function ReportGenerator() {
               <button
                 key={category.id}
                 onClick={() => handleTabChange(category.id)}
-                className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${
-                  isActive ? "bg-white text-sky-600 shadow-sm border border-slate-200/60" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/50 border border-transparent"
-                }`}
+                className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-bold transition-all cursor-pointer ${isActive ? "bg-white text-sky-600 shadow-sm border border-slate-200/60" : "text-slate-500 hover:text-slate-900 hover:bg-slate-100/50 border border-transparent"
+                  }`}
               >
                 <Icon className={`h-4 w-4 ${isActive ? "text-sky-600" : "text-slate-400"}`} />
                 {category.label}
@@ -126,9 +168,8 @@ export function ReportGenerator() {
               <button
                 key={report}
                 onClick={() => setSelectedReport(report)}
-                className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all text-left cursor-pointer ${
-                  selectedReport === report ? "border-sky-500 bg-sky-50" : "border-slate-100 hover:border-sky-200 bg-white"
-                }`}
+                className={`flex items-start gap-3 p-4 rounded-xl border-2 transition-all text-left cursor-pointer ${selectedReport === report ? "border-sky-500 bg-sky-50" : "border-slate-100 hover:border-sky-200 bg-white"
+                  }`}
               >
                 <div className={`mt-0.5 rounded-full p-0.5 ${selectedReport === report ? "bg-sky-600 text-white" : "text-transparent border border-slate-300"}`}>
                   <CheckCircle2 className="h-3 w-3" />
@@ -155,9 +196,7 @@ export function ReportGenerator() {
                 className="w-full h-12 pl-10 pr-4 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 focus:bg-white transition-colors cursor-pointer"
               />
             </div>
-            
             <span className="text-slate-400 font-medium text-sm hidden sm:block">to</span>
-            
             <div className="relative w-full sm:w-auto flex-1">
               <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <input
@@ -173,7 +212,7 @@ export function ReportGenerator() {
 
         {/* Action Button */}
         <div className="mt-auto pt-6 border-t border-slate-100 flex justify-end">
-          <Button 
+          <Button
             onClick={handleGenerate}
             disabled={isGenerating}
             className="bg-slate-900 hover:bg-slate-800 text-white h-12 px-8 rounded-xl shadow-md cursor-pointer transition-all active:scale-95 text-base"

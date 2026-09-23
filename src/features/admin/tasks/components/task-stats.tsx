@@ -21,15 +21,7 @@ export function TaskStats({ tasks }: { tasks: Task[] }) {
         </div>
       </div>
 
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-        <div>
-          <div className="flex justify-between items-start mb-2">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Urgent Action</p>
-            <div className="p-2 bg-rose-50 rounded-lg text-rose-600"><AlertOctagon className="h-4 w-4" /></div>
-          </div>
-          <p className="text-3xl font-bold text-rose-600">{urgent}</p>
-        </div>
-      </div>
+
 
       <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
         <div>
@@ -38,16 +30,6 @@ export function TaskStats({ tasks }: { tasks: Task[] }) {
             <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600"><CheckCircle2 className="h-4 w-4" /></div>
           </div>
           <p className="text-3xl font-bold text-emerald-600">{completed}</p>
-        </div>
-      </div>
-
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-        <div>
-          <div className="flex justify-between items-start mb-2">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Delegated</p>
-            <div className="p-2 bg-slate-50 rounded-lg text-slate-600"><Users className="h-4 w-4" /></div>
-          </div>
-          <p className="text-3xl font-bold text-slate-900">{total}</p>
         </div>
       </div>
     </div>

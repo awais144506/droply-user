@@ -1,41 +1,42 @@
 "use client";
 
-import { useState } from "react";
-import { Loader2, Plus } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
 import { useProduction } from "@/features/stock/production/api/use-production";
-import { ProductionStats } from "@/features/stock/production/components/production-stats";
-import { ProductionTable } from "@/features/stock/production/components/production-table";
+import { ProductionStats } from "@/features/stock/production/components/main/production-stats";
+import { ProductionTable } from "@/features/stock/production/components/main/production-table";
 import { toast } from "sonner";
+import Loading from "@/app/loading";
+import MainPageHeader from "@/lib/utils/components/MainPageHeader";
+import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 
 export default function ProductionPage() {
-  const { branchId, isLoading: isTenantLoading } = useRole();
-  const { data: batches = [], isLoading } = useProduction(branchId);
+  const { branchId } = useRole();
 
-  const handleNewBatch = () => {
-    toast.info("Opening New Production Batch modal...");
-  };
+  // 1. Fetch the data object which contains both { batches, logs }
+  const { data, isLoading } = useProduction(branchId);
 
-  if (isTenantLoading || isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
-        <Loader2 className="h-8 w-8 animate-spin mb-4 text-sky-600" />
-        <p className="text-sm font-medium">Loading production logs...</p>
-      </div>
-    );
-  }
+  const batches = data?.batches || [];
+  const logs = data?.logs || [];
+
+  if (isLoading) return <Loading text="Loading batches..." />;
 
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto p-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Production & Refill Logs</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Track assembly output, raw material consumption, and daily stock conversions.
-        </p>
-      </div>
+    <div className="space-y-6 max-w-350 mx-auto p-6">
+      <MainPageHeader
+        heading="Production & Refill Logs"
+        description="Track assembly output, raw material consumption, and daily stock conversions."
+        href="/stock/production/create-batch"
+        btnText="Log New Batch"
+      />
 
       <ProductionStats batches={batches} />
-      <ProductionTable batches={batches} onNewBatch={handleNewBatch} />
+      <ProductionTable batches={batches} />
+
+      <ActivityLogsCard
+        title="Production Batch Logs"
+        logs={logs}
+        isLoading={isLoading}
+      />
     </div>
   );
 }
