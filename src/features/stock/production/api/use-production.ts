@@ -11,7 +11,6 @@ export const useProduction = (branchId: string) => {
       const totalYield = batchesData.batches.reduce((sum, batch) => sum + (batch.actualYield || 0), 0);
       const completedBatches = batchesData.batches.filter(b => b.status === "COMPLETED").length;
       const inProgressBatches = batchesData.batches.filter(b => b.status === "IN_PROGRESS").length;
-
       return {
         batchesData,
         stats: {

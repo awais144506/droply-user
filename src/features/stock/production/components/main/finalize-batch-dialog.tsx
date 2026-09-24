@@ -156,8 +156,8 @@ export function FinalizeBatchDialog({ isOpen, onClose, batch, branchId }: Finali
                             <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={isPending} className="bg-emerald-600 hover:bg-emerald-700 text-white">
-                                {isPending ? "Finalizing..." : "Add to Stock"}
+                            <Button type="submit" disabled={isPending || methods.formState.isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                                {isPending || methods.formState.isSubmitting ? "Finalizing..." : "Add to Stock"}
                             </Button>
                         </div>
                     </form>

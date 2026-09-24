@@ -15,6 +15,7 @@ const EditProductionBatch = () => {
     const { branchId } = useRole();
     const params = useParams();
     const batchId = params.id as string;
+    const isEdit = !!branchId;
 
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
@@ -56,6 +57,7 @@ const EditProductionBatch = () => {
                 <ProductionBatchForm
                     branchId={branchId}
                     initialData={data}
+                    isEdit={isEdit}
                 />
             </div>
 

@@ -17,11 +17,11 @@ import { RecipeProjection } from "./recipie-projection";
 interface ProductionBatchFormProps {
   branchId: string;
   initialData?: ProductionBatch;
+  isEdit?: boolean;
 }
 
-export const ProductionBatchForm = ({ branchId, initialData }: ProductionBatchFormProps) => {
+export const ProductionBatchForm = ({ branchId, initialData, isEdit }: ProductionBatchFormProps) => {
 
-  const isEdit = !!initialData;
   const { mutateAsync: createBatch } = useMutateProduction(branchId);
   const { mutateAsync: updateBatch } = useUpdateProduction(branchId);
 

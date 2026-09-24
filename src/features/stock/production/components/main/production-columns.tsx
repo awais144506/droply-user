@@ -37,7 +37,9 @@ export const getProductionColumns = (
                 <div className="space-y-1">
                     {batch.consumedItems?.map((item, idx) => (
                         <p key={item.id || idx} className="text-xs text-slate-600 font-medium">
-                            <span className="font-bold text-slate-900">{item.quantityUsed.toLocaleString()}x</span> {item.rawMaterial?.name || "Item"}
+                            <span className="font-bold text-slate-900">{item.quantityUsed.toLocaleString()}</span>
+                            <span className="text-[10px] font-semibold"> ({item.rawMaterial.unitOfMeasure})</span>
+                            <span className="text-slate-900 font-bold"> {item.rawMaterial?.name || "Item"} </span>
                         </p>
                     ))}
                 </div>
@@ -79,7 +81,7 @@ export const getProductionColumns = (
             className: "text-right",
             render: (batch) => {
                 const isInProgress = batch.status === "IN_PROGRESS";
-
+                const isCompleted = batch.status === "COMPLETED";
                 return (
                     <div className="flex justify-end items-center gap-1">
                         {/* WIP FINALIZE BUTTON */}
@@ -94,16 +96,16 @@ export const getProductionColumns = (
                             </Button>
                         )}
 
-
-                        {/* Standard Utilities */}
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => router.push(`/stock/production/${batch.id}`)}
-                            className="h-8 w-8 text-slate-400 hover:text-slate-600"
-                        >
-                            <Pen className="h-4 w-4" />
-                        </Button>
+                        {!isCompleted && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => router.push(`/stock/production/${batch.id}`)}
+                                className="h-8 w-8 text-slate-400 hover:text-slate-600"
+                            >
+                                <Pen className="h-4 w-4" />
+                            </Button>
+                        )}
                     </div>
                 );
             },

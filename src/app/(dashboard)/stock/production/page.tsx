@@ -16,9 +16,7 @@ export default function ProductionPage() {
   const stats = data?.stats || { totalYield: 0, completedBatches: 0, inProgressBatches: 0 }
   const batches = data?.batchesData.batches || [];
   const logs = data?.batchesData.logs || [];
-
   if (isLoading) return <Loading text="Loading batches..." />;
-
   return (
     <div className="space-y-6 max-w-350 mx-auto p-6">
       <MainPageHeader

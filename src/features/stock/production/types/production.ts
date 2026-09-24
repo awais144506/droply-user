@@ -5,6 +5,7 @@ export interface ConsumedItem {
   rawMaterialId: string;
   quantityUsed: number;
   rawMaterial: {
+    unitOfMeasure: string;
     name: string;
     productCode: string;
     category: string;

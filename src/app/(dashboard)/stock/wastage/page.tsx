@@ -68,7 +68,6 @@ export default function WastageDashboard() {
             <table className="w-full text-left text-sm whitespace-nowrap">
               <thead className="bg-slate-50/50 text-slate-500">
                 <tr>
-                  <th className="font-semibold px-6 py-4">Wastage ID</th>
                   <th className="font-semibold px-6 py-4">Date</th>
                   <th className="font-semibold px-6 py-4">Item Details</th>
                   <th className="font-semibold px-6 py-4">Qty</th>
@@ -79,9 +78,6 @@ export default function WastageDashboard() {
               <tbody className="divide-y divide-slate-100">
                 {MOCK_WASTAGE_DATA.map((row) => (
                   <tr key={row.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="px-6 py-4">
-                      <span className="font-mono text-xs font-semibold text-slate-900">{row.id}</span>
-                    </td>
                     <td className="px-6 py-4 text-slate-600">{new Date(row.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                     <td className="px-6 py-4">
                       <p className="font-bold text-slate-900">{row.item}</p>
