@@ -1,7 +1,7 @@
 "use client";
 
 import { CheckCircle2, CircleDashed, AlertOctagon, Users } from "lucide-react";
-import { Task } from "../api/use-tasks";
+import { Task } from "../../api/use-tasks";
 
 export function TaskStats({ tasks }: { tasks: Task[] }) {
   const pending = tasks.filter(t => t.status === "INCOMPLETE").length;

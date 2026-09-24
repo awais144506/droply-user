@@ -1,4 +1,4 @@
-import { ActivityLog } from "@/types/ActivityLog";
+import { ActivityLog } from "@/types/ActivityLog"; // Adjust path if needed
 
 export interface ConsumedItem {
   id: string;
@@ -16,7 +16,9 @@ export interface ProductionBatch {
   batchCode: string;
   branchId: string;
   productId: string;
-  yieldQuantity: number;
+  expectedYield: number;
+  actualYield: number | null;
+  status: 'IN_PROGRESS' | 'COMPLETED';
   supervisorName: string;
   productionDate: string;
   product: {
@@ -34,11 +36,7 @@ export interface ProductionResponse {
 export interface CreateProductionPayload {
   branchId: string;
   productId: string;
-  yieldQuantity: number;
+  expectedYield: number;
   supervisorName: string;
   productionDate?: string;
-  consumedItems: {
-    rawMaterialId: string;
-    quantityUsed: number;
-  }[];
 }

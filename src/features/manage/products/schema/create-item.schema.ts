@@ -2,6 +2,7 @@ import * as yup from "yup";
 
 export const createItemSchema = yup.object().shape({
   name: yup.string().min(3, "Item name too short").required("Item name is required"),
+  unitOfMeasure: yup.string().required("Scale is required"),
   category: yup.string().oneOf(["FINISHED_GOOD", "RAW_MATERIAL", "TRADE", "EQUIPMENT", "PACKAGING"]).required(),
   trackingType: yup.string().oneOf(["OUTRIGHT", "RETURNABLE"]).required(),
 
@@ -11,16 +12,16 @@ export const createItemSchema = yup.object().shape({
   openingStock: yup.number().min(0).transform((v, o) => (o === "" ? 0 : v)).default(0),
   lowStockThreshold: yup.number().min(0).transform((v, o) => (o === "" ? 0 : v)).default(0),
   securityDeposit: yup
-  .number()
-  .transform((value, originalValue) => {
-    if (originalValue == null || String(originalValue).trim() === "") {
-      return 0;
-    }
-    return value;
-  })
-  .min(0, "Cannot be negative")
-  .default(0)
-  .nullable(),
+    .number()
+    .transform((value, originalValue) => {
+      if (originalValue == null || String(originalValue).trim() === "") {
+        return 0;
+      }
+      return value;
+    })
+    .min(0, "Cannot be negative")
+    .default(0)
+    .nullable(),
   hasRecipe: yup.boolean().default(false),
   recipeItems: yup.array().of(
     yup.object().shape({

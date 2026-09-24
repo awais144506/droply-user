@@ -13,6 +13,7 @@ export function formatProductPayload(data: CreateItemFormData, branchId?: string
         name: data.name,
         unitCost: data.unitCost,
         salePrice: data.salePrice,
+        unitOfMeasure:data.unitOfMeasure,
         profitMargin: parseFloat(calculatedMargin.toFixed(2)),
         openingStock: data.openingStock,
         lowStockThreshold: data.lowStockThreshold,

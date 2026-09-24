@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type CategoryType = "FINISHED_GOOD" | "RAW_MATERIAL" | "TRADE" | "EQUIPMENT" | "PACKAGING"
 export type TrackingType = "OUTRIGHT" | "RETURNABLE";
 
@@ -6,6 +7,7 @@ export interface ProductItem {
     id: string;
     name: string;
     category: CategoryType;
+    unitOfMeasure: string;
     trackingType: TrackingType;
     unitCost: number;
     salePrice: number;
@@ -26,7 +28,9 @@ export interface ProductItem {
 }
 
 export interface ProductList {
+    recipeIngredients: any;
     productCode: string;
+    unitOfMeasure:string;
     securityDeposit: number;
     id: string;
     name: string;

@@ -3,20 +3,24 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
 import DataTable from "@/lib/utils/components/TableCreateMachine";
 import TablePagination from "@/lib/utils/components/TablePagination";
 import { usePagination } from "@/lib/utils/functions/pagination-calculation";
-
 import { SupplierPayment } from "../../types/payments";
 import { getPaymentColumns } from "./payment-columns";
+import { sendPOPaymentMessage } from "@/lib/utils/functions/whatsapp/whatsapp-utils";
+import { useBranchSettings } from "@/features/admin/settings/api/use-branch-settings";
+import { generatePaymentPdf } from "@/lib/utils/functions/generatePdfs/generate-payment-pdf";
 
 interface PaymentsTableProps {
     payments?: SupplierPayment[];
+    branchId: string;
 }
 
-export const PaymentsTable = ({ payments = [] }: PaymentsTableProps) => {
+export const PaymentsTable = ({ payments = [], branchId }: PaymentsTableProps) => {
     const router = useRouter();
+    const { fetchBranchSettings } = useBranchSettings(branchId);
+    const branchSettings = fetchBranchSettings.data;
 
     const {
         currentPage,
@@ -37,13 +41,13 @@ export const PaymentsTable = ({ payments = [] }: PaymentsTableProps) => {
             toast.info(`Delete flow for ${payment.voucherNumber} pending...`);
         },
         onPrint: (payment: SupplierPayment) => {
-            console.log("Print", payment.id);
             toast.info(`Generating voucher PDF for ${payment.voucherNumber}...`);
+            generatePaymentPdf(payment, branchSettings);
         },
         onWhatsApp: (payment: SupplierPayment) => {
-            toast.info("Opening WhatsApp...");
+            sendPOPaymentMessage(payment, branchSettings)
         }
-    }), [router]);
+    }), [branchSettings, router]);
 
     const columns = useMemo(() => getPaymentColumns(router, handlers), [router, handlers]);
 

@@ -38,6 +38,23 @@ export function useProducts(branchId: string) {
                 category: p.category,
             })) || [];
 
+            // Updated for Production WIP: Exclude Raw Materials!
+            const productionOptions = products?.filter(p => p.category === "FINISHED_GOOD" || p.hasRecipe)
+                .map(p => ({
+                    value: p.id,
+                    label: p.name,
+                    hasRecipe: p.hasRecipe,
+                    currentStock: p.currentStock,
+                    category: p.category,
+                    recipe: p.recipeIngredients?.map((ri: any) => ({
+                        rawMaterialId: ri.childItemId,
+                        name: ri.childItem?.name || "Unknown Material",
+                        quantityNeeded: ri.quantity,
+                        unitOfMeasure: ri.childItem?.unitOfMeasure || "PIECE",
+                        currentStock: ri.childItem?.currentStock || 0
+                    })) || []
+                })) || [];
+
             return {
                 products,
                 stats: {
@@ -49,6 +66,7 @@ export function useProducts(branchId: string) {
                 productOptions,
                 quickSaleOptions,
                 bomOptions,
+                productionOptions
             }
 
         },

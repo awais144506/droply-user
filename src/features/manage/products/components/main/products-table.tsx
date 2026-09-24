@@ -86,11 +86,12 @@ export function ProductsTable({ products }: { products: ProductList[] | undefine
             />
 
             <ConfirmDeleteDialog
-                itemName={productToDelete?.name}
+                title="Are you sure?"
+                description={`You want to delete : ${productToDelete?.name}`}
                 isOpen={!!productToDelete}
                 onClose={() => setProductToDelete(null)}
                 onConfirm={confirmDelete}
-                isDeleting={isDeleting}
+                isLoading={isDeleting}
             />
         </div>
     );

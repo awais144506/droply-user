@@ -11,14 +11,14 @@ const handleOpenWhatsApp = () => {
 };
 
 const handleOpenEmail = () => {
-  const email = "support@droply.pk";
+  const email = "support@dedroply.com";
   const subject = encodeURIComponent("Support Inquiry - Droply User");
   const body = encodeURIComponent("Hi Droply Team,\n\nI need help with: ");
   window.open(`https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`, "_blank");
 };
 
 const handleOpenInstagram = () => {
-  window.open("https://instagram.com/droply.pk", "_blank");
+  window.open("https://instagram.com/dedroply", "_blank");
 };
 
 export default function UserHelpPage() {
@@ -69,7 +69,7 @@ export default function UserHelpPage() {
               <FaEnvelope className="h-4 w-4" />
             </div>
             <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Email Help Desk</h2>
-            <p className="text-[11px] text-slate-500 mt-1">Drop us a mail at <span className="font-bold text-sky-600 text-xs">support@droply.pk</span> for detailed inquiries.</p>
+            <p className="text-[11px] text-slate-500 mt-1">Drop us a mail at <span className="font-bold text-sky-600 text-xs">support@dedroply.com</span> for detailed inquiries.</p>
           </div>
           <div className="mt-4 flex items-center gap-1 text-xs font-bold text-sky-600 group-hover:translate-x-0.5 transition-transform">
             <span>Send Email</span>
@@ -87,7 +87,7 @@ export default function UserHelpPage() {
               <FaInstagram className="h-5 w-5" />
             </div>
             <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Instagram DM</h2>
-            <p className="text-[11px] text-slate-500 mt-1">Follow updates and reach out via <span className="text-rose-600 font-bold text-xs">@droply.pk</span></p>
+            <p className="text-[11px] text-slate-500 mt-1">Follow updates and reach out via <span className="text-rose-600 font-bold text-xs">@dedroply</span></p>
           </div>
           <div className="mt-4 flex items-center gap-1 text-xs font-bold text-rose-600 group-hover:translate-x-0.5 transition-transform">
             <span>Follow Us</span>

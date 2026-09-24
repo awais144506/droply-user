@@ -10,3 +10,12 @@ export const trackingOptions = [
     { value: "OUTRIGHT", label: "Outright (Sold)" },
     { value: "RETURNABLE", label: "Returnable (Trackable)" },
 ];
+
+export const scaleOptions = [
+    { value: "PIECE", label: "Piece" },
+    { value: "KG", label: "KG" },
+    { value: "GRAM", label: "Gram" },
+    { value: "LITER", label: "Liter" },
+    { value: "MILLILITER", label: "Milli Liter" },
+    { value: "PACK", label: "Pack" },
+];

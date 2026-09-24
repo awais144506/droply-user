@@ -2,7 +2,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card"
 import { FormInput } from "@/components/ui/form-input"
 import { Package } from "lucide-react"
 import { FormSelect } from "@/components/ui/form-select"
-import { categoryOptions, trackingOptions } from "../../data/create-product-dropdown";
+import { categoryOptions, trackingOptions, scaleOptions } from "../../data/create-product-dropdown";
 
 const ProductDetailCard = () => {
     return (
@@ -13,12 +13,18 @@ const ProductDetailCard = () => {
                 </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
-                <div className="gap-3">
+                <div className="grid grid-cols-2 gap-3">
                     <FormInput
                         label="Product Name"
                         placeholder="e.g. 19-Liter Water"
                         required
                         name="name"
+                    />
+                    <FormSelect
+                        label="Scale"
+                        name="unitOfMeasure"
+                        options={scaleOptions}
+                        required
                     />
                 </div>
 

@@ -1,31 +1,47 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
-import { useTasks, Task } from "@/features/admin/tasks/api/use-tasks";
-import { TaskStats } from "@/features/admin/tasks/components/task-stats";
-import { TaskTable } from "@/features/admin/tasks/components/task-table";
+import { TaskStats } from "@/features/admin/tasks/components/main/task-stats";
+import { TaskTable } from "@/features/admin/tasks/components/main/task-table";
+import { TaskDialog } from "@/features/admin/tasks/components/create/task-dialog";
 import { Button } from "@/components/ui/button";
+import { useStaffList } from "@/features/admin/staff/api/use-staff";
+import { useTasks } from "@/features/admin/tasks/api/use-tasks";
+import Loading from "@/app/loading";
+import { Task } from "@/features/admin/tasks/types/task";
 
 export default function AdminTasksPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
-  const { data: tasks = [], isLoading } = useTasks(branchId);
+  
+  // Fetch Staff for the dropdown
+  const { data: staffData, isLoading: isStaffLoading } = useStaffList(branchId);
+  
+  const staffOptions = staffData?.staffOptions
+  console.log(staffOptions)
+  const { data: tasks = [], isLoading: isTasksLoading } = useTasks({ branchId });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  if (isTenantLoading || isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
-        <Loader2 className="h-8 w-8 animate-spin mb-4 text-sky-600" />
-        <p className="text-sm font-medium">Loading task data...</p>
-      </div>
-    );
+  if (isTenantLoading || isTasksLoading || isStaffLoading) {
+    return <Loading text="Loading tasks..." />;
   }
 
+  const handleEdit = (task: Task) => {
+    setEditingTask(task);
+    setIsModalOpen(true);
+  };
+
+  const handleClose = () => {
+    setIsModalOpen(false);
+    // Slight delay before clearing data to prevent UI flashing during modal exit animation
+    setTimeout(() => setEditingTask(null), 200);
+  };
+
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto p-6">
+    <div className="space-y-6 max-w-350 mx-auto p-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Task Delegation</h1>
@@ -33,7 +49,7 @@ export default function AdminTasksPage() {
             Assign and track daily operations for managers and riders.
           </p>
         </div>
-        <Button 
+        <Button
           onClick={() => { setEditingTask(null); setIsModalOpen(true); }}
           className="bg-sky-600 hover:bg-sky-700 text-white h-10 px-4 rounded-xl shadow-sm cursor-pointer"
         >
@@ -43,12 +59,16 @@ export default function AdminTasksPage() {
 
       <TaskStats tasks={tasks} />
       
-      <TaskTable 
-        tasks={tasks} 
-        onEdit={(task) => {
-          setEditingTask(task);
-          setIsModalOpen(true);
-        }}
+      {/* Ensure you pass your newly fetched tasks down */}
+      <TaskTable tasks={tasks} onEdit={handleEdit} />
+
+      {/* The Dialog */}
+      <TaskDialog
+        isOpen={isModalOpen}
+        onClose={handleClose}
+        branchId={branchId}
+        staffList={staffOptions}
+        initialData={editingTask}
       />
     </div>
   );

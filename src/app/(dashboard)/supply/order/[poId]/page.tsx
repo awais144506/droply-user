@@ -29,7 +29,7 @@ const EditPoOrder = () => {
     // Fetch dependent data
     const { data: productsData, isLoading: isLoadingProducts } = useProducts(branchId);
     const { data: suppliersData, isLoading: isLoadingSuppliers } = useSuppliers(branchId);
-    
+
     // Mutations
     const { mutate: updatePO, isPending: isUpdating } = useUpdatePO(branchId);
     const { mutate: deletePO, isPending: isDeleting } = useDeletePO(branchId);
@@ -86,11 +86,11 @@ const EditPoOrder = () => {
                     <h1 className="text-2xl font-bold text-slate-900">Edit Purchase Order</h1>
                     <p className="text-sm text-slate-500">Update details for {currentPO.poNumber}</p>
                 </div>
-                
+
                 {/* Delete Button */}
-                <Button 
-                    type="button" 
-                    variant="outline" 
+                <Button
+                    type="button"
+                    variant="outline"
                     onClick={() => setIsDeleteDialogOpen(true)}
                     className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
                 >
@@ -111,11 +111,12 @@ const EditPoOrder = () => {
 
             {/* Confirmation Dialog */}
             <ConfirmDeleteDialog
-                itemName={`Purchase Order ${currentPO.poNumber}`}
+                title="Are you sure?"
+                description={`Purchase Order ${currentPO.poNumber}`}
                 isOpen={isDeleteDialogOpen}
                 onClose={() => setIsDeleteDialogOpen(false)}
                 onConfirm={handleDelete}
-                isDeleting={isDeleting}
+                isLoading={isDeleting}
             />
         </div>
     );

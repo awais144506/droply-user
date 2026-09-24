@@ -12,18 +12,19 @@ export interface SupplierPayment {
     branchId: string;
     supplierId: string;
     poId: string;
-    
+
     // Included Relations from Backend
     supplier?: {
         firmName: string;
         supplierName: string;
+        phone: string;
     };
     purchaseOrder?: {
         poNumber: string;
         totalAmount: number;
         balanceDue: number;
     };
-    
+
     createdAt: string;
     updatedAt: string;
 }

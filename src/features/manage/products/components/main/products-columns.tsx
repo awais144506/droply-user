@@ -89,7 +89,7 @@ export const getProductColumns = (
                 return (
                     <div>
                         <p className={`text-base font-bold ${isLowStock ? "text-rose-600" : "text-slate-900"}`}>
-                            {product.currentStock}
+                            {product.currentStock} <span className="text-xs">({product.unitOfMeasure.toLocaleLowerCase()})</span>
                         </p>
                         {isLowStock && (
                             <div className="flex items-center justify-center gap-1 text-[10px] font-medium text-rose-500 mt-0.5">

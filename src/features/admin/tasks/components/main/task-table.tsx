@@ -4,7 +4,7 @@
 import { useState, useEffect } from "react";
 import { Search, Pencil, Trash2, CheckCircle, Circle, Clock, UserCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { Task, TaskStatus } from "../api/use-tasks";
+import { Task, TaskStatus } from "../../api/use-tasks";
 import { Button } from "@/components/ui/button";
 
 type FilterType = "ALL" | TaskStatus;

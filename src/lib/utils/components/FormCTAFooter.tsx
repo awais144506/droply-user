@@ -12,6 +12,7 @@ type Props = {
     isEditMode?: boolean;
     href: string;
     setStep?: (role: string) => void;
+    ctaText?: string;
 }
 
 export default function FormCTAFooter({
@@ -20,7 +21,8 @@ export default function FormCTAFooter({
     isDirty,
     isEditMode = false,
     href,
-    setStep
+    setStep,
+    ctaText
 }: Props) {
     return (
         <div className="flex items-center justify-between gap-3 border-t border-slate-200 pt-6 mt-8">
@@ -49,7 +51,7 @@ export default function FormCTAFooter({
                     disabled={isPending || (!isDirty && isEditMode) || !isValid}
                 >
                     {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin shrink-0" />}
-                    {isEditMode ? "Save Changes" : "Create Record"}
+                    {isEditMode ? "Save Changes" : ctaText}
                 </Button>
             </div>
         </div>

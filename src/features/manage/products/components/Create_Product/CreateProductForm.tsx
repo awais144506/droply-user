@@ -29,6 +29,7 @@ export function ProductForm({ initialValues, onSubmit, isPending = false }: Prod
         defaultValues: initialValues || {
             category: "FINISHED_GOOD",
             trackingType: "OUTRIGHT",
+            unitOfMeasure: "PIECE",
             name: "",
             unitCost: 0,
             salePrice: 0,
@@ -39,7 +40,7 @@ export function ProductForm({ initialValues, onSubmit, isPending = false }: Prod
             recipeItems: [],
         },
     });
-    
+
     const { handleSubmit, watch } = form;
     const hasRecipe = watch("hasRecipe");
     const unitCost = watch("unitCost") || 0;
@@ -65,6 +66,7 @@ export function ProductForm({ initialValues, onSubmit, isPending = false }: Prod
                 />
 
                 <FormCTAFooter
+                    ctaText="Create Product"
                     isPending={isPending}
                     isValid={form.formState.isValid}
                     isDirty={form.formState.isDirty}

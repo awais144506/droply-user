@@ -1,18 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { Crown, AlertTriangle, ArrowUpCircle, Sparkles } from "lucide-react";
-import { CurrentPlan } from "../api/use-subscription";
 import { Button } from "@/components/ui/button";
 
-export function PlanOverview({ plan }: { plan: CurrentPlan }) {
-  const formatCurrency = (val: number) => `Rs ${val.toLocaleString("en-PK")}`;
-  
-  const isPastDue = plan.status === "PAST_DUE";
-  // Detect if the workspace is in its initial 7-day trial
-  const isTrial = plan.status === "TRIAL" || plan.cycle === "TRIAL" as any;
+export function PlanOverview({ roleData }: { roleData: any }) {
+  const { userTier, tierCycle, userStatus, renewDate, isLoading } = roleData;
+
+  if (isLoading) {
+    return <div className="h-40 w-full bg-slate-50 border border-slate-100 rounded-2xl animate-pulse"></div>;
+  }
+
+  const isTrial = tierCycle === "TRIAL";
+  const isPastDue = userStatus === "PAST_DUE";
 
   // 1. Dynamic Tier Themes
-  const themes = {
+  const themes: Record<string, any> = {
     SILVER: {
       border: "border-slate-300",
       iconBg: "bg-slate-100",
@@ -33,17 +36,20 @@ export function PlanOverview({ plan }: { plan: CurrentPlan }) {
     }
   };
 
-  const theme = themes[plan.tier] || themes.GOLD;
+  const theme = themes[userTier?.toUpperCase()] || themes.SILVER;
 
   // 2. Date & Progress Calculations
   const today = new Date();
-  const expiry = new Date(plan.expiresAt);
+  today.setHours(0, 0, 0, 0);
+  
+  const expiry = renewDate ? new Date(renewDate) : new Date();
+  expiry.setHours(0, 0, 0, 0);
   
   const diffTime = expiry.getTime() - today.getTime();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
-  const maxGraceDays = 30; 
-  let cycleDays = plan.cycle === "MONTHLY" ? 30 : 365;
+  const maxGraceDays = parseInt(process.env.NEXT_PUBLIC_GRACE_PERIOD || "3", 10); 
+  let cycleDays = tierCycle === "MONTHLY" ? 30 : tierCycle === "YEARLY" ? 365 : 7;
   if (isTrial) cycleDays = 7;
 
   let progressPercent = 0;
@@ -69,14 +75,14 @@ export function PlanOverview({ plan }: { plan: CurrentPlan }) {
     const daysUsed = Math.max(0, cycleDays - diffDays);
     
     progressPercent = Math.min(100, (daysUsed / cycleDays) * 100);
-    statusText = `${diffDays} days remaining in current cycle`;
+    statusText = `${Math.max(0, diffDays)} days remaining in current cycle`;
   }
 
   // 3. UI Overrides for States
   let containerBorder = theme.border;
   let containerBg = "bg-white";
 
-  if (isPastDue) {
+  if (isPastDue || diffDays < 0) {
     containerBorder = "border-rose-400";
     containerBg = "bg-rose-50/30";
   } else if (isTrial) {
@@ -96,10 +102,10 @@ export function PlanOverview({ plan }: { plan: CurrentPlan }) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h2 className="text-xl font-bold text-slate-900 capitalize">
-                {plan.tier} Plan <span className="text-sm font-medium text-slate-500 capitalize">({isTrial ? "Trial" : plan.cycle})</span>
+                {userTier} Plan <span className="text-sm font-medium text-slate-500 capitalize">({isTrial ? "Trial" : tierCycle})</span>
               </h2>
               
-              {isPastDue && (
+              {(isPastDue || diffDays < 0) && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 uppercase tracking-wider">
                   <AlertTriangle className="h-3 w-3" /> Past Due
                 </span>
@@ -115,7 +121,7 @@ export function PlanOverview({ plan }: { plan: CurrentPlan }) {
             <p className="text-sm text-slate-600">
               {isTrial ? "Your risk-free trial ends on " : "Your workspace renews on "}
               <span className="font-bold text-slate-900">{expiry.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}</span>. 
-              {isTrial ? " Upgrade to keep access." : ` Fee: ${formatCurrency(plan.price)}/${plan.cycle.toLowerCase() === 'monthly' ? 'mo' : 'yr'}.`}
+              {isTrial ? " Upgrade to keep access." : " Update billing to ensure uninterrupted service."}
             </p>
           </div>
         </div>
@@ -129,11 +135,11 @@ export function PlanOverview({ plan }: { plan: CurrentPlan }) {
       {/* Bottom Section: Progress Bar */}
       <div className="space-y-2 pt-2 border-t border-slate-200/60">
         <div className="flex justify-between items-end text-xs font-bold">
-          <span className={isPastDue ? "text-rose-600" : isTrial ? "text-indigo-700" : "text-slate-500"}>
+          <span className={isPastDue || diffDays < 0 ? "text-rose-600" : isTrial ? "text-indigo-700" : "text-slate-500"}>
             {statusText}
           </span>
           <span className="text-slate-400">
-            {isPastDue ? `${progressPercent.toFixed(0)}% Grace Used` : isTrial ? `${progressPercent.toFixed(0)}% Trial Used` : `${progressPercent.toFixed(0)}% Cycle Used`}
+            {isPastDue || diffDays < 0 ? `${progressPercent.toFixed(0)}% Grace Used` : isTrial ? `${progressPercent.toFixed(0)}% Trial Used` : `${progressPercent.toFixed(0)}% Cycle Used`}
           </span>
         </div>
         

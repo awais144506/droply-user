@@ -8,7 +8,11 @@ import { PaymentChannels } from "@/features/admin/subscription/components/paymen
 import { BillingLedger } from "@/features/admin/subscription/components/billing-ledger";
 
 export default function SubscriptionPage() {
-  const { branchId, isLoading: isTenantLoading } = useRole();
+  // 1. Grab the full roleData object to pass to the overview
+  const roleData = useRole();
+  const { branchId, isLoading: isTenantLoading } = roleData;
+  
+  // 2. Fetch the billing ledger (and any other heavy backend data)
   const { data, isLoading } = useSubscription(branchId);
 
   if (isTenantLoading || isLoading || !data) {
@@ -29,7 +33,9 @@ export default function SubscriptionPage() {
         </p>
       </div>
 
-      <PlanOverview plan={data.plan} />
+      {/* 3. Pass the roleData directly to the newly designed PlanOverview */}
+      <PlanOverview roleData={roleData} />
+      
       <PaymentChannels />
       <BillingLedger ledger={data.ledger} />
     </div>

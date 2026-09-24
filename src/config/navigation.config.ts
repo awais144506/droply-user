@@ -53,8 +53,8 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     label: "INVENTORY & ASSETS",
     headerColor: { text: "text-indigo-600 dark:text-indigo-400", dot: "bg-indigo-500", border: "border-indigo-500/20", bgHover: "hover:bg-indigo-500/5" },
     items: [
-      { title: "Production", url: "/stock/production", icon: Factory, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "PARTIAL" },
-      { title: "Wastage & Damages", url: "/stock/wastage", icon: ArchiveX, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "TODO" },
+      { title: "Production", url: "/stock/production", icon: Factory, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "DONE" },
+      { title: "Wastage & Damages", url: "/stock/wastage", icon: ArchiveX, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "PARTIAL" },
     ],
   },
   {
@@ -63,7 +63,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     items: [
       { title: "Suppliers", url: "/supply/suppliers", icon: Building, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "DONE" },
       { title: "Purchase Orders", url: "/supply/order", icon: Receipt, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "DONE" },
-      { title: "Payments", url: "/supply/payments", icon: CreditCard, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "PARTIAL" },
+      { title: "Payments", url: "/supply/payments", icon: CreditCard, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "DONE" },
       { title: "Purchase Returns", url: "/supply/returns", icon: Undo2, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "PARTIAL" },
     ],
   },
@@ -78,7 +78,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
       { title: "Reports", url: "/admin/reports", icon: BarChart3, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS,devStatus: "PARTIAL" },
 
       // Admin/Settings are always available to manage their account
-      { title: "Subscription", url: "/admin/subscription", icon: CreditCard, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "TODO" },
+      { title: "Subscription", url: "/admin/subscription", icon: CreditCard, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "PARTIAL" },
       { title: "Branch Settings", url: "/admin/settings", icon: Settings, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "DONE" },
       { title: "Help", url: "/admin/help", icon: Headphones, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "DONE" },
     ],

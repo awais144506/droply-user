@@ -1,7 +1,6 @@
 "use client";
 import { useRole } from "@/lib/hooks/use-role";
 import { usePayments } from "@/features/supply/payments/api/use-payments";
-import { PaymentStats } from "@/features/supply/payments/components/main/payment-stats";
 import { PaymentsTable } from "@/features/supply/payments/components/main/payment-table";
 import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 import Loading from "@/app/loading";
@@ -9,10 +8,9 @@ import Loading from "@/app/loading";
 export default function SupplierPaymentsPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
   const { data, isLoading } = usePayments(branchId);
-  const stats = data?.stats || { totalAmountPaid: 0 }
   const payments = data?.payments
 
-  if (isTenantLoading || isLoading || !data) return <Loading text="Loading Payments..."/>
+  if (isTenantLoading || isLoading || !data) return <Loading text="Loading Payments..." />
 
   return (
     <div className="space-y-6 max-w-350 mx-auto p-6">
@@ -23,9 +21,8 @@ export default function SupplierPaymentsPage() {
         btnText="New Payment"
       />
 
-      <PaymentStats payments={data.payments} remainingPayable={stats.totalAmountPaid} />
-
       <PaymentsTable
+        branchId={branchId}
         payments={payments}
       />
     </div>

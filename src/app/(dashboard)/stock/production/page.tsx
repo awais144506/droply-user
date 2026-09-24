@@ -4,7 +4,6 @@ import { useRole } from "@/lib/hooks/use-role";
 import { useProduction } from "@/features/stock/production/api/use-production";
 import { ProductionStats } from "@/features/stock/production/components/main/production-stats";
 import { ProductionTable } from "@/features/stock/production/components/main/production-table";
-import { toast } from "sonner";
 import Loading from "@/app/loading";
 import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
@@ -12,11 +11,11 @@ import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 export default function ProductionPage() {
   const { branchId } = useRole();
 
-  // 1. Fetch the data object which contains both { batches, logs }
   const { data, isLoading } = useProduction(branchId);
 
-  const batches = data?.batches || [];
-  const logs = data?.logs || [];
+  const stats = data?.stats || { totalYield: 0, completedBatches: 0, inProgressBatches: 0 }
+  const batches = data?.batchesData.batches || [];
+  const logs = data?.batchesData.logs || [];
 
   if (isLoading) return <Loading text="Loading batches..." />;
 
@@ -29,7 +28,11 @@ export default function ProductionPage() {
         btnText="Log New Batch"
       />
 
-      <ProductionStats batches={batches} />
+      <ProductionStats
+        totalYield={stats.totalYield}
+        completedBatches={stats.completedBatches}
+        inProgressBatches={stats.inProgressBatches}
+      />
       <ProductionTable batches={batches} />
 
       <ActivityLogsCard

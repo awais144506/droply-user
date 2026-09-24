@@ -3,6 +3,7 @@ export const mappedProductData = (product: ProductItem | undefined) => {
     if (!product) return undefined;
     const mappedInitialData = {
         name: product.name,
+        unitOfMeasure: product.unitOfMeasure,
         category: product.category,
         trackingType: product.trackingType,
         unitCost: product.unitCost,

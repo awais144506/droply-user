@@ -6,7 +6,7 @@ export const getActionText = (action: ActivityLog["action"], type: string) => {
         case "CREATED": return `created a new ${lowerType}`;
         case "UPDATED": return `updated ${lowerType} details for`;
         case "DELETED": return `deleted ${lowerType}`;
-        case "RESTOCKED": return `restocked inventory for`;
+        case "RESTOCKED": return `stocked inventory for`;
         default: return `modified ${lowerType}`;
     }
 };

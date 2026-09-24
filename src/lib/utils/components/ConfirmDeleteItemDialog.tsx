@@ -13,7 +13,7 @@ interface ConfirmActionDialogProps {
     title: string;
     description: React.ReactNode;
     confirmText?: string;
-    confirmButtonClass?: string; // e.g. "bg-amber-600 hover:bg-amber-700"
+    confirmButtonClass?: string;
 }
 
 export default function ConfirmActionDialog({

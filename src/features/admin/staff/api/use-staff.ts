@@ -34,11 +34,18 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
           value: rider.id,
         }));
 
+      const staffOptions = payload.staff
+        .map((staff: { name: string; phone: string; id: string }) => ({
+          label: `${staff.name} (${staff.phone})`,
+          value: staff.id,
+        }));
+
       // 4. Return everything cleanly
       return {
         staff: filterStaff,
         stats: payload.stats,
         riderOptions,
+        staffOptions,
         isLimitReached
       };
     },

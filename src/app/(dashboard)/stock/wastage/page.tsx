@@ -34,16 +34,12 @@ export default function WastageDashboard() {
         {/* Summary Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Items Damaged (This Month)</p>
+            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Items Damaged</p>
             <h3 className="text-2xl font-black text-slate-900 mt-2">170<span className="text-sm font-medium text-slate-500 ml-1">units</span></h3>
           </div>
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Estimated Loss Value</p>
             <h3 className="text-2xl font-black text-rose-600 mt-2">Rs 18,500</h3>
-          </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pending Approvals</p>
-            <h3 className="text-2xl font-black text-amber-500 mt-2">1<span className="text-sm font-medium text-slate-500 ml-1">report</span></h3>
           </div>
         </div>
 
@@ -77,7 +73,6 @@ export default function WastageDashboard() {
                   <th className="font-semibold px-6 py-4">Item Details</th>
                   <th className="font-semibold px-6 py-4">Qty</th>
                   <th className="font-semibold px-6 py-4">Reason</th>
-                  <th className="font-semibold px-6 py-4">Status</th>
                   <th className="font-semibold px-6 py-4 text-center">Action</th>
                 </tr>
               </thead>
@@ -96,15 +91,6 @@ export default function WastageDashboard() {
                     <td className="px-6 py-4">
                       <p className="text-slate-700">{row.reason}</p>
                       <p className="text-[11px] text-slate-500">Rep: {row.reportedBy}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-bold ${
-                        row.status === 'Discarded' ? 'bg-slate-100 text-slate-600' : 
-                        row.status === 'Pending Review' ? 'bg-amber-50 text-amber-600 border border-amber-200/50' : 
-                        'bg-emerald-50 text-emerald-600 border border-emerald-200/50'
-                      }`}>
-                        {row.status}
-                      </span>
                     </td>
                     <td className="px-6 py-4 text-center">
                       <button className="p-2 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors cursor-pointer">
