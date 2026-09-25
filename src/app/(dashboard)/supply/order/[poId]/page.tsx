@@ -2,8 +2,7 @@
 "use client";
 import { useRouter, useParams } from "next/navigation";
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
-
+import { Trash2, AlertTriangle } from "lucide-react";
 import Loading from "@/app/loading";
 import POForm from "@/features/supply/order/components/create_update/POForm";
 import { useProducts } from "@/features/manage/products/api/use-products";
@@ -15,6 +14,7 @@ import { CreatePOFormData } from "@/features/supply/order/schema/create-po-schem
 import NotFoundPage from "@/app/not-found";
 import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
 import { Button } from "@/components/ui/button";
+import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
 
 const EditPoOrder = () => {
     const { branchId } = useRole();
@@ -23,26 +23,23 @@ const EditPoOrder = () => {
     const poId = params.poId as string;
     const isEditing = !!poId;
 
-    // Dialog state
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-    // Fetch dependent data
     const { data: productsData, isLoading: isLoadingProducts } = useProducts(branchId);
     const { data: suppliersData, isLoading: isLoadingSuppliers } = useSuppliers(branchId);
 
-    // Mutations
     const { mutate: updatePO, isPending: isUpdating } = useUpdatePO(branchId);
     const { mutate: deletePO, isPending: isDeleting } = useDeletePO(branchId);
 
-    // Fetch the target PO
     const { data: currentPO, isLoading: isLoadingPO } = usePurchaseOrder(poId);
 
     const productOptions = productsData?.bomOptions || [];
     const supplierOptions = suppliersData?.supplierOptions || [];
 
     if (isLoadingProducts || isLoadingSuppliers || isLoadingPO) return <Loading text="Loading PO details..." />;
-
     if (!currentPO) return <NotFoundPage />;
+
+    const isLocked = currentPO.status !== "ORDERED";
 
     const defaultValues: CreatePOFormData = {
         supplierId: currentPO.supplierId,
@@ -57,16 +54,14 @@ const EditPoOrder = () => {
     };
 
     const handleSubmit = (data: CreatePOFormData) => {
+        if (isLocked) return; // Hard block submission if bypassed via DevTools
+
         updatePO(
             {
                 id: poId,
                 payload: { ...data, branchId } as CreatePOFormData & { branchId: string }
             },
-            {
-                onSuccess: () => {
-                    router.push("/supply/order");
-                }
-            }
+            { onSuccess: () => router.push("/supply/order") }
         );
     };
 
@@ -82,21 +77,41 @@ const EditPoOrder = () => {
     return (
         <div className="max-w-5xl mx-auto space-y-6">
             <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Edit Purchase Order</h1>
-                    <p className="text-sm text-slate-500">Update details for {currentPO.poNumber}</p>
-                </div>
 
-                {/* Delete Button */}
-                <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setIsDeleteDialogOpen(true)}
-                    className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
-                >
-                    <Trash2 className="h-4 w-4 mr-2" /> Delete Order
-                </Button>
+
+                <div className="flex items-center justify-between w-full mb-6">
+                    <CreateFormHeader
+                        title="Edit Purchase Order Details"
+                        description={`View or update ${currentPO.poNumber}`}
+                        href="/supply/order"
+                    />
+
+                    {!isLocked && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsDeleteDialogOpen(true)}
+                            className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                        >
+                            <Trash2 className="h-4 w-4 mr-2" /> Delete Order
+                        </Button>
+                    )}
+                </div>
             </div>
+
+            {isLocked && (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3 text-amber-800 text-sm shadow-sm">
+                    <AlertTriangle className="w-5 h-5 shrink-0 text-amber-600 mt-0.5" />
+                    <div>
+                        <strong className="block mb-1">This Purchase Order is locked.</strong>
+                        {isLocked ? (
+                            <p>This order has already been added to your warehouse stock. You cannot modify the contents of a completed inventory ledger.</p>
+                        ) : (
+                            <p>Financial transactions are linked to this order. You cannot modify the items or totals while an active payment exists. To make changes, void the associated Payment Vouchers first.</p>
+                        )}
+                    </div>
+                </div>
+            )}
 
             <POForm
                 supplierOptions={supplierOptions}
@@ -107,9 +122,9 @@ const EditPoOrder = () => {
                 isLoadingSuppliers={isLoadingSuppliers}
                 initalValues={defaultValues}
                 isEditing={isEditing}
+                isLocked={isLocked} // Pass the lock state down
             />
 
-            {/* Confirmation Dialog */}
             <ConfirmDeleteDialog
                 title="Are you sure?"
                 description={`Purchase Order ${currentPO.poNumber}`}

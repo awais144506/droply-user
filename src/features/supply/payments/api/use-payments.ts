@@ -9,8 +9,6 @@ export function usePayments(branchId: string, search?: string, status?: string) 
         select: (allPayments) => {
             // Calculate global stats for the cards
             const totalAmountPaid = allPayments.reduce((acc, p) => acc + p.amountPaid, 0);
-
-            // Filter data for the table
             let filteredPayments = allPayments;
 
             if (status) {

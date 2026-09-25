@@ -28,7 +28,7 @@ export function useCreatePayment(branchId: string) {
     });
 }
 
-export function useUpdatePayment() {
+export function useUpdatePayment(branchId: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
@@ -36,7 +36,9 @@ export function useUpdatePayment() {
         onSuccess: () => {
             toast.success("Payment updated successfully");
             queryClient.invalidateQueries({ queryKey: paymentKeys.lists() });
-            queryClient.invalidateQueries({ queryKey: poKeys.lists() }); // PO balances changed
+            queryClient.invalidateQueries({ queryKey: paymentKeys.list(branchId) });
+            queryClient.invalidateQueries({ queryKey: poKeys.lists() });
+            queryClient.invalidateQueries({ queryKey: supplierKeys.lists(branchId) });
         },
         onError: (error) => {
             toast.error("Failed to update payment", {

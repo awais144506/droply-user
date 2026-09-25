@@ -6,6 +6,8 @@ export interface SupplierPayment {
     voucherNumber: string;
     paymentDate: string;
     amountPaid: number;
+    balanceDue: number;
+    remainingAmount:number;
     paymentMethod: SupplierPaymentMethod;
     referenceNote?: string;
     status: PaymentStatus;

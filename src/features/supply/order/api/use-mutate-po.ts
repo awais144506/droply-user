@@ -4,6 +4,7 @@ import { poKeys } from "./po-keys";
 import { toast } from "sonner";
 import { CreatePOFormData } from "../schema/create-po-schema";
 import { supplierKeys } from "../../suppliers/api/supplier-keys";
+import { productKeys } from "@/features/manage/products/api/product-keys";
 
 export function useCreatePO(branchId: string) {
     const queryClient = useQueryClient();
@@ -14,6 +15,7 @@ export function useCreatePO(branchId: string) {
             toast.success("Purchase Order generated successfully");
             queryClient.invalidateQueries({ queryKey: poKeys.list(branchId) });
             queryClient.invalidateQueries({ queryKey: supplierKeys.lists(branchId) });
+            queryClient.invalidateQueries({ queryKey: productKeys.lists() });
         },
         onError: (error) => {
             toast.error("Failed to generate PO", {

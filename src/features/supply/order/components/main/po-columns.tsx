@@ -3,7 +3,7 @@ import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
 import { formatCurrency, displayPakistaniPhone } from "@/lib/utils/functions/setFormat";
 import { Button } from "@/components/ui/button";
 import { PurchaseOrder } from "../../types/po";
-import { Printer, Edit2, PackagePlus, RotateCcw, Clock, CheckCircle2, AlertCircle } from "lucide-react";
+import { Printer, Edit2, PackagePlus, LockIcon, Clock, CheckCircle2, AlertCircle } from "lucide-react";
 import { format } from "date-fns";
 import { FaWhatsapp } from "react-icons/fa";
 
@@ -97,8 +97,6 @@ export const getPOColumns = (
             header: "Actions",
             className: "text-right",
             render: (po) => {
-                ;
-
                 return (
                     <div className="flex justify-end items-center gap-1">
 
@@ -142,21 +140,13 @@ export const getPOColumns = (
                                 <CheckCircle2 className="h-4 w-4 mr-1.5" /> Confirm Stock
                             </Button>
                         )}
-
-                        {/* UNDO LOGIC: Exclusively for Owners */}
-                        {po.status === "RECEIVED" && isOwner && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(e) => { e.stopPropagation(); handlers.onUndo(po); }}
-                                className="h-8 text-amber-600 hover:text-rose-600 hover:bg-rose-50 mr-2"
-                            >
-                                <RotateCcw className="h-4 w-4 mr-1.5" /> Undo
-                            </Button>
+                        {po.status === "RECEIVED" && (
+                            <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded-md font-bold uppercase tracking-wider cursor-not-allowed mr-2">
+                                <LockIcon className="h-4 w-4"/>
+                            </span>
                         )}
 
-                        {/* Standard Utilities */}
-                        {po.status == "ORDERED" && (
+                        {po.status === "ORDERED" && (
                             <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handlers.onEdit(po); }} className="h-8 w-8 text-slate-400 hover:text-slate-600">
                                 <Edit2 className="h-4 w-4" />
                             </Button>
@@ -165,6 +155,7 @@ export const getPOColumns = (
                         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handlers.onPrint(po); }} className="h-8 w-8 text-slate-400 hover:text-slate-600">
                             <Printer className="h-4 w-4" />
                         </Button>
+
                         <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); handlers.onWhatsApp(po); }} className="h-8 w-8 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50">
                             <FaWhatsapp className="h-4 w-4 text-green-600" />
                         </Button>

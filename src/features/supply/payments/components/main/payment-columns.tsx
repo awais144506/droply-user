@@ -4,14 +4,14 @@ import { formatCurrency } from "@/lib/utils/functions/setFormat";
 import { Button } from "@/components/ui/button";
 import { SupplierPayment } from "../../types/payments";
 import { format } from "date-fns";
-import { 
-    Landmark, 
-    Banknote, 
-    Receipt, 
-    CheckCircle2, 
-    Clock, 
-    Edit2, 
-    Printer,  
+import {
+    Landmark,
+    Banknote,
+    Receipt,
+    CheckCircle2,
+    Clock,
+    Edit2,
+    Printer,
 } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 
@@ -53,10 +53,10 @@ export const getPaymentColumns = (
         {
             header: "Payment Method",
             render: (payment) => {
-                const MethodIcon = payment.paymentMethod === "BANK_TRANSFER" ? Landmark 
-                                 : payment.paymentMethod === "CASH" ? Banknote 
-                                 : Receipt;
-                
+                const MethodIcon = payment.paymentMethod === "BANK_TRANSFER" ? Landmark
+                    : payment.paymentMethod === "CASH" ? Banknote
+                        : Receipt;
+
                 const methodLabel = payment.paymentMethod.replace("_", " ");
 
                 return (
@@ -77,7 +77,7 @@ export const getPaymentColumns = (
         {
             header: "PO Ref",
             render: (payment) => (
-                <button 
+                <button
                     onClick={() => router.push(`/supply/order/${payment.poId}`)}
                     className="font-bold text-sky-600 text-sm hover:underline text-left"
                 >
@@ -102,15 +102,22 @@ export const getPaymentColumns = (
             ),
         },
         {
+            header: "Balance Due",
+            render: (payment) => (
+                <span className="font-bold text-rose-600 text-sm">
+                    Rs {formatCurrency(payment.balanceDue)}
+                </span>
+            ),
+        },
+        {
             header: "Status",
             render: (payment) => {
                 const isCleared = payment.status === "CLEARED";
                 return (
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${
-                        isCleared 
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200" 
-                            : "bg-amber-50 text-amber-700 border-amber-200"
-                    }`}>
+                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${isCleared
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
+                        }`}>
                         {isCleared ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
                         {payment.status === "CLEARED" ? "Cleared" : "Partial"}
                     </span>

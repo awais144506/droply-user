@@ -36,6 +36,7 @@ export function useProducts(branchId: string) {
                 salePrice: p.salePrice,
                 unitCost: p.unitCost,
                 category: p.category,
+                unit: p.unitOfMeasure,
             })) || [];
 
             // Updated for Production WIP: Exclude Raw Materials!

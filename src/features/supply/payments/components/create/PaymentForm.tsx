@@ -5,7 +5,6 @@ import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { toast } from "sonner";
 import { FormInput } from "@/components/ui/form-input";
 import { FormSelect } from "@/components/ui/form-select";
 import { useRole } from "@/lib/hooks/use-role";
@@ -32,7 +31,7 @@ export default function PaymentForm({ initialData }: PaymentFormProps) {
 
     const isEditing = !!initialData;
     const { mutate: createPayment, isPending: isCreating } = useCreatePayment(branchId);
-    const { mutate: updatePayment, isPending: isUpdating } = useUpdatePayment();
+    const { mutate: updatePayment, isPending: isUpdating } = useUpdatePayment(branchId);
 
 
     // 1. Fetch Related Data for Dropdowns
@@ -45,8 +44,8 @@ export default function PaymentForm({ initialData }: PaymentFormProps) {
     // 2. Setup Form
     const methods = useForm<CreatePaymentFormValues>({
         resolver: yupResolver(createPaymentSchema),
+        mode: "onChange",
         defaultValues: {
-            branchId: branchId || "",
             supplierId: initialData?.supplierId || "",
             poId: initialData?.poId || "",
             amountPaid: initialData?.amountPaid || 0,
@@ -63,11 +62,11 @@ export default function PaymentForm({ initialData }: PaymentFormProps) {
         if (!poData?.orders) return [];
 
         return poData.orders
-            // Only show POs for the selected supplier that have a remaining balance (unless editing an existing payment)
             .filter(po => po.supplierId === selectedSupplierId && (po.balanceDue > 0 || po.id === initialData?.poId))
             .map(po => ({
-                label: `${po.poNumber} (Remaining: Rs ${po.balanceDue.toLocaleString()})`,
+                label: po.poNumber,
                 value: po.id,
+                balanceDue: po.balanceDue
             }));
     }, [poData?.orders, selectedSupplierId, initialData?.poId]);
 
@@ -79,10 +78,16 @@ export default function PaymentForm({ initialData }: PaymentFormProps) {
     }, [selectedSupplierId, setValue, isEditing]);
 
     const onSubmit = (values: CreatePaymentFormValues) => {
+        const selectedPO = poData?.orders?.find(po => po.id === values.poId);
+        const currentBalanceDue = selectedPO?.balanceDue || 0;
+        const newBalanceDue = currentBalanceDue - values.amountPaid
         const payload = {
             ...values,
+            branchId,
             paymentMethod: values.paymentMethod as "CASH" | "BANK_TRANSFER" | "CHEQUE",
-            paymentDate: values.paymentDate.toISOString(),
+            paymentDate: values.paymentDate,
+            balanceDue: newBalanceDue,
+            remainingAmount: currentBalanceDue,
         };
 
         if (isEditing && initialData) {
@@ -123,7 +128,7 @@ export default function PaymentForm({ initialData }: PaymentFormProps) {
                             label="Supplier Firm"
                             options={supplierData?.supplierOptions || []}
                             placeholder={isLoadingSuppliers ? "Loading..." : "Select Supplier"}
-                            disabled={isEditing || isLoadingSuppliers} // Usually can't change supplier on an existing ledger entry
+                            disabled={isEditing || isLoadingSuppliers}
                         />
 
                         <FormSelect
@@ -132,6 +137,14 @@ export default function PaymentForm({ initialData }: PaymentFormProps) {
                             options={poOptions}
                             placeholder={!selectedSupplierId ? "Select a supplier first" : isLoadingPOs ? "Loading POs..." : "Select PO"}
                             disabled={isEditing || !selectedSupplierId || isLoadingPOs}
+                            formatOptionLabel={(opt) => (
+                                <div className="flex items-center justify-between w-full pr-1">
+                                    <span className="font-medium mr-2">{opt.label}</span>
+                                    <span className="shrink-0 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-rose-600 shadow-sm bg-rose-50">
+                                        Remaining: Rs {opt.balanceDue?.toLocaleString()}
+                                    </span>
+                                </div>
+                            )}
                         />
                     </div>
 
@@ -169,7 +182,8 @@ export default function PaymentForm({ initialData }: PaymentFormProps) {
                     </div>
 
                     <FormCTAFooter
-                        isPending={isCreating}
+                        ctaText="Create Payment"
+                        isPending={isCreating || isUpdating}
                         isDirty={methods.formState.isDirty}
                         isValid={methods.formState.isValid}
                         isEditMode={isEditing}

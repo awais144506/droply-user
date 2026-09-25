@@ -1,7 +1,6 @@
 import * as yup from "yup";
 
 export const createPaymentSchema = yup.object().shape({
-    branchId: yup.string().required("Branch context is missing"),
     
     supplierId: yup.string().required("Please select a supplier"),
     

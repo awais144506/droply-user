@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import PaymentForm from "@/features/supply/payments/components/create/PaymentForm";
 import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
 import { usePayment } from "@/features/supply/payments/api/use-payments";
-import Loading from "@/app/loading"; // Adjust based on your loading component
+import Loading from "@/app/loading";
 
 export default function EditSupplierPayment() {
   const params = useParams();

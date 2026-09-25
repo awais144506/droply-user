@@ -6,6 +6,7 @@ import { useRole } from "@/lib/hooks/use-role";
 import { useSuppliers } from "@/features/supply/suppliers/api/use-suppliers";
 import { CreatePOFormData } from "@/features/supply/order/schema/create-po-schema";
 import { useCreatePO } from "@/features/supply/order/api/use-mutate-po";
+import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
 
 const CreatePoOrder = () => {
     const { branchId } = useRole();
@@ -33,12 +34,12 @@ const CreatePoOrder = () => {
     };
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
-            <div>
-                <h1 className="text-2xl font-bold text-slate-900">Create Purchase Order</h1>
-                <p className="text-sm text-slate-500">Issue a new PO to restock branch inventory.</p>
-            </div>
-
+        <div className="min-w-6xl mx-auto space-y-6">
+            <CreateFormHeader
+                title="Create Purchase Order"
+                description="Issue a new PO to restock branch inventory."
+                href="/supply/order"
+            />
             <POForm
                 supplierOptions={supplierOptions}
                 productOptions={productOptions}

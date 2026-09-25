@@ -14,20 +14,21 @@ type POFormProps = {
     productOptions: SelectOption[];
     onSubmit: (data: CreatePOFormData) => void;
     isPending: boolean;
-    isLoadingProducts: boolean
-    isLoadingSuppliers: boolean
+    isLoadingProducts: boolean;
+    isLoadingSuppliers: boolean;
     initalValues?: CreatePOFormData;
     isEditing?: boolean;
+    isLocked?: boolean;
 };
 
-export default function POForm({ supplierOptions, productOptions, onSubmit, isPending, isLoadingProducts, isLoadingSuppliers, initalValues, isEditing }: POFormProps) {
+export default function POForm({ supplierOptions, productOptions, onSubmit, isPending, isLoadingProducts, isLoadingSuppliers, initalValues, isEditing, isLocked = false }: POFormProps) {
     const form = useForm<CreatePOFormData>({
         resolver: yupResolver(createPOSchema),
         mode: "onChange",
         defaultValues: {
             supplierId: "",
             notes: "",
-            advancePaid: 0, // Added default value
+            advancePaid: 0,
             items: [{ productId: "", supplierItemName: "", quantity: 1, unitCost: 0 }],
         },
         values: initalValues,
@@ -40,18 +41,17 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
         name: "items",
     });
 
-    // Live calculations
     const watchedItems = useWatch({ control, name: "items" }) || [];
     const watchedAdvance = useWatch({ control, name: "advancePaid" }) || 0;
-
     const liveTotal = watchedItems.reduce((sum, item) => sum + ((item?.quantity || 0) * (item?.unitCost || 0)), 0);
     const balanceDue = Math.max(0, liveTotal - watchedAdvance);
+    const isAdvanceError = watchedAdvance > liveTotal;
 
     return (
         <FormProvider {...form}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
 
-                {/* 1. Top Section - Switched to 3 columns to fit Advance Paid */}
+                {/* 1. Top Section */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <FormSelect
                         name="supplierId"
@@ -61,25 +61,34 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
                         placeholder="-- Choose Supplier --"
                         isSearchable
                         required
+                        disabled={isLocked}
                         formatOptionLabel={(opt) => (
                             <div className="flex items-center justify-between w-full pr-1">
                                 <span className="font-medium mr-2">{opt.label}</span>
                                 <span className="shrink-0 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider text-slate-800 shadow-sm bg-gray-100">
                                     {opt.name}
                                 </span>
+
                             </div>
                         )}
                     />
-                    <FormInput
-                        name="advancePaid"
-                        label="Advance Paid (Rs)"
-                        type="number"
-                        min={0}
-                    />
+                    <div className="space-y-1">
+                        <FormInput
+                            name="advancePaid"
+                            label="Advance Paid (Rs)"
+                            type="number"
+                            min={0}
+                            disabled={isLocked}
+                        />
+                        {isAdvanceError && (
+                            <p className="text-xs text-rose-600 font-medium">Advance cannot exceed the total order amount.</p>
+                        )}
+                    </div>
                     <FormInput
                         name="notes"
                         label="Order Notes"
                         placeholder="e.g. Please deliver to back gate"
+                        disabled={isLocked}
                     />
                 </div>
 
@@ -89,14 +98,18 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
                         <h3 className="font-bold text-slate-900 mt-1">Order Items</h3>
                         <div className="text-right">
                             <p className="text-sm font-medium text-slate-500">Subtotal: Rs {liveTotal.toLocaleString()}</p>
-                            <p className="text-lg font-bold text-sky-600">Balance: Rs {balanceDue.toLocaleString()}</p>
+                            <p className={`text-lg font-bold ${isAdvanceError ? "text-rose-600" : "text-sky-600"}`}>
+                                (PO Time) Balance: Rs {balanceDue.toLocaleString()}
+                            </p>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 bg-sky-50 border border-sky-100 text-sky-700 px-4 py-3 rounded-xl text-xs font-medium">
-                        <Info className="h-4 w-4 shrink-0" />
-                        <p>When this order is marked as received, the specified quantities will automatically increment the live stock of the linked products.</p>
-                    </div>
+                    {!isLocked && (
+                        <div className="flex items-center gap-2 bg-sky-50 border border-sky-100 text-sky-700 px-4 py-3 rounded-xl text-xs font-medium">
+                            <Info className="h-4 w-4 shrink-0" />
+                            <p>When this order is marked as received, the specified quantities will automatically increment the live stock of the linked products.</p>
+                        </div>
+                    )}
 
                     {fields.map((field, index) => (
                         <div key={field.id} className="flex flex-col md:flex-row gap-6 items-start bg-slate-50 p-4 rounded-xl border border-slate-100 relative group">
@@ -109,12 +122,14 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
                                     placeholder="Select Product..."
                                     isSearchable
                                     required
+                                    disabled={isLocked}
                                     formatOptionLabel={(opt) => (
                                         <div className="flex items-center justify-between w-full pr-1">
-                                            <span className="font-medium mr-2">{opt.name}</span>
-                                            <span className="shrink-0 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider text-white shadow-sm bg-gray-700">
+                                            <span className="font-medium mr-2">{opt.name} <span className="text-[10px] bg-amber-600 text-white p-1 rounded">({opt.unit.toLowerCase()})</span></span>
+                                            <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider text-white shadow-sm bg-sky-700">
                                                 {opt.category}
                                             </span>
+
                                         </div>
                                     )}
                                 />
@@ -126,6 +141,7 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
                                     label="Item Name (For Invoice)"
                                     placeholder="e.g. 55mm Caps"
                                     required
+                                    disabled={isLocked}
                                 />
                             </div>
 
@@ -136,6 +152,7 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
                                     type="number"
                                     min={1}
                                     required
+                                    disabled={isLocked}
                                 />
                             </div>
 
@@ -146,10 +163,11 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
                                     type="number"
                                     min={0}
                                     required
+                                    disabled={isLocked}
                                 />
                             </div>
 
-                            {fields.length > 1 && (
+                            {!isLocked && fields.length > 1 && (
                                 <Button
                                     type="button"
                                     variant="ghost"
@@ -163,23 +181,28 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
                         </div>
                     ))}
 
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => append({ productId: "", supplierItemName: "", quantity: 1, unitCost: 0 })}
-                        className="w-full border-dashed border-2 border-slate-200 text-slate-500 hover:text-sky-600 hover:border-sky-200 hover:bg-sky-50"
-                    >
-                        <Plus className="h-4 w-4 mr-2" /> Add Another Item
-                    </Button>
+                    {!isLocked && (
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => append({ productId: "", supplierItemName: "", quantity: 1, unitCost: 0 })}
+                            className="w-full border-dashed border-2 border-slate-200 text-slate-500 hover:text-sky-600 hover:border-sky-200 hover:bg-sky-50"
+                        >
+                            <Plus className="h-4 w-4 mr-2" /> Add Another Item
+                        </Button>
+                    )}
                 </div>
 
-                <FormCTAFooter
-                    href="/supply/order"
-                    isPending={isPending}
-                    isDirty={form.formState.isDirty}
-                    isValid={form.formState.isValid}
-                    isEditMode={isEditing}
-                />
+                {!isLocked && (
+                    <FormCTAFooter
+                        ctaText="Create PO"
+                        href="/supply/order"
+                        isPending={isPending}
+                        isDirty={form.formState.isDirty}
+                        isValid={form.formState.isValid && !isAdvanceError}
+                        isEditMode={isEditing}
+                    />
+                )}
             </form>
         </FormProvider>
     );
