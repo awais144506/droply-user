@@ -7,6 +7,7 @@ export interface POItem {
     total: number;
     supplierItemName: string;
     branchProduct: {
+        currentStock: number;
         id: string;
         name: string;
     };

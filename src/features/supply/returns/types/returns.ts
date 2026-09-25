@@ -13,7 +13,7 @@ export interface PurchaseReturnItem {
     // Included relation
     branchProduct?: {
         name: string;
-        sku: string;
+        sku?: string; // Made optional because the backend select only returns 'name'
     };
 }
 
@@ -21,25 +21,27 @@ export interface PurchaseReturn {
     id: string;
     debitNoteNumber: string;
     returnDate: string;
-    resolvedAt?: string;
+    resolvedAt: string | null; // Explicitly handle null from JSON
     status: ReturnStatus;
     totalValue: number;
     creditRecovered: number;
-    notes?: string;
+    notes: string | null;
     branchId: string;
     supplierId: string;
-    poId?: string;
-    
+    poId: string | null;
+
     // Included Relations
     supplier?: {
         firmName: string;
         supplierName: string;
+        phone: string;
     };
     purchaseOrder?: {
         poNumber: string;
-    };
+    } | null;
+
     items: PurchaseReturnItem[];
-    
+
     createdAt: string;
     updatedAt: string;
 }

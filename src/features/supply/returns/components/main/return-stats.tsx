@@ -2,6 +2,7 @@
 
 import { AlertCircle, Banknote, PackagePlus } from "lucide-react";
 import PageStatsCard from "@/lib/utils/components/StatsMainPageCards";
+import { formatCurrency } from "@/lib/utils/functions/setFormat";
 
 interface ReturnStatsProps {
     stats: {
@@ -17,7 +18,7 @@ export function ReturnStats({ stats, isLoading = false }: ReturnStatsProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <PageStatsCard
                 title="Pending Resolution"
-                value={stats.pendingResolutionAmount.toLocaleString()}
+                value={formatCurrency(stats.pendingResolutionAmount)}
                 prefix="Rs"
                 icon={AlertCircle}
                 iconContainerClass="bg-amber-50 text-amber-600"
@@ -28,7 +29,7 @@ export function ReturnStats({ stats, isLoading = false }: ReturnStatsProps) {
 
             <PageStatsCard
                 title="Credits Recovered"
-                value={stats.creditsRecoveredAmount.toLocaleString()}
+                value={formatCurrency(stats.creditsRecoveredAmount)}
                 prefix="Rs"
                 icon={Banknote}
                 iconContainerClass="bg-emerald-50 text-emerald-600"
@@ -40,7 +41,7 @@ export function ReturnStats({ stats, isLoading = false }: ReturnStatsProps) {
             <PageStatsCard
                 title="Stock Replacements"
                 value={stats.stockReplacementsCount}
-                postfix="Batches"
+                postfix="Items"
                 icon={PackagePlus}
                 iconContainerClass="bg-sky-50 text-sky-600"
                 valueColorClass="text-slate-900"

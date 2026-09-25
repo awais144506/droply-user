@@ -43,6 +43,7 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
 
     const watchedItems = useWatch({ control, name: "items" }) || [];
     const watchedAdvance = useWatch({ control, name: "advancePaid" }) || 0;
+    const selectedProductIds = watchedItems.map(item => item?.productId).filter(Boolean);
     const liveTotal = watchedItems.reduce((sum, item) => sum + ((item?.quantity || 0) * (item?.unitCost || 0)), 0);
     const balanceDue = Math.max(0, liveTotal - watchedAdvance);
     const isAdvanceError = watchedAdvance > liveTotal;
@@ -111,75 +112,85 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
                         </div>
                     )}
 
-                    {fields.map((field, index) => (
-                        <div key={field.id} className="flex flex-col md:flex-row gap-6 items-start bg-slate-50 p-4 rounded-xl border border-slate-100 relative group">
-                            <div className="flex-2 w-full">
-                                <FormSelect
-                                    name={`items.${index}.productId`}
-                                    label="Product Link"
-                                    options={productOptions}
-                                    isLoading={isLoadingProducts}
-                                    placeholder="Select Product..."
-                                    isSearchable
-                                    required
-                                    disabled={isLocked}
-                                    formatOptionLabel={(opt) => (
-                                        <div className="flex items-center justify-between w-full pr-1">
-                                            <span className="font-medium mr-2">{opt.name} <span className="text-[10px] bg-amber-600 text-white p-1 rounded">({opt.unit.toLowerCase()})</span></span>
-                                            <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider text-white shadow-sm bg-sky-700">
-                                                {opt.category}
-                                            </span>
+                    {fields.map((field, index) => {
+                        const currentProductId = watchedItems[index]?.productId;
+                        const availableProductOptions = productOptions.filter(opt =>
+                            opt.value === currentProductId || !selectedProductIds.includes(opt.value as string)
+                        );
+                        return (
+                            <div key={field.id} className="flex flex-col md:flex-row gap-6 items-start bg-slate-50 p-4 rounded-xl border border-slate-100 relative group">
+                                <div className="flex-2 w-full">
+                                    <FormSelect
+                                        name={`items.${index}.productId`}
+                                        label="Product Link"
+                                        options={availableProductOptions}
+                                        isLoading={isLoadingProducts}
+                                        placeholder="Select Product..."
+                                        isSearchable
+                                        required
+                                        disabled={isLocked}
+                                        formatOptionLabel={(opt) => (
+                                            <div className="flex items-center justify-between w-full pr-1">
+                                                <span className="font-medium mr-2">
+                                                    {opt.name}
+                                                    <span className="text-[10px] bg-amber-600 text-white p-1 rounded ml-1">
+                                                        ({opt.unit?.toLowerCase() || 'unit'})
+                                                    </span>
+                                                </span>
+                                                <span className="shrink-0 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider text-white shadow-sm bg-sky-700">
+                                                    {opt.category}
+                                                </span>
+                                            </div>
+                                        )}
+                                    />
+                                </div>
 
-                                        </div>
-                                    )}
-                                />
+                                <div className="flex-2 w-full">
+                                    <FormInput
+                                        name={`items.${index}.supplierItemName`}
+                                        label="Item Name (For Invoice)"
+                                        placeholder="e.g. 55mm Caps"
+                                        required
+                                        disabled={isLocked}
+                                    />
+                                </div>
+
+                                <div className="w-full md:w-24">
+                                    <FormInput
+                                        name={`items.${index}.quantity`}
+                                        label="Qty"
+                                        type="number"
+                                        min={1}
+                                        required
+                                        disabled={isLocked}
+                                    />
+                                </div>
+
+                                <div className="w-full md:w-32">
+                                    <FormInput
+                                        name={`items.${index}.unitCost`}
+                                        label="Unit Cost (Rs)"
+                                        type="number"
+                                        min={0}
+                                        required
+                                        disabled={isLocked}
+                                    />
+                                </div>
+
+                                {!isLocked && fields.length > 1 && (
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => remove(index)}
+                                        className="md:mt-6 text-slate-400 hover:text-rose-600 hover:bg-rose-50 w-full md:w-auto"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                )}
                             </div>
-
-                            <div className="flex-2 w-full">
-                                <FormInput
-                                    name={`items.${index}.supplierItemName`}
-                                    label="Item Name (For Invoice)"
-                                    placeholder="e.g. 55mm Caps"
-                                    required
-                                    disabled={isLocked}
-                                />
-                            </div>
-
-                            <div className="w-full md:w-24">
-                                <FormInput
-                                    name={`items.${index}.quantity`}
-                                    label="Qty"
-                                    type="number"
-                                    min={1}
-                                    required
-                                    disabled={isLocked}
-                                />
-                            </div>
-
-                            <div className="w-full md:w-32">
-                                <FormInput
-                                    name={`items.${index}.unitCost`}
-                                    label="Unit Cost (Rs)"
-                                    type="number"
-                                    min={0}
-                                    required
-                                    disabled={isLocked}
-                                />
-                            </div>
-
-                            {!isLocked && fields.length > 1 && (
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => remove(index)}
-                                    className="md:mt-6 text-slate-400 hover:text-rose-600 hover:bg-rose-50 w-full md:w-auto"
-                                >
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            )}
-                        </div>
-                    ))}
+                        )
+                    })}
 
                     {!isLocked && (
                         <Button

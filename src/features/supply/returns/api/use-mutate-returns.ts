@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { returnApi } from "./returns.service";
 import { returnKeys } from "./return-keys";
 import { productKeys } from "@/features/manage/products/api/product-keys";
+
 
 export function useCreateReturn() {
     const queryClient = useQueryClient();
@@ -15,7 +17,7 @@ export function useCreateReturn() {
             });
 
             queryClient.invalidateQueries({ queryKey: returnKeys.lists() });
-            // queryClient.invalidateQueries({ queryKey: productKeys.lists() }); // Physical stock dropped
+            queryClient.invalidateQueries({ queryKey: productKeys.lists() });
         },
         onError: (error) => {
             toast.error("Failed to log return", {
@@ -43,5 +45,20 @@ export function useDeleteReturn() {
                 description: error?.message || "Ensure the return is still pending.",
             });
         },
+    });
+}
+
+export function useResolveReturn(branchId?: string) {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, payload }: { id: string; payload: any }) => returnApi.resolve(id, payload),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: returnKeys.list(branchId || "") });
+            toast.success("Purchase return successfully resolved.");
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to resolve the return.");
+        }
     });
 }

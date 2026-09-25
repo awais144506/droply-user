@@ -1,7 +1,9 @@
 import { PurchaseOrder } from "@/features/supply/order/types/po";
 import { BranchSettingData } from "@/features/admin/settings/types/settings";
 import { SupplierPayment } from "@/features/supply/payments/types/payments";
+import { PurchaseReturn } from "@/features/supply/returns/types/returns";
 import { format } from "date-fns";
+
 
 export const sendWhatsAppMessage = (phone: string, message: string) => {
     if (!phone) return;
@@ -76,4 +78,38 @@ ${payment.referenceNote ? `*Reference Note:* ${payment.referenceNote}\n\n` : ''}
 
     // 4. Send
     sendWhatsAppMessage(payment.supplier?.phone || '', message);
+};
+
+export const sendReturnWhatsApp = (returnRecord: PurchaseReturn, settings?: BranchSettingData) => {
+    // 1. Extract Items
+    const itemsList = returnRecord.items?.length
+        ? `\n*Returned Items:*\n${returnRecord.items.map(item => `- ${item.quantityReturned}x ${item.supplierItemName} @ Rs ${item.unitCost}`).join('\n')}\n`
+        : '';
+
+    // 2. Extract Branch details
+    const branchName = settings?.displayName || "Our Company";
+
+    // 3. Format References
+    const formattedDate = format(new Date(returnRecord.returnDate), "MMM d, yyyy");
+    const poRef = returnRecord.purchaseOrder?.poNumber
+        ? `\n*Original PO:* ${returnRecord.purchaseOrder.poNumber}`
+        : '';
+
+    // 4. Construct the message
+    const message = `*${returnRecord.supplier?.firmName || 'Supplier'}*,
+
+We have initiated a Purchase Return (Debit Note) for defective or rejected items.
+
+*Debit Note No:* ${returnRecord.debitNoteNumber}
+*Date:* ${formattedDate}${poRef}
+${itemsList}
+*Total Value to Resolve:* Rs ${returnRecord.totalValue?.toLocaleString() || 0}
+
+${returnRecord.notes ? `*Reason / Notes:* ${returnRecord.notes}\n\n` : ''}Please review and advise on replacement or credit application.
+
+Thank you,
+*${branchName}*`;
+
+    // 5. Send
+    sendWhatsAppMessage(returnRecord.supplier?.phone || '', message);
 };

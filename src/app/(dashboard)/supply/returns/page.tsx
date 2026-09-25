@@ -6,15 +6,21 @@ import { ReturnStats } from "@/features/supply/returns/components/main/return-st
 import { ReturnTable } from "@/features/supply/returns/components/main/return-table";
 import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 import Loading from "@/app/loading";
+import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
+import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
+import { useSearchParams } from "next/navigation";
 
 export default function PurchaseReturnsPage() {
+  const searchParams = useSearchParams();
+  const search = searchParams.get('search') || undefined;
+  const status = searchParams.get('status') || undefined;
   const { branchId, isLoading: isTenantLoading } = useRole();
-  const { data, isLoading } = useReturns(branchId);
+  const { data, isLoading } = useReturns(branchId, search, status);
 
   if (isTenantLoading || isLoading || !data) return <Loading text="Loading PO Returns..." />
 
   return (
-    <div className="space-y-6 max-w-350 mx-auto p-6">
+    <div className="space-y-6 p-6">
       <MainPageHeader
         heading="Purchase Returns"
         description="Manage debit notes for damaged or rejected vendor shipments."
@@ -24,8 +30,22 @@ export default function PurchaseReturnsPage() {
 
       <ReturnStats stats={data.stats} />
 
-      <ReturnTable
-        returns={data.returns}
+      <DataTableFilterBar
+        searchParamName="search"
+        searchPlaceholder="Search by firm / debit note #..."
+        tabParamName="status"
+        tabs={[
+          { label: "All", value: "" },
+          { label: "Pending", value: "PENDING" },
+          { label: "Resolved", value: "RESOLVED" },
+        ]}
+      />
+      <ReturnTable returns={data.returns} />
+
+      <ActivityLogsCard
+        title="Purchase Return Activity"
+        logs={data.logs}
+        isLoading={isLoading}
       />
     </div>
   );

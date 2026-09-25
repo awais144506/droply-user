@@ -3,7 +3,7 @@ import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation"
 
 const CreateReturn = () => {
     return (
-        <div className="w-full max-w-4xl mx-auto py-6 space-y-6">
+        <div className="w-full max-w-6xl mx-auto py-6 space-y-6">
             {/* Page Header */}
             <CreateFormHeader
                 title="Create New PO Return"

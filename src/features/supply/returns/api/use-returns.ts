@@ -2,41 +2,42 @@ import { useQuery } from "@tanstack/react-query";
 import { returnApi } from "./returns.service";
 import { returnKeys } from "./return-keys";
 
-export function useReturns(branchId: string) {
+export function useReturns(branchId: string, search?: string, status?: string) {
   return useQuery({
-    queryKey: returnKeys.list(branchId),
+    queryKey: returnKeys.list(branchId), // Keep queryKey simple so it caches one network request
     queryFn: () => returnApi.getAll(branchId),
-    select: (returns) => {
-      // Aggregate UI Stats dynamically
-      const pendingResolutionAmount = returns
-        .filter(r => r.status === "PENDING_RESOLUTION")
-        .reduce((sum, r) => sum + r.totalValue, 0);
+    select: (data) => {
+      let filteredReturns = data.returns;
 
-      const creditsRecoveredAmount = returns.reduce((sum, r) => sum + r.creditRecovered, 0);
+      // 1. Apply Status Filter
+      if (status) {
+        filteredReturns = filteredReturns.filter((r) => {
+          const isPending = r.status === "PENDING_RESOLUTION";
+          if (status === "PENDING") return isPending;
+          if (status === "RESOLVED") return !isPending;
+          return true;
+        });
+      }
 
-      // Count how many individual item batches were successfully replaced
-      const stockReplacementsCount = returns.reduce((count, r) => {
-        const replacedItemsInReturn = r.items.filter(item => item.quantityReplaced > 0).length;
-        return count + replacedItemsInReturn;
-      }, 0);
+      // 2. Apply Search Filter
+      if (search) {
+        const lowerSearch = search.toLowerCase();
+        filteredReturns = filteredReturns.filter((r) =>
+          r.debitNoteNumber.toLowerCase().includes(lowerSearch) ||
+          r.supplier?.firmName.toLowerCase().includes(lowerSearch)
+        );
+      }
 
       return {
-        returns,
+        returns: filteredReturns,
         stats: {
-          pendingResolutionAmount,
-          creditsRecoveredAmount,
-          stockReplacementsCount
-        }
+          pendingResolutionAmount: data.stats.pendingResolution,
+          creditsRecoveredAmount: data.stats.creditsRecovered,
+          stockReplacementsCount: data.stats.stockReplacements,
+        },
+        logs: data.logs || [],
       };
     },
     enabled: !!branchId,
-  });
-}
-
-export function useReturn(id: string) {
-  return useQuery({
-    queryKey: returnKeys.detail(id),
-    queryFn: () => returnApi.getById(id),
-    enabled: !!id,
   });
 }

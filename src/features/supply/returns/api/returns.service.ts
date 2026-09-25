@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiClient } from "@/lib/api-client";
 import { PurchaseReturn } from "../types/returns";
 import { CreateReturnFormValues } from "../schema/returns-schema";
@@ -17,5 +18,8 @@ export const returnApi = {
 
     delete: async (id: string): Promise<void> => {
         await apiClient.delete(`/supply/returns/${id}`);
+    },
+    resolve: async (id: string, payload: any): Promise<PurchaseReturn> => {
+        return await apiClient.patch(`/supply/returns/${id}/resolve`, payload);
     }
 };

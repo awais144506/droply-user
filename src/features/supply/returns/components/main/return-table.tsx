@@ -1,16 +1,20 @@
+// ReturnTable.tsx
 "use client";
-
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-
 import DataTable from "@/lib/utils/components/TableCreateMachine";
 import TablePagination from "@/lib/utils/components/TablePagination";
+import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
 import { usePagination } from "@/lib/utils/functions/pagination-calculation";
-
 import { PurchaseReturn } from "../../types/returns";
 import { getReturnColumns } from "./return-columns";
-import { useDeleteReturn } from "../../api/use-mutate-returns"; // For the Undo action
+import { useDeleteReturn, useResolveReturn } from "../../api/use-mutate-returns";
+import { useBranchSettings } from "@/features/admin/settings/api/use-branch-settings";
+import { sendReturnWhatsApp } from "@/lib/utils/functions/whatsapp/whatsapp-utils";
+import { useRole } from "@/lib/hooks/use-role";
+import { generateReturnPdf } from "@/lib/utils/functions/generatePdfs/generate-return-pdf";
+import ResolveReturnDialog, { ResolveFormValues } from "./ResolveReturnDialog";
 
 interface ReturnTableProps {
     returns?: PurchaseReturn[];
@@ -18,7 +22,20 @@ interface ReturnTableProps {
 
 export const ReturnTable = ({ returns = [] }: ReturnTableProps) => {
     const router = useRouter();
-    const { mutate: deleteReturn } = useDeleteReturn();
+    const { branchId } = useRole();
+    
+    // Mutations
+    const { mutate: deleteReturn, isPending: isDeleting } = useDeleteReturn();
+    const { mutate: resolveReturn, isPending: isResolving } = useResolveReturn(branchId);
+    
+    // Settings
+    const { fetchBranchSettings } = useBranchSettings(branchId);
+    const branchSettings = fetchBranchSettings.data;
+    
+    // Dialog States
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isResolveDialogOpen, setIsResolveDialogOpen] = useState(false);
+    const [selectedReturn, setSelectedReturn] = useState<PurchaseReturn | null>(null);
 
     const {
         currentPage,
@@ -31,36 +48,53 @@ export const ReturnTable = ({ returns = [] }: ReturnTableProps) => {
 
     const handlers = useMemo(() => ({
         onResolve: (returnRecord: PurchaseReturn) => {
-            // We will route this to the resolution modal/page in the next step
-            toast.info(`Opening resolution logic for ${returnRecord.debitNoteNumber}`);
-            // e.g., router.push(`/supply/returns/${returnRecord.id}/resolve`);
+            setSelectedReturn(returnRecord);
+            setIsResolveDialogOpen(true);
         },
-        onUndo: (returnRecord: PurchaseReturn) => {
-            if (confirm(`Are you sure you want to undo ${returnRecord.debitNoteNumber}? This will revert any financial credits and stock adjustments.`)) {
-                deleteReturn(returnRecord.id);
+        onPrint: (returnRecord: PurchaseReturn) => {
+            toast.info(`Generating PDF for ${returnRecord.debitNoteNumber}...`);
+            generateReturnPdf(returnRecord, branchSettings);
+        },
+        onWhatsApp: (returnRecord: PurchaseReturn) => {
+            if (!branchSettings) {
+                toast.error("Branch settings are still loading. Please wait a second.");
+                return;
             }
+            sendReturnWhatsApp(returnRecord, branchSettings);
         },
-    }), [deleteReturn]);
+        onDelete: (returnRecord: PurchaseReturn) => {
+            setSelectedReturn(returnRecord);
+            setIsDeleteDialogOpen(true);
+        },
+    }), [branchSettings]);
+
+    const handleDeleteConfirm = () => {
+        if (selectedReturn) {
+            deleteReturn(selectedReturn.id, {
+                onSuccess: () => {
+                    setIsDeleteDialogOpen(false);
+                    setSelectedReturn(null);
+                }
+            });
+        }
+    };
+
+    const handleResolveConfirm = (id: string, data: ResolveFormValues) => {
+        resolveReturn(
+            { id, payload: data },
+            {
+                onSuccess: () => {
+                    setIsResolveDialogOpen(false);
+                    setSelectedReturn(null);
+                }
+            }
+        );
+    };
 
     const columns = useMemo(() => getReturnColumns(router, handlers), [router, handlers]);
 
     return (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-            {/* Header/Search bar placeholder based on design */}
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
-                <input 
-                    type="text" 
-                    placeholder="Search by debit note # or supplier..."
-                    className="w-full max-w-md px-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
-                />
-                
-                {/* Minimal tab filters from the design */}
-                <div className="hidden sm:flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
-                    <button className="px-3 py-1.5 text-xs font-bold bg-white text-slate-800 rounded shadow-sm">All</button>
-                    <button className="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700">Pending</button>
-                    <button className="px-3 py-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700">Replaced</button>
-                </div>
-            </div>
 
             <DataTable
                 data={paginatedData}
@@ -77,6 +111,22 @@ export const ReturnTable = ({ returns = [] }: ReturnTableProps) => {
                     onPageChange={setCurrentPage}
                 />
             )}
+
+            <ConfirmDeleteDialog
+                title="Delete Purchase Return?"
+                description={`Are you sure you want to delete debit note ${selectedReturn?.debitNoteNumber}? This will permanently remove the record and restore the inventory quantities.`}
+                isOpen={isDeleteDialogOpen}
+                onClose={() => setIsDeleteDialogOpen(false)}
+                onConfirm={handleDeleteConfirm}
+                isLoading={isDeleting}
+            />
+            <ResolveReturnDialog
+                isOpen={isResolveDialogOpen}
+                onClose={() => setIsResolveDialogOpen(false)}
+                returnRecord={selectedReturn}
+                onConfirm={handleResolveConfirm}
+                isLoading={isResolving}
+            />
         </div>
     );
 };
