@@ -37,8 +37,8 @@ export default function SuppliersPage() {
         tabs={[
           { label: "All", value: "" },
           { label: "Balance", value: "DEBT" },
-          { label: "Clear", value: "CLEAR" },]
-        }
+          { label: "Clear", value: "CLEAR" },
+        ]}
       />
       <SupplierTable suppliers={suppliers} />
 

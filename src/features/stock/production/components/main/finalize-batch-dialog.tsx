@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useFieldArray } from "react-hook-form";
-import { PackagePlus, Plus, Trash2 } from "lucide-react";
+import { PackagePlus, Plus, Trash2, AlertTriangle } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { FormProvider } from "react-hook-form";
@@ -52,7 +52,7 @@ export function FinalizeBatchDialog({ isOpen, onClose, batch, branchId }: Finali
     })) || [];
 
     const onSubmit = async (data: FinalizeBatchFormValues) => {
-        finalizeBatch({
+        await finalizeBatch({
             id: batch.id,
             actualYield: data.actualYield,
             wastage: data.wastage,
@@ -75,6 +75,15 @@ export function FinalizeBatchDialog({ isOpen, onClose, batch, branchId }: Finali
 
                 <FormProvider {...methods}>
                     <form onSubmit={methods.handleSubmit(onSubmit)} className="space-y-6 mt-4">
+
+                        {/* THE HARD WARNING */}
+                        <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg flex items-start gap-3 text-rose-800 text-xs">
+                            <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600 mt-0.5" />
+                            <p>
+                                <strong>Ledger Warning:</strong> Wastage logged here instantly adjust warehouse stock. Once finalized, these wastage records are permanently locked and cannot be edited.
+                            </p>
+                        </div>
+
                         {/* Yield Section */}
                         <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
                             <div className="grid grid-cols-2 gap-4">
@@ -113,11 +122,10 @@ export function FinalizeBatchDialog({ isOpen, onClose, batch, branchId }: Finali
                             ) : (
                                 <div className="space-y-3">
                                     {fields.map((field, index) => (
-                                        <div key={field.id} className="flex items-start gap-3 p-3 bg-rose-50/50 border border-rose-100 rounded-lg">
+                                        <div key={field.id} className="flex items-center gap-3 p-3 bg-rose-50/50 border border-rose-100 rounded-lg">
                                             <div className="grid grid-cols-12 gap-3 flex-1">
                                                 <div className="col-span-12 md:col-span-5">
                                                     <FormSelect
-                                                        label="Wastage Product"
                                                         name={`wastage.${index}.rawMaterialId`}
                                                         options={materialOptions}
                                                         placeholder="Select material..."
@@ -142,7 +150,7 @@ export function FinalizeBatchDialog({ isOpen, onClose, batch, branchId }: Finali
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => remove(index)}
-                                                className="h-10 w-10 text-rose-500 hover:text-rose-700 hover:bg-rose-100 shrink-0 mt-1"
+                                                className="h-10 w-10 text-rose-500 hover:text-rose-700 hover:bg-rose-100 shrink-0"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </Button>
@@ -156,7 +164,9 @@ export function FinalizeBatchDialog({ isOpen, onClose, batch, branchId }: Finali
                             <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={isPending || methods.formState.isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                            <Button type="submit"
+                                disabled={isPending || methods.formState.isSubmitting || !methods.formState.isValid}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white">
                                 {isPending || methods.formState.isSubmitting ? "Finalizing..." : "Add to Stock"}
                             </Button>
                         </div>

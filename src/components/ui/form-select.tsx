@@ -14,7 +14,7 @@ export interface SelectOption {
 
 interface FormSelectProps {
     name: string;
-    label: string | ReactNode;
+    label?: string | ReactNode;
     options: SelectOption[];
     placeholder?: string;
     disabled?: boolean;

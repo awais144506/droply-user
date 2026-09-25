@@ -10,6 +10,7 @@ import { getProductionColumns } from "./production-columns";
 import { useRole } from "@/lib/hooks/use-role";
 import { FinalizeBatchDialog } from "./finalize-batch-dialog";
 
+
 interface ProductionTableProps {
   batches?: ProductionBatch[];
 }
@@ -17,6 +18,7 @@ interface ProductionTableProps {
 export function ProductionTable({ batches = [] }: ProductionTableProps) {
   const router = useRouter();
   const { branchId } = useRole();
+
 
   const [finalizeBatch, setFinalizeBatch] = useState<ProductionBatch | null>(null);
 

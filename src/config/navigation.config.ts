@@ -54,7 +54,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     headerColor: { text: "text-indigo-600 dark:text-indigo-400", dot: "bg-indigo-500", border: "border-indigo-500/20", bgHover: "hover:bg-indigo-500/5" },
     items: [
       { title: "Production", url: "/stock/production", icon: Factory, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "DONE" },
-      { title: "Wastage & Damages", url: "/stock/wastage", icon: ArchiveX, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "PARTIAL" },
+      { title: "Wastage & Damages", url: "/stock/wastage", icon: ArchiveX, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "DONE" },
     ],
   },
   {

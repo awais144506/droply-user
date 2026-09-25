@@ -22,6 +22,7 @@ export function useAppForm<TSchema extends yup.AnyObjectSchema>(
 ) {
     return useForm<yup.InferType<TSchema>>({
         resolver: yupResolver(schema),
+        mode:"onChange",
         defaultValues,
     });
 }
