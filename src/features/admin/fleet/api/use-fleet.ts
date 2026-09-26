@@ -44,3 +44,11 @@ export function useVehicles(branchId: string, statusFilter?: string, searchFilte
     staleTime: 5 * 60 * 1000,
   })
 }
+
+export function useVehicle(id: string) {
+  return useQuery({
+    queryKey: fleetKeys.vehicles.detail(id),
+    queryFn: () => fleetApi.getVehicle(id),
+    enabled: !!id,
+  })
+}

@@ -1,30 +1,44 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { apiClient } from "@/lib/api-client";
-import { Vehicle, FuelExpense } from "../types/fleet";
-import { VehicleFormValues, FuelExpenseFormValues } from "../schema/fleet.schema";
+import { Vehicle, VehicleExpense } from "../types/fleet";
+import { VehicleFormValues, VehicleExpenseFormValues } from "../schema/fleet.schema";
 
 export const fleetApi = {
-    // 1. Fetch Vehicles
+    // --- VEHICLE ROUTES ---
+
     getVehicles: async (branchId: string): Promise<Vehicle[]> => {
         return apiClient.get<any, Vehicle[]>("/fleet/vehicles", {
             params: { branchId }
         });
     },
 
-    // 2. Create Vehicle
+    getVehicle: async (id: string): Promise<Vehicle> => {
+        return apiClient.get(`/fleet/vehicles/${id}`);
+    },
+
     createVehicle: async (newVehicle: VehicleFormValues): Promise<Vehicle> => {
         return apiClient.post<any, Vehicle>("/fleet/vehicles", newVehicle);
     },
 
-    // 3. Fetch Fuel Expenses
-    getFuelExpenses: async (vehicleId?: string): Promise<FuelExpense[]> => {
-        return apiClient.get<any, FuelExpense[]>("/fleet/fuel", {
+    updateVehicle: async (id: string, updateData: Partial<VehicleFormValues>): Promise<Vehicle> => {
+        return apiClient.patch<any, Vehicle>(`/fleet/vehicles/${id}`, updateData);
+    },
+
+    deleteVehicle: async (id: string): Promise<void> => {
+        return apiClient.delete(`/fleet/vehicles/${id}`);
+    },
+
+    getVehicleExpenses: async (vehicleId?: string): Promise<VehicleExpense[]> => {
+        return apiClient.get<any, VehicleExpense[]>("/fleet/expenses", {
             params: { vehicleId }
         });
     },
 
-    // 4. Create Fuel Expense
-    createFuelExpense: async (newExpense: FuelExpenseFormValues): Promise<FuelExpense> => {
-        return apiClient.post<any, FuelExpense>("/fleet/fuel", newExpense);
+    createVehicleExpense: async (newExpense: VehicleExpenseFormValues): Promise<VehicleExpense> => {
+        return apiClient.post<any, VehicleExpense>("/fleet/expenses", newExpense);
+    },
+
+    deleteExpenseRecord: async (id: string) => {
+        return apiClient.delete(`/fleet/expenses/${id}`)
     }
-}
+};
