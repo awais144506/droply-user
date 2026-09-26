@@ -95,6 +95,7 @@ export default function UserHelpPage() {
           </div>
         </button>
       </div>
+      <p className="text-center font-semibold italic text-slate-500 text-xs">Droply V.1.0</p>
     </div>
   );
 }

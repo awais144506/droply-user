@@ -15,10 +15,12 @@ export function useRole() {
   const userName = String(user?.fullName) || "XYZ";
   const userEmail = String(user?.emailAddresses);
   const userProfilePicture = user?.imageUrl;
+  const userId = user?.id;
 
   return {
     branchId,
     role,
+    userId,
     userTier,
     tierCycle,
     renewDate,

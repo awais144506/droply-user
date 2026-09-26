@@ -6,28 +6,18 @@ export interface Task {
   branchId: string;
   description: string;
   status: TaskStatus;
-  
   assignedById: string;
   assignedByName: string;
-  
+  assignedByRole: string;
   assignedToId: string;
   assignedToName: string;
   assignedToRole: AssigneeRole;
-  
   createdAt: string;
   updatedAt: string;
   completedAt: string | null;
 }
 
-export interface CreateTaskPayload {
-  branchId: string;
-  description: string;
-  assignedToId: string;
-  assignedToName: string;
-  assignedToRole: AssigneeRole;
-}
-
 export interface UpdateTaskPayload {
-  description?: string;
   status?: TaskStatus;
+  description?: string;
 }

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-
+import { subApi } from "./subscription.service";
 export type InvoiceStatus = "UNPAID" | "PENDING_VERIFICATION" | "CLEARED";
 
 export interface BillingRecord {
@@ -55,4 +55,11 @@ export function useSubscription(branchId: string) {
     },
     enabled: Boolean(branchId),
   });
+}
+
+export function useBankDetails() {
+  return useQuery({
+    queryKey: ['Bank_Details'],
+    queryFn: () => subApi.getAllBanks(),
+  })
 }

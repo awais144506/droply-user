@@ -10,7 +10,6 @@ export const useCreateTask = (branchId: string) => {
         mutationFn: tasksService.create,
         onSuccess: () => {
             toast.success("Task assigned successfully");
-            // Refetch all tasks for this branch to update the lists
             queryClient.invalidateQueries({ queryKey: tasksKeys.lists(branchId) });
         },
         onError: (error) => {
@@ -25,13 +24,26 @@ export const useUpdateTask = (branchId: string) => {
 
     return useMutation({
         mutationFn: tasksService.update,
-        // We let the frontend components handle the success toasts for toggling 
-        // to keep it feeling instantaneous, but we invalidate the cache to ensure sync.
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: tasksKeys.lists(branchId) });
         },
         onError: (error) => {
             toast.error(error?.message || "Failed to update task");
+        },
+    });
+};
+
+export const useDeleteTask = (branchId: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: tasksService.delete,
+        onSuccess: () => {
+            toast.success("Task deleted successfully");
+            queryClient.invalidateQueries({ queryKey: tasksKeys.lists(branchId) });
+        },
+        onError: (error) => {
+            toast.error(error?.message || "Failed to delete task");
         },
     });
 };

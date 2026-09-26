@@ -1,20 +1,22 @@
 import { apiClient } from "@/lib/api-client";
-import { Task, CreateTaskPayload, UpdateTaskPayload } from "../types/task";
+import { Task, UpdateTaskPayload } from "../types/task";
+import { CreateTaskFormValues } from "../schema/tasks-schema";
 
 export const tasksService = {
-  getAll: async (branchId: string, assignedToId?: string, assignedById?: string): Promise<Task[]> => {
-    const params = new URLSearchParams();
-    params.append("branchId", branchId);
-    if (assignedToId) params.append("assignedToId", assignedToId);
-    if (assignedById) params.append("assignedById", assignedById);
-    return await apiClient.get(`/tasks?${params.toString()}`);
+  getAll: async (branchId: string): Promise<Task[]> => {
+    // Backend automatically handles role-based filtering via Clerk token
+    return await apiClient.get(`/tasks/branch/${branchId}`);
   },
 
-  create: async (payload: CreateTaskPayload): Promise<Task> => {
+  create: async (payload: CreateTaskFormValues): Promise<Task> => {
     return await apiClient.post("/tasks", payload);
   },
 
   update: async ({ id, payload }: { id: string; payload: UpdateTaskPayload }): Promise<Task> => {
     return apiClient.patch(`/tasks/${id}`, payload);
   },
+
+  delete: async (id: string) => {
+    return apiClient.delete(`/tasks/${id}`);
+  }
 };

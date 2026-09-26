@@ -40,13 +40,22 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
           value: staff.id,
         }));
 
+      const taskStaffOptions = payload.staff
+        .map((staff: { name: string; phone: string; id: string, designation: string }) => ({
+          label: `${staff.name}`,
+          value: staff.id,
+          role: staff.designation,
+          phone: staff.phone
+        }));
+
       // 4. Return everything cleanly
       return {
         staff: filterStaff,
         stats: payload.stats,
         riderOptions,
         staffOptions,
-        isLimitReached
+        isLimitReached,
+        taskStaffOptions
       };
     },
     enabled: !!branchId,

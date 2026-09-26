@@ -1,37 +1,25 @@
 "use client";
 
-import { CheckCircle2, CircleDashed, AlertOctagon, Users } from "lucide-react";
-import { Task } from "../../api/use-tasks";
+import { CheckCircle2, CircleDashed } from "lucide-react";
+import PageStatsCard from "@/lib/utils/components/StatsMainPageCards";
 
-export function TaskStats({ tasks }: { tasks: Task[] }) {
-  const pending = tasks.filter(t => t.status === "INCOMPLETE").length;
-  const completed = tasks.filter(t => t.status === "COMPLETED").length;
-  const urgent = tasks.filter(t => t.type === "URGENT" && t.status === "INCOMPLETE").length;
-  const total = tasks.length;
+export function TaskStats({ pending, completed }: { pending: number, completed: number }) {
+
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-        <div>
-          <div className="flex justify-between items-start mb-2">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Pending Tasks</p>
-            <div className="p-2 bg-sky-50 rounded-lg text-sky-600"><CircleDashed className="h-4 w-4" /></div>
-          </div>
-          <p className="text-3xl font-bold text-sky-600">{pending}</p>
-        </div>
-      </div>
-
-
-
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between">
-        <div>
-          <div className="flex justify-between items-start mb-2">
-            <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Completed</p>
-            <div className="p-2 bg-emerald-50 rounded-lg text-emerald-600"><CheckCircle2 className="h-4 w-4" /></div>
-          </div>
-          <p className="text-3xl font-bold text-emerald-600">{completed}</p>
-        </div>
-      </div>
+    <div className="grid grid-cols-3 gap-3">
+      <PageStatsCard
+        title="Pending Tasks"
+        value={pending}
+        icon={CircleDashed}
+      />
+      <PageStatsCard
+        title="Completed Tasks"
+        value={completed}
+        icon={CheckCircle2}
+        valueColorClass="text-emerald-600"
+        iconContainerClass="bg-emerald-50 text-emerald-600"
+      />
     </div>
   );
 }

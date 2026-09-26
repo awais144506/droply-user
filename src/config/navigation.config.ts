@@ -72,10 +72,10 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     headerColor: { text: "text-rose-600 dark:text-rose-400", dot: "bg-rose-500", border: "border-rose-500/20", bgHover: "hover:bg-rose-500/5" },
     items: [
       { title: "Staff & Payroll", url: "/admin/staff", icon: UserCog, badge: "Owner", allowedRoles: ["OWNER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
-      { title: "Vehicles & Fuel", url: "/admin/fleet", icon: TruckIcon, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "PARTIAL" },
-      { title: "Assigned Tasks", url: "/admin/tasks", icon: FileText, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "TODO" },
-      { title: "Expenses & Accounts", url: "/admin/expenses", icon: BadgeDollarSign, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "TODO" },
-      { title: "Reports", url: "/admin/reports", icon: BarChart3, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS,devStatus: "PARTIAL" },
+      { title: "Vehicles & Fuel", url: "/admin/fleet", icon: TruckIcon, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "DONE" },
+      { title: "Assigned Tasks", url: "/admin/tasks", icon: FileText, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "DONE" },
+      { title: "Expenses & Accounts", url: "/admin/expenses", icon: BadgeDollarSign, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "DONE" },
+      // { title: "Reports", url: "/admin/reports", icon: BarChart3, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS,devStatus: "PARTIAL" },
 
       // Admin/Settings are always available to manage their account
       { title: "Subscription", url: "/admin/subscription", icon: CreditCard, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "PARTIAL" },
