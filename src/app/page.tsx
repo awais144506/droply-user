@@ -3,10 +3,8 @@ import { redirect } from "next/navigation";
 
 export default async function Home() {
   const { userId } = await auth();
-
   if (userId) {
     redirect("/app");
   }
-
   redirect("/sign-in");
 }

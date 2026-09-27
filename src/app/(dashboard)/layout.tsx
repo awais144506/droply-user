@@ -1,7 +1,7 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
 import { SiteHeader } from "@/components/layout/site-header";
-
+import { TermsAgreementModal } from "@/components/layout/TermsAgreementModal";
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
@@ -14,6 +14,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <SiteHeader />
         <main className="flex flex-1 flex-col gap-4 p-4 lg:p-6">
           {children}
+          <TermsAgreementModal />
         </main>
       </SidebarInset>
     </SidebarProvider>
