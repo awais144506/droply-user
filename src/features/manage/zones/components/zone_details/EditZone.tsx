@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Loader2 } from "lucide-react";
+import { Save } from "lucide-react";
 import { editZoneSchema, EditZoneFormValues } from "../../schema/edit-zone-schema";
 import {
     Dialog,
@@ -11,10 +9,11 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { useUpdateZone } from "../../api/use-mutate-zone";
 import { FormInput } from "@/components/ui/form-input";
 import { FormProvider } from "react-hook-form";
+import { useAppForm } from "@/lib/hooks/use-app-form";
+import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
 
 interface EditZoneDialogProps {
     zone: {
@@ -31,17 +30,13 @@ export default function EditZoneDialog({ zone, isOpen, onClose }: EditZoneDialog
 
     const { mutate: updateZone, isPending } = useUpdateZone();
 
-    const form = useForm<EditZoneFormValues>({
-        resolver: yupResolver(editZoneSchema),
-        mode: "onChange",
-        defaultValues: {
-            name: zone.name || "",
-            latitude: zone.latitude || null,
-            longitude: zone.longitude || null,
-        },
-    });
+    const form = useAppForm(editZoneSchema, {
+        name: zone.name || "",
+        latitude: zone.latitude || null,
+        longitude: zone.longitude || null,
+    })
 
-    // Reset form when dialog opens with new zone data
+
     useEffect(() => {
         if (isOpen) {
             form.reset({
@@ -58,9 +53,11 @@ export default function EditZoneDialog({ zone, isOpen, onClose }: EditZoneDialog
             onSuccess: () => {
                 onClose();
             }
-        }
-        );
+        });
     };
+
+    const { formState, handleSubmit } = form;
+    const { isDirty, isValid } = formState;
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -70,7 +67,7 @@ export default function EditZoneDialog({ zone, isOpen, onClose }: EditZoneDialog
                 </DialogHeader>
 
                 <FormProvider {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 mt-2">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-2">
                         <FormInput
                             label="Zone Name"
                             required
@@ -92,16 +89,15 @@ export default function EditZoneDialog({ zone, isOpen, onClose }: EditZoneDialog
                             />
                         </div>
 
-                        {/* Form Actions */}
-                        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 mt-6">
-                            <Button type="button" variant="outline" onClick={onClose} disabled={isPending}>
-                                Cancel
-                            </Button>
-                            <Button type="submit" variant="default" disabled={!form.formState.isValid || !form.formState.isDirty || isPending}>
-                                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isPending ? "Saving..." : "Save Changes"}
-                            </Button>
-                        </div>
+                        <FormCTAFooter
+                            ctaText="Save Changes"
+                            isPending={isPending}
+                            isValid={isValid}
+                            isDirty={isDirty}
+                            icon={Save}
+                            isCancel={false}
+                            isEditMode={true}
+                        />
                     </form>
                 </FormProvider>
             </DialogContent>

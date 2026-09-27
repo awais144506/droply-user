@@ -42,13 +42,13 @@ export function ZoneCard({ zones }: ZoneCardProps) {
                                     <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[10px] font-bold text-slate-500 shrink-0">
                                         ZONE {zoneNumber}
                                     </span>
-                                    <CardTitle className="text-sm font-bold text-slate-900 truncate">
+                                    <CardTitle className="text-[15px] font-bold text-slate-900 truncate">
                                         {zone.name}
                                     </CardTitle>
                                 </div>
-                                <div className="flex items-center gap-1.5 mt-1.5 text-slate-500">
-                                    <Users className="h-3.5 w-3.5" />
-                                    <span className="text-xs font-medium">
+                                <div className="flex items-center gap-1.5 mt-1.5 text-slate-700">
+                                    <Users className="h-3.5 w-3.5 text-indigo-600" />
+                                    <span className="text-sm font-bold">
                                         {zone.customers?.length || 0} Customers
                                     </span>
                                 </div>

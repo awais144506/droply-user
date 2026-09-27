@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { Zap, Clock, CalendarDays, AlertTriangle, Sparkles } from "lucide-react";
+import { Zap, Clock, CalendarDays, AlertTriangle, Crown } from "lucide-react";
 import Link from "next/link";
 export function SubscriptionIndicator({ roleData }: { roleData: any }) {
   const { userTier, tierCycle, userStatus, renewDate, isLoading } = roleData;
@@ -85,7 +85,7 @@ export function SubscriptionIndicator({ roleData }: { roleData: any }) {
         return {
           wrapper: "bg-slate-900 border-slate-800 hover:border-indigo-500 shadow-md shadow-indigo-500/10",
           iconBox: "bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-inner",
-          icon: <Sparkles className="h-4 w-4 group-hover:scale-110 transition-transform" />,
+          icon: <Crown className="h-4 w-4 group-hover:scale-110 transition-transform" />,
           tierText: "bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400",
           pill: "bg-white/10 text-indigo-100 border border-white/10 backdrop-blur-sm",
           dateText: "text-slate-400",

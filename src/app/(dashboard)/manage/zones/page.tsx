@@ -1,7 +1,7 @@
 "use client"
 import MainPageHeader from "@/lib/utils/components/MainPageHeader"
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage"
-import { useZoneLogs, useZones } from "@/features/manage/zones/api/use-zones"
+import { useZones } from "@/features/manage/zones/api/use-zones"
 import { useRole } from "@/lib/hooks/use-role"
 import Loading from "@/app/loading"
 import ErrorBoundary from "@/app/error"
@@ -15,12 +15,11 @@ const ZonePage = () => {
   const { branchId } = useRole();
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || undefined;
-  const { data: logs = [], isLoading: isLoadingLogs } = useZoneLogs(branchId);
   const { data, isError, error, isLoading: isLoadingZones } = useZones(branchId, search);
   const zones = data?.zones || [];
   const stats = data?.stats || { totalZones: 0, totalCustomers: 0, totalLedger: 0, totalReturnables: 0 };
-
-  if (isLoadingZones) return <Loading text="Loading Zones..."/>
+  const logs = data?.logs || [];
+  if (isLoadingZones) return <Loading text="Loading Zones..." />
   if (isError && !data?.zones) return <ErrorBoundary error={error.message} />;
 
   return (
@@ -55,7 +54,7 @@ const ZonePage = () => {
             <ActivityLogsCard
               title="Zone Activity Logs"
               logs={logs}
-              isLoading={isLoadingLogs}
+              isLoading={isLoadingZones}
             />
           </div>
         </div>

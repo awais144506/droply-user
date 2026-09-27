@@ -101,7 +101,7 @@ export default function WalkInSaleDialog({ isOpen, onClose }: { isOpen: boolean,
         
         {/* --- RECEIPT / PRINT VIEW (Shows after successful sale or when clicking Reprint) --- */}
         {receiptData ? (
-          <div className="p-8 flex flex-col items-center justify-center min-h-[400px] bg-white text-center">
+          <div className="p-8 flex flex-col items-center justify-center min-h-100 bg-white text-center">
             <div className="h-16 w-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4">
               <CheckCircle className="h-8 w-8" />
             </div>

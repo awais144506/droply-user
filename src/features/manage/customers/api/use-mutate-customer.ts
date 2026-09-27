@@ -82,7 +82,7 @@ export function useDeleteCustomer() {
       queryClient.invalidateQueries({ queryKey: customerKeys.all });
     },
     onError: (err) => {
-      toast.success(err.message);
+      toast.error(err.message);
     }
   });
 }

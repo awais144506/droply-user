@@ -64,14 +64,13 @@ export function NavUser({ roleData }: { roleData: any }) {
       <DropdownMenu>
         {/* 🔥 2. Premium Hover States on Trigger */}
         <DropdownMenuTrigger className="flex items-center gap-3 hover:bg-slate-100/70 p-1.5 pl-4 rounded-full transition-all duration-300 outline-none focus:ring-2 focus:ring-sky-500/20 border border-transparent cursor-pointer group">
-          
+
           <div className="hidden sm:flex flex-col text-right leading-none">
             <span className="font-bold text-slate-900 text-[13px] group-hover:text-sky-700 transition-colors">
               {userName}
             </span>
-            <span className={`text-[9px] font-extrabold tracking-widest mt-1.5 uppercase ${
-              role === "OWNER" ? "text-emerald-500" : "text-sky-500"
-            }`}>
+            <span className={`text-[9px] font-extrabold tracking-widest mt-1.5 uppercase ${role === "OWNER" ? "text-emerald-500" : "text-sky-500"
+              }`}>
               {displayRole}
             </span>
           </div>
@@ -124,16 +123,11 @@ export function NavUser({ roleData }: { roleData: any }) {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {/* 🔥 4. Redesigned Modern Modal */}
       <Dialog open={showConfirm} onOpenChange={setShowConfirm}>
-        <DialogContent className="max-w-90 rounded-[24px] p-0 overflow-hidden border-slate-100 shadow-2xl">
+        <DialogContent className="max-w-90 rounded-lg  overflow-hidden border-slate-100 shadow-2xl">
           <div className="p-6 pb-4">
-            <div className="h-12 w-12 bg-rose-100 rounded-2xl flex items-center justify-center mb-4 border border-rose-200/50 shadow-inner">
-              <LogOut className="h-6 w-6 text-rose-600" />
-            </div>
             <DialogHeader>
-              <DialogTitle className="text-lg font-bold text-slate-900 text-left">Sign Out</DialogTitle>
+              <DialogTitle className="text-lg font-bold text-slate-900 text-left flex flex-row gap-2"><LogOut className="h-6 w-6 text-rose-600" />  Sign Out</DialogTitle>
               <DialogDescription className="text-sm text-slate-500 mt-2 text-left leading-relaxed">
                 Are you sure you want to end your current session? You will need to securely sign in again to access your branch.
               </DialogDescription>

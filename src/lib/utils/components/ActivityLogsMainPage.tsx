@@ -6,13 +6,12 @@ import Loading from "@/app/loading";
 
 interface ActivityLogsCardProps {
     title?: string;
-    logs: ActivityLog[];
+    logs?: ActivityLog[]; // Mark as optional
     isLoading: boolean;
 }
 
-export default function ActivityLogsCard({ title = "Recent Activity", logs, isLoading }: ActivityLogsCardProps) {
-
-
+// Add the default assignment (logs = []) here
+export default function ActivityLogsCard({ title = "Recent Activity", logs = [], isLoading }: ActivityLogsCardProps) {
 
     return (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
@@ -20,8 +19,10 @@ export default function ActivityLogsCard({ title = "Recent Activity", logs, isLo
                 <History className="h-4 w-4 text-slate-400" />
                 <h3 className="text-sm font-bold text-slate-900">{title}</h3>
             </div>
-            {isLoading && <Loading text="Loading Logs..."/>}
-            {logs.length === 0 ? (
+            {isLoading && <Loading text="Loading Logs..." />}
+
+            {/* Safe to check length now because logs is guaranteed to be an array */}
+            {!isLoading && logs.length === 0 ? (
                 <div className="p-8 text-center text-xs text-slate-400">
                     No recent activity found.
                 </div>

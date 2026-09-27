@@ -1,29 +1,19 @@
 "use client";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { createZoneSchema, ZoneFormValues } from "../../schema/create-zone-schema";
-import { Plus, Loader2 } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { FormInput } from '@/components/ui/form-input';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { buttonVariants } from '@/components/ui/button';
 import { FormProvider } from "react-hook-form";
 import { useCreateZone } from "../../api/use-mutate-zone";
 import { useRouter } from "next/navigation";
+import { useAppForm } from "@/lib/hooks/use-app-form";
+import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
 
 const ZoneCreateForm = ({ branchId }: { branchId: string }) => {
-
   const router = useRouter();
   const { mutate: createZone, isPending } = useCreateZone();
-
-  const form = useForm<ZoneFormValues>({
-    resolver: yupResolver(createZoneSchema),
-    mode: "onChange",
-    defaultValues: {
-      name: "",
-    }
-  });
-
+  const form = useAppForm(createZoneSchema, {
+    name: "",
+  })
   const onSubmit = (data: ZoneFormValues) => {
     const payload = {
       ...data,
@@ -34,9 +24,12 @@ const ZoneCreateForm = ({ branchId }: { branchId: string }) => {
     });
   };
 
+  const { formState, handleSubmit } = form;
+  const { isDirty, isValid } = formState;
+
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+      <form onSubmit={handleSubmit(onSubmit)} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
         <div className="space-y-5">
           <FormInput
             label="Zone Name"
@@ -59,32 +52,14 @@ const ZoneCreateForm = ({ branchId }: { branchId: string }) => {
             />
           </div>
         </div>
-        <div className="mt-8 pt-5 gap-2 border-t border-slate-100 flex justify-end">
-          <Link
-            href="/manage/zones"
-            className={`${buttonVariants({ variant: "outline", size: "sm" })} ${isPending ? "pointer-events-none opacity-50" : ""}`}
-            tabIndex={isPending ? -1 : undefined}
-          >
-            Cancel
-          </Link>
-          <Button
-            type="submit"
-            disabled={isPending || !form.formState.isValid}
-            variant="default"
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              <>
-                <Plus className="h-4 w-4" />
-                Create Zone
-              </>
-            )}
-          </Button>
-        </div>
+        <FormCTAFooter
+          ctaText="Create Zone"
+          href="/manage/zones"
+          isPending={isPending}
+          isDirty={isDirty}
+          isValid={isValid}
+          icon={MapPin}
+        />
       </form>
     </FormProvider>
   )

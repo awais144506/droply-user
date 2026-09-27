@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Trash2, Edit} from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { useZone } from "@/features/manage/zones/api/use-zones";
 import { useDeleteZone, } from "@/features/manage/zones/api/use-mutate-zone";
@@ -22,14 +22,13 @@ export default function ZoneDetailsPage() {
   const zoneId = params.zoneId as string;
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || undefined;
-
   const { data, isLoading } = useZone(zoneId, search);
 
   const { mutate: deleteZone, isPending: isDeleting } = useDeleteZone();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  if (isLoading) return <Loading />
+  if (isLoading) return <Loading text="Loading zone details..." />
   if (!data || !data.zone) return <NotFoundPage />
 
   const { zone, filterCustomer, stats, hasCustomers, hasLedger, hasReturnables, hasRiders } = data;
@@ -96,21 +95,25 @@ export default function ZoneDetailsPage() {
           totalLedger={stats?.calculatedLedger}
           totalReturnables={stats?.calculatedReturnables}
         />
-
-        {/* Map and Riders Grid */}
         <ZoneDetailMap
           zone={zone}
         />
-
         <ZoneCustomersTable customers={filterCustomer} />
       </div>
 
       <ConfirmDeleteDialog
-        itemName={`Zone "${zone.name}"`}
+        title={`Delete "${zone.name}" Zone?`}
+        description={
+          <span>
+            Are you sure you want to delete <span className="font-bold text-slate-900">{zone.name}</span>?
+          </span>
+        }
+        isLoading={isDeleting}
+        confirmText="Delete Zone"
+        confirmButtonClass="bg-rose-600 hover:bg-rose-700 text-white"
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
-        isDeleting={isDeleting}
       />
       <EditZoneDialog
         zone={zone}

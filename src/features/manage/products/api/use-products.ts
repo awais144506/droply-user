@@ -16,6 +16,7 @@ export function useProducts(branchId: string) {
             const returnablesCount = products.filter(p => p.trackingType === "RETURNABLE").length;
             const recipeItemsCount = products.filter(p => p.hasRecipe).length;
             const productOptions = products?.filter(p => p.trackingType === "RETURNABLE").map(p => ({ value: p.id, label: p.name })) || [];
+            const lowStockProducts = products.filter(p => p.currentStock <= p.lowStockThreshold);
             const quickSaleOptions = products?.map(p =>
             ({
                 id: p.id, name: p.name,
@@ -67,7 +68,8 @@ export function useProducts(branchId: string) {
                 productOptions,
                 quickSaleOptions,
                 bomOptions,
-                productionOptions
+                productionOptions,
+                lowStockProducts
             }
 
         },

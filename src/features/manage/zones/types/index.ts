@@ -1,3 +1,5 @@
+import { ActivityLog } from "@/types/ActivityLog";
+
 export interface ZoneDetails {
   updatedAt: string | Date | undefined;
   id: string;
@@ -11,10 +13,13 @@ export interface ZoneDetails {
   longitude?: number;
   riders: { id: string; name: string; phone: string }[];
   customers: {
-    name:string;
-    phone:string;
+    name: string;
+    phone: string;
     customerCredit: number;
     returnablesLength: number;
   }[];
 }
-
+export interface ZoneResponsePayload {
+  zones: ZoneDetails[];
+  logs: ActivityLog[];
+}
