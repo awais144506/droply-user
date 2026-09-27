@@ -1,7 +1,7 @@
 "use client";
 
 import { Banknote, AlertCircle } from "lucide-react";
-import { SupplierPayment } from "../api/use-payments";
+import { SupplierPayment } from "../../types/payments";
 
 export function PaymentStats({ payments, remainingPayable }: { payments: SupplierPayment[], remainingPayable: number }) {
   const totalDisbursed = payments.reduce((acc, p) => acc + p.amountPaid, 0);

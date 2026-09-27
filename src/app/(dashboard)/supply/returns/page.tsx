@@ -16,6 +16,7 @@ export default function PurchaseReturnsPage() {
   const status = searchParams.get('status') || undefined;
   const { branchId, isLoading: isTenantLoading } = useRole();
   const { data, isLoading } = useReturns(branchId, search, status);
+  const logs = data?.logs || [];
 
   if (isTenantLoading || isLoading || !data) return <Loading text="Loading PO Returns..." />
 
@@ -44,7 +45,7 @@ export default function PurchaseReturnsPage() {
 
       <ActivityLogsCard
         title="Purchase Return Activity"
-        logs={data.logs}
+        logs={logs}
         isLoading={isLoading}
       />
     </div>

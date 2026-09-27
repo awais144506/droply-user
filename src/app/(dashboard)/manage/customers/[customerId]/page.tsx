@@ -25,7 +25,7 @@ export default function CustomerDetailsPage() {
   const { data: customer, isLoading } = useCustomer(customerId);
   const { mutate: deleteCustomer, isPending: isDeleting } = useDeleteCustomer();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  if (isLoading) return <Loading />;
+  if (isLoading) return <Loading text="Loading customer details..."/>;
   if (!customer) return <NotFoundPage />;
   const totalReturnables = customer.returnables?.reduce(
     (sum: number, item: any) => sum + item.currentBalance,

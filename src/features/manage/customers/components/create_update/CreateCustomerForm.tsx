@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form'
 import { createCustomerSchema, CreateCustomerFormData } from "@/features/manage/customers/schema/create-customer.schema";
@@ -28,7 +27,7 @@ export const CustomerForm = ({
     customerId?: string
 }) => {
     const isEditMode = !!customerId;
-    const { mutate: createNewCustomer, isPending: isCreating } = useCreateCustomer();
+    const { mutate: createNewCustomer, isPending: isCreating } = useCreateCustomer(branchId);
     const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer();
     const isPending = isCreating || isUpdating;
 
@@ -39,7 +38,7 @@ export const CustomerForm = ({
         phone: "",
         zoneId: "",
         address: "",
-        email:"",
+        email: "",
         latitude: 31.5411,
         longitude: 74.3591,
         customerCredit: 0,
@@ -62,8 +61,7 @@ export const CustomerForm = ({
         } as Parameters<typeof createNewCustomer>[0];
 
         if (isEditMode) {
-            const { branchId: _b, ...safeUpdatePayload } = payload;
-            updateCustomer({ id: customerId!, data: safeUpdatePayload });
+            updateCustomer({ id: customerId!, data: payload });
         } else {
             createNewCustomer(payload);
         }

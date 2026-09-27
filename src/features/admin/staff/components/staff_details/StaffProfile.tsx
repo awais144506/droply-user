@@ -110,12 +110,13 @@ export function StaffProfile({ user, userId, branchId }: { user: any, userId: st
       </div>
 
       <ConfirmDeleteDialog
-        itemName={localUser.name}
+        title={localUser.name}
         isOpen={isDisableOpen}
+        description
         onClose={() => setIsDisableOpen(false)}
         onConfirm={handleDisableConfirm}
-        isDeleting={isDisabling}
-        btnText="Disable"
+        isLoading={isDisabling}
+        confirmText="Disable"
       />
 
       <ConfirmEnableDialog

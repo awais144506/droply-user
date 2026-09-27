@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { generateDynamicReportPdf } from "@/lib/utils/functions/generatePdfs/report-pdf";
 import { useRole } from "@/lib/hooks/use-role";
 
-// 1. IMPORT YOUR ACTUAL HOOKS HERE (Update paths to match your project structure)
+// 1. IMPORT YOUR ACTUAL HOOKS HERE
 import { usePayments } from "@/features/supply/payments/api/use-payments";
 import { usePurchaseOrders } from "@/features/supply/order/api/use-po";
 
@@ -32,8 +33,9 @@ export function ReportGenerator() {
   const { data: paymentsData } = usePayments(branchId);
   const { data: ordersData } = usePurchaseOrders(branchId);
 
-  const payments = paymentsData?.payments
-  const orders = ordersData?.orders
+  // 🔥 THE FIX: Add '|| []' to guarantee these are always arrays, never undefined
+  const payments = paymentsData?.payments || [];
+  const orders = ordersData?.orders || [];
 
   const activeCategory = reportCategories.find(c => c.id === activeTab);
   const todayStr = new Date().toISOString().split("T")[0];
@@ -66,15 +68,16 @@ export function ReportGenerator() {
     let rows: any[][] = [];
     let totalAmount = 0;
 
-    // 3. FILTER REAL DATA FROM YOUR HOOKS INSTEAD OF MOCK DATA
+    // 3. FILTER REAL DATA FROM YOUR HOOKS
     if (selectedReport === "Supplier Payment History") {
-      // Replace 'payments' with your actual hook array variable name
+      // Safe to filter now because payments is guaranteed to be an array
       const filtered = payments.filter((p: any) => {
         const pDate = new Date(p.paymentDate);
         return pDate >= start && pDate <= end;
       });
 
       columns = ["Date", "Voucher Number", "Supplier", "Method", "Amount Paid"];
+      // Safe to map and reduce now
       rows = filtered.map((p: any) => [
         new Date(p.paymentDate).toLocaleDateString(),
         p.voucherNumber,
@@ -85,7 +88,7 @@ export function ReportGenerator() {
       totalAmount = filtered.reduce((sum: number, p: any) => sum + p.amountPaid, 0);
 
     } else if (selectedReport === "Purchase Orders Summary") {
-      // Replace 'orders' with your actual hook array variable name
+      // Safe to filter now because orders is guaranteed to be an array
       const filtered = orders.filter((o: any) => {
         const oDate = new Date(o.orderDate);
         return oDate >= start && oDate <= end;

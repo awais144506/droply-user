@@ -1,56 +1,28 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { CreateCustomerFormData } from "../schema/create-customer.schema";
 import { customerKeys } from "./customer-keys";
 import { customerApi } from "./customer.service";
 import { toast } from "sonner";
-import { formatCustomerPayload } from "../utils/formatCustomerPayload";
 import { zoneKeys } from "../../zones/api/zone-keys";
 import { useRouter } from "next/navigation";
 
-type CreateCustomerPayload = ReturnType<typeof formatCustomerPayload>;
-
-export function useCreateCustomer() {
+export function useCreateCustomer(branchId: string) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (newCustomer: CreateCustomerPayload) =>
+    mutationFn: (newCustomer: CreateCustomerFormData) =>
       customerApi.createNewCustomer(newCustomer),
-    onMutate: async (newCustomer) => {
-      const queryKey = customerKeys.branchList(newCustomer.branchId);
-      await queryClient.cancelQueries({ queryKey });
-      const previousCustomers = queryClient.getQueryData(queryKey);
-      queryClient.setQueryData(queryKey, (old: any[]) => {
-        const optimisticCustomer = {
-          id: `temp-${Date.now()}`,
-          ...newCustomer,
-          status: "ACTIVE",
-          returnablesLength: newCustomer.returnables?.length || 0,
-          createdAt: new Date().toISOString(),
-        };
-        return old ? [optimisticCustomer, ...old] : [optimisticCustomer];
-      });
-      return { previousCustomers, queryKey };
-    },
-
-    onError: (err, newCustomer, context) => {
-      if (context?.previousCustomers) {
-        queryClient.setQueryData(context.queryKey, context.previousCustomers);
-      }
-      toast.error(err.message);
-    },
-
-    onSettled: (data, error, variables, context) => {
-      if (context?.queryKey) {
-        queryClient.invalidateQueries({ queryKey: context.queryKey });
-        queryClient.invalidateQueries({ queryKey: customerKeys.logs() });
-        queryClient.invalidateQueries({ queryKey: zoneKeys.lists() });
-      }
-    },
     onSuccess: () => {
       toast.success("Customer created successfully");
+      queryClient.invalidateQueries({ queryKey: customerKeys.branchList(branchId) });
+      queryClient.invalidateQueries({ queryKey: customerKeys.logs() });
+      queryClient.invalidateQueries({ queryKey: zoneKeys.lists() });
+
       router.back();
+    },
+    onError: (err) => {
+      toast.error(err.message);
     },
   });
 }

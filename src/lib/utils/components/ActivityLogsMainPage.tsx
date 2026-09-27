@@ -6,7 +6,7 @@ import Loading from "@/app/loading";
 
 interface ActivityLogsCardProps {
     title?: string;
-    logs?: ActivityLog[]; // Mark as optional
+    logs?: ActivityLog[];
     isLoading: boolean;
 }
 

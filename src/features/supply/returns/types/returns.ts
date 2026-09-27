@@ -1,3 +1,4 @@
+import { ActivityLog } from "@/types/ActivityLog";
 export type ReturnStatus = "PENDING_RESOLUTION" | "CREDIT_APPLIED" | "REPLACED" | "MIXED_RESOLUTION";
 
 export interface PurchaseReturnItem {
@@ -44,4 +45,14 @@ export interface PurchaseReturn {
 
     createdAt: string;
     updatedAt: string;
+}
+
+export interface ReturnsApiResponse {
+    returns: PurchaseReturn[];
+    logs: ActivityLog[];
+    stats: {
+        pendingResolution: number;
+        creditsRecovered: number;
+        stockReplacements: number;
+    };
 }

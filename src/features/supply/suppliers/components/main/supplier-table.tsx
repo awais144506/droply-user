@@ -69,11 +69,12 @@ export function SupplierTable({ suppliers }: SupplierTableProps) {
         )}
       </div>
       <ConfirmDeleteDialog
-        itemName={`Supplier "${supplierToDelete?.firmName}"`}
+        title={`Supplier "${supplierToDelete?.firmName}"`}
+        description
         isOpen={!!supplierToDelete}
         onClose={() => setSupplierToDelete(null)}
         onConfirm={confirmDelete}
-        isDeleting={isDeleting}
+        isLoading={isDeleting}
       />
     </>
   );
