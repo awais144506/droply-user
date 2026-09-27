@@ -2,7 +2,7 @@ import * as yup from "yup";
 
 export const createCustomerSchema = yup.object().shape({
   partyType: yup.string().required("Party type is required"),
-  customerCategory: yup.string().required("Category is required"),
+  category: yup.string().required("Category is required"),
   name: yup
     .string()
     .min(3, "Name must be at least 3 characters")
@@ -15,7 +15,7 @@ export const createCustomerSchema = yup.object().shape({
       "Must be a valid Pakistani mobile number (e.g., 03001234567)"
     )
     .required("Phone number is required"),
-  email: yup.string().email("Please enter a valid email address").optional().nullable(),
+  email: yup.string().email("Please enter a valid email address").optional(),
   address: yup.string().required("Address is required"),
   zoneId: yup.string().required("Delivery zone is required"),
   latitude: yup
@@ -45,7 +45,7 @@ export const createCustomerSchema = yup.object().shape({
     .transform((value, originalValue) => (originalValue === "" ? 0 : value))
     .min(0, "Deposit cannot be negative")
     .optional(),
-  openingReturnables: yup.array().of(
+  returnables: yup.array().of(
     yup.object().shape({
       productId: yup.string().required("Product is required"),
       quantity: yup.number().min(1, "Must be at least 1").required("Quantity is required")

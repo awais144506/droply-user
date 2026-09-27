@@ -1,10 +1,10 @@
 import { Home, MapPin, Phone, CalendarX2 } from "lucide-react";
-import { CustomerList } from "../../types/customer";
+import { CustomerDetails } from "../../types/customer";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
 import { formatLastVisit, formatCurrency, displayPakistaniPhone } from "@/lib/utils/functions/setFormat";
 
 
-export const getCustomerColumns = (): ColumnDef<CustomerList>[] => [
+export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
     {
         header: "Code",
         render: (customer) => (
@@ -41,9 +41,11 @@ export const getCustomerColumns = (): ColumnDef<CustomerList>[] => [
         render: (customer) => (
 
             <div>
-                <span className="flex items-center text-xs gap-1 max-w-45" title={customer.address || "No address"}>
+                <span className="flex items-center text-xs gap-1 max-w-60 min-w-0">
                     <Home className="h-3 w-3 text-slate-400 shrink-0" />
-                    {customer.address || "No address"}
+                    <span className="truncate">
+                        {customer.address || "No address"}
+                    </span>
                 </span>
                 <div className="flex items-center gap-3 text-xs text-slate-500">
                     <span className="flex items-center gap-1 max-w-45 truncate" title={customer.zone?.name || "No address"}>

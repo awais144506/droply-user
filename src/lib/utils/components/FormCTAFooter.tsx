@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Loader2, LucideIcon } from "lucide-react";
+import { Loader2, LucideIcon, Save } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -13,17 +13,17 @@ type Props = {
     ctaText?: string;
     icon?: LucideIcon;
     isCancel?: boolean;
-}
+};
 
 export default function FormCTAFooter({
     isPending,
     isValid,
     isDirty,
     isEditMode = false,
-    href,
+    href = "",
     setStep,
-    ctaText = "Submit",
-    icon: Icon,
+    ctaText = "Save Changes",
+    icon: ActionIcon,
     isCancel = true,
 }: Props) {
     return (
@@ -39,15 +39,16 @@ export default function FormCTAFooter({
                     </Button>
                 )}
             </div>
+
             <div className="flex items-center gap-3">
                 {isCancel && (
                     <Link
-                        href={href || ""}
+                        href={href}
                         className={cn(buttonVariants({ variant: "outline" }))}
                     >
                         Cancel
-                    </Link>)
-                }
+                    </Link>
+                )}
 
                 <Button
                     type="submit"
@@ -57,12 +58,16 @@ export default function FormCTAFooter({
                     {isPending ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin shrink-0" />
-                            Creating Record...
+                            {isEditMode ? "Saving Changes..." : "Creating Record..."}
                         </>
                     ) : (
                         <>
-                            {Icon && <Icon className="mr-2 h-4 w-4 shrink-0" />}
-                            {ctaText}
+                            {isEditMode ? (
+                                <Save className="mr-2 h-4 w-4 shrink-0" />
+                            ) : (
+                                ActionIcon && <ActionIcon className="mr-2 h-4 w-4 shrink-0" />
+                            )}
+                            {isEditMode ? "Save Changes" : ctaText}
                         </>
                     )}
                 </Button>

@@ -13,7 +13,9 @@ export function useCustomers(
   return useQuery({
     queryKey: customerKeys.branchList(branchId || ""),
     queryFn: () => customerApi.getAllCustomers(branchId),
-    select: (customers) => {
+    select: (payload) => {
+      const customers = payload?.customer || [];
+      const logs = payload?.logs || [];
       const activeCount = customers.filter((c) => c.status === "ACTIVE").length;
       const totalLedger = customers.reduce((sum, c) => sum + Number(c.customerCredit || 0), 0);
       const totalAssets = customers.reduce((sum, c) => sum + Number(c.returnablesLength || 0), 0)
@@ -52,7 +54,8 @@ export function useCustomers(
           totalLedger: formatCurrency(totalLedger),
           totalAssets,
         },
-        customerOptions
+        customerOptions,
+        logs: logs
       }
     },
     staleTime: 5 * 60 * 1000,
@@ -73,14 +76,5 @@ export function useCustomer(id: string) {
     },
     staleTime: 5 * 60 * 1000,
     enabled: !!id,
-  });
-}
-
-// 7. Activity Logs for Customers
-export function useCustomerLogs(branchId: string) {
-  return useQuery({
-    queryKey: customerKeys.customerLogs(branchId),
-    queryFn: () => customerApi.getCustomerLogs(branchId),
-    enabled: !!branchId,
   });
 }

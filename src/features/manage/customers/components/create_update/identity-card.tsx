@@ -27,7 +27,7 @@ export default function IdentityCard({ zoneOptions, isLoading }: any) {
                     <div className="space-y-1.5">
                         <FormSelect
                             label="Category Options"
-                            name="customerCategory"
+                            name="category"
                             required
                             options={categoryOptions}
                         />

@@ -5,6 +5,7 @@ import { QueryProvider } from "@/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ClerkProvider } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
+import { TermsAgreementModal } from "@/components/layout/TermsAgreementModal";
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -27,6 +28,7 @@ export default function RootLayout({
           <QueryProvider>
             {children}
             <Toaster position="top-center" />
+            <TermsAgreementModal />
           </QueryProvider>
         </body>
       </html>

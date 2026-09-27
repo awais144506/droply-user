@@ -1,7 +1,7 @@
 "use client";
 import PageHeader from "@/lib/utils/components/MainPageHeader";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
-import { useCustomers, useCustomerLogs } from "@/features/manage/customers/api/use-customer";
+import { useCustomers } from "@/features/manage/customers/api/use-customer";
 import { useRole } from "@/lib/hooks/use-role";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
@@ -19,11 +19,12 @@ export default function CustomersPage() {
   const debt = searchParams.get("debt") || undefined
 
   const { data, isError, error, isLoading } = useCustomers(branchId, debt, search);
-  const { data: logs = [], isLoading: isLoadingLogs } = useCustomerLogs(branchId);
+
   const customers = data?.customers || [];
   const stats = data?.stats || { activeCount: 0, totalLedger: "0", totalAssets: 0 };
+  const logs = data?.logs || [];
 
-  if (isLoading) return <Loading text="Loading Customers..."/>;
+  if (isLoading) return <Loading text="Loading Customers..." />;
   if (isError) return <ErrorBoundary error={error.message} />;
 
   return (
@@ -60,7 +61,7 @@ export default function CustomersPage() {
             <ActivityLogsCard
               title="Customer Activity Logs"
               logs={logs}
-              isLoading={isLoadingLogs}
+              isLoading={isLoading}
             />
           </div>
         </div>

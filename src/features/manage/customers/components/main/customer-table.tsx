@@ -2,14 +2,14 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { CustomerList } from "../../types/customer";
+import { CustomerDetails } from "../../types/customer";
 import { usePagination } from "@/lib/utils/functions/pagination-calculation";
 import DataTable from "@/lib/utils/components/TableCreateMachine";
 import TablePagination from "@/lib/utils/components/TablePagination";
 import { getCustomerColumns } from "./customer-columns";
 
 interface CustomersTableProps {
-  customers: CustomerList[];
+  customers: CustomerDetails[];
 }
 
 export function CustomersTable({ customers }: CustomersTableProps) {

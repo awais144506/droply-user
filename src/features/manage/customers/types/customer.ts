@@ -1,3 +1,4 @@
+import { ActivityLog } from "@/types/ActivityLog";
 export type OrderStatus = "PENDING" | "ON_ROUTE" | "COMPLETED" | "VOIDED"
 export type CustomerStatus = "ACTIVE" | "INACTIVE" | "BLOCKED";
 
@@ -8,7 +9,7 @@ export interface CustomerDetails {
     customerCode: string;
     name: string;
     phone?: string;
-    email: string | null;
+    email?: string | null;
     address: string | null;
     latitude: number | null;
     longitude: number | null;
@@ -33,26 +34,6 @@ export interface CustomerDetails {
     orders: CustomerOrderHistory[],
 }
 
-export interface CustomerList {
-    category: string;
-    address: string;
-    id: string;
-    customerCode: string;
-    name: string;
-    phone: string;
-    status: CustomerStatus;
-    zone?: {
-        id: string;
-        name: string;
-    } | null;
-    returnables: [
-        currentReturnables: number,
-    ]
-    customerCredit: string;
-    returnablesLength: string;
-    lastVisitDate: string;
-}
-
 export interface CustomerOrderHistory {
     orderCode: string;
     id: string
@@ -60,4 +41,9 @@ export interface CustomerOrderHistory {
     totalAmount: number;
     type: "WALK_IN" | "DELIVERY";
     createdAt: string;
+}
+
+export interface CustomerResponse {
+  customer: CustomerDetails[];
+  logs: ActivityLog[];
 }

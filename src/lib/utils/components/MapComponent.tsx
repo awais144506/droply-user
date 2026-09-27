@@ -43,10 +43,10 @@ export default function MapComponent({
         className="h-full w-full"
         style={{ height: "100%", width: "100%", minHeight: "300px" }}
       >
-        {/* Using standard OpenStreetMap tiles */}
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maxZoom={19}
         />
 
         <Marker position={center}>

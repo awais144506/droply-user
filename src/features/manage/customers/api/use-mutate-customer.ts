@@ -6,10 +6,12 @@ import { customerApi } from "./customer.service";
 import { toast } from "sonner";
 import { formatCustomerPayload } from "../utils/formatCustomerPayload";
 import { zoneKeys } from "../../zones/api/zone-keys";
+import { useRouter } from "next/navigation";
 
 type CreateCustomerPayload = ReturnType<typeof formatCustomerPayload>;
 
 export function useCreateCustomer() {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -48,18 +50,21 @@ export function useCreateCustomer() {
     },
     onSuccess: () => {
       toast.success("Customer created successfully");
+      router.back();
     },
   });
 }
 
 // 5. Update Customer
 export function useUpdateCustomer() {
+  const router = useRouter();
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: string; data: Partial<CreateCustomerFormData> }) => customerApi.updateCustomer(id, data),
     onSuccess: (_, variables) => {
       toast.success("Customer updated successfully");
+      router.back();
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: customerKeys.detail(variables.id) });
       queryClient.invalidateQueries({ queryKey: customerKeys.logs() });
@@ -80,6 +85,7 @@ export function useDeleteCustomer() {
     onSuccess: () => {
       toast.success("Customer deleted successfully");
       queryClient.invalidateQueries({ queryKey: customerKeys.all });
+      queryClient.invalidateQueries({ queryKey: zoneKeys.lists() });
     },
     onError: (err) => {
       toast.error(err.message);

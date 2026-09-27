@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { Save } from "lucide-react";
 import { editZoneSchema, EditZoneFormValues } from "../../schema/edit-zone-schema";
 import {
     Dialog,
@@ -90,11 +89,9 @@ export default function EditZoneDialog({ zone, isOpen, onClose }: EditZoneDialog
                         </div>
 
                         <FormCTAFooter
-                            ctaText="Save Changes"
                             isPending={isPending}
                             isValid={isValid}
                             isDirty={isDirty}
-                            icon={Save}
                             isCancel={false}
                             isEditMode={true}
                         />

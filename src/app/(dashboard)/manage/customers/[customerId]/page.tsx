@@ -122,11 +122,18 @@ export default function CustomerDetailsPage() {
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDeleteDialog
-        itemName={`Customer "${customer.name}"`}
+             title={`Delete "${customer.name}" Customer?`}
+        description={
+          <span>
+            Are you sure you want to delete <span className="font-bold text-slate-900">{customer.name}</span>?
+          </span>
+        }
+        isLoading={isDeleting}
+        confirmText="Delete Customer"
+        confirmButtonClass="bg-rose-600 hover:bg-rose-700 text-white"
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
-        isDeleting={isDeleting}
       />
     </>
   );

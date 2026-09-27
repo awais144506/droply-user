@@ -7,7 +7,7 @@ import CustomerForm from "@/features/manage/customers/components/create_update/C
 import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
 import { useParams } from "next/navigation";
 import Loading from "@/app/loading";
-import { mappedCustomerData } from "@/features/manage/customers/utils/mapCustomerDataEdit";
+import { mappedCustomerData } from "@/features/manage/customers/utils/mappedCustomerData";
 
 export default function EditCustomerPage() {
     const { customerId } = useParams() as { customerId: string };
