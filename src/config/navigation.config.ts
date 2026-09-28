@@ -1,6 +1,6 @@
 import {
   MapPin, Package, Truck, FileText, Navigation, Factory, Building,
-  Receipt, UserCog, BarChart3, LucideIcon, UserPlus, Settings, ArchiveX, TruckIcon,
+  Receipt, UserCog, LucideIcon, UserPlus, Settings, ArchiveX, TruckIcon,
   BadgeDollarSign, Undo2, Headphones, CreditCard
 } from "lucide-react";
 
@@ -54,14 +54,14 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     headerColor: { text: "text-indigo-600 dark:text-indigo-400", dot: "bg-indigo-500", border: "border-indigo-500/20", bgHover: "hover:bg-indigo-500/5" },
     items: [
       { title: "Production", url: "/stock/production", icon: Factory, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "DONE" },
-      { title: "Wastage & Damages", url: "/stock/wastage", icon: ArchiveX, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "DONE" },
+      { title: "Wastage & Damages", url: "/stock/wastage", icon: ArchiveX, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
     ],
   },
   {
     label: "SUPPLIES & PURCHASES",
     headerColor: { text: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500", border: "border-amber-500/20", bgHover: "hover:bg-amber-500/5" },
     items: [
-      { title: "Suppliers", url: "/supply/suppliers", icon: Building, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "DONE" },
+      { title: "Suppliers", url: "/supply/suppliers", icon: Building, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Purchase Orders", url: "/supply/order", icon: Receipt, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "DONE" },
       { title: "Payments", url: "/supply/payments", icon: CreditCard, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "DONE" },
       { title: "Purchase Returns", url: "/supply/returns", icon: Undo2, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "DONE" },
@@ -72,7 +72,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     headerColor: { text: "text-rose-600 dark:text-rose-400", dot: "bg-rose-500", border: "border-rose-500/20", bgHover: "hover:bg-rose-500/5" },
     items: [
       { title: "Staff & Payroll", url: "/admin/staff", icon: UserCog, badge: "Owner", allowedRoles: ["OWNER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
-      { title: "Vehicles & Fuel", url: "/admin/fleet", icon: TruckIcon, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "DONE" },
+      { title: "Vehicles & Fuel", url: "/admin/fleet", icon: TruckIcon, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Assigned Tasks", url: "/admin/tasks", icon: FileText, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "DONE" },
       { title: "Expenses & Accounts", url: "/admin/expenses", icon: BadgeDollarSign, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "DONE" },
       // { title: "Reports", url: "/admin/reports", icon: BarChart3, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS,devStatus: "PARTIAL" },

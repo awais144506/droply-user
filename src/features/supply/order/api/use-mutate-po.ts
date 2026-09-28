@@ -93,6 +93,7 @@ export function useUndoPO() {
             });
             queryClient.invalidateQueries({ queryKey: poKeys.lists() });
             queryClient.invalidateQueries({ queryKey: poKeys.logs() });
+            queryClient.invalidateQueries({ queryKey: productKeys.lists() });
         },
         onError: (error) => {
             toast.error("Failed to undo receipt", {

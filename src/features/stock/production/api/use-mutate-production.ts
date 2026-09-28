@@ -5,6 +5,8 @@ import { productionKeys } from "./production-keys";
 import { toast } from "sonner"; // Or your preferred toast library
 import { productKeys } from "@/features/manage/products/api/product-keys";
 import { useRouter } from "next/navigation";
+import { wastageKeys } from "../../wastage/api/wastage-keys";
+
 export const useMutateProduction = (branchId: string) => {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -87,6 +89,9 @@ export const useFinalizeProduction = (branchId: string) => {
       });
       queryClient.invalidateQueries({
         queryKey: productKeys.lists(),
+      });
+        queryClient.invalidateQueries({
+        queryKey: wastageKeys.lists(branchId),
       });
     },
     onError: (error) => {
