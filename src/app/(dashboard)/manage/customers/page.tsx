@@ -46,7 +46,7 @@ export default function CustomersPage() {
       <div>
         <div className="lg:col-span-2">
           <DataTableFilterBar
-            searchPlaceholder="Search by customer name..."
+            searchPlaceholder="Search by customer name / phone..."
             searchParamName="search"
             tabParamName="debt"
             tabs={FilterTabs}

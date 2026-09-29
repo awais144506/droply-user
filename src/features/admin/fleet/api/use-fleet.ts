@@ -2,7 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { fleetKeys } from "./query-keys";
 import { fleetApi } from "./fleet.service";
-import { displayPakistaniPhone } from "@/lib/utils/functions/setFormat";
+import { formatPhoneNumber } from "react-phone-number-input";
 
 export function useVehicles(branchId: string, statusFilter?: string, searchFilter?: string) {
   return useQuery({
@@ -24,7 +24,7 @@ export function useVehicles(branchId: string, statusFilter?: string, searchFilte
       });
       const formattedList = filteredVehicles.map(vehicle => ({
         ...vehicle,
-        driverPhone: displayPakistaniPhone(vehicle.assignedTo?.phone),
+        driverPhone: formatPhoneNumber(vehicle.assignedTo?.phone),
         displayName: `${vehicle.modelInfo} (${vehicle.registration})`,
       }));
 

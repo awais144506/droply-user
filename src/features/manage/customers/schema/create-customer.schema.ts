@@ -1,4 +1,5 @@
 import * as yup from "yup";
+import { isValidPhoneNumber } from "react-phone-number-input";
 
 export const createCustomerSchema = yup.object().shape({
   partyType: yup.string().required("Party type is required"),
@@ -7,15 +8,17 @@ export const createCustomerSchema = yup.object().shape({
     .string()
     .min(3, "Name must be at least 3 characters")
     .required("Customer name is required"),
+  
   phone: yup
     .string()
-    .transform((value) => (value ? value.replace(/[\s-]/g, "") : value))
-    .matches(
-      /^((\+923[0-9]{8})|(03[0-9]{9}))$/,
-      "Must be a valid Pakistani mobile number (e.g., 03001234567)"
-    )
-    .required("Phone number is required"),
+    .required("Phone number is required")
+    .test("is-valid-phone", "Must be a valid phone number", (value) => {
+      return value ? isValidPhoneNumber(value) : false;
+    }),
+
   email: yup.string().email("Please enter a valid email address").optional(),
+  
+  // ... rest of your existing schema remains identical
   address: yup.string().required("Address is required"),
   zoneId: yup.string().required("Delivery zone is required"),
   latitude: yup

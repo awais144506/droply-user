@@ -7,6 +7,6 @@ export const useOrders = (branchId: string) => {
         queryKey: orderKeys.todays(branchId),
         queryFn: () => orderService.getTodaysOrders(branchId),
         enabled: !!branchId,
-        staleTime: 1000 * 60 * 2,
+        refetchInterval: 1000 * 30 * 2,
     });
 };

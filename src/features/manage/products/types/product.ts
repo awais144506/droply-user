@@ -30,7 +30,7 @@ export interface ProductItem {
 export interface ProductList {
     recipeIngredients: any;
     productCode: string;
-    unitOfMeasure:string;
+    unitOfMeasure: string;
     securityDeposit: number;
     id: string;
     name: string;

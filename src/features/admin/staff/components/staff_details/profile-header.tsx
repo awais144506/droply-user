@@ -6,6 +6,7 @@ import { useState } from "react";
 import UpdateStaffEmailDialog from "../../utils/updateEmailDialog";
 import { updateStaffEmail } from "../../api/use-mutate-staff";
 import { updateStaffEmailValue } from "../../utils/updateEmailDialog";
+import { formatPhoneNumber } from "react-phone-number-input";
 export default function ProfileHeader({ user, branchId }: { user: any, branchId: string }) {
 
   const [updateMailModel, setUpdateMailModel] = useState(false);
@@ -57,7 +58,7 @@ export default function ProfileHeader({ user, branchId }: { user: any, branchId:
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500 mt-2">
-              <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> {user.phone}</span>
+              <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" /> {formatPhoneNumber(user.phone)}</span>
               {user.email && <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5" /> {user.email}</span>}
               {user.zones && user.zones.length > 0 && (
                 <span className="flex items-center gap-1.5">

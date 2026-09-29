@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Phone, Mail, Calendar } from "lucide-react";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
+import { formatPhoneNumber } from "react-phone-number-input";
 
 export const getStaffColumns = (): ColumnDef<any>[] => [
     {
@@ -25,7 +26,7 @@ export const getStaffColumns = (): ColumnDef<any>[] => [
                 <div className="flex items-center gap-3 text-xs text-slate-500">
                     <span className="flex items-center gap-1">
                         <Phone className="h-3 w-3 text-slate-400" />
-                        {staff.phone}
+                        {formatPhoneNumber(staff.phone)}
                     </span>
                     {staff.email && (
                         <span className="flex items-center gap-1">

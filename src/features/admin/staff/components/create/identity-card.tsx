@@ -1,6 +1,7 @@
 import { User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormInput } from "@/components/ui/form-input";
+import { FormPhoneInput } from "@/components/ui/form-phone-input";
 
 // Add props interface
 interface IdentityCardProps {
@@ -36,7 +37,7 @@ const CreateStaffIdentityCard = ({ isEditMode = false }: IdentityCardProps) => {
                         )}
                     </div>
                     <div className="space-y-1.5">
-                        <FormInput
+                        <FormPhoneInput
                             label="Phone"
                             required
                             placeholder="e.g. 03001234567"

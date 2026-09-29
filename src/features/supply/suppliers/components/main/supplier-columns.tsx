@@ -2,8 +2,9 @@ import { MapPin, Phone, CalendarX2, Edit2, Trash2, Building2, Mail } from "lucid
 import { SupplierList } from "../../types/supplier";
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
-import { formatLastVisit, formatCurrency, displayPakistaniPhone } from "@/lib/utils/functions/setFormat";
+import { formatLastVisit, formatCurrency } from "@/lib/utils/functions/setFormat";
 import { Button } from "@/components/ui/button";
+import { formatPhoneNumber } from "react-phone-number-input";
 export const getSupplierColumns = (
     router: AppRouterInstance,
     setSupplierToDelete: (supplier: SupplierList) => void
@@ -26,7 +27,7 @@ export const getSupplierColumns = (
                 <div className="space-y-1">
                     <span className="flex items-center gap-1.5 text-xs text-slate-700 font-medium">
                         <Phone className="h-3.5 w-3.5 text-slate-400 shrink-0" />
-                        {displayPakistaniPhone(supplier.phone)}
+                        {formatPhoneNumber(supplier.phone)}
                     </span>
                     <span className="flex items-center gap-1.5 text-xs text-slate-500">
                         <Building2 className="h-3.5 w-3.5 text-slate-400 shrink-0" />

@@ -6,7 +6,6 @@ import { useCreateSupplier } from "@/features/supply/suppliers/api/use-mutate-su
 import { SupplierFormData } from "@/features/supply/suppliers/schema/create-supplier-schema";
 import { useRouter } from "next/navigation";
 import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation"
-import { formatPakistaniPhone } from "@/lib/utils/functions/setFormat";
 
 const CreateSupplier = () => {
 
@@ -16,7 +15,6 @@ const CreateSupplier = () => {
     const handleSubmit = (data: SupplierFormData) => {
         const payload = {
             ...data,
-            phone: formatPakistaniPhone(data.phone),
             branchId,
         }
         createSupplier(payload, {

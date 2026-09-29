@@ -13,6 +13,8 @@ type Props = {
     ctaText?: string;
     icon?: LucideIcon;
     isCancel?: boolean;
+    varient?: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | "success";
+    cancelVarient?: "link" | "default" | "destructive" | "outline" | "secondary" | "ghost" | "success";
 };
 
 export default function FormCTAFooter({
@@ -25,6 +27,8 @@ export default function FormCTAFooter({
     ctaText = "Save Changes",
     icon: ActionIcon,
     isCancel = true,
+    varient = "default",
+    cancelVarient = "outline",
 }: Props) {
     return (
         <div className="flex items-center justify-between gap-3 border-t border-slate-200 pt-6 mt-8">
@@ -44,7 +48,7 @@ export default function FormCTAFooter({
                 {isCancel && (
                     <Link
                         href={href}
-                        className={cn(buttonVariants({ variant: "outline" }))}
+                        className={cn(buttonVariants({ variant: cancelVarient  }))}
                     >
                         Cancel
                     </Link>
@@ -52,7 +56,7 @@ export default function FormCTAFooter({
 
                 <Button
                     type="submit"
-                    variant="default"
+                    variant={varient}
                     disabled={isPending || (!isDirty && isEditMode) || !isValid}
                 >
                     {isPending ? (

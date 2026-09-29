@@ -10,7 +10,7 @@ import Loading from '@/app/loading'
 import { useUpdateSupplier } from '@/features/supply/suppliers/api/use-mutate-supplier'
 import { useSupplierDetail } from '@/features/supply/suppliers/api/use-suppliers'
 import { SupplierFormData } from '@/features/supply/suppliers/schema/create-supplier-schema'
-import { formatPakistaniPhone, displayPakistaniPhone } from '@/lib/utils/functions/setFormat'
+import { formatPhoneNumber } from 'react-phone-number-input'
 
 const EditSupplier = () => {
   const router = useRouter();
@@ -22,14 +22,10 @@ const EditSupplier = () => {
   const { mutate: updateSupplier, isPending } = useUpdateSupplier()
 
   const handleSubmit = (data: SupplierFormData) => {
-    const formattedData = {
-      ...data,
-      phone: formatPakistaniPhone(data.phone),
-    };
     updateSupplier(
       {
         id: supplierId,
-        data: formattedData
+        data: data
       },
       {
         onSuccess: () => {
@@ -43,7 +39,7 @@ const EditSupplier = () => {
     firmName: supplierData.firmName,
     supplierName: supplierData.supplierName,
     email: supplierData.email || "",
-    phone: displayPakistaniPhone(supplierData.phone),
+    phone: (supplierData.phone),
     address: supplierData.address || "",
     city: supplierData.city,
   } : undefined;

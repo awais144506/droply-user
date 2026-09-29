@@ -1,3 +1,4 @@
+
 export const formatCurrency = (amount: number | string | null | undefined) => {
     const numericAmount = Number(amount || 0);
     if (isNaN(numericAmount) || numericAmount === 0) return "0";
@@ -26,23 +27,6 @@ export const formatLastVisit = (dateString: string | null) => {
     });
 
     return { daysAgo, formattedDate };
-};
-
-export const formatPakistaniPhone = (phone: string) => {
-    if (!phone) return phone;
-    const cleaned = phone.replace(/[\s-]/g, '');
-    if (cleaned.startsWith('03') && cleaned.length === 11) {
-        return '+92' + cleaned.slice(1);
-    }
-    return cleaned;
-};
-
-export const displayPakistaniPhone = (phone?: string) => {
-    if (!phone) return phone;
-    if (phone.startsWith('+923') && phone.length === 13) {
-        return '0' + phone.slice(3);
-    }
-    return phone;
 };
 
 export const formatDate = (dateString?: string) => dateString

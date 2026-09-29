@@ -2,9 +2,10 @@
 
 import { useFormContext, useWatch } from "react-hook-form";
 import { FormSelect } from "@/components/ui/form-select";
-import { User, MapPin } from "lucide-react";
+import { User, MapPin, Phone } from "lucide-react";
 import { useCustomers } from "@/features/manage/customers/api/use-customer";
 import { OrderFormValues } from "../../schema/create-order-schema";
+import { formatPhoneNumber } from "react-phone-number-input";
 
 type Props = {
     branchId: string;
@@ -19,7 +20,7 @@ const CustomerSelection = ({ branchId }: Props) => {
         name: "customerId",
     });
 
-    const selectedCustomer = customerOptions.find(c => c.id === selectedCustomerId);
+    const selectedCustomer = customerOptions.find(c => c.value === selectedCustomerId);
 
     return (
         <section>
@@ -35,20 +36,16 @@ const CustomerSelection = ({ branchId }: Props) => {
                 label="Search Customers"
                 isSearchable={true}
                 isLoading={isLoading}
-                // 1. Pass the extra data (address, category, name) into the options array
-                options={customerOptions.map((c) => ({
-                    value: c.id,
-                    label: `${c.name} - ${c.address} (${c.category})`,
-                    name: c.name,
-                    address: c.address,
-                    category: c.category
-                }))}
+                options={customerOptions}
                 // 2. Custom Render for the Dropdown Options
                 formatOptionLabel={(opt) => (
                     <div className="flex flex-col w-full pr-1 py-0.5">
                         <div className="flex items-center justify-between w-full">
                             <span className="font-bold truncate mr-2">
-                                {opt.name}
+                                {opt.label}
+                                <span className="flex items-center gap-1 mt-0.5 truncate">
+                                    <Phone className="h-2.5 w-2.5 shrink-0" /><span className="text-xs opacity-70 px-1.5 py-0.5"> {formatPhoneNumber(opt.phone)}</span>
+                                </span>
                             </span>
                             <span className="shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border border-current opacity-70 shadow-sm">
                                 {opt.category}
@@ -72,7 +69,7 @@ const CustomerSelection = ({ branchId }: Props) => {
                     <div className="flex justify-between items-start border-b border-slate-100 pb-3">
                         <div>
                             <h4 className="text-sm font-extrabold text-slate-900">
-                                {selectedCustomer.name}
+                                {selectedCustomer.label}
                             </h4>
                             <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
                                 <MapPin className="h-3.5 w-3.5 text-slate-400" />

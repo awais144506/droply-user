@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { displayPakistaniPhone } from "@/lib/utils/functions/setFormat";
 import { customerKeys } from "./customer-keys";
 import { customerApi } from "./customer.service";
 import { formatCurrency } from "@/lib/utils/functions/setFormat";
@@ -28,8 +27,18 @@ export function useCustomers(
         } else if (tabFilter === "CLEAR") {
           matchesTab = credit <= 0;
         }
+
+        const cleanSearch = searchFilter?.toLowerCase().trim();
+        const searchDigits = cleanSearch?.replace(/\D/g, "");
+        const phoneDigits = customer.phone ? customer.phone.replace(/\D/g, "") : "";
+
+        const adjustedSearchDigits = searchDigits?.startsWith("0")
+          ? searchDigits.slice(1)
+          : searchDigits;
+
         const matchesSearch = searchFilter
-          ? customer.name.toLowerCase().includes(searchFilter.toLowerCase().trim())
+          ? customer.name.toLowerCase().includes(cleanSearch || "") ||
+          ((adjustedSearchDigits?.length || 0) > 0 && phoneDigits.includes(adjustedSearchDigits || ""))
           : true;
 
         return matchesTab && matchesSearch;
@@ -38,8 +47,9 @@ export function useCustomers(
       const customerOptions = customers
         .filter((c) => c.status === "ACTIVE")
         .map((c) => ({
-          id: c.id,
-          name: c.name,
+          value: c.id,
+          label: c.name,
+          phone: c.phone,
           category: c.category,
           address: c.address || "No Address Provided",
           customerCredit: Number(c.customerCredit || 0),
@@ -71,7 +81,6 @@ export function useCustomer(id: string) {
     select: (customer) => {
       return {
         ...customer,
-        phone: displayPakistaniPhone(customer.phone),
       }
     },
     staleTime: 5 * 60 * 1000,

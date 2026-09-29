@@ -5,24 +5,27 @@ import React, { useState } from "react";
 import PageHeader from "@/lib/utils/components/MainPageHeader";
 import { useOrders } from "@/features/sales/orders/api/use-order";
 import {
-  Search, Store, Truck, MapPin, CheckCircle,
+  Search, Store, Truck, MapPin,
   Clock, Printer, Edit, Trash2, ChevronDown, CheckCircle2
 } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
+import Loading from "@/app/loading";
 const Orders = () => {
   const { branchId } = useRole();
-  const { data: realOrders = [], isLoading } = useOrders(branchId);
+  const { data: realOrders = [], isLoading, refetch, isRefetching } = useOrders(branchId);
 
   const [activeTab, setActiveTab] = useState("All Orders");
 
-
+  if (isLoading) return <Loading text="Loading oders..." />
   return (
-    <div className="space-y-6 max-w-[1400px] mx-auto p-4 sm:p-6 lg:p-8">
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       <PageHeader
         heading="Sales & Despatch Orders"
         description="Generate instant branch counter bills or schedule route deliveries for zones."
         href="/sales/orders/create-sale"
         btnText="Create New Sale"
+        onRefresh={() => refetch()}
+        isRefreshing={isRefetching}
       />
 
       {/* Container mapping the exact shape of your screenshot */}

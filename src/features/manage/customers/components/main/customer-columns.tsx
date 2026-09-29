@@ -1,7 +1,8 @@
 import { Home, MapPin, Phone, CalendarX2 } from "lucide-react";
 import { CustomerDetails } from "../../types/customer";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
-import { formatLastVisit, formatCurrency, displayPakistaniPhone } from "@/lib/utils/functions/setFormat";
+import { formatLastVisit, formatCurrency } from "@/lib/utils/functions/setFormat";
+import { formatPhoneNumber } from "react-phone-number-input";
 
 
 export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
@@ -29,7 +30,7 @@ export const getCustomerColumns = (): ColumnDef<CustomerDetails>[] => [
                 <div className="flex items-center gap-3 text-xs text-slate-700">
                     <span className="flex items-center gap-1">
                         <Phone className="h-3 w-3 text-slate-400" />
-                        {displayPakistaniPhone(customer.phone)} . ({customer.category.toLowerCase()})
+                        {formatPhoneNumber(customer.phone)} . ({customer.category.toLowerCase()})
                     </span>
                 </div>
             </div>

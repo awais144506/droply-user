@@ -47,8 +47,8 @@ const SelectProduct = ({ branchId }: Props) => {
             hasOffer: false,
             offerQty: 0,
             discountPrice: 0,
-            chargedDeposit: 0, 
-            isDepositCharged: false // 🔥 Ensure boolean initializes as false
+            chargedDeposit: 0,
+            isDepositCharged: false
         });
     };
 
@@ -88,6 +88,7 @@ const SelectProduct = ({ branchId }: Props) => {
                     const showDepositWarning = isReturnable && deficit > 0;
                     const isDepositCharged = currentItemState.isDepositCharged === true;
                     const calculatedDepositNeeded = deficit * depositRate;
+                    const scale = selectedProductDetails?.unitOfMeasure;
 
                     return (
                         <div key={field.id} className={`p-3 border rounded-xl transition-colors ${isOutOfStock ? 'bg-rose-50/30 border-rose-200' : 'bg-white border-slate-100'}`}>
@@ -118,12 +119,12 @@ const SelectProduct = ({ branchId }: Props) => {
                                         )}
                                     />
                                     {selectedProductDetails && (
-                                        <span className={`absolute -bottom-5 left-1 text-[10px] font-bold flex items-center gap-1 ${isOutOfStock ? 'text-rose-600' :
+                                        <span className={`absolute -bottom-5 left-1 text-[11px] font-bold flex items-center gap-1 ${isOutOfStock ? 'text-rose-600' :
                                             remainingStock <= (selectedProductDetails.lowStockThreshold || 0) ? 'text-amber-500' :
                                                 'text-emerald-600'
                                             }`}>
                                             {isOutOfStock && <AlertCircle className="h-3 w-3" />}
-                                            {isOutOfStock ? "Stock Exceeded!" : `Stock Left: ${remainingStock}`}
+                                            {isOutOfStock ? "Stock Exceeded!" : `Stock Left: ${remainingStock} ( ${scale} )`}
                                         </span>
                                     )}
                                 </div>
@@ -182,7 +183,7 @@ const SelectProduct = ({ branchId }: Props) => {
                                     <div className="flex items-center gap-2 flex-1">
                                         <Gift className="h-4 w-4 text-emerald-500 shrink-0" />
                                         <span className="text-xs font-bold text-emerald-700 truncate">
-                                            Free Item: {selectedProductDetails?.name || "Product"}
+                                            Free Item: {selectedProductDetails?.name || "Product"} ( {selectedProductDetails?.unitOfMeasure} )
                                         </span>
                                     </div>
 
@@ -203,9 +204,8 @@ const SelectProduct = ({ branchId }: Props) => {
 
                             {/* Asset Deficit Warning & Deposit Toggle */}
                             {showDepositWarning && (
-                                <div className={`mt-6 p-3 border rounded-xl flex items-start sm:items-center gap-3 transition-all animate-in fade-in ${
-                                    isDepositCharged ? "bg-emerald-50/50 border-emerald-200" : "bg-amber-50 border-amber-200"
-                                }`}>
+                                <div className={`mt-6 p-3 border rounded-xl flex items-start sm:items-center gap-3 transition-all animate-in fade-in ${isDepositCharged ? "bg-emerald-50/50 border-emerald-200" : "bg-amber-50 border-amber-200"
+                                    }`}>
                                     {isDepositCharged ? (
                                         <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5 sm:mt-0" />
                                     ) : (

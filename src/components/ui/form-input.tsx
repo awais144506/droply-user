@@ -8,6 +8,7 @@ import { CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { LucideIcon } from "lucide-react";
 
 interface FormInputProps {
     name: string;
@@ -23,9 +24,10 @@ interface FormInputProps {
     max?: number;
     className?: string;
     lableTextColor?: string;
-    // 🔥 New Date Restriction Props
     disablePastDates?: boolean;
     disableFutureDates?: boolean;
+    labelIcon?: LucideIcon,
+    iconColor?: string;
 }
 
 export function FormInput({
@@ -44,6 +46,8 @@ export function FormInput({
     lableTextColor = "text-slate-700",
     disablePastDates = false,
     disableFutureDates = false,
+    labelIcon: Icon,
+    iconColor = "text-sky-500",
 }: FormInputProps) {
     const { register, control, formState: { errors } } = useFormContext();
     const error = errors[name]?.message as string;
@@ -53,6 +57,7 @@ export function FormInput({
         <div className="space-y-1.5 w-full">
             {label && (
                 <label htmlFor={inputId} className={`flex items-center text-xs font-bold ${lableTextColor} uppercase tracking-wide cursor-pointer`}>
+                    {Icon && <Icon className={`h-3.5 w-3.5 mr-1.5 ${iconColor}`} />}
                     {label}
                     {required && <span className="text-rose-500 ml-1">*</span>}
                 </label>

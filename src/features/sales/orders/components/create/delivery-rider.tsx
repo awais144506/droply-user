@@ -15,17 +15,11 @@ type Props = {
 
 const DeliveryRider = ({ branchId }: Props) => {
     const { control, setValue } = useFormContext<OrderFormValues>();
-
-    // Watch the saleType from react-hook-form state
     const saleType = useWatch({
         control,
         name: "saleType",
     });
-
-    // Fetch live rider options using your hook
     const { data, isLoading } = useStaffList(branchId);
-
-    // Auto-parse the label "Name (Phone)" into separate fields for beautiful rendering
     const rawRiderOptions = data?.riderOptions || [];
     const riderOptions = rawRiderOptions.map((r: any) => {
         const extractedName = r.name || r.label.split(' (')[0];
@@ -84,6 +78,7 @@ const DeliveryRider = ({ branchId }: Props) => {
                         label="Scheduled Delivery"
                         type="date"
                         name="scheduledDate"
+                        disablePastDates={true}
                     />
                 </div>
             </div>

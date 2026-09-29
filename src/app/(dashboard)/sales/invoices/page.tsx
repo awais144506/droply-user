@@ -21,7 +21,7 @@ import {
   MapPin,
   Check,
 } from "lucide-react";
-
+import { generateSalesInvoicePdf } from "@/lib/utils/functions/generatePdfs/generate-invoice";
 // --- TYPES ---
 export type InvoiceStatus = "PAID" | "UNPAID" | "PARTIAL" | "OVERDUE";
 
@@ -305,41 +305,36 @@ export default function InvoicesPage() {
           <div className="flex items-center bg-slate-100 p-0.5 rounded-lg text-xs font-medium text-slate-600 self-start md:self-auto">
             <button
               onClick={() => setStatusFilter("ALL")}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
-                statusFilter === "ALL" ? "bg-white text-slate-900 shadow-2xs font-semibold" : ""
-              }`}
+              className={`px-2.5 py-1 rounded-md transition-colors ${statusFilter === "ALL" ? "bg-white text-slate-900 shadow-2xs font-semibold" : ""
+                }`}
             >
               All
             </button>
             <button
               onClick={() => setStatusFilter("PAID")}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
-                statusFilter === "PAID" ? "bg-white text-emerald-700 shadow-2xs font-semibold" : ""
-              }`}
+              className={`px-2.5 py-1 rounded-md transition-colors ${statusFilter === "PAID" ? "bg-white text-emerald-700 shadow-2xs font-semibold" : ""
+                }`}
             >
               Paid
             </button>
             <button
               onClick={() => setStatusFilter("PARTIAL")}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
-                statusFilter === "PARTIAL" ? "bg-white text-sky-700 shadow-2xs font-semibold" : ""
-              }`}
+              className={`px-2.5 py-1 rounded-md transition-colors ${statusFilter === "PARTIAL" ? "bg-white text-sky-700 shadow-2xs font-semibold" : ""
+                }`}
             >
               Partial
             </button>
             <button
               onClick={() => setStatusFilter("UNPAID")}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
-                statusFilter === "UNPAID" ? "bg-white text-amber-700 shadow-2xs font-semibold" : ""
-              }`}
+              className={`px-2.5 py-1 rounded-md transition-colors ${statusFilter === "UNPAID" ? "bg-white text-amber-700 shadow-2xs font-semibold" : ""
+                }`}
             >
               Unpaid
             </button>
             <button
               onClick={() => setStatusFilter("OVERDUE")}
-              className={`px-2.5 py-1 rounded-md transition-colors ${
-                statusFilter === "OVERDUE" ? "bg-white text-rose-700 shadow-2xs font-semibold" : ""
-              }`}
+              className={`px-2.5 py-1 rounded-md transition-colors ${statusFilter === "OVERDUE" ? "bg-white text-rose-700 shadow-2xs font-semibold" : ""
+                }`}
             >
               Overdue
             </button>
@@ -447,6 +442,7 @@ export default function InvoicesPage() {
                         <button
                           className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
                           title="Print / View Invoice"
+                          onClick={() => generateSalesInvoicePdf()}
                         >
                           <Printer className="h-3.5 w-3.5" />
                         </button>

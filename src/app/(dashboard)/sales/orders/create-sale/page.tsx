@@ -1,13 +1,11 @@
 "use client"
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useRole } from "@/lib/hooks/use-role";
 import ChooseSale from "@/features/sales/orders/components/create/choose-sale";
 import CreateSaleForm from "@/features/sales/orders/components/create/CreateSaleForm";
 
 
 const CreateNewSalePage = () => {
-    const router = useRouter();
     const { branchId } = useRole();
 
     const [step, setStep] = useState<"SELECT_SALE" | "FORM">("SELECT_SALE");

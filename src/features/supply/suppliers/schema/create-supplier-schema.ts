@@ -1,7 +1,5 @@
 import * as yup from "yup";
-
-
-const stripFormat = (value: string | undefined) => (value ? value.replace(/[\s-]/g, "") : value);
+import { isValidPhoneNumber } from "react-phone-number-input";
 
 export const supplierSchema = yup.object().shape({
     firmName: yup
@@ -23,9 +21,10 @@ export const supplierSchema = yup.object().shape({
 
     phone: yup
         .string()
-        .transform(stripFormat)
-        .matches(/^((\+923[0-9]{8})|(03[0-9]{9}))$/, "Invalid Pakistani mobile number")
-        .required("Phone number is required"),
+        .required("Phone number is required")
+        .test("is-valid-phone", "Must be a valid phone number", (value) => {
+            return value ? isValidPhoneNumber(value) : false;
+        }),
 
     address: yup
         .string()

@@ -9,7 +9,6 @@ import { createStaffSchema, CreateStaffFormData } from "@/features/admin/staff/s
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
-import { formatPakistaniPhone } from "@/lib/utils/functions/setFormat";
 
 const CreateStaffForm = ({ onSubmit,
     isPending,
@@ -44,11 +43,7 @@ const CreateStaffForm = ({ onSubmit,
             });
             return;
         }
-        const payload = {
-            ...data,
-            phone:formatPakistaniPhone(data.phone),
-        }
-        onSubmit(payload);
+        onSubmit(data);
     };
 
     return (

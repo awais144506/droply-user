@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, RefreshCw } from "lucide-react";
 import {
     Breadcrumb,
     BreadcrumbItem,
@@ -20,6 +20,8 @@ type Props = {
     isDisabled?: boolean;
     breadcrumbs?: { label: string; href?: string }[];
     children?: React.ReactNode;
+    onRefresh?: () => void;
+    isRefreshing?: boolean;
 }
 
 export default function MainPageHeader({
@@ -29,7 +31,9 @@ export default function MainPageHeader({
     btnText,
     isDisabled = false,
     breadcrumbs,
-    children
+    children,
+    onRefresh,
+    isRefreshing = false
 }: Props) {
     return (
         <div className="flex flex-col gap-4 pb-6">
@@ -71,6 +75,21 @@ export default function MainPageHeader({
                 {/* Actions Container */}
                 <div className="flex items-center gap-3 shrink-0">
                     {children}
+                    
+                    {/* 🔥 Optional Refresh Button */}
+                    {onRefresh && (
+                        <button
+                            onClick={onRefresh}
+                            disabled={isRefreshing}
+                            className={`flex items-center justify-center h-10 w-10 rounded-md border border-slate-200 bg-white hover:bg-slate-100 transition-colors ${
+                                isRefreshing ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                            }`}
+                            title="Refresh Data"
+                        >
+                            <RefreshCw className={`h-4 w-4 text-slate-700 ${isRefreshing ? "animate-spin" : ""}`} />
+                        </button>
+                    )}
+
                     {href && btnText && (
                         <Link
                             href={isDisabled ? "#" : href}

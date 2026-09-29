@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { User } from "lucide-react";
 import { FormInput } from "@/components/ui/form-input";
+import { FormSelect } from "@/components/ui/form-select";
+import { FormPhoneInput } from "@/components/ui/form-phone-input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { partyOptions, categoryOptions } from "@/features/manage/customers/components/data/dropdownOptions";
-import { FormSelect } from "@/components/ui/form-select";
 
 export default function IdentityCard({ zoneOptions, isLoading }: any) {
     return (
@@ -44,13 +45,13 @@ export default function IdentityCard({ zoneOptions, isLoading }: any) {
                 </div>
 
                 <div className="space-y-1.5">
-                    <FormInput
+                    <FormPhoneInput
                         label="Phone Number"
                         required
-                        placeholder="e.g. 03211234567"
                         name="phone"
                     />
                 </div>
+
                 <div className="space-y-1.5">
                     <FormInput
                         label="Email"
@@ -58,7 +59,6 @@ export default function IdentityCard({ zoneOptions, isLoading }: any) {
                         name="email"
                     />
                 </div>
-
 
                 <div className="space-y-1.5">
                     <FormSelect

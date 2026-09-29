@@ -3,7 +3,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { SupplierPayment } from "@/features/supply/payments/types/payments";
 import { BranchSettingData } from "@/features/admin/settings/types/settings";
-import { displayPakistaniPhone } from "../setFormat";
+import { formatPhoneNumber } from "react-phone-number-input";
 import { getBase64ImageFromUrl } from "./getBase64Image";
 
 export const generatePaymentPdf = async (payment: SupplierPayment & { purchaseOrder?: { supplierPayments?: SupplierPayment[], totalAmount?: number, advancePaid?: number, balanceDue?: number, poNumber?: string } }, branch?: BranchSettingData) => {
@@ -45,7 +45,7 @@ export const generatePaymentPdf = async (payment: SupplierPayment & { purchaseOr
     doc.setFontSize(10);
     doc.setTextColor(...colors.slate500);
     doc.text((branch?.displayAddress || ""), textStartX, 29);
-    doc.text(`Phone: ${displayPakistaniPhone(branch?.displayPhone) || ""}`, textStartX, 34);
+    doc.text(`Phone: ${formatPhoneNumber(branch?.displayPhone) || ""}`, textStartX, 34);
     doc.text(`Email: ${branch?.displayEmail || ""}`, textStartX, 39);
 
     // Document Meta 
@@ -91,7 +91,7 @@ export const generatePaymentPdf = async (payment: SupplierPayment & { purchaseOr
     doc.setFontSize(10);
     doc.setTextColor(...colors.slate500);
     doc.text(`Contact: ${payment.supplier?.supplierName || "N/A"}`, 14, 70);
-    doc.text(`Phone: ${displayPakistaniPhone(payment.supplier?.phone) || "N/A"}`, 14, 75);
+    doc.text(`Phone: ${formatPhoneNumber(payment.supplier?.phone) || "N/A"}`, 14, 75);
 
     // Dynamic Table Data Mapping (Historical Ledger)
     let tableData: any[][] = [];

@@ -4,6 +4,7 @@ import {
     Package, Tag, Briefcase, Building2
 } from "lucide-react";
 import { CustomerDetails } from "../../types/customer";
+import { formatPhoneNumber } from "react-phone-number-input";
 
 type Props = {
     customer: CustomerDetails;
@@ -31,7 +32,7 @@ const PersonalInformationAssets = ({ customer }: Props) => {
                         <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">Phone</label>
                         <div className="flex items-center gap-2 text-sm text-slate-900 font-medium">
                             <Phone className="h-4 w-4 text-slate-400" />
-                            {customer.phone}
+                            {formatPhoneNumber(customer.phone)}
                         </div>
                     </div>
 

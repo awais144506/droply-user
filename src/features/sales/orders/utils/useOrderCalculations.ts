@@ -14,25 +14,21 @@ export const useOrderCalculations = (branchId: string, previousKhataBalance: num
     let grossTotal = 0;
     let totalSecurityDeposit = 0;
     const discountBreakdown: { name: string; offerQty: number; }[] = [];
+    let scale = "";
 
     items.forEach((item) => {
         const product = productData?.products.find(p => p.id === item.productId);
+        scale = product?.unitOfMeasure || "piece";
         if (!product) return;
-
         const price = Number(product.salePrice) || 0;
         const depositRate = Number(product.securityDeposit) || 0;
-
         const qty = Number(item.paidQty) || 0;
         const offerQty = Number(item.offerQty) || 0;
         const emptiesIn = Number(item.emptiesIn) || 0;
-
-        // 🔥 Dynamic Deposit Math
         const deficit = Math.max(0, (qty + offerQty) - emptiesIn);
         const deposit = item.isDepositCharged ? (deficit * depositRate) : 0;
-
         grossTotal += (qty * price);
         totalSecurityDeposit += deposit;
-
         if (offerQty > 0) {
             discountBreakdown.push({ name: product.name, offerQty });
         }
@@ -41,5 +37,5 @@ export const useOrderCalculations = (branchId: string, previousKhataBalance: num
     const totalDue = (grossTotal - globalDiscount) + previousKhataBalance + totalSecurityDeposit + deliveryCharges;
     const remainingBalance = totalDue - amountPaid;
 
-    return { grossTotal, totalSecurityDeposit, deliveryCharges, totalDue, remainingBalance, discountBreakdown };
+    return { grossTotal, totalSecurityDeposit, deliveryCharges, totalDue, remainingBalance, discountBreakdown, scale };
 };

@@ -4,7 +4,7 @@
 import { ReactNode, useId } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import Select from "react-select";
-import { Loader } from "lucide-react";
+import { Loader, LucideIcon } from "lucide-react";
 
 export interface SelectOption {
     label: string;
@@ -24,6 +24,9 @@ interface FormSelectProps {
     helperText?: ReactNode;
     isLoading?: boolean;
     formatOptionLabel?: (data: any) => ReactNode;
+    lableTextColor?: string;
+    labelIcon?: LucideIcon,
+    iconColor?: string;
 }
 
 export function FormSelect({
@@ -37,7 +40,10 @@ export function FormSelect({
     isSearchable = false,
     helperText,
     isLoading,
-    formatOptionLabel
+    formatOptionLabel,
+    lableTextColor = "text-slate-700",
+    labelIcon: Icon,
+    iconColor = "text-sky-500",
 }: FormSelectProps) {
     const { control, formState: { errors } } = useFormContext();
     const error = errors[name]?.message as string;
@@ -45,10 +51,13 @@ export function FormSelect({
 
     return (
         <div className="space-y-1.5">
-            <label htmlFor={inputId} className="flex items-center text-xs font-bold text-slate-700 uppercase tracking-wide cursor-pointer">
-                {label}
-                {required && <span className="text-rose-500 ml-1">*</span>}
-            </label>
+            {label && (
+                <label htmlFor={inputId} className={`flex items-center text-xs font-bold ${lableTextColor} uppercase tracking-wide cursor-pointer`}>
+                    {Icon && <Icon className={`h-3.5 w-3.5 mr-1.5 ${iconColor}`} />}
+                    {label}
+                    {required && <span className="text-rose-500 ml-1">*</span>}
+                </label>
+            )}
 
             {/* 🔥 Controller is the bridge between RHF and react-select */}
             <Controller

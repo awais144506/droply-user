@@ -3,6 +3,7 @@ import { yupResolver } from "@hookform/resolvers/yup"
 
 import { SupplierFormData, supplierSchema } from "../../schema/create-supplier-schema"
 import { FormInput } from "@/components/ui/form-input"
+import { FormPhoneInput } from "@/components/ui/form-phone-input"
 import FormCTAFooter from "@/lib/utils/components/FormCTAFooter"
 
 type Props = {
@@ -34,7 +35,12 @@ const SupplierForm = ({ onSubmit, isPending, initialData, isEditMode }: Props) =
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                         <FormInput label="Firm Name" name="firmName" placeholder="e.g. SES Group Packaging" required />
                         <FormInput label="Contact Person Name" name="supplierName" placeholder="Rasheed Anjum" required />
-                        <FormInput label="Phone Number" name="phone" required placeholder="e.g. 03001234567" />
+                        <FormPhoneInput
+                            label="Phone Number"
+                            required
+                            name="phone"
+                            placeholder="e.g. 03001234567"
+                        />
                         <FormInput label="Email Address" name="email" placeholder="Optional" />
                         <FormInput label="Address" name="address" required placeholder="e.g Factory Road" />
                         <FormInput label="City" name="city" required placeholder="e.g Lahore" />
