@@ -10,19 +10,20 @@ import { CustomersTable } from "@/features/manage/customers/components/main/cust
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
 import { FilterTabs } from "@/features/manage/customers/components/data/dropdownOptions";
-
+import { CustomerRequestsList } from "@/features/manage/customers/components/main/customer-requests-list";
 
 export default function CustomersPage() {
   const { branchId } = useRole();
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || undefined;
-  const debt = searchParams.get("debt") || undefined
+  const debt = searchParams.get("debt") || undefined;
 
   const { data, isError, error, isLoading } = useCustomers(branchId, debt, search);
 
   const customers = data?.customers || [];
   const stats = data?.stats || { activeCount: 0, totalLedger: "0", totalAssets: 0 };
   const logs = data?.logs || [];
+  const requests = data?.newCustomerRequest || [];
 
   if (isLoading) return <Loading text="Loading Customers..." />;
   if (isError) return <ErrorBoundary error={error.message} />;
@@ -43,28 +44,28 @@ export default function CustomersPage() {
         totalAssets={stats.totalAssets}
       />
 
-      <div>
-        <div className="lg:col-span-2">
-          <DataTableFilterBar
-            searchPlaceholder="Search by customer name / phone..."
-            searchParamName="search"
-            tabParamName="debt"
-            tabs={FilterTabs}
-          />
-          <CustomersTable
-            customers={customers}
-          />
-        </div>
+      {/* Main Data Table - Full Width */}
+      <div className="w-full">
+        <DataTableFilterBar
+          searchPlaceholder="Search by customer name / phone..."
+          searchParamName="search"
+          tabParamName="debt"
+          tabs={FilterTabs}
+        />
+        <CustomersTable customers={customers} />
+      </div>
 
-        <div className="mt-5">
-          <div className="sticky top-6">
-            <ActivityLogsCard
-              title="Customer Activity Logs"
-              logs={logs}
-              isLoading={isLoading}
-            />
-          </div>
-        </div>
+      {/* Bottom Section: Requests & Logs side-by-side on large screens */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <CustomerRequestsList
+          requests={requests}
+          isLoading={isLoading}
+        />
+        <ActivityLogsCard
+          title="Customer Activity Logs"
+          logs={logs}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

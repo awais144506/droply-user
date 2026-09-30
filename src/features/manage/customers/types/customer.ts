@@ -44,6 +44,7 @@ export interface CustomerOrderHistory {
 }
 
 export interface CustomerResponse {
-  customer: CustomerDetails[];
-  logs: ActivityLog[];
+    customer: CustomerDetails[];
+    logs: ActivityLog[];
+    newCustomerRequest: [];
 }

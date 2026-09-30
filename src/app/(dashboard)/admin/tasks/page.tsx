@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, ClipboardList, CheckCircle2 } from "lucide-react";
+import { Plus, ClipboardList, CheckCircle2, RefreshCw } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
 import { TaskStats } from "@/features/admin/tasks/components/main/task-stats";
 import { TaskTable } from "@/features/admin/tasks/components/main/task-table";
@@ -26,7 +26,7 @@ export default function AdminTasksPage() {
   const { data: staffData, isLoading: isStaffLoading } = useStaffList(branchId);
   const staffOptions = staffData?.taskStaffOptions;
 
-  const { data, isLoading: isTasksLoading } = useTasks(branchId, search, status);
+  const { data, isLoading: isTasksLoading, isRefetching, refetch } = useTasks(branchId, search, status);
   const { mutate: updateTask } = useUpdateTask(branchId);
 
   const stats = data?.stats || { pending: 0, completed: 0 };
@@ -67,12 +67,23 @@ export default function AdminTasksPage() {
             Assign and track daily operations for managers and riders.
           </p>
         </div>
-        <Button
-          onClick={() => { setEditingTask(null); setIsModalOpen(true); }}
-          className="bg-sky-600 hover:bg-sky-700 text-white h-10 px-4 rounded-xl shadow-sm cursor-pointer"
-        >
-          <Plus className="h-4 w-4 mr-2" /> New Task
-        </Button>
+        <div className="flex flex-row gap-3">
+          <Button
+            onClick={() => refetch()}
+            disabled={isRefetching}
+            className={`flex items-center justify-center h-10 w-10 rounded-md border border-slate-200 bg-white hover:bg-slate-100 transition-colors ${isRefetching ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+              }`}
+            title="Refresh Data"
+          >
+            <RefreshCw className={`h-4 w-4 text-slate-700 ${isRefetching ? "animate-spin" : ""}`} />
+          </Button>
+          <Button
+            onClick={() => { setEditingTask(null); setIsModalOpen(true); }}
+            className="bg-sky-600 hover:bg-sky-700 text-white h-10 px-4 rounded-xl shadow-sm cursor-pointer"
+          >
+            <Plus className="h-4 w-4 mr-2" /> New Task
+          </Button>
+        </div>
       </div>
 
       <TaskStats pending={stats.pending} completed={stats.completed} />

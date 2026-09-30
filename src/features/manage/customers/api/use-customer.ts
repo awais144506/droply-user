@@ -15,6 +15,7 @@ export function useCustomers(
     select: (payload) => {
       const customers = payload?.customer || [];
       const logs = payload?.logs || [];
+      const newCustomerRequest = payload?.newCustomerRequest || [];
       const activeCount = customers.filter((c) => c.status === "ACTIVE").length;
       const totalLedger = customers.reduce((sum, c) => sum + Number(c.customerCredit || 0), 0);
       const totalAssets = customers.reduce((sum, c) => sum + Number(c.returnablesLength || 0), 0)
@@ -65,7 +66,8 @@ export function useCustomers(
           totalAssets,
         },
         customerOptions,
-        logs: logs
+        logs: logs,
+        newCustomerRequest,
       }
     },
     staleTime: 5 * 60 * 1000,
