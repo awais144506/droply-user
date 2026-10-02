@@ -20,7 +20,6 @@ export function RiderSidebar({ branchId, riders, selectedRider, onSelect }: Side
   const [filter, setFilter] = useState<FilterType>("ALL");
 
   const { data: staffData, isLoading: isStaffLoading } = useStaffList(branchId, "", "RIDER");
-  // 🔥 Grab the 'refetch' function from TanStack Query
   const { data: presenceData, isLoading: isPresenceLoading, error, refetch: refetchPresence } = useRiderPresence(branchId);
 
   if (error) {
@@ -34,7 +33,6 @@ export function RiderSidebar({ branchId, riders, selectedRider, onSelect }: Side
   const mergedRiders = allStaffRiders.map((staffRider) => {
     const activeTrackingData = riders.find((tr) => tr.id === staffRider.id);
     const livePresence = presenceData?.find((p: { riderId: string; }) => p.riderId === staffRider.id);
-
     // 1. Calculate how long it has been since they were last active
     const lastActiveDate = livePresence ? new Date(livePresence.lastActive) : null;
     const isStale = lastActiveDate ? differenceInMinutes(new Date(), lastActiveDate) > 3 : true;

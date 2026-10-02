@@ -12,7 +12,6 @@ import { BranchSettingData } from "../types/settings";
 import { InvoicePreview } from "./invoice-preview";
 import { useUploadThing } from "@/lib/uploadthing";
 import { branchSettingsSchema, BranchSettingsFormValues } from "../schema/update-branch-settings.schema";
-import { formatPakistaniPhone } from "@/lib/utils/functions/setFormat";
 import { FormInput } from "@/components/ui/form-input";
 
 interface BranchSettingsFormProps {
@@ -76,7 +75,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
   };
 
   const handleFormSubmit = async (data: Partial<BranchSettingData>) => {
-    let finalLogoUrl = isLogoRemoved ? undefined : safeInitialLogo;
+    let logoUrl = isLogoRemoved ? undefined : safeInitialLogo;
 
     if (selectedFile) {
       try {
@@ -88,7 +87,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
         });
 
         if (res && res.length > 0) {
-          finalLogoUrl = res[0].ufsUrl;
+          logoUrl = res[0].ufsUrl;
         } else {
           toast.error("Failed to upload logo.");
           return;
@@ -98,7 +97,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
         return;
       }
     }
-    onSubmit({ ...data, logoUrl: finalLogoUrl || "", displayPhone: formatPakistaniPhone(data.displayPhone||"") });
+    onSubmit({ ...data, logoUrl: logoUrl || "" });
   };
 
   return (
