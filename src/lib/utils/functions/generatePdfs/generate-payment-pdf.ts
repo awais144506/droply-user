@@ -45,7 +45,7 @@ export const generatePaymentPdf = async (payment: SupplierPayment & { purchaseOr
     doc.setFontSize(10);
     doc.setTextColor(...colors.slate500);
     doc.text((branch?.displayAddress || ""), textStartX, 29);
-    doc.text(`Phone: ${formatPhoneNumber(branch?.displayPhone) || ""}`, textStartX, 34);
+    doc.text(`Phone: ${formatPhoneNumber(branch?.displayPhone || "")}`, textStartX, 34);
     doc.text(`Email: ${branch?.displayEmail || ""}`, textStartX, 39);
 
     // Document Meta 
@@ -91,7 +91,7 @@ export const generatePaymentPdf = async (payment: SupplierPayment & { purchaseOr
     doc.setFontSize(10);
     doc.setTextColor(...colors.slate500);
     doc.text(`Contact: ${payment.supplier?.supplierName || "N/A"}`, 14, 70);
-    doc.text(`Phone: ${formatPhoneNumber(payment.supplier?.phone) || "N/A"}`, 14, 75);
+    doc.text(`Phone: ${formatPhoneNumber(payment.supplier?.phone || "N/A")}`, 14, 75);
 
     // Dynamic Table Data Mapping (Historical Ledger)
     let tableData: any[][] = [];

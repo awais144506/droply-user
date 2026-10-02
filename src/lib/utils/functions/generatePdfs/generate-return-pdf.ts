@@ -47,7 +47,7 @@ export const generateReturnPdf = async (returnRecord: PurchaseReturn, branch?: B
     doc.setFontSize(10);
     doc.setTextColor(...colors.slate500);
     doc.text((branch?.displayAddress || ""), textStartX, 29);
-    doc.text(`Phone: ${formatPhoneNumber(branch?.displayPhone) || ""}`, textStartX, 34);
+    doc.text(`Phone: ${formatPhoneNumber(branch?.displayPhone || "")}`, textStartX, 34);
     doc.text(`Email: ${branch?.displayEmail || ""}`, textStartX, 39);
 
     // Document Title
