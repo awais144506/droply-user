@@ -2,12 +2,11 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
-
 import { PurchaseReturn } from "@/features/supply/returns/types/returns";
 import { BranchSettingData } from "@/features/admin/settings/types/settings";
 import { formatCurrency } from "@/lib/utils/functions/setFormat";
-import { displayPakistaniPhone } from "@/lib/utils/functions/setFormat";
 import { getBase64ImageFromUrl } from "./getBase64Image";
+import { formatPhoneNumber } from "react-phone-number-input";
 
 const colors = {
     primary: [2, 132, 199] as [number, number, number],
@@ -48,7 +47,7 @@ export const generateReturnPdf = async (returnRecord: PurchaseReturn, branch?: B
     doc.setFontSize(10);
     doc.setTextColor(...colors.slate500);
     doc.text((branch?.displayAddress || ""), textStartX, 29);
-    doc.text(`Phone: ${displayPakistaniPhone(branch?.displayPhone) || ""}`, textStartX, 34);
+    doc.text(`Phone: ${formatPhoneNumber(branch?.displayPhone) || ""}`, textStartX, 34);
     doc.text(`Email: ${branch?.displayEmail || ""}`, textStartX, 39);
 
     // Document Title

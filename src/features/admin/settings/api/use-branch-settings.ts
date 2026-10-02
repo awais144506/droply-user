@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { displayPakistaniPhone } from "@/lib/utils/functions/setFormat";
 import { BranchSettingData } from "../types/settings";
 import { branchSettingsKeys } from "./branch-setting-keys";
 import { branchSettingApi } from "./branch-settings.service";
+import { formatPhoneNumber } from "react-phone-number-input";
 
 
 export function useBranchSettings(branchId: string) {
@@ -16,7 +16,7 @@ export function useBranchSettings(branchId: string) {
     queryFn: () => branchSettingApi.getBranchSettings(branchId),
     select: (settings) => ({
       ...settings,
-      displayPhone: settings.displayPhone ? displayPakistaniPhone(settings.displayPhone) : "",
+      displayPhone: settings.displayPhone ? formatPhoneNumber(settings.displayPhone) : "",
     }),
     enabled: !!branchId,
   });

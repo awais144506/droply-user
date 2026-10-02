@@ -3,7 +3,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { PurchaseOrder } from "@/features/supply/order/types/po"; // Adjust path if needed
 import { BranchSettingData } from "@/features/admin/settings/types/settings";
-import { displayPakistaniPhone } from "../setFormat";
+import { formatPhoneNumber } from "react-phone-number-input";
 import { getBase64ImageFromUrl } from "./getBase64Image";
 
 
@@ -78,7 +78,7 @@ export const generatePOPdf = async (po: PurchaseOrder, branch: BranchSettingData
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   doc.setTextColor(...colors.slate500);
-  doc.text(`Phone: ${displayPakistaniPhone(po.supplier?.phone) || "N/A"}`, 14, 70);
+  doc.text(`Phone: ${formatPhoneNumber(po.supplier?.phone) || "N/A"}`, 14, 70);
 
   // Table Data Mapping
   const tableData = po.items.map(item => [

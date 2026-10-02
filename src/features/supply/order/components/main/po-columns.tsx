@@ -1,6 +1,7 @@
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
-import { formatCurrency, displayPakistaniPhone } from "@/lib/utils/functions/setFormat";
+import { formatCurrency } from "@/lib/utils/functions/setFormat";
+import { formatPhoneNumber } from "react-phone-number-input";
 import { Button } from "@/components/ui/button";
 import { PurchaseOrder } from "../../types/po";
 import { Printer, Edit2, PackagePlus, LockIcon, Clock, CheckCircle2, AlertCircle } from "lucide-react";
@@ -38,7 +39,7 @@ export const getPOColumns = (
                 <div>
                     <p className="font-bold text-slate-900 text-sm mb-1">{po.supplier?.firmName || "Unknown"}</p>
                     <p className="text-xs text-slate-500 font-medium">
-                        {po.supplier?.phone ? displayPakistaniPhone(po.supplier.phone) : "N/A"}
+                        {po.supplier?.phone ? formatPhoneNumber(po.supplier.phone) : "N/A"}
                     </p>
                 </div>
             ),
