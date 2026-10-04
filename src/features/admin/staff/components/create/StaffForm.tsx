@@ -32,7 +32,7 @@ const CreateStaffForm = ({ onSubmit,
             address: "",
             salary: 0,
             zoneIds: [],
-            vehicleIds: [],
+            vehicleId: "",
         },
     });
 
