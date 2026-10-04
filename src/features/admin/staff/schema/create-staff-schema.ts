@@ -1,6 +1,6 @@
 import * as yup from "yup";
 import { isValidPhoneNumber } from "react-phone-number-input";
-// Helper to strip dashes and spaces
+
 const stripFormat = (value: string | undefined) => (value ? value.replace(/[\s-]/g, "") : value);
 
 export const createStaffSchema = yup.object().shape({
@@ -20,34 +20,32 @@ export const createStaffSchema = yup.object().shape({
     .required("CNIC is required"),
 
   address: yup.string().optional().nullable(),
-
   joiningDate: yup.string().optional().nullable(),
-
   salary: yup
     .number()
     .transform((value, originalValue) => (originalValue === "" ? 0 : value))
     .min(0, "Salary cannot be negative")
     .optional(),
 
+  // Zones remain multi-select (array)
   zoneIds: yup.array().of(yup.string().required()).when("$role", {
     is: "RIDER",
     then: (schema) => schema.min(1, "Please assign at least one zone").required(),
     otherwise: (schema) => schema.optional().default([]),
   }),
 
-  vehicleIds: yup.array().of(yup.string().required()).when("$role", {
+  // 🔥 CHANGED: Vehicle is now a single string
+  vehicleId: yup.string().when("$role", {
     is: "RIDER",
-    then: (schema) => schema.min(1, "Please assign at least one vehicle").required(),
-    otherwise: (schema) => schema.optional().default([]),
+    then: (schema) => schema.required("Please assign exactly one vehicle"),
+    otherwise: (schema) => schema.optional().nullable(),
   }),
 
-  // Optional: You can do the same for licenseNumber if it's mandatory for riders!
   licenseNumber: yup.string().when("$role", {
     is: "RIDER",
     then: (schema) => schema.optional(),
   }),
 
-  // Extra Details
   fatherName: yup.string().optional().nullable(),
   fatherCnic: yup
     .string()

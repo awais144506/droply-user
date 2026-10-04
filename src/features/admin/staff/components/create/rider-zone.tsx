@@ -37,8 +37,7 @@ const RiderZoneCard = ({
 
                     <div className="space-y-1.5">
                         <FormSelect
-                            isMulti={true}
-                            name="vehicleIds"
+                            name="vehicleId"
                             label="Assign Vehicle"
                             options={vehicleOptions}
                             isSearchable={true}

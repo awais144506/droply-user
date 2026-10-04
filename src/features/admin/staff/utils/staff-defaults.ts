@@ -12,22 +12,28 @@ export const getEditStaffFormValues = (
             name: "", phone: "", designation: "", cnic: "", salary: 0,
             address: "", bloodGroup: "", fatherName: "", fatherCnic: "",
             guarantorName: "", guarantorCnic: "", guarantorPhone: "",
-            licenseNumber: "", joiningDate: "", zoneIds: [], vehicleIds: [],
+            licenseNumber: "", joiningDate: "", zoneIds: [],
+            vehicleId: "", // Empty string for single vehicle
         };
     }
 
-    // 2. Safely map the arrays
+    // 2. Safely map the Zones (still an array)
     const mappedZoneIds = user.zones?.map((userZone: any) => {
         const matchedOption = zoneOptions.find((opt: any) => opt.label === userZone.name);
         return matchedOption ? matchedOption.value : null;
     }).filter(Boolean) || [];
 
-    const mappedVehicleIds = user.assignedVehicles?.map((userVehicle: any) => {
-        const matchedOption = vehicleOptions.find((opt: any) => opt.label === userVehicle.registration);
-        return matchedOption ? matchedOption.value : null;
-    }).filter(Boolean) || [];
+    // 🔥 3. Safely map the single Vehicle ID
+    // Prisma returns an array, so we just grab the first assigned vehicle
+    const firstAssignedVehicle = user.assignedVehicles?.[0];
+    let mappedVehicleId = "";
 
-    // 3. Return the perfectly shaped object
+    if (firstAssignedVehicle) {
+        const matchedOption = vehicleOptions.find((opt: any) => opt.label === firstAssignedVehicle.registration);
+        mappedVehicleId = matchedOption ? matchedOption.value : "";
+    }
+
+    // 4. Return the perfectly shaped object
     return {
         name: user.name || "",
         phone: user.phone || "",
@@ -44,6 +50,6 @@ export const getEditStaffFormValues = (
         licenseNumber: user.licenseNumber || "",
         joiningDate: user.joiningDate ? new Date(user.joiningDate).toISOString().split('T')[0] : "",
         zoneIds: mappedZoneIds,
-        vehicleIds: mappedVehicleIds,
+        vehicleId: mappedVehicleId,
     };
 };

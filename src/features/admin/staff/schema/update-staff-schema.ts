@@ -31,10 +31,10 @@ export const updateStaffSchema = yup.object().shape({
         then: (schema) => schema.min(1, "Please assign at least one zone").required(),
         otherwise: (schema) => schema.optional().default([]),
     }),
-    vehicleIds: yup.array().of(yup.string().required()).when("designation", {
+    vehicleId: yup.string().when("designation", {
         is: "RIDER",
-        then: (schema) => schema.min(1, "Please assign at least one vehicle").required(),
-        otherwise: (schema) => schema.optional().default([]),
+        then: (schema) => schema.required("Please assign exactly one vehicle"),
+        otherwise: (schema) => schema.optional().nullable(),
     }),
 
     licenseNumber: yup.string().when("designation", {

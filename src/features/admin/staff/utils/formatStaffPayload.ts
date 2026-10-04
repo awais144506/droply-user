@@ -1,4 +1,3 @@
-// utils/formatStaffPayload.ts
 import { CreateStaffFormData } from "../schema/create-staff-schema"
 import { UpdateStaffFormData } from "../schema/update-staff-schema";
 
@@ -22,7 +21,7 @@ export function formatStaffPayload(data: CreateStaffFormData, branchId: string, 
         guarantorCnic: data.guarantorCnic || undefined,
         guarantorPhone: data.guarantorPhone || undefined,
         zoneIds: role === "RIDER" ? data.zoneIds : undefined,
-        vehicleIds: role === "RIDER" ? data.vehicleIds : undefined,
+        vehicleId: role === "RIDER" ? data.vehicleId : undefined,
         licenseNumber: role === "RIDER" ? (data.licenseNumber || undefined) : undefined,
     }
 }
@@ -43,7 +42,7 @@ export function updateStaffPayload(data: UpdateStaffFormData) {
         guarantorCnic: data.guarantorCnic || undefined,
         guarantorPhone: data.guarantorPhone || undefined,
         zoneIds: data.designation === "RIDER" ? data.zoneIds : undefined,
-        vehicleIds: data.designation === "RIDER" ? data.vehicleIds : undefined,
+        vehicleId: data.designation === "RIDER" ? data.vehicleId : undefined,
         licenseNumber: data.designation === "RIDER" ? (data.licenseNumber || undefined) : undefined,
     }
 }
