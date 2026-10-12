@@ -1,13 +1,9 @@
 import Image from "next/image";
 import { Building2 } from "lucide-react";
+import { BranchSettingData } from "../types/settings";
 
 interface InvoicePreviewProps {
-    data: {
-        displayName?: string;
-        displayPhone?: string;
-        displayEmail?: string;
-        displayAddress?: string;
-    };
+    data: BranchSettingData;
     logoUrl?: string | null;
 }
 
@@ -38,15 +34,15 @@ export function InvoicePreview({ data, logoUrl }: InvoicePreviewProps) {
                     {/* Branch Details Section */}
                     <div className="w-full">
                         <h4 className="text-lg font-black text-slate-900 uppercase tracking-wider wrap-break-word">
-                            {data.displayName || "Your Branch Name"}
+                            {data.name || "Your Branch Name"}
                         </h4>
                         <p className="text-[11px] text-slate-500 mt-2 max-w-55 mx-auto leading-relaxed">
-                            {data.displayAddress || "123 Main Street, City"}
+                            {data.address || "123 Main Street, City"}
                         </p>
                         <div className="flex items-center justify-center gap-2 mt-2 text-[11px] text-slate-500 font-medium">
-                            <span>{data.displayPhone || "03001234567"}</span>
+                            <span>{data.phone || "03001234567"}</span>
                             <span className="text-slate-300">•</span>
-                            <span>{data.displayEmail || "billing@branch.com"}</span>
+                            <span>{data.email || "billing@branch.com"}</span>
                         </div>
                     </div>
                 </div>

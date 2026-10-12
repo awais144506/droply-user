@@ -4,7 +4,7 @@ import { isValidPhoneNumber } from "react-phone-number-input";
 const stripFormat = (value: string | undefined) => (value ? value.replace(/[\s-]/g, "") : value);
 
 export const updateStaffSchema = yup.object().shape({
-    designation: yup.string().required("Role/Designation is required"),
+    role: yup.string().required("Role/Designation is required"),
     name: yup.string().min(3, "Name must be at least 3 characters").required("Name is required"),
     phone: yup
         .string()

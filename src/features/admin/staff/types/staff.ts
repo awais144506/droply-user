@@ -8,7 +8,7 @@ export interface StaffList {
     status: string; // Or your specific Enum like CustomerStatus/StaffStatus
     phone: string;
     email: string | null;
-    designation: string; // Or your StaffRole Enum
+    role: string; // Or your StaffRole Enum
     joiningDate: string | null;
 }
 
@@ -44,6 +44,7 @@ export interface StaffVehicle {
 }
 
 export interface Staff {
+  role: string;
   id: string;
   branchId: string;
   staffCode: string;

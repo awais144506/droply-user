@@ -44,8 +44,8 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     headerColor: { text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500", border: "border-emerald-500/20", bgHover: "hover:bg-emerald-500/5" },
     items: [
       { title: "Deliveries & Sales", url: "/sales/orders", icon: Truck, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "PARTIAL" },
-      { title: "Sale Returns & Recovery", url: "/sales/recovery", icon: Undo2, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "TODO" },
-      { title: "Invoices & Receipts", url: "/sales/invoices", icon: FileText, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "TODO" },
+      { title: "Sale Returns/Recovery", url: "/sales/recovery", icon: Undo2, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "TODO" },
+      { title: "Invoices/Quotations", url: "/sales/invoices", icon: FileText, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "TODO" },
       { title: "Live Tracking", url: "/sales/tracking", icon: Navigation, badge: "GPS", allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "TODO" },
     ],
   },
@@ -74,13 +74,13 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
       { title: "Staff & Payroll", url: "/admin/staff", icon: UserCog, badge: "Owner", allowedRoles: ["OWNER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Vehicles & Fuel", url: "/admin/fleet", icon: TruckIcon, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Assigned Tasks", url: "/admin/tasks", icon: FileText, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "DONE" },
-      { title: "Expenses & Accounts", url: "/admin/expenses", icon: BadgeDollarSign, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "DONE" },
+      { title: "Expenses & Accounts", url: "/admin/expenses", icon: BadgeDollarSign, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       // { title: "Reports", url: "/admin/reports", icon: BarChart3, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS,devStatus: "PARTIAL" },
 
       // Admin/Settings are always available to manage their account
-      { title: "Subscription", url: "/admin/subscription", icon: CreditCard, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "PARTIAL" },
-      { title: "Branch Settings", url: "/admin/settings", icon: Settings, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "DONE" },
-      { title: "Help", url: "/admin/help", icon: Headphones, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS,devStatus: "DONE" },
+      { title: "Subscription", url: "/admin/subscription", icon: CreditCard, badge: "Owner", allowedRoles: ["OWNER"], allowedTiers: ALL_TIERS, devStatus: "PARTIAL" },
+      { title: "Branch Settings", url: "/admin/settings", icon: Settings, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
+      { title: "Help", url: "/admin/help", icon: Headphones, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
     ],
   },
 ];

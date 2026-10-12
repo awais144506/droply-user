@@ -47,8 +47,8 @@ export default function EditStaffPage() {
     });
 
     // 3. Derived State
-    const selectedRole = methods.watch("designation");
-    const isRoleChanged = user?.designation && selectedRole !== user.designation;
+    const selectedRole = methods.watch("role");
+    const isRoleChanged = user?.role && selectedRole !== user.role;
 
     // 4. Submit Handler
     const onUpdateSubmit = (data: UpdateStaffFormData) => {

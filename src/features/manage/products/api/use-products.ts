@@ -10,7 +10,9 @@ export function useProducts(branchId: string) {
     return useQuery({
         queryKey: productKeys.branchList(branchId || ""),
         queryFn: () => productApi.getAllProducts(branchId),
-        select: (products) => {
+        select: (data) => {
+            const products = data.products;
+            const logs = data.logs;
             const totalItems = products.length;
             const lowStockCount = products.filter(p => p.currentStock <= p.lowStockThreshold).length;
             const returnablesCount = products.filter(p => p.trackingType === "RETURNABLE").length;
@@ -59,6 +61,7 @@ export function useProducts(branchId: string) {
 
             return {
                 products,
+                logs,
                 stats: {
                     totalItems,
                     lowStockCount,
@@ -92,16 +95,5 @@ export function useProduct(id: string) {
             };
         },
         enabled: !!id,
-    });
-}
-
-
-
-// 6. Activity Logs
-export function useProductLogs(branchId: string) {
-    return useQuery({
-        queryKey: productKeys.branchLogs(branchId),
-        queryFn: () => productApi.getProductLogs(branchId),
-        enabled: !!branchId,
     });
 }

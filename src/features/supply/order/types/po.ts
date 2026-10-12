@@ -1,3 +1,4 @@
+import { ActivityLog } from "@/types/ActivityLog";
 export type POStatus = "ORDERED" | "PENDING_RESTOCK" | "RECEIVED";
 
 export interface POItem {
@@ -33,4 +34,9 @@ export interface PurchaseOrder {
     notes?: string;
     items: POItem[];
     supplier: POSupplier;
+}
+
+export interface POResponse {
+    po: PurchaseOrder[]
+    logs: ActivityLog[]
 }

@@ -17,7 +17,7 @@ export function useCreateCustomer(branchId: string) {
       toast.success("Customer created successfully");
       queryClient.invalidateQueries({ queryKey: customerKeys.branchList(branchId) });
       queryClient.invalidateQueries({ queryKey: customerKeys.logs() });
-      queryClient.invalidateQueries({ queryKey: zoneKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: zoneKeys.all });
 
       router.back();
     },
@@ -40,7 +40,7 @@ export function useUpdateCustomer() {
       queryClient.invalidateQueries({ queryKey: customerKeys.lists() });
       queryClient.invalidateQueries({ queryKey: customerKeys.detail(variables.id) });
       queryClient.invalidateQueries({ queryKey: customerKeys.logs() });
-      queryClient.invalidateQueries({ queryKey: zoneKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: zoneKeys.all });
     },
     onError: (err) => {
       toast.error(err.message)
@@ -57,7 +57,7 @@ export function useDeleteCustomer() {
     onSuccess: () => {
       toast.success("Customer deleted successfully");
       queryClient.invalidateQueries({ queryKey: customerKeys.all });
-      queryClient.invalidateQueries({ queryKey: zoneKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: zoneKeys.all });
     },
     onError: (err) => {
       toast.error(err.message);

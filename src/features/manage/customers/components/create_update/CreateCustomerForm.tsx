@@ -39,6 +39,8 @@ export const CustomerForm = ({
         zoneId: "",
         address: "",
         email: "",
+        customerNtn: "",
+        customerStrn: "",
         latitude: 31.5411,
         longitude: 74.3591,
         customerCredit: 0,

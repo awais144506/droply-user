@@ -9,13 +9,15 @@ import { partyOptions, categoryOptions } from "@/features/manage/customers/compo
 export default function IdentityCard({ zoneOptions, isLoading }: any) {
     return (
         <Card>
-            <CardHeader className="pb-3 border-b border-slate-100">
+            <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <User className="h-4 w-4 text-sky-600" />
+                    <User className="h-4 w-4 text-sky-600 dark:text-sky-400" />
                     Identity & Contact
                 </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
+                
+                {/* Row 1: Party Type & Category */}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                         <FormSelect
@@ -58,6 +60,24 @@ export default function IdentityCard({ zoneOptions, isLoading }: any) {
                         placeholder="e.g. awais@gmail.com"
                         name="email"
                     />
+                </div>
+
+                {/* Row: NTN & STRN Side-by-Side */}
+                <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                        <FormInput
+                            label="NTN No"
+                            placeholder="e.g. 1234567-8"
+                            name="customerNtn"
+                        />
+                    </div>
+                    <div className="space-y-1.5">
+                        <FormInput
+                            label="STRN No"
+                            placeholder="e.g. 320012345678"
+                            name="customerStrn" // Fixed: Was duplicate 'customerNtn'
+                        />
+                    </div>
                 </div>
 
                 <div className="space-y-1.5">

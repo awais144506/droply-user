@@ -58,7 +58,7 @@ export function StaffProfile({ user, userId, branchId }: { user: any, userId: st
     enableUser(userId);
   };
 
-  const isDisabled = user.status === "DISABLE";
+  const isDisabled = user.status === "SUSPENDED";
 
   return (
     <div className="space-y-6">
@@ -94,7 +94,7 @@ export function StaffProfile({ user, userId, branchId }: { user: any, userId: st
             </>
           ) : (
             <>
-              <Ban className="h-4 w-4 mr-1.5" /> Disable
+              <Ban className="h-4 w-4 mr-1.5" /> Suspend
             </>
           )}
         </Button>
@@ -116,7 +116,7 @@ export function StaffProfile({ user, userId, branchId }: { user: any, userId: st
         onClose={() => setIsDisableOpen(false)}
         onConfirm={handleDisableConfirm}
         isLoading={isDisabling}
-        confirmText="Disable"
+        confirmText="Suspend"
       />
 
       <ConfirmEnableDialog

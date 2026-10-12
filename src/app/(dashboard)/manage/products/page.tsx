@@ -1,7 +1,7 @@
 "use client";
 
 import { useRole } from "@/lib/hooks/use-role";
-import { useProducts, useProductLogs } from "@/features/manage/products/api/use-products";
+import { useProducts } from "@/features/manage/products/api/use-products";
 import { ProductStats } from "@/features/manage/products/components/main/product-stats";
 import { ProductsTable } from "@/features/manage/products/components/main/products-table";
 import PageHeader from "@/lib/utils/components/MainPageHeader";
@@ -12,9 +12,9 @@ import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 export default function ProductsPage() {
   const { branchId } = useRole();
   const { data, isLoading, isError, error } = useProducts(branchId);
-  const { data: logs = [], isLoading: isLoadingLogs } = useProductLogs(branchId);
 
   const products = data?.products;
+  const logs = data?.logs;
   const stats = data?.stats || { totalItems: 0, lowStockCount: 0, returnablesCount: 0, recipeItemsCount: 0 };
 
   //LOADING & ERROR
@@ -45,7 +45,6 @@ export default function ProductsPage() {
         <ActivityLogsCard
           title="Products Activity Logs"
           logs={logs}
-          isLoading={isLoadingLogs}
         />
       </div>
     </div>

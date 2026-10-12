@@ -1,25 +1,23 @@
 "use client";
-
-import { Loader2 } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
 import { useSubscription } from "@/features/admin/subscription/api/use-subscription";
-import { PlanOverview } from "@/features/admin/subscription/components/plan-overview";
-import { PaymentChannels } from "@/features/admin/subscription/components/payment-channels";
-import { BillingLedger } from "@/features/admin/subscription/components/billing-ledger";
+import { PlanOverview } from "@/features/admin/subscription/components/main/plan-overview";
+import { BillingLedger } from "@/features/admin/subscription/components/main/billing-ledger";
+import ErrorBoundary from "@/app/error";
+import Loading from "@/app/loading";
 
 export default function SubscriptionPage() {
-  // 1. Grab the full roleData object to pass to the overview
-  const roleData = useRole();
-  const { branchId, isLoading: isTenantLoading } = roleData;
-  
-  // 2. Fetch the billing ledger (and any other heavy backend data)
-  const { data, isLoading } = useSubscription(branchId);
+  const { branchId } = useRole();
+  const { data, isLoading, isError, error } = useSubscription(branchId);
+  const currentPlan = data?.currentPlan
 
-  if (isTenantLoading || isLoading || !data) {
+  if (isLoading) return <Loading text="Loading Subscription..." />
+  if (isError) return <ErrorBoundary error={error.message} />
+
+  if (!currentPlan) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
-        <Loader2 className="h-8 w-8 animate-spin mb-4 text-sky-600" />
-        <p className="text-sm font-medium">Loading subscription profile...</p>
+      <div className="p-6 text-center text-slate-500">
+        No active subscription plan found for this branch.
       </div>
     );
   }
@@ -33,11 +31,10 @@ export default function SubscriptionPage() {
         </p>
       </div>
 
-      {/* 3. Pass the roleData directly to the newly designed PlanOverview */}
-      <PlanOverview roleData={roleData} />
-      
-      <PaymentChannels />
-      <BillingLedger ledger={data.ledger} />
+      {/* FIXED: Changed 'plan' to 'currentPlan' */}
+      <PlanOverview currentPlan={currentPlan} />
+
+      {/* <BillingLedger ledger={data.ledger} /> */}
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Copy, QrCode, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
-import { useBankDetails } from "../api/use-subscription";
+import { useBankDetails } from "../../api/use-subscription";
 import Image from "next/image";
 
 export function PaymentChannels() {
@@ -19,14 +19,6 @@ export function PaymentChannels() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-lg font-bold text-slate-900">
-          Official Droply Payment Channels & QRs
-        </h3>
-        <p className="text-sm text-slate-500">
-          Scan the QR code on your banking app or copy the IBAN/account number to clear renewals.
-        </p>
-      </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center p-12">
@@ -37,7 +29,7 @@ export function PaymentChannels() {
           No payment channels available at the moment.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-4 gap-6">
           {banks?.map((bank) => (
             <div
               key={bank.id}
@@ -51,7 +43,7 @@ export function PaymentChannels() {
                 </h4>
                 <p className="text-sm font-medium text-slate-900 mt-1">
                   <span className="font-bold text-[11px] uppercase tracking-wider text-slate-500">Title: </span>
-                  {bank.accountTitle}
+                  {bank.title}
                 </p>
               </div>
 
@@ -76,18 +68,18 @@ export function PaymentChannels() {
               {/* Card Footer: Account Details */}
               <div className="p-5 space-y-3 border-t border-slate-100 bg-white">
                 {/* Account Number Field */}
-                {bank.accountNumber && (
+                {bank.number && (
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                       Account Number
                     </label>
                     <div
-                      onClick={() => copyToClipboard(bank.accountNumber, "Account number")}
+                      onClick={() => copyToClipboard(bank.number, "Account number")}
                       className="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 border border-slate-200 rounded-lg cursor-pointer transition-colors group"
                       title="Click to copy"
                     >
                       <span className="font-mono text-sm font-medium text-slate-700 truncate">
-                        {bank.accountNumber}
+                        {bank.number}
                       </span>
                       <Copy className="w-4 h-4 text-slate-400 group-hover:text-slate-700 shrink-0 transition-colors" />
                     </div>

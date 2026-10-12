@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ActivityLog } from "@/types/ActivityLog";
 export type CategoryType = "FINISHED_GOOD" | "RAW_MATERIAL" | "TRADE" | "EQUIPMENT" | "PACKAGING"
 export type TrackingType = "OUTRIGHT" | "RETURNABLE";
 
@@ -43,4 +44,9 @@ export interface ProductList {
     salePrice: number;
     hasRecipe: boolean;
     isUsedInRecipes?: boolean;
+}
+
+export interface ProductListResponse {
+    products: ProductList[]
+    logs: ActivityLog[]
 }

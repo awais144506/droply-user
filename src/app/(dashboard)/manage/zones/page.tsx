@@ -54,7 +54,6 @@ const ZonePage = () => {
             <ActivityLogsCard
               title="Zone Activity Logs"
               logs={logs}
-              isLoading={isLoadingZones}
             />
           </div>
         </div>

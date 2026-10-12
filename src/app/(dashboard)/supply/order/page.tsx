@@ -7,20 +7,22 @@ import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 import Loading from "@/app/loading";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
-import { usePoLogs } from "@/features/supply/order/api/use-po";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
+import ErrorBoundary from "@/app/error";
 
 export default function PurchaseOrdersPage() {
   const { branchId } = useRole();
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || undefined;
   const status = searchParams.get("status") || undefined
-  const { data, isLoading } = usePurchaseOrders(branchId, search, status);
-  const { data: logs = [], isLoading: isLoadingLogs } = usePoLogs(branchId);
+  const { data, isLoading, isError, error } = usePurchaseOrders(branchId, search, status);;
 
   const orders = data?.orders;
+  const logs = data?.logs;
   const stats = data?.stats || { activeOrders: 0, pendingValue: 0, checkedByManager: 0, completedOrders: 0 };
+
   if (isLoading) return <Loading text="Loading Orders..." />
+  if(isError) return <ErrorBoundary error={error.message}/>
 
   return (
     <div className="space-y-6 p-6">
@@ -51,7 +53,6 @@ export default function PurchaseOrdersPage() {
       <ActivityLogsCard
         title="Purchase Order Activity"
         logs={logs}
-        isLoading={isLoadingLogs}
       />
     </div>
   );

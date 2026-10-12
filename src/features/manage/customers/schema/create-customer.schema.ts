@@ -8,7 +8,7 @@ export const createCustomerSchema = yup.object().shape({
     .string()
     .min(3, "Name must be at least 3 characters")
     .required("Customer name is required"),
-  
+
   phone: yup
     .string()
     .required("Phone number is required")
@@ -17,9 +17,11 @@ export const createCustomerSchema = yup.object().shape({
     }),
 
   email: yup.string().email("Please enter a valid email address").optional(),
-  
+
   // ... rest of your existing schema remains identical
   address: yup.string().required("Address is required"),
+  customerNtn: yup.string().optional(),
+  customerStrn: yup.string().optional(),
   zoneId: yup.string().required("Delivery zone is required"),
   latitude: yup
     .number()

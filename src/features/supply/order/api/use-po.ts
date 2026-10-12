@@ -6,7 +6,10 @@ export function usePurchaseOrders(branchId: string, search?: string, status?: st
     return useQuery({
         queryKey: poKeys.list(branchId), // Client-side filtering keeps this simple
         queryFn: () => poApi.getAll(branchId),
-        select: (allOrders) => {
+        select: (data) => {
+
+            const allOrders = data.po;
+            const logs = data.logs;
             // 1. Calculate stats on ALL orders (so the top cards remain accurate)
             const activeOrders = allOrders.filter(o => o.status === "ORDERED").length;
             const checkedByManager = allOrders.filter(o => o.status === "PENDING_RESTOCK").length;
@@ -28,6 +31,7 @@ export function usePurchaseOrders(branchId: string, search?: string, status?: st
 
             return {
                 orders: filteredOrders,
+                logs,
                 stats: {
                     activeOrders,
                     checkedByManager,
@@ -46,13 +50,4 @@ export function usePurchaseOrder(id: string) {
         queryFn: () => poApi.getById(id),
         enabled: !!id,
     });
-}
-
-// 7. Activity Logs for Customers
-export function usePoLogs(branchId: string) {
-  return useQuery({
-    queryKey: poKeys.logs(),
-    queryFn: () => poApi.getPoLogs(branchId),
-    enabled: !!branchId,
-  });
 }

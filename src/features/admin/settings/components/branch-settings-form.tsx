@@ -34,10 +34,12 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
     resolver: yupResolver(branchSettingsSchema),
     mode: "onChange",
     defaultValues: {
-      displayName: initialData?.displayName || "",
-      displayPhone: initialData?.displayPhone || "",
-      displayEmail: initialData?.displayEmail || "",
-      displayAddress: initialData?.displayAddress || "",
+      name: initialData?.name || "",
+      phone: initialData?.phone || "",
+      email: initialData?.email || "",
+      address: initialData?.address || "",
+      ntn: initialData?.ntn || "",
+      strn: initialData?.strn || "",
     },
   });
 
@@ -162,8 +164,8 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-1.5">
                   <FormInput
-                    name="displayName"
-                    label="Display Name"
+                    name="name"
+                    label="Name"
                     required
                     placeholder="e.g. Droply - Main Branch"
                   />
@@ -171,7 +173,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
 
                 <div className="space-y-1.5">
                   <FormInput
-                    name="displayPhone"
+                    name="phone"
                     label="Contact No"
                     required
                     placeholder="e.g. 03001234567"
@@ -180,21 +182,41 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
 
                 <div className="space-y-1.5">
                   <FormInput
-                    name="displayEmail"
+                    name="email"
                     label="Email"
                     placeholder="e.g. branch@droply.com"
                   />
                 </div>
+
+                <div className="space-y-1.5">
+                  <FormInput
+                    name="ntn"
+                    label="NTN"
+                    placeholder="e.g. 2532465134"
+                  />
+
+                </div>
+
+                <div className="space-y-1.5">
+                  <FormInput
+                    name="strn"
+                    label="STRN"
+                    placeholder="e.g. 55-12254"
+                  />
+
+                </div>
+
               </div>
 
               <div className="space-y-1.5">
                 <FormInput
                   label="Branch Address"
-                  name="displayAddress"
+                  name="address"
                   placeholder="e.g. Droply Main Branch, Lahore."
                 />
               </div>
             </div>
+
 
           </form>
         </FormProvider>

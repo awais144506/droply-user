@@ -6,12 +6,12 @@ export type StaffRole = "MANAGER" | "RIDER";
 export function formatStaffPayload(data: CreateStaffFormData, branchId: string, role: StaffRole) {
     return {
         branchId,
-        designation: role,
+        role: role,
         name: data.name,
         email: data.email || undefined,
         phone: data.phone,
         cnic: data.cnic,
-        currentAddress: data.address || undefined,
+        address: data.address || undefined,
         basicSalary: data.salary,
         joiningDate: data.joiningDate ? new Date(data.joiningDate).toISOString() : undefined,
         fatherName: data.fatherName || undefined,
@@ -28,11 +28,11 @@ export function formatStaffPayload(data: CreateStaffFormData, branchId: string, 
 
 export function updateStaffPayload(data: UpdateStaffFormData) {
     return {
-        designation: data.designation,
+        role: data.role,
         name: data.name,
         phone: data.phone,
         cnic: data.cnic,
-        currentAddress: data.address || undefined,
+        address: data.address || undefined,
         basicSalary: data.salary,
         joiningDate: data.joiningDate ? new Date(data.joiningDate).toISOString() : undefined,
         fatherName: data.fatherName || undefined,
@@ -41,8 +41,8 @@ export function updateStaffPayload(data: UpdateStaffFormData) {
         guarantorName: data.guarantorName || undefined,
         guarantorCnic: data.guarantorCnic || undefined,
         guarantorPhone: data.guarantorPhone || undefined,
-        zoneIds: data.designation === "RIDER" ? data.zoneIds : undefined,
-        vehicleId: data.designation === "RIDER" ? data.vehicleId : undefined,
-        licenseNumber: data.designation === "RIDER" ? (data.licenseNumber || undefined) : undefined,
+        zoneIds: data.role === "RIDER" ? data.zoneIds : undefined,
+        vehicleId: data.role === "RIDER" ? data.vehicleId : undefined,
+        licenseNumber: data.role === "RIDER" ? (data.licenseNumber || undefined) : undefined,
     }
 }

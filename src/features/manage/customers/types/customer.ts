@@ -11,6 +11,8 @@ export interface CustomerDetails {
     phone: string;
     email?: string | null;
     address: string | null;
+    customerNtn: string | null;
+    customerStrn: string | null;
     latitude: number | null;
     longitude: number | null;
     status: CustomerStatus;

@@ -1,13 +1,13 @@
 export const partyOptions = [
-    { value: "CUSTOMER", label: "Customer (Buyer)" },
-    { value: "VENDOR", label: "Vendor (Supplier)" },
-    { value: "BOTH", label: "Both (Buys & Sells)" },
+    { value: "CUSTOMER", label: "Customer" },
+    { value: "VENDOR", label: "Vendor" },
+    { value: "COMPANY", label: "Company" },
 ]
 
 export const categoryOptions = [
-    { value: "DOMESTIC", label: "Domestic (Home)" },
-    { value: "COMMERCIAL", label: "Commercial (Shop)" },
-    { value: "CORPORATE", label: "Corporate (Office)" },
+    { value: "DOMESTIC", label: "Domestic" },
+    { value: "COMMERCIAL", label: "Commercial" },
+    { value: "CORPORATE", label: "Corporate" },
 ]
 
 export const FilterTabs = [
