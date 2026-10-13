@@ -2,14 +2,15 @@
 import { useRole } from "@/lib/hooks/use-role";
 import { useSubscription } from "@/features/admin/subscription/api/use-subscription";
 import { PlanOverview } from "@/features/admin/subscription/components/main/plan-overview";
-import { BillingLedger } from "@/features/admin/subscription/components/main/billing-ledger";
 import ErrorBoundary from "@/app/error";
 import Loading from "@/app/loading";
+import BillingTable from "@/features/admin/subscription/components/main/billing-table";
 
 export default function SubscriptionPage() {
   const { branchId } = useRole();
   const { data, isLoading, isError, error } = useSubscription(branchId);
   const currentPlan = data?.currentPlan
+  const paymentHistory = data?.paymentHistory;
 
   if (isLoading) return <Loading text="Loading Subscription..." />
   if (isError) return <ErrorBoundary error={error.message} />
@@ -23,7 +24,7 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-300 mx-auto p-6">
+    <div className="space-y-8 p-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">Billing & Subscription</h1>
         <p className="text-sm text-slate-500 mt-1">
@@ -33,8 +34,9 @@ export default function SubscriptionPage() {
 
       {/* FIXED: Changed 'plan' to 'currentPlan' */}
       <PlanOverview currentPlan={currentPlan} />
-
-      {/* <BillingLedger ledger={data.ledger} /> */}
+      <BillingTable
+        ledger={paymentHistory}
+      />
     </div>
   );
 }

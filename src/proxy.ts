@@ -34,16 +34,24 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   if (req.nextUrl.pathname.startsWith("/_next") || req.nextUrl.pathname.includes(".")) {
     return NextResponse.next();
   }
+  
   const { userId, sessionClaims } = await auth();
   const metadata = (sessionClaims?.metadata || sessionClaims?.public_metadata || {}) as {
-    role?: string; branchId?: string; tier?: string; status?: string; renewDate?: string;
+    role?: string; 
+    branchId?: string; 
+    tier?: string; 
+    branchStatus?: string; 
+    userStatus?: string; 
+    status?: string; // Fallback for legacy
   };
 
   const userRole = metadata.role;
   const branchId = metadata.branchId;
   const tier = (metadata.tier || "SILVER").toUpperCase();
-  const status = (metadata.status || "ACTIVE").toUpperCase();
-  const renewDate = metadata.renewDate;
+  
+  // Use the new keys, default to ACTIVE if missing
+  const branchStatus = (metadata.branchStatus || metadata.status || "ACTIVE").toUpperCase();
+  const userStatus = (metadata.userStatus || "ACTIVE").toUpperCase();
 
   const isAllowedTenantUser = Boolean(userRole) && ALLOWED_TENANT_ROLES.includes(userRole!) && Boolean(branchId);
 
@@ -53,8 +61,9 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 
-  // --- B. AUTHENTICATED BUT UNAUTHORIZED ---
-  if (!isAllowedTenantUser) {
+  // --- B. AUTHENTICATED BUT UNAUTHORIZED / INACTIVE ---
+  // If the owner fired them (userStatus), or they have no branch, kick them out
+  if (!isAllowedTenantUser || userStatus === "INACTIVE" || userStatus === "SUSPENDED") {
     if (isUnauthorizedRoute(req)) return NextResponse.next();
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
@@ -64,19 +73,8 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return NextResponse.redirect(new URL("/app", req.url));
   }
 
-  const gracePeriod = parseInt(process.env.NEXT_PUBLIC_GRACE_PERIOD || "3", 10);
-  let isDateSuspended = false;
-  if (renewDate) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const expiration = new Date(renewDate);
-    expiration.setHours(0, 0, 0, 0);
-    const diffTime = today.getTime() - expiration.getTime();
-    const daysPastDue = Math.round(diffTime / (1000 * 60 * 60 * 24));
-    if (daysPastDue >= gracePeriod) isDateSuspended = true;
-  }
-
-  const isStrictlySuspended = status === "SUSPENDED" || isDateSuspended;
+  // --- D. BRANCH BILLING SUSPENSION (Controlled by Backend Cron Job) ---
+  const isStrictlySuspended = branchStatus === "SUSPENDED";
 
   if (isStrictlySuspended && !isBillingRoute(req)) {
     if (req.nextUrl.pathname.startsWith("/api")) {
@@ -86,6 +84,7 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   }
 
   // --- E. ROLE & TIER-BASED ROUTE PROTECTION ---
+  // (This only runs if the branch is active, since the block above catches suspensions)
   if (isOwnerOnlyRoute(req) && userRole !== "OWNER") {
     return NextResponse.redirect(new URL("/app", req.url));
   }
@@ -94,11 +93,11 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   const hasPlatinum = tier === "PLATINUM";
 
   if (isPlatinumRoute(req) && !hasPlatinum) {
-    return NextResponse.redirect(new URL("/admin/subscription?upgrade=platinum", req.url));
+    return NextResponse.redirect(new URL("/admin/subscription", req.url));
   }
 
   if (isGoldPlusRoute(req) && !hasGoldPlus) {
-    return NextResponse.redirect(new URL("/admin/subscription?upgrade=gold", req.url));
+    return NextResponse.redirect(new URL("/admin/subscription", req.url));
   }
 
   return NextResponse.next();

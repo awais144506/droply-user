@@ -3,7 +3,8 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
 type Props = {
-    currentUser: { tier: string; cycle: string; renewDate: Date; price: number };
+    // Added 'status' to the currentUser type to track ACTIVE, PAST_DUE, or SUSPENDED
+    currentUser: { tier: string; cycle: string; renewDate: Date; price: number; status: string };
     daysLeft: number;
 };
 
@@ -35,8 +36,21 @@ export default function SubscriptionHeader({ currentUser, daysLeft }: Props) {
                         </div>
                     </div>
                     <div>
-                        <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Time Remaining</p>
-                        <div className="text-xl font-black text-emerald-400">{daysLeft} Days Left</div>
+                        <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">
+                            {currentUser.status === "ACTIVE" ? "Time Remaining" : "Account Status"}
+                        </p>
+                        
+                        {/* Dynamic Status Rendering */}
+                        {currentUser.status === "ACTIVE" ? (
+                            <div className="text-xl font-black text-emerald-400">{daysLeft} Days Left</div>
+                        ) : (
+                            <div className={`text-xl font-black uppercase ${
+                                currentUser.status === "PAST_DUE" ? "text-rose-500" : "text-amber-500"
+                            }`}>
+                                {currentUser.status}
+                            </div>
+                        )}
+
                     </div>
                     <div className="text-right">
                         <p className="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Current Price</p>

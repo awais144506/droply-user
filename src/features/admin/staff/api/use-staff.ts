@@ -19,7 +19,7 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
           ? (st.name.toLowerCase() || "").includes(searchFilter.toLowerCase())
           : true;
         const matchesRole = roleFilter
-          ? st.designation === roleFilter
+          ? st.role === roleFilter
           : true;
 
         const matchesStatus = statusFilter
@@ -28,7 +28,7 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
         return matchesSearch && matchesRole && matchesStatus;
       });
       const riderOptions = payload.staff
-        .filter((member: { designation: string }) => member.designation === "RIDER")
+        .filter((member: { role: string }) => member.role === "RIDER")
         .map((rider: { name: string; phone: string; id: string }) => ({
           label: `${rider.name} (${rider.phone})`,
           value: rider.id,
@@ -41,10 +41,10 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
         }));
 
       const taskStaffOptions = payload.staff
-        .map((staff: { name: string; phone: string; id: string, designation: string }) => ({
+        .map((staff: { name: string; phone: string; id: string, role: string }) => ({
           label: `${staff.name}`,
           value: staff.id,
-          role: staff.designation,
+          role: staff.role,
           phone: staff.phone
         }));
 
