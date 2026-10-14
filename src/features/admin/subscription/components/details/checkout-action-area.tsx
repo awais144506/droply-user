@@ -67,7 +67,9 @@ export default function CheckoutArea({
 
     const { startUpload, isUploading } = useUploadThing("paymentReceipt", {
         onUploadError: (err) => {
-            methods.setError("receiptImage", { message: err.message || "Upload failed. Try again." });
+            // 🔥 THIS WILL PRINT THE REAL REASON IN YOUR F12 CONSOLE!
+            console.error("🔥 REAL UPLOADTHING ERROR:", err.message, err.data);
+            methods.setError("receiptImage", { message: `Upload Error: ${err.message}` });
         },
     });
 
@@ -111,7 +113,7 @@ export default function CheckoutArea({
             type: data.type,
             transactionId: data.transactionId?.trim() || undefined,
             imageUrl: uploadedUrl,
-            isRenewal, 
+            isRenewal,
         });
     };
 

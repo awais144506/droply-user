@@ -18,9 +18,12 @@ export function NavMain() {
   const pathname = usePathname();
   const { isOwner, userTier } = useRole();
   const isDashboardActive = pathname === "/app";
-  
+
   const userRole: UserRole = isOwner ? "OWNER" : "MANAGER";
   const currentTier = (userTier || "SILVER").toUpperCase() as SubscriptionTier;
+
+  // 🔥 Check if we are running in non-production (development / staging)
+  const isProduction = process.env.NEXT_PUBLIC_NODE_ENV === "production";
 
   return (
     <div className="space-y-3 px-3 py-2 select-none">
@@ -55,10 +58,9 @@ export function NavMain() {
 
       {/* 2. Grouped Category Cards */}
       {BRANCH_NAV_CONFIG.map((group) => {
-        
-        // 🔥 Apply DOUBLE FILTER: Must have correct Role AND correct Tier
+
         const visibleItems = group.items.filter((item) =>
-          item.allowedRoles.includes(userRole) && 
+          item.allowedRoles.includes(userRole) &&
           item.allowedTiers.includes(currentTier)
         );
 
@@ -130,17 +132,16 @@ export function NavMain() {
                           </Badge>
                         )}
 
-                        {/* 🔥 Render the Dev Status Dot (REMOVE BEFORE PROD) */}
-                        {item.devStatus && (
+                        {/* 🔥 Render Dev Status Dot ONLY in non-production environments */}
+                        {!isProduction && item.devStatus && (
                           <span
                             title={`Status: ${item.devStatus}`}
-                            className={`h-2 w-2 rounded-full shrink-0 shadow-sm ${
-                              item.devStatus === "DONE"
+                            className={`h-2 w-2 rounded-full shrink-0 shadow-sm ${item.devStatus === "DONE"
                                 ? "bg-emerald-500" // Green
                                 : item.devStatus === "PARTIAL"
-                                ? "bg-amber-400" // Yellow
-                                : "bg-rose-500" // Red (TODO)
-                            }`}
+                                  ? "bg-amber-400" // Yellow
+                                  : "bg-rose-500" // Red (TODO)
+                              }`}
                           />
                         )}
                       </div>

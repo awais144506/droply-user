@@ -13,6 +13,8 @@ import { InvoicePreview } from "./invoice-preview";
 import { useUploadThing } from "@/lib/uploadthing";
 import { branchSettingsSchema, BranchSettingsFormValues } from "../schema/update-branch-settings.schema";
 import { FormInput } from "@/components/ui/form-input";
+import { FormPhoneInput } from "@/components/ui/form-phone-input";
+import { formatPhoneNumber } from "react-phone-number-input";
 
 interface BranchSettingsFormProps {
   initialData: BranchSettingData;
@@ -172,7 +174,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
                 </div>
 
                 <div className="space-y-1.5">
-                  <FormInput
+                  <FormPhoneInput
                     name="phone"
                     label="Contact No"
                     required

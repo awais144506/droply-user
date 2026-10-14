@@ -19,10 +19,10 @@ export default function StaffPage() {
   const status = searchParams.get("status") || undefined;
 
   const { data, isLoading, isError, error } = useStaffList(branchId, search, role, status);
-  const { data: logs = [], isLoading: isLoadingLogs } = useStaffLogs(branchId);
 
   const staffData = data?.staff || [];
   const stats = data?.stats || { totalStaff: 0, activeStaffCount: 0, activeManagers: 0, activeRiders: 0, disableStaff: 0 };
+  const logs = data?.logs;
   const isLimitReached = data?.isLimitReached
 
   if (isLoading) return <Loading text="Loading Staff..."/>;
@@ -79,7 +79,6 @@ export default function StaffPage() {
             <ActivityLogsCard
               title="Staff Activity Logs"
               logs={logs}
-              isLoading={isLoadingLogs}
             />
           </div>
         </div>

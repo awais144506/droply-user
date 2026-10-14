@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { BranchSettingData } from "../types/settings";
 import { branchSettingsKeys } from "./branch-setting-keys";
 import { branchSettingApi } from "./branch-settings.service";
-import { formatPhoneNumber } from "react-phone-number-input";
 
 
 export function useBranchSettings(branchId: string) {
@@ -14,10 +13,6 @@ export function useBranchSettings(branchId: string) {
   const fetchBranchSettings = useQuery({
     queryKey: branchSettingsKeys.branch(branchId || ""),
     queryFn: () => branchSettingApi.getBranchSettings(branchId),
-    select: (settings) => ({
-      ...settings,
-      displayPhone: settings.displayPhone ? formatPhoneNumber(settings.displayPhone) : "",
-    }),
     enabled: !!branchId,
   });
 

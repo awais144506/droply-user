@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-// 🔥 1. Accept roleData as a prop to sync with SiteHeader
 export function NavUser({ roleData }: { roleData: any }) {
   const { userName, userEmail, userProfilePicture, role, isLoading } = roleData;
   const { signOut, openUserProfile } = useClerk();

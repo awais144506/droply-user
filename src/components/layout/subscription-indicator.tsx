@@ -2,8 +2,11 @@
 "use client";
 import { Zap, Clock, CalendarDays, AlertTriangle, Crown } from "lucide-react";
 import Link from "next/link";
-export function SubscriptionIndicator({ roleData }: { roleData: any }) {
-  const { userTier, tierCycle, userStatus, renewDate, isLoading } = roleData;
+import { useSubscription } from "@/features/admin/subscription/api/use-subscription";
+
+export function SubscriptionIndicator({ branchId }: { branchId: string }) {
+  const { data, isLoading } = useSubscription(branchId);
+  const currentPlan = data?.currentPlan;
 
   if (isLoading) {
     return (
@@ -16,25 +19,29 @@ export function SubscriptionIndicator({ roleData }: { roleData: any }) {
       </div>
     );
   }
-  const gracePeriod = parseInt(process.env.NEXT_PUBLIC_GRACE_PERIOD || "3", 10);
+
+  // Safely extract properties
+  const tier = currentPlan?.tier || "SILVER";
+  const cycle = currentPlan?.cycle || "TRIAL";
+  const renewDate = currentPlan?.renewDate;
+
+  // Exact math matching the Backend Cron Job
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const endDate = renewDate ? new Date(renewDate as string) : new Date();
+  const endDate = renewDate ? new Date(renewDate) : new Date();
   endDate.setHours(0, 0, 0, 0);
 
-  const diffTime = endDate.getTime() - today.getTime();
-  const daysLeft = Math.round(diffTime / (1000 * 60 * 60 * 24));
+  const daysLeft = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const isTrial = cycle === "TRIAL";
 
-  const isHardSuspended = daysLeft <= -gracePeriod;
-  const isTrial = tierCycle === "TRIAL";
-  const isExpired = daysLeft <= 0;
+  // Map strictly to our database states
+  const isPastDue = daysLeft < 0 && daysLeft >= -2;
+  const isSuspended = daysLeft < -2;
 
-  const isSuspended = userStatus === "SUSPENDED" || (isHardSuspended && !isTrial);
-  const isPastDue = userStatus === "PAST_DUE" || (isExpired && !isTrial && !isSuspended);
-  const isEndingSoon = daysLeft <= gracePeriod && daysLeft > 0
-  const isCritical = isSuspended || (isTrial && isExpired);
-  const isWarning = (!isSuspended && isPastDue) || (isTrial && isEndingSoon);
+  // UI styling flags
+  const isCritical = isSuspended || (isTrial && daysLeft < 0);
+  const isWarning = isPastDue && !isTrial;
 
   const formattedDate = endDate.toLocaleDateString("en-US", {
     month: "short",
@@ -55,7 +62,7 @@ export function SubscriptionIndicator({ roleData }: { roleData: any }) {
       };
     }
 
-    // 2. Warning / Grace Period State (Amber)
+    // 2. Warning / Past Due State (Amber)
     if (isWarning) {
       return {
         wrapper: "bg-white border-amber-300 hover:border-amber-400",
@@ -80,7 +87,7 @@ export function SubscriptionIndicator({ roleData }: { roleData: any }) {
     }
 
     // 4. Active Premium States
-    switch (userTier?.toUpperCase()) {
+    switch (tier.toUpperCase()) {
       case "PLATINUM":
         return {
           wrapper: "bg-slate-900 border-slate-800 hover:border-indigo-500 shadow-md shadow-indigo-500/10",
@@ -127,14 +134,15 @@ export function SubscriptionIndicator({ roleData }: { roleData: any }) {
         <div className="flex flex-col justify-center">
           <div className="flex items-center gap-2">
             <span className={`text-xs font-extrabold tracking-wide uppercase ${theme.tierText}`}>
-              {userTier} <span className="opacity-40 mx-0.5 font-normal">|</span> {tierCycle}
+              {tier} <span className="opacity-40 mx-0.5 font-normal">|</span> {cycle}
             </span>
 
             <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md tracking-wide uppercase ${theme.pill}`}>
               {isSuspended ? "Suspended"
-                : (isTrial && isExpired) ? "Expired"
-                  : isPastDue ? "Grace Period"
-                    : `${daysLeft} Days Left`
+                : (isTrial && daysLeft < 0) ? "Expired"
+                : isPastDue ? "Past Due"
+                : daysLeft === 0 ? "Due Today"
+                : `${daysLeft} Days Left`
               }
             </span>
           </div>
@@ -142,14 +150,14 @@ export function SubscriptionIndicator({ roleData }: { roleData: any }) {
           <span className={`text-[10px] flex items-center gap-1 mt-0.5 ${theme.dateText}`}>
             <CalendarDays className="h-3 w-3 opacity-70" />
             {isTrial ? "Trial ends:" : "Renew Date:"}
-            <span className={userTier?.toUpperCase() === "PLATINUM" && !isCritical && !isWarning ? "text-slate-500" : "font-semibold"}>
+            <span className={tier.toUpperCase() === "PLATINUM" && !isCritical && !isWarning ? "text-slate-500" : "font-semibold"}>
               {formattedDate}
             </span>
           </span>
         </div>
       </Link>
 
-      {/* Urgent Action Banner - Adapts color based on severity */}
+      {/* Urgent Action Banner */}
       {(isCritical || isWarning) && (
         <div className={`hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl shadow-sm animate-pulse border ${isCritical ? "bg-rose-50 border-rose-200" : "bg-amber-50 border-amber-200"
           }`}>
@@ -157,9 +165,9 @@ export function SubscriptionIndicator({ roleData }: { roleData: any }) {
           <div className="flex flex-col">
             <span className={`text-[10px] font-bold uppercase leading-none ${isCritical ? "text-rose-700" : "text-amber-700"}`}>
               {isSuspended ? "Account Suspended"
-                : (isTrial && isExpired) ? "Trial Expired"
-                  : isPastDue ? "Payment Overdue"
-                    : "Trial Ending Soon"}
+                : (isTrial && daysLeft < 0) ? "Trial Expired"
+                : isPastDue ? "Payment Overdue"
+                : "Action Required"}
             </span>
             <span className={`text-[9px] font-medium mt-0.5 ${isCritical ? "text-rose-600" : "text-amber-600"}`}>
               {isCritical ? "Update billing to restore access" : "Update billing to avoid disruption"}

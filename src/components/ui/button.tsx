@@ -9,7 +9,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         // Default is now your Sky-600 Theme
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "bg-sky-100 text-sky-700 border border-sky-400 hover:bg-sky-200",
         
         // Destructive is your Rose
         destructive:

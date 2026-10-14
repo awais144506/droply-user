@@ -1,31 +1,33 @@
+import { ActivityLog } from "@/types/ActivityLog";
 export type CustomerStatus = "ACTIVE" | "DISABLE"
 export type StaffRole = "MANAGER" | "RIDER"
 
 export interface StaffList {
-    id: string;
-    staffCode: string;
-    name: string;
-    status: string; // Or your specific Enum like CustomerStatus/StaffStatus
-    phone: string;
-    email: string | null;
-    role: string; // Or your StaffRole Enum
-    joiningDate: string | null;
+  id: string;
+  staffCode: string;
+  name: string;
+  status: string; // Or your specific Enum like CustomerStatus/StaffStatus
+  phone: string;
+  email: string | null;
+  role: string; // Or your StaffRole Enum
+  joiningDate: string | null;
 }
 
 // 2. Represents the stats object
 export interface StaffStats {
-    totalStaff: number;
-    activeStaffCount: number;
-    activeManagers: number;
-    activeRiders: number;
-    disableStaff: number;
+  totalStaff: number;
+  activeStaffCount: number;
+  activeManagers: number;
+  activeRiders: number;
+  disableStaff: number;
 }
 
 // 3. Represents the ENTIRE payload coming from the backend!
 export interface StaffApiResponse {
-    staff: StaffList[];
-    stats: StaffStats;
-    maxUserLimit: number;
+  staff: StaffList[];
+  stats: StaffStats;
+  logs: ActivityLog[];
+  maxUserLimit: number;
 }
 
 // types/staff.ts (or wherever you keep your types)
@@ -39,7 +41,7 @@ export interface StaffVehicle {
   id: string;      // Assuming your backend sends IDs
   modelInfo: string;
   registration: string;
-  status: "ACTIVE" | "MAINTENANCE" | "DISABLE"; 
+  status: "ACTIVE" | "MAINTENANCE" | "DISABLE";
   type: string;
 }
 

@@ -11,6 +11,7 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
     queryFn: () => staffApi.getAllStaff(branchId),
 
     select: (payload) => {
+      const logs = payload.logs;
 
       const isLimitReached = payload.stats.activeStaffCount >= maxUsersLimit;
 
@@ -50,6 +51,7 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
 
       // 4. Return everything cleanly
       return {
+        logs,
         staff: filterStaff,
         stats: payload.stats,
         riderOptions,

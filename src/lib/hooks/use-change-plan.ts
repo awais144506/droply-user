@@ -83,12 +83,18 @@ export function useChangePlan() {
     const selectedWeight = TIER_WEIGHT[selectedTier] || 0;
 
     const isSamePlan = !isTrial && selectedTier === currentUser.tier && selectedCycle === currentUser.cycle;
-    const isDowngrade = !isTrial && selectedWeight < currentWeight;
+    
+    // Lock switching from Yearly -> Monthly while active (even if upgrading tier)
     const isCycleLocked = !isPastDue && currentUser.cycle === "YEARLY" && selectedCycle === "MONTHLY";
+    
+    // Detect if user is switching from Monthly -> Yearly
+    const isCycleUpgrade = !isTrial && currentUser.cycle === "MONTHLY" && selectedCycle === "YEARLY";
+
+    const isDowngrade = !isTrial && selectedWeight < currentWeight;
     const isUpgrade =
         isTrial ||
         selectedWeight > currentWeight ||
-        (selectedWeight === currentWeight && currentUser.cycle === "MONTHLY" && selectedCycle === "YEARLY");
+        (selectedWeight === currentWeight && isCycleUpgrade);
 
     const targetLimit = pricingDb[selectedTier]?.users;
     const isOverLimit = typeof targetLimit === "number" && activeStaffCount > targetLimit;
@@ -104,15 +110,18 @@ export function useChangePlan() {
         amountDue = selectedPlanFullPrice;
         isRenewal = true;
     } else if (isDowngrade) {
-        amountDue = 0;
-        isRenewal = false; // Downgrades take effect next cycle, no charge today
+        // 🔥 FIX 1: If past due/expired, downgrading to a lower tier starts a new billing cycle at that tier's full price
+        amountDue = isPastDue ? selectedPlanFullPrice : 0;
+        isRenewal = isPastDue;
     } else if (isUpgrade) {
-        if (inRenewalWindow || isPastDue) {
-            // Upgrade inside the renewal window or past due: charge full price and extend date
+        // 🔥 FIX 2: Trial conversions, Monthly->Yearly switches, 7-day window upgrades, and Past Due upgrades
+        // ALL require full plan payment and extend the renewal date by a full cycle!
+        if (isTrial || isCycleUpgrade || inRenewalWindow || isPastDue) {
             amountDue = selectedPlanFullPrice;
             isRenewal = true;
         } else {
-            // Mid-cycle upgrade: charge only the difference, keep the same date
+            // Same-cycle Mid-Cycle Upgrade (Monthly->Monthly or Yearly->Yearly with > 7 days left):
+            // Charge only the difference and keep the existing renewDate
             amountDue = Math.max(0, selectedPlanFullPrice - currentPlanPrice);
             isRenewal = false;
         }
@@ -162,9 +171,9 @@ export function useChangePlan() {
             requirePayment = false;
             break;
 
-        // 7-Day Window explicitly applies to UPGRADES only
+        // 🔥 FIX 3: Use `isRenewal` to accurately label full-cycle extensions vs mid-cycle upgrades
         case !isPastDue && isUpgrade:
-            buttonText = inRenewalWindow 
+            buttonText = isRenewal 
                 ? `Pay Rs. ${amountDue.toLocaleString()} to Upgrade & Renew` 
                 : `Pay Rs. ${amountDue.toLocaleString()} & Upgrade Now`;
             buttonClass = "bg-emerald-600 hover:bg-emerald-700 text-white";

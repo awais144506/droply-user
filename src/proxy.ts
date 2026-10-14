@@ -17,7 +17,8 @@ const isUnauthorizedRoute = createRouteMatcher(["/unauthorized(.*)"]);
 // 2. Safe routes for suspended users
 const isBillingRoute = createRouteMatcher([
   "/admin/subscription(.*)",
-  "/sign-out(.*)"
+  "/sign-out(.*)",
+  "/api/uploadthing(.*)" // 🔥 FIX 1: Allow suspended users to upload payment receipts!
 ]);
 
 const isOwnerOnlyRoute = createRouteMatcher(["/admin/staff(.*)"]);
@@ -32,6 +33,14 @@ const ALLOWED_TENANT_ROLES = ["OWNER", "MANAGER"];
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
   if (req.nextUrl.pathname.startsWith("/_next") || req.nextUrl.pathname.includes(".")) {
+    return NextResponse.next();
+  }
+
+  // 🔥 FIX 2: Always let UploadThing & Webhooks bypass tenant/suspension checks immediately
+  if (
+    req.nextUrl.pathname.startsWith("/api/uploadthing") ||
+    req.nextUrl.pathname.startsWith("/api/webhooks")
+  ) {
     return NextResponse.next();
   }
   
@@ -84,7 +93,6 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   }
 
   // --- E. ROLE & TIER-BASED ROUTE PROTECTION ---
-  // (This only runs if the branch is active, since the block above catches suspensions)
   if (isOwnerOnlyRoute(req) && userRole !== "OWNER") {
     return NextResponse.redirect(new URL("/app", req.url));
   }

@@ -10,12 +10,11 @@ import { useDeletePayment } from "../../api/use-mutate-subscription";
 import Loading from "@/app/loading";
 
 type Props = {
-    ledger: SubscriptionPayment[];
+    ledger: SubscriptionPayment[] | undefined;
 };
 
 export default function BillingTable({ ledger }: Props) {
     const { mutate: deletePayment, isPending } = useDeletePayment();
-    // 1. Initialize your custom pagination hook
     const {
         currentPage, setCurrentPage, paginatedData, totalPages, totalItems, itemsPerPage
     } = usePagination(ledger);
@@ -24,7 +23,8 @@ export default function BillingTable({ ledger }: Props) {
     const handleDeletePayment = useCallback((paymentId: string) => {
         deletePayment(paymentId);
     }, [deletePayment]);
-    // Pass the handler into the column generator
+
+
     const columns = useMemo(() => getBillingColumns(handleDeletePayment), [handleDeletePayment]);
     if (isPending) return <Loading text="Loading data..." />
     return (
@@ -47,7 +47,7 @@ export default function BillingTable({ ledger }: Props) {
             </div>
 
             {/* Empty State Fallback (If your DataTable doesn't handle empty arrays natively) */}
-            {ledger.length === 0 && (
+            {ledger?.length === 0 && (
                 <div className="p-12 text-center flex flex-col items-center justify-center">
                     <p className="text-sm font-medium text-slate-500">No payment history found.</p>
                 </div>
