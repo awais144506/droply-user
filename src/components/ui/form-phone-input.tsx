@@ -4,6 +4,7 @@ import { useId, ReactNode } from "react";
 import { useFormContext, Controller } from "react-hook-form";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css"; // Required for flags
+import { LucideIcon } from "lucide-react";
 
 interface FormPhoneInputProps {
     name: string;
@@ -11,6 +12,8 @@ interface FormPhoneInputProps {
     required?: boolean;
     placeholder?: string;
     helperText?: ReactNode;
+    labelIcon?: LucideIcon,
+    iconColor?: string;
 }
 
 export function FormPhoneInput({
@@ -18,7 +21,9 @@ export function FormPhoneInput({
     label,
     required = false,
     placeholder = "e.g. 0300 1234567",
-    helperText
+    helperText,
+    labelIcon: Icon,
+    iconColor = "text-sky-500",
 }: FormPhoneInputProps) {
     const { control, formState: { errors } } = useFormContext();
     const error = errors[name]?.message as string;
@@ -28,6 +33,7 @@ export function FormPhoneInput({
         <div className="space-y-1.5 w-full">
             {label && (
                 <label htmlFor={inputId} className="flex items-center text-xs font-bold text-slate-700 uppercase tracking-wide cursor-pointer">
+                    {Icon && <Icon className={`h-3.5 w-3.5 mr-1.5 ${iconColor}`} />}
                     {label}
                     {required && <span className="text-rose-500 ml-1">*</span>}
                 </label>

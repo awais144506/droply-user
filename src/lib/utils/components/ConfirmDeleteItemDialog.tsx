@@ -14,6 +14,7 @@ interface ConfirmActionDialogProps {
     description: React.ReactNode;
     confirmText?: string;
     confirmButtonClass?: string;
+    confirmButtonVariant?: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"; // Added variant prop
 }
 
 export default function ConfirmActionDialog({
@@ -24,7 +25,8 @@ export default function ConfirmActionDialog({
     title,
     description,
     confirmText = "Confirm",
-    confirmButtonClass = "bg-sky-600 hover:bg-sky-700 text-white"
+    confirmButtonClass = "bg-sky-600 hover:bg-sky-700 text-white",
+    confirmButtonVariant = "default" // Defaults to default, can be overridden per action
 }: ConfirmActionDialogProps) {
     return (
         <AlertDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
@@ -32,7 +34,7 @@ export default function ConfirmActionDialog({
                 <AlertDialogHeader>
                     <AlertDialogTitle>{title}</AlertDialogTitle>
                     <AlertDialogDescription>
-                        <div>{description}</div>
+                        <div className="text-sm text-slate-500 mt-1">{description}</div>
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -40,6 +42,7 @@ export default function ConfirmActionDialog({
                     <Button 
                         onClick={onConfirm} 
                         disabled={isLoading}
+                        variant={confirmButtonVariant}
                         className={confirmButtonClass}
                     >
                         {isLoading ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Processing...</> : confirmText}

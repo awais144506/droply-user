@@ -47,7 +47,7 @@ export function FormInput({
     disablePastDates = false,
     disableFutureDates = false,
     labelIcon: Icon,
-    iconColor = "text-sky-500",
+    iconColor = "text-sky-600",
 }: FormInputProps) {
     const { register, control, formState: { errors } } = useFormContext();
     const error = errors[name]?.message as string;

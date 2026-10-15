@@ -59,6 +59,13 @@ export function useProducts(branchId: string) {
                     })) || []
                 })) || [];
 
+            const productOptionsQuotation = products.map((p) => ({
+                value: p.id,
+                label: p.name,
+                unitOfMeasure: p.unitOfMeasure,
+                currentStock: p.currentStock,
+                salePrice: p.salePrice ?? 0,
+            }))
             return {
                 products,
                 logs,
@@ -72,7 +79,8 @@ export function useProducts(branchId: string) {
                 quickSaleOptions,
                 bomOptions,
                 productionOptions,
-                lowStockProducts
+                lowStockProducts,
+                productOptionsQuotation
             }
 
         },

@@ -58,6 +58,22 @@ export function useCustomers(
           zoneName: c.zone?.name || "",
         }));
 
+      const customerOptionsQuotaion = customers
+        .filter((c) => c.status === "ACTIVE")
+        .map((c) => ({
+          value: c.id,
+          label: c.name,
+          phone: c.phone,
+          email: c.email,
+          category: c.category,
+          ntn: c.customerNtn,
+          strn: c.customerStrn,
+          address: c.address || "No Address Provided",
+          customerCredit: Number(c.customerCredit || 0),
+          assetsHeld: Number(c.returnablesLength || 0),
+          zoneName: c.zone?.name || "",
+        }));
+
       return {
         customers: filteredCustomers,
         stats: {
@@ -68,6 +84,7 @@ export function useCustomers(
         customerOptions,
         logs: logs,
         newCustomerRequest,
+        customerOptionsQuotaion
       }
     },
     staleTime: 5 * 60 * 1000,

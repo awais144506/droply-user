@@ -2,7 +2,7 @@
 "use client";
 
 import { ReactNode, useId } from "react";
-import { useFormContext, Controller } from "react-hook-form";
+import { useFormContext, Controller, get } from "react-hook-form";
 import Select from "react-select";
 import { Loader, LucideIcon } from "lucide-react";
 
@@ -21,11 +21,13 @@ interface FormSelectProps {
     required?: boolean;
     isMulti?: boolean;
     isSearchable?: boolean;
+    isClearable?: boolean;
     helperText?: ReactNode;
     isLoading?: boolean;
     formatOptionLabel?: (data: any) => ReactNode;
+    onValueChange?: (selectedOption: any) => void; // 🔥 Triggers auto-fill on selection
     lableTextColor?: string;
-    labelIcon?: LucideIcon,
+    labelIcon?: LucideIcon;
     iconColor?: string;
 }
 
@@ -37,20 +39,23 @@ export function FormSelect({
     disabled = false,
     required = false,
     isMulti = false,
-    isSearchable = false,
+    isSearchable = true,
+    isClearable = false,
     helperText,
     isLoading,
     formatOptionLabel,
+    onValueChange,
     lableTextColor = "text-slate-700",
     labelIcon: Icon,
     iconColor = "text-sky-500",
 }: FormSelectProps) {
     const { control, formState: { errors } } = useFormContext();
-    const error = errors[name]?.message as string;
+    // 🔥 Supports both flat ("partyName") and nested ("items.0.productId") errors
+    const error = get(errors, name)?.message as string;
     const inputId = useId();
 
     return (
-        <div className="space-y-1.5">
+        <div className="space-y-1.5 w-full">
             {label && (
                 <label htmlFor={inputId} className={`flex items-center text-xs font-bold ${lableTextColor} uppercase tracking-wide cursor-pointer`}>
                     {Icon && <Icon className={`h-3.5 w-3.5 mr-1.5 ${iconColor}`} />}
@@ -59,7 +64,6 @@ export function FormSelect({
                 </label>
             )}
 
-            {/* 🔥 Controller is the bridge between RHF and react-select */}
             <Controller
                 control={control}
                 name={name}
@@ -78,7 +82,8 @@ export function FormSelect({
                             isDisabled={disabled}
                             isMulti={isMulti}
                             isSearchable={isSearchable}
-                            placeholder={isLoading ? <Loader className="animate-spin" /> : placeholder}
+                            isClearable={isClearable}
+                            placeholder={isLoading ? <Loader className="animate-spin h-4 w-4" /> : placeholder}
                             onBlur={onBlur}
                             onChange={(selectedOption: any) => {
                                 if (isMulti) {
@@ -86,29 +91,34 @@ export function FormSelect({
                                 } else {
                                     onChange(selectedOption ? selectedOption.value : null);
                                 }
+                                if (onValueChange) {
+                                    onValueChange(selectedOption);
+                                }
                             }}
                             menuPortalTarget={typeof window !== "undefined" ? document.body : null}
                             menuPosition="fixed"
                             styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
                             unstyled
                             classNames={{
-                                control: (state) => ` min-h-[40px] rounded-xl border text-sm transition-all px-3 ${error
-                                    ? "border-rose-300 bg-rose-50/20"
-                                    : state.isFocused
+                                control: (state) => `min-h-[40px] rounded-xl border text-sm transition-all px-3 ${
+                                    error
+                                        ? "border-rose-300 bg-rose-50/20"
+                                        : state.isFocused
                                         ? "border-sky-500 ring-1 ring-sky-500 bg-white"
                                         : "bg-slate-50 border-slate-200"
-                                    } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`,
+                                } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`,
                                 placeholder: () => "text-slate-400",
                                 singleValue: () => "text-slate-900",
                                 multiValue: () => "bg-sky-100 text-sky-700 rounded-md px-2 py-0.5 mr-1 mt-1 text-xs font-semibold flex items-center",
                                 multiValueRemove: () => "ml-1 hover:text-sky-900 hover:bg-sky-200 rounded px-0.5",
                                 menu: () => "mt-1.5 rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden text-sm z-50",
-                                option: (state) => `px-3 py-2 cursor-pointer transition-colors ${state.isSelected
-                                    ? "bg-sky-600 text-white font-medium"
-                                    : state.isFocused
+                                option: (state) => `px-3 py-2 cursor-pointer transition-colors ${
+                                    state.isSelected
+                                        ? "bg-sky-600 text-white font-medium"
+                                        : state.isFocused
                                         ? "bg-slate-100 text-slate-900"
                                         : "text-slate-700 hover:bg-slate-50"
-                                    }`,
+                                }`,
                                 noOptionsMessage: () => "p-3 text-slate-500 text-sm",
                                 valueContainer: () => "gap-1 py-1",
                             }}

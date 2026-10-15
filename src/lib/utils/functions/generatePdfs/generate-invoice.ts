@@ -1,286 +1,387 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { BillingDocument } from "@/features/sales/invoices/types/quotation";
+import { BranchSettingData } from "@/features/admin/settings/types/settings";
+import { formatPhoneNumber } from "react-phone-number-input";
+import { getBase64ImageFromUrl } from "./getBase64Image";
+import { toWords } from "number-to-words";
 
-// --- Dummy Data Interfaces ---
-interface InvoiceData {
-    invoiceNo: string;
-    date: string;
-    subTotal: number;
-    gstPercent: number;
-    gstAmount: number;
-    total: number;
-    received: number;
-    balance: number;
-    amountInWords: string;
-    items: {
-        id: number;
-        name: string;
-        quantity: number;
-        price: number;
-        amount: number;
-    }[];
-}
+export const generateInvoicePdf = async (
+    billingDoc: BillingDocument,
+    branch?: BranchSettingData & Record<string, any>
+) => {
+    const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+    });
 
-interface CompanyInfo {
-    name: string;
-    ntn: string;
-    strn: string;
-    address: string;
-    phone: string;
-    email: string;
-}
+    const isInvoice = billingDoc.type === "INVOICE";
+    const docTitle = isInvoice ? "Invoice" : "Quotation";
 
-interface CustomerInfo {
-    name: string;
-    ntn: string;
-    strn: string;
-    address: string;
-    phone: string;
-}
+    // Formatting helpers matching your PDF: "Rs 5,75,000.00" and "29-12-2025"
+    const formatCurrency = (val: number) =>
+        `Rs ${Number(val || 0).toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        })}`;
 
-export const generateSalesInvoicePdf = async () => {
-    // --- 1. Dummy Data from Reference PDF ---
-    const company: CompanyInfo = {
-        name: "Power Bridge Engineering Services Pvt LTD",
-        ntn: "9630761-5",
-        strn: "3277876296251",
-        address: "al- Jannat street main Jan MUHAMMAD road Near Madina\nCorporation/al- Hamra Town Raiwind road Lahore",
-        phone: "03216903582",
-        email: "pbes786@gmail.com",
+    const formatDateDMY = (dateStr: string | Date) => {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return "N/A";
+        const day = String(d.getDate()).padStart(2, "0");
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const year = d.getFullYear();
+        return `${day}-${month}-${year}`;
     };
 
-    const customer: CustomerInfo = {
-        name: "MS: Beacon Energy (Pvt) Limited",
-        ntn: "6528870-0",
-        strn: "3277876181126",
-        address: "789, Capital View Road Mohra Noor, Banigala, Islamabad\nPakistan",
-        phone: "+923168156762",
-    };
-
-    const invoice: InvoiceData = {
-        invoiceNo: "58",
-        date: "29-12-2025",
-        subTotal: 575000,
-        gstPercent: 18.0,
-        gstAmount: 103500,
-        total: 678500,
-        received: 0,
-        balance: 678500,
-        amountInWords: "Six Lakh Seventy Eight Thousand Five Hundred Rupees\nonly",
-        items: [
-            { id: 1, name: "Aluminum L3 Structure (C Type) 2.6 mm", quantity: 50, price: 11500, amount: 575000 }
-        ]
-    };
-
-    const doc = new jsPDF();
-
-    // --- 2. Color Palette (Dark Blue Theme) ---
     const colors = {
-        darkBlue: [30, 58, 138] as [number, number, number], // Beautiful corporate Navy/Dark Blue
+        primary: [3, 105, 161] as [number, number, number],       // Deep Charcoal / Navy header
+        brandAccent: [2, 132, 199] as [number, number, number],  // Sky 600
         slate900: [15, 23, 42] as [number, number, number],
-        slate600: [71, 85, 105] as [number, number, number],
-        slate300: [203, 213, 225] as [number, number, number],
-        slate50: [248, 250, 252] as [number, number, number],
-        white: [255, 255, 255] as [number, number, number],
+        slate700: [51, 65, 85] as [number, number, number],
+        slate500: [100, 116, 139] as [number, number, number],
+        slate200: [226, 232, 240] as [number, number, number],
+        slate100: [241, 245, 249] as [number, number, number],
     };
 
-    const formatCurrency = (val: number) => `Rs ${val.toLocaleString("en-PK", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    // Safely resolve branch fields (supports both raw API fields and display* fields)
+    const companyName = branch?.name || branch?.displayName || "Company Name";
+    const companyNtn = branch?.ntn || branch?.displayNtn || "";
+    const companyStrn = branch?.strn || branch?.displayStrn || "";
+    const companyAddress = branch?.address || branch?.displayAddress || "";
+    const companyPhone = branch?.phone || branch?.displayPhone || "";
+    const companyEmail = branch?.email || branch?.displayEmail || "";
 
-    // --- 3. Header Section ---
+    // =========================================================================
+    // 1. TOP HEADER: Company Details (Left) & Logo / Brand Box (Right)
+    // =========================================================================
+    let leftY = 18;
+    const leftX = 14;
+    const rightColX = 196;
 
-    // Left side: Company Details
+    // Company Name (Bold, Wrapped if long)
     doc.setFont("helvetica", "bold");
     doc.setFontSize(14);
-    doc.setTextColor(...colors.darkBlue);
-    doc.text(company.name.toUpperCase(), 14, 20);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(...colors.slate600);
-    doc.text(`NTN: (${company.ntn})`, 14, 26);
-    doc.text(`STRN: ${company.strn}`, 14, 31);
-
-    // Address (handles multiline)
-    const splitAddress = doc.splitTextToSize(company.address, 100);
-    doc.text(splitAddress, 14, 36);
-
-    const addressOffset = 36 + (splitAddress.length * 4);
-    doc.text(`Phone no.: ${company.phone}`, 14, addressOffset + 2);
-    doc.text(`Email: ${company.email}`, 14, addressOffset + 7);
-
-    // Right side: Invoice Title & Meta
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(28);
-    doc.setTextColor(...colors.darkBlue);
-    doc.text("INVOICE", 196, 22, { align: "right" });
-
-    doc.setFontSize(11);
     doc.setTextColor(...colors.slate900);
-    doc.text("Invoice Details", 196, 32, { align: "right" });
+    const companyNameLines = doc.splitTextToSize(companyName, 115);
+    doc.text(companyNameLines, leftX, leftY);
+    leftY += companyNameLines.length * 5.5;
 
+    // Company NTN, STRN, Address, Phone, Email
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(...colors.slate600);
-    doc.text(`Invoice No.: ${invoice.invoiceNo}`, 196, 38, { align: "right" });
-    doc.text(`Date: ${invoice.date}`, 196, 43, { align: "right" });
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.slate700);
 
-    // Divider Line
-    doc.setDrawColor(...colors.slate300);
-    doc.setLineWidth(0.5);
-    doc.line(14, 60, 196, 60);
+    if (companyNtn) {
+        doc.text(`NTN: (${companyNtn})`, leftX, leftY);
+        leftY += 4.5;
+    }
+    if (companyStrn) {
+        doc.text(`STRN: ${companyStrn}`, leftX, leftY);
+        leftY += 4.5;
+    }
+    if (companyAddress) {
+        const addressLines = doc.splitTextToSize(companyAddress, 115);
+        doc.text(addressLines, leftX, leftY);
+        leftY += addressLines.length * 4.5;
+    }
+    if (companyPhone) {
+        const formattedPhone = formatPhoneNumber(companyPhone) || companyPhone;
+        doc.text(`Phone no.: ${formattedPhone}`, leftX, leftY);
+        leftY += 4.5;
+    }
+    if (companyEmail) {
+        doc.text(`Email: ${companyEmail}`, leftX, leftY);
+        leftY += 4.5;
+    }
 
-    // --- 4. Bill To Section ---
+  if (branch?.logoUrl) {
+        try {
+            const base64Logo = await getBase64ImageFromUrl(branch.logoUrl);
+            doc.addImage(base64Logo, 'PNG', 155, 14, 30, 30);
+        } catch (error) {
+            console.warn("Failed to load logo", error);
+        }
+    }
+
+    // =========================================================================
+    // 2. CENTER TITLE ("Invoice" or "Quotation") & DIVIDER
+    // =========================================================================
+    const titleY = Math.max(leftY + 6, 52);
+
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(11);
-    doc.setTextColor(...colors.darkBlue);
-    doc.text("Bill To", 14, 68);
+    doc.setFontSize(18);
+    doc.setTextColor(...colors.primary);
+    doc.text(docTitle, 105, titleY, { align: "center" });
 
+    doc.setDrawColor(...colors.slate200);
+    doc.setLineWidth(0.4);
+    doc.line(14, titleY + 3, 196, titleY + 3);
+
+    // =========================================================================
+    // 3. BILL TO (Left) & INVOICE DETAILS (Right)
+    // =========================================================================
+    let billY = titleY + 10;
+    const detailsStartY = billY;
+
+    // Left: Bill To
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...colors.slate900);
-    doc.text(customer.name, 14, 74);
+    doc.text("Bill To", leftX, billY);
+    billY += 5;
+
+    doc.text(`MS: ${billingDoc.partyName || "-"}`, leftX, billY);
+    billY += 4.8;
 
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(...colors.slate600);
-    doc.text(`NTN No. ${customer.ntn}`, 14, 79);
-    doc.text(`STRN No. ${customer.strn}`, 14, 84);
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.slate700);
 
-    const splitCustomerAddress = doc.splitTextToSize(customer.address, 100);
-    doc.text(splitCustomerAddress, 14, 89);
+    if (billingDoc.partyNtn) {
+        doc.text(`NTN No.${billingDoc.partyNtn}`, leftX, billY);
+        billY += 4.5;
+    }
+    if (billingDoc.partyStrn) {
+        doc.text(`STRN No.${billingDoc.partyStrn}`, leftX, billY);
+        billY += 4.5;
+    }
+    if (billingDoc.partyAddress) {
+        const partyAddrLines = doc.splitTextToSize(billingDoc.partyAddress, 110);
+        doc.text(partyAddrLines, leftX, billY);
+        billY += partyAddrLines.length * 4.5;
+    }
+    if (billingDoc.partyPhone) {
+        doc.text(`Contact No.: ${billingDoc.partyPhone}`, leftX, billY);
+        billY += 4.5;
+    }
+    if (billingDoc.partyEmail) {
+        doc.text(`Email: ${billingDoc.partyEmail}`, leftX, billY);
+        billY += 4.5;
+    }
 
-    const custAddressOffset = 89 + (splitCustomerAddress.length * 4);
-    doc.text(`Contact No.: ${customer.phone}`, 14, custAddressOffset + 1);
+    // Right: Invoice / Quotation Details
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(...colors.slate900);
+    doc.text(`${docTitle} Details`, rightColX, detailsStartY, { align: "right" });
 
-    // --- 5. Items Table ---
-    const tableData = invoice.items.map((item) => [
-        item.id,
-        item.name,
-        item.quantity.toString(),
-        formatCurrency(item.price),
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.slate700);
+    doc.text(
+        `${docTitle} No.: ${billingDoc.documentNumber}`,
+        rightColX,
+        detailsStartY + 5,
+        { align: "right" }
+    );
+    doc.text(
+        `Date: ${formatDateDMY(billingDoc.issueDate)}`,
+        rightColX,
+        detailsStartY + 10,
+        { align: "right" }
+    );
+
+    // =========================================================================
+    // 4. LINE ITEMS TABLE (#, Item name, Quantity, Price/ unit, Amount)
+    // =========================================================================
+    const tableStartY = Math.max(billY + 4, detailsStartY + 18);
+    const items = billingDoc.items || [];
+
+    const totalQty = items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+    const subTotal = Number(billingDoc.subTotal || 0);
+
+    const tableBody: any[] = items.map((item, idx) => [
+        String(idx + 1),
+        item.unitOfMeasure
+            ? `${item.itemName} (${item.unitOfMeasure})`
+            : item.itemName,
+        String(item.quantity),
+        formatCurrency(item.unitPrice),
         formatCurrency(item.amount),
     ]);
 
-    // Calculate total quantity for footer
-    const totalQty = invoice.items.reduce((sum, item) => sum + item.quantity, 0);
+    // Bottom "Total" row inside table matching your PDF
+    tableBody.push([
+        "",
+        { content: "Total", styles: { fontStyle: "bold" } },
+        { content: String(totalQty), styles: { fontStyle: "bold", halign: "right" } },
+        "",
+        { content: formatCurrency(subTotal), styles: { fontStyle: "bold", halign: "right" } },
+    ]);
 
     autoTable(doc, {
-        startY: 110,
-        head: [['#', 'Item name', 'Quantity', 'Price/ unit', 'Amount']],
-        body: tableData,
-        foot: [['', 'Total', totalQty.toString(), '', formatCurrency(invoice.subTotal)]],
-        theme: 'plain',
+        startY: tableStartY,
+        margin: { left: 14, right: 14 },
+        head: [["#", "Item name", "Quantity", "Price/ unit", "Amount"]],
+        body: tableBody,
+        theme: "grid",
         headStyles: {
-            fillColor: colors.darkBlue,
-            textColor: colors.white,
-            fontStyle: 'bold',
-            halign: 'left',
+            fillColor: colors.primary,
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            fontSize: 9.5,
+            cellPadding: 3,
         },
         bodyStyles: {
             textColor: colors.slate900,
-            lineColor: colors.slate300,
-            lineWidth: { bottom: 0.1 },
+            fontSize: 9.5,
+            cellPadding: 3,
+            lineColor: colors.slate200,
+            lineWidth: 0.2,
         },
-        footStyles: {
-            fillColor: colors.slate50,
-            textColor: colors.slate900,
-            fontStyle: 'bold',
-            lineColor: colors.slate300,
-            lineWidth: { top: 0.5, bottom: 0.5 }
-        },
-        styles: { fontSize: 9, cellPadding: 4 },
         columnStyles: {
-            0: { cellWidth: 15 },
-            1: { cellWidth: 'auto' },
-            2: { cellWidth: 25, halign: 'center' },
-            3: { cellWidth: 35, halign: 'right' },
-            4: { cellWidth: 40, halign: 'right', fontStyle: 'bold' }
-        }
+            0: { cellWidth: 12, halign: "left" },
+            1: { cellWidth: "auto", halign: "left" },
+            2: { cellWidth: 24, halign: "right" },
+            3: { cellWidth: 36, halign: "right" },
+            4: { cellWidth: 38, halign: "right" },
+        },
     });
 
-    const finalY = (doc as any).lastAutoTable.finalY + 15;
+    // =========================================================================
+    // 5. BOTTOM SECTION: Amount In Words & Terms (Left) + Totals Box (Right)
+    // =========================================================================
+    let finalY = (doc as any).lastAutoTable.finalY + 8;
 
-    // --- 6. Footer Layout (Split into Left and Right Columns) ---
+    // Prevent page overflow if table is very long
+    if (finalY > 230) {
+        doc.addPage();
+        finalY = 20;
+    }
 
-    // LEFT COLUMN (Words & Terms)
+    let bottomLeftY = finalY;
+
+    // Left: Invoice Amount In Words
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.setTextColor(...colors.darkBlue);
-    doc.text("Invoice Amount In Words", 14, finalY);
+    doc.setTextColor(...colors.slate900);
+    doc.text(`${docTitle} Amount In Words`, leftX, bottomLeftY);
+    bottomLeftY += 5;
 
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(...colors.slate900);
-    const splitWords = doc.splitTextToSize(invoice.amountInWords, 90);
-    doc.text(splitWords, 14, finalY + 6);
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.slate700);
+    const amountWords = toWords(billingDoc.totalAmount).toUpperCase();
+    const wordLines = doc.splitTextToSize(amountWords, 95);
+    doc.text(wordLines, leftX, bottomLeftY);
+    bottomLeftY += wordLines.length * 4.5 + 5;
+
+    // Left: Terms And Conditions
+    if (billingDoc.termsAndConditions) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.setTextColor(...colors.slate900);
+        doc.text("Terms And Conditions", leftX, bottomLeftY);
+        bottomLeftY += 5;
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...colors.slate700);
+        const termLines = doc.splitTextToSize(billingDoc.termsAndConditions, 95);
+        doc.text(termLines, leftX, bottomLeftY);
+        bottomLeftY += termLines.length * 4.5 + 4;
+    }
+
+    // Optional Notes
+    if (billingDoc.notes) {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9.5);
+        doc.setTextColor(...colors.slate900);
+        doc.text("Notes:", leftX, bottomLeftY);
+        bottomLeftY += 4.5;
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.setTextColor(...colors.slate700);
+        const noteLines = doc.splitTextToSize(billingDoc.notes, 95);
+        doc.text(noteLines, leftX, bottomLeftY);
+        bottomLeftY += noteLines.length * 4.5;
+    }
+
+    // Right: Financial Summary (Sub Total, GST, Discount, Total, Received, Balance)
+    let summaryY = finalY;
+    const summaryLabelX = 120;
+    const summaryValX = 196;
+
+    const drawSummaryRow = (
+        label: string,
+        val: string,
+        options?: { isBold?: boolean; isHighlighted?: boolean }
+    ) => {
+        if (options?.isHighlighted) {
+            doc.setFillColor(...colors.primary);
+            doc.rect(summaryLabelX - 2, summaryY - 4.2, 78, 6.5, "F");
+        }
+        doc.setFont("helvetica", options?.isBold ? "bold" : "normal");
+        doc.setFontSize(9.5);
+        if (options?.isHighlighted) {
+            doc.setTextColor(...colors.slate100);
+        } else {
+            doc.setTextColor(...colors.slate900);
+        }
+        doc.text(label, summaryLabelX, summaryY);
+        doc.text(val, summaryValX, summaryY, { align: "right" });
+        summaryY += 6.5;
+    };
+
+    drawSummaryRow("Sub Total", formatCurrency(billingDoc.subTotal));
+
+    if (Number(billingDoc.gstPercent || 0) > 0 || Number(billingDoc.gstAmount || 0) > 0) {
+        drawSummaryRow(
+            `GST@${Number(billingDoc.gstPercent || 0).toFixed(1)}%`,
+            formatCurrency(billingDoc.gstAmount)
+        );
+    }
+
+    if (Number(billingDoc.discount || 0) > 0) {
+        drawSummaryRow("Discount", `- ${formatCurrency(billingDoc.discount)}`);
+    }
+
+    drawSummaryRow("Total", formatCurrency(billingDoc.totalAmount), {
+        isBold: true,
+        isHighlighted: true,
+    });
+    drawSummaryRow("Received", formatCurrency(billingDoc.advanceAmount || 0));
+    drawSummaryRow("Balance", formatCurrency(billingDoc.balanceDue ?? billingDoc.totalAmount), {
+        isBold: true,
+    });
+
+    // =========================================================================
+    // 6. AUTHORIZED SIGNATORY FOOTER (Bottom Right, Matches PDF)
+    // =========================================================================
+    const sigY = Math.max(bottomLeftY, summaryY) + 14;
+
+    // Space for stamp/signature
+    doc.setDrawColor(...colors.slate500);
+    doc.setLineWidth(0.3);
+    doc.line(145, sigY + 18, rightColX, sigY + 18);
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.setTextColor(...colors.darkBlue);
-    doc.text("Terms And Conditions", 14, finalY + 25);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(...colors.slate600);
-    doc.text("Thank you for doing business with us.", 14, finalY + 31);
-
-    // RIGHT COLUMN (Calculations)
-    const labelX = 135;
-    const valueX = 196;
-    let currentY = finalY;
-
-    // Sub Total
-    doc.setTextColor(...colors.slate600);
-    doc.text("Sub Total", labelX, currentY);
     doc.setTextColor(...colors.slate900);
-    doc.text(formatCurrency(invoice.subTotal), valueX, currentY, { align: "right" });
-    currentY += 7;
+    doc.text("Authorized Signatory", rightColX, sigY + 23, { align: "right" });
 
-    // GST
-    doc.setTextColor(...colors.slate600);
-    doc.text(`GST@${invoice.gstPercent.toFixed(1)}%`, labelX, currentY);
-    doc.setTextColor(...colors.slate900);
-    doc.text(formatCurrency(invoice.gstAmount), valueX, currentY, { align: "right" });
-    currentY += 9;
+    // Pagination Footer
+    const pageCount = (doc as any).internal.getNumberOfPages();
 
-    // Total (Dark Blue Highlight Box)
-    doc.setFillColor(...colors.darkBlue);
-    doc.rect(labelX - 5, currentY - 6, 75, 10, "F");
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...colors.white);
-    doc.text("Total", labelX, currentY);
-    doc.text(formatCurrency(invoice.total), valueX, currentY, { align: "right" });
-    currentY += 10;
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        const pageHeight = doc.internal.pageSize.height;
 
-    // Received
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(...colors.slate600);
-    doc.text("Received", labelX, currentY);
-    doc.setTextColor(...colors.slate900);
-    doc.text(formatCurrency(invoice.received), valueX, currentY, { align: "right" });
-    currentY += 7;
+        doc.setFont("helvetica", "italic");
+        doc.setFontSize(8);
+        doc.setTextColor(...colors.slate500);
 
-    // Balance
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...colors.darkBlue);
-    doc.text("Balance", labelX, currentY);
-    doc.text(formatCurrency(invoice.balance), valueX, currentY, { align: "right" });
+        doc.text(`Generated by Droply System • ${new Date().toLocaleString()}`, 14, pageHeight - 10);
+        doc.text(`Page ${i} of ${pageCount}`, 196, pageHeight - 10, { align: "right" });
+    }
 
-    // --- 7. Signature Area ---
-    const pageHeight = doc.internal.pageSize.height;
-
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(9);
-    doc.setTextColor(...colors.slate900);
-    doc.text(`For: ${company.name}`, 196, pageHeight - 30, { align: "right" });
-
-    doc.setDrawColor(...colors.slate300);
-    doc.line(136, pageHeight - 15, 196, pageHeight - 15);
-
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(...colors.slate600);
-    doc.text("Authorized Signatory", 196, pageHeight - 10, { align: "right" });
-
-    // --- 8. Save Document ---
-    doc.save(`Invoice_${invoice.invoiceNo}_${invoice.date}.pdf`);
+    // Save with clean filename e.g. Quotation_DOC-603787794707_13-10-2026.pdf
+    const fileName = `${docTitle}_${billingDoc.documentNumber}_${formatDateDMY(
+        billingDoc.issueDate
+    )}.pdf`;
+    doc.save(fileName);
 };

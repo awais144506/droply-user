@@ -44,9 +44,9 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     headerColor: { text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500", border: "border-emerald-500/20", bgHover: "hover:bg-emerald-500/5" },
     items: [
       { title: "Deliveries & Sales", url: "/sales/orders", icon: Truck, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "PARTIAL" },
-      { title: "Daily Sales", url: "/sales/daily", icon: Receipt, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "TODO" },
-      { title: "Invoices/Quotations", url: "/sales/invoices", icon: FileText, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "TODO" },
-      { title: "Live Tracking", url: "/sales/tracking", icon: Navigation, badge: "GPS", allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "TODO" },
+      { title: "Daily Sales", url: "/sales/daily", icon: Receipt, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "PARTIAL" },
+      { title: "Invoices/Quotations", url: "/sales/invoices", icon: FileText, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
+      { title: "Live Tracking", url: "/sales/tracking", icon: Navigation, badge: "GPS", allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "PARTIAL" },
     ],
   },
   {
