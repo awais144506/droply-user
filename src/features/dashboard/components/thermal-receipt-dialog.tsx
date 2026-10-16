@@ -15,6 +15,7 @@ export interface ReceiptOrderData {
   receiptNumber: string;
   createdAt: string;
   customerName: string;
+  customerPhone: string;
   paymentMethod: "CASH" | "ONLINE";
   items: {
     id: string;
@@ -169,10 +170,10 @@ export default function ThermalReceiptDialog({
         </DialogHeader>
 
         {/* 80mm Thermal Printer Paper Preview */}
-        <div className="bg-slate-100 p-4 rounded-xl flex justify-center max-h-95 overflow-y-auto border border-slate-200">
+        <div className="bg-white p-4 rounded-xl flex justify-center max-h-95 overflow-y-auto border border-slate-200">
           <div
             id="thermal-receipt-area"
-            className="bg-white w-72.5 p-4 shadow-sm border border-slate-200/80 font-mono text-xs text-slate-900 space-y-2"
+            className="bg-white w-72.5 p-4  font-mono text-xs text-slate-900 space-y-2"
           >
             {/* Dynamic Branch Header */}
             <div className="text-center space-y-0.5">
@@ -202,6 +203,10 @@ export default function ThermalReceiptDialog({
               <div className="flex justify-between">
                 <span>Customer:</span>
                 <span className="font-semibold">{order.customerName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Phone:</span>
+                <span className="font-semibold">{order.customerPhone}</span>
               </div>
               <div className="flex justify-between">
                 <span>Payment:</span>
@@ -269,7 +274,7 @@ export default function ThermalReceiptDialog({
             <div className="border-t border-dashed border-slate-400 my-2 divider" />
 
             <div className="text-center text-[10px] text-slate-500 pt-1">
-              Thank you for your patronage!
+              Thank you for shopping!
             </div>
           </div>
         </div>

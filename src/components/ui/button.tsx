@@ -10,7 +10,7 @@ const buttonVariants = cva(
       variant: {
         // Frosted Sky Glass (Your signature look, elevated with inner specular highlight & blur)
         default:
-          "bg-sky-500/15 text-sky-700 border border-sky-400/50 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.7)] hover:bg-sky-500/25 hover:border-sky-400/80 hover:text-sky-700 hover:shadow-sm hover:shadow-sky-500/10",
+          "bg-sky-500/15 text-sky-700 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.7)] hover:bg-sky-500/25 hover:border-sky-400/80 hover:text-white-700 hover:shadow-sm hover:shadow-sky-500/10",
 
         // Frosted Emerald Glass (Saves, Finalizing Sales, WhatsApp, Approvals)
         success:
