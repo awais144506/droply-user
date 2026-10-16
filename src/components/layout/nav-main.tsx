@@ -22,7 +22,6 @@ export function NavMain() {
   const userRole: UserRole = isOwner ? "OWNER" : "MANAGER";
   const currentTier = (userTier || "SILVER").toUpperCase() as SubscriptionTier;
 
-  // 🔥 Check if we are running in non-production (development / staging)
   const isProduction = process.env.NEXT_PUBLIC_NODE_ENV === "production";
 
   return (
@@ -45,12 +44,6 @@ export function NavMain() {
         </div>
         <div className="flex flex-col text-left min-w-0">
           <span className="font-bold text-xs leading-none">
-            Dashboard
-          </span>
-          <span
-            className={`text-[10px] mt-1 font-normal truncate ${isDashboardActive ? "text-sky-100" : "text-muted-foreground"
-              }`}
-          >
             Quick Sale
           </span>
         </div>

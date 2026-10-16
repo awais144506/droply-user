@@ -19,14 +19,16 @@ export function useProducts(branchId: string) {
             const recipeItemsCount = products.filter(p => p.hasRecipe).length;
             const productOptions = products?.filter(p => p.trackingType === "RETURNABLE").map(p => ({ value: p.id, label: p.name })) || [];
             const lowStockProducts = products.filter(p => p.currentStock <= p.lowStockThreshold);
-            const quickSaleOptions = products?.map(p =>
-            ({
-                id: p.id, name: p.name,
-                price: p.salePrice,
-                currentStock: p.currentStock,
+            const quickSaleOptions = products?.map((p: any) => ({
+                id: p.id,
+                name: p.name,
+                code: p.productCode,
+                price: Number(p.salePrice ?? p.price ?? 0),
+                stock: p.currentStock ?? p.stock ?? p.quantity ?? 0,
                 trackingType: p.trackingType,
-                lowStockThreshold: p.lowStockThreshold,
-                securityDeposit: p.securityDeposit
+                lowStock: p.lowStockThreshold ?? p.lowStock ?? 5,
+                security: p.securityDeposit ?? p.security ?? 0,
+                unit: p.unitOfMeasure ?? p.unit ?? "Unit",
             })) || [];
 
             const bomOptions = products?.map(p => ({

@@ -18,5 +18,4 @@ export const scaleOptions = [
     { value: "LITER", label: "Liter" },
     { value: "MILLILITER", label: "Milli Liter" },
     { value: "PACK", label: "Pack" },
-    { value: "CARTON", label: "Carton" },
 ];

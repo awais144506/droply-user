@@ -1,52 +1,50 @@
+"use client";
 import { useState } from "react";
-import { Truck, UserPlus, Zap } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import WalkInSaleDialog from "@/features/dashboard/components/walk-in-sale-dialog";
+import ThermalReceiptDialog, {
+  ReceiptOrderData,
+} from "./thermal-receipt-dialog";
+import NavigationHeader from "./navigation-header";
+import ProductSelection, { QuickSaleProduct } from "./product-selection-checkout";
+import { useProducts } from "@/features/manage/products/api/use-products";
+import { useBranchSettings } from "@/features/admin/settings/api/use-branch-settings";
+import { useRole } from "@/lib/hooks/use-role";
+import ErrorBoundary from "@/app/error";
+import QuickSaleHistory from "./history-orders-table";
 
-type Props = {}
+const QuickSale = () => {
+  const { branchId } = useRole();
+  const { data, isLoading: isLoadingProducts, isError, error } = useProducts(branchId);
+  const { fetchBranchSettings } = useBranchSettings(branchId);
 
-const QuickSale = (props: Props) => {
+  const products: QuickSaleProduct[] = data?.quickSaleOptions || [];
+  const branchDetails = fetchBranchSettings.data;
 
-    const router = useRouter();
-    const [isQuickSaleOpen, setIsQuickSaleOpen] = useState(false);
+  // Thermal Receipt Modal State
+  const [completedOrder, setCompletedOrder] = useState<ReceiptOrderData | null>(null);
 
-    return (
-        <div> {/* Left Column: Quick Actions */}
-            <div className="lg:col-span-1 space-y-6">
-                <Card className="border-sky-200 bg-sky-50 shadow-sm overflow-hidden">
-                    <CardHeader className="pb-3 border-b border-sky-100 bg-white">
-                        <CardTitle className="text-sm font-bold text-sky-900">Over-the-Counter</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 space-y-3">
-                        <Button
-                            onClick={() => setIsQuickSaleOpen(true)}
-                            className="w-full bg-sky-600 hover:bg-sky-700 text-white h-14 text-lg shadow-sm"
-                        >
-                            <Zap className="mr-2 h-5 w-5" /> Quick Sale
-                        </Button>
-                        <div className="grid grid-cols-2 gap-3">
-                            <Button
-                                onClick={() => router.push('/manage/customers/create-customer')}
-                                variant="outline" className="h-12 bg-white border-sky-200 text-sky-700 hover:bg-sky-100 px-2 text-xs">
-                                <UserPlus className="mr-1.5 h-4 w-4" /> New Customer
-                            </Button>
-                            <Button
-                                onClick={() => router.push('/sales/orders/create-sale')}
-                                variant="outline" className="h-12 bg-white border-sky-200 text-sky-700 hover:bg-sky-100 px-2 text-xs">
-                                <Truck className="mr-1.5 h-4 w-4" /> Dispatch
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-            <WalkInSaleDialog
-                isOpen={isQuickSaleOpen}
-                onClose={() => setIsQuickSaleOpen(false)}
-            />
-        </div>
-    )
-}
+  if (isError) {
+    return <ErrorBoundary error={error?.message || "Failed to load products for quick sale"} />;
+  }
 
-export default QuickSale
+  return (
+    <div className="space-y-6">
+      <NavigationHeader />
+
+      <ProductSelection
+        products={products}
+        isLoading={isLoadingProducts}
+        onOrderComplete={(orderSnapshot) => setCompletedOrder(orderSnapshot)}
+      />
+      <QuickSaleHistory 
+      />
+      <ThermalReceiptDialog
+        isOpen={Boolean(completedOrder)}
+        onClose={() => setCompletedOrder(null)}
+        order={completedOrder}
+        branchDetails={branchDetails}
+      />
+    </div>
+  );
+};
+
+export default QuickSale;
