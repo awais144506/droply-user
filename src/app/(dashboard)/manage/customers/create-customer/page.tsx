@@ -12,10 +12,14 @@ export default function CreateCustomerPage() {
     const { data, isLoading: LoadingProducts } = useProducts(branchId);
     const productOptions = data?.productOptions;
     return (
-        <div className="max-w-5xl mx-auto space-y-6 p-6">
+        <div className="space-y-6 p-6">
             <CreateFormHeader
-                href="/manage/customers"
                 title="Create New Customer"
+                description="Create new customer with unique phone number to avoid duplicates"
+                breadcrumbs={[
+                    { label: "Customers", href: "/manage/customers" },
+                    { label: "Create Customer" }
+                ]}
             />
             <CreateCustomerForm
                 branchId={branchId}

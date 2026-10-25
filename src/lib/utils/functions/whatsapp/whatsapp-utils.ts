@@ -18,8 +18,8 @@ export const sendPOWhatsApp = (po: PurchaseOrder, settings?: BranchSettingData) 
         : '';
 
     // 2. Extract Branch details (fallback gracefully if some are missing)
-    const branchName = settings?.displayName || "Our Company";
-    const addressDetails = settings?.displayAddress ? `\n*Delivery Address:* ${settings.displayAddress}` : '';
+    const branchName = settings?.name || "Our Company";
+    const addressDetails = settings?.name ? `\n*Delivery Address:* ${settings.address}` : '';
 
     const historicalBalance = po.totalAmount - (po.advancePaid || 0);
 
@@ -45,7 +45,7 @@ Thank you,
 
 export const sendPOPaymentMessage = (payment: SupplierPayment, settings?: BranchSettingData) => {
     // 1. Extract Branch details
-    const branchName = settings?.displayName || "Our Company";
+    const branchName = settings?.name || "Our Company";
 
     // 2. Format payment properties
     const formattedDate = format(new Date(payment.paymentDate), "MMM d, yyyy");
@@ -87,7 +87,7 @@ export const sendReturnWhatsApp = (returnRecord: PurchaseReturn, settings?: Bran
         : '';
 
     // 2. Extract Branch details
-    const branchName = settings?.displayName || "Our Company";
+    const branchName = settings?.name || "Our Company";
 
     // 3. Format References
     const formattedDate = format(new Date(returnRecord.returnDate), "MMM d, yyyy");

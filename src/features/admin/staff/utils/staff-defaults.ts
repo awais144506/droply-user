@@ -9,7 +9,7 @@ export const getEditStaffFormValues = (
     // 1. If data is still loading, return a safe empty shell
     if (!user) {
         return {
-            name: "", phone: "", designation: "", cnic: "", salary: 0,
+            name: "", phone: "", role: "", cnic: "", salary: 0,
             address: "", bloodGroup: "", fatherName: "", fatherCnic: "",
             guarantorName: "", guarantorCnic: "", guarantorPhone: "",
             licenseNumber: "", joiningDate: "", zoneIds: [],
@@ -37,7 +37,7 @@ export const getEditStaffFormValues = (
     return {
         name: user.name || "",
         phone: user.phone || "",
-        designation: user.designation || "",
+        role: user.designation || "",
         cnic: user.cnic || "",
         salary: user.basicSalary || 0,
         address: user.currentAddress || "",

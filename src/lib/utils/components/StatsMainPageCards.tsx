@@ -22,8 +22,6 @@ export default function PageStatsCard({
     prefix,
     postfix,
     description,
-    postfixTextColor = "text-slate-400",
-    // Default is now a glassy Sky badge with translucent border
     iconContainerClass = "bg-sky-500/15 text-sky-600 border-sky-400/40",
     valueColorClass = "text-slate-900",
     isLoading = false,
@@ -86,7 +84,6 @@ export default function PageStatsCard({
                                 <span
                                     className={cn(
                                         "text-xs font-bold uppercase tracking-wide ml-0.5",
-                                        postfixTextColor
                                     )}
                                 >
                                     {postfix}

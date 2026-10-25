@@ -6,7 +6,6 @@ import { useProduct } from "@/features/manage/products/api/use-products";
 import { useUpdateProduct } from "@/features/manage/products/api/use-mutate-product";
 import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
 import Loading from "@/app/loading";
-import { formatProductPayload } from "@/features/manage/products/utils/format-product-payload";
 import ErrorBoundary from "@/app/error";
 import { mappedProductData } from "@/features/manage/products/utils/editProductInitialValues";
 
@@ -19,8 +18,7 @@ export default function EditItemPage() {
     const { mutate: updateProduct, isPending: isUpdating } = useUpdateProduct();
 
     const onSubmit = (data: CreateItemFormData) => {
-        const payload = formatProductPayload(data);
-        updateProduct({ id: productId, data: payload }, {
+        updateProduct({ id: productId, data }, {
             onSuccess: () => router.back(),
         });
     };
@@ -33,8 +31,11 @@ export default function EditItemPage() {
     return (
         <div className="max-w-5xl mx-auto space-y-6 p-6">
             <CreateFormHeader
-                href="/manage/products"
-                title={`Edit Product ${product.name}`}
+                title={`Edit Product: ${product.name}`}
+                breadcrumbs={[
+                    { label: "Products", href: "/manage/products" },
+                    { label: "Edit Product" }
+                ]}
             />
             <ProductForm
                 initialValues={mappedProductData(product)}

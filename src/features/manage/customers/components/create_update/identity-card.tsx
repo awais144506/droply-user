@@ -25,6 +25,7 @@ export default function IdentityCard({ zoneOptions, isLoading }: any) {
                             name="partyType"
                             required
                             options={partyOptions}
+                            isSearchable={false}
                         />
                     </div>
                     <div className="space-y-1.5">
@@ -33,6 +34,7 @@ export default function IdentityCard({ zoneOptions, isLoading }: any) {
                             name="category"
                             required
                             options={categoryOptions}
+                            isSearchable={false}
                         />
                     </div>
                 </div>
@@ -41,7 +43,7 @@ export default function IdentityCard({ zoneOptions, isLoading }: any) {
                     <FormInput
                         label="Full Name / Business Name"
                         required
-                        placeholder="e.g. Muhammad Awais"
+                        placeholder="e.g. Muhammad Awais / Power Bridge Privte Ltd"
                         name="name"
                     />
                 </div>
@@ -68,26 +70,26 @@ export default function IdentityCard({ zoneOptions, isLoading }: any) {
                         <FormInput
                             label="NTN No"
                             placeholder="e.g. 1234567-8"
-                            name="customerNtn"
+                            name="ntn"
                         />
                     </div>
                     <div className="space-y-1.5">
                         <FormInput
                             label="STRN No"
                             placeholder="e.g. 320012345678"
-                            name="customerStrn" // Fixed: Was duplicate 'customerNtn'
+                            name="strn"
                         />
                     </div>
                 </div>
 
                 <div className="space-y-1.5">
                     <FormSelect
-                        label="Select Zone Route"
+                        label="Select Zone"
                         name="zoneId"
-                        required
                         options={zoneOptions}
                         isLoading={isLoading}
                         isSearchable={true}
+                        isClearable={true}
                     />
                 </div>
             </CardContent>

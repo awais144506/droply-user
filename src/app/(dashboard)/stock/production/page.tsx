@@ -50,7 +50,6 @@ export default function ProductionPage() {
       <ActivityLogsCard
         title="Production Batch Logs"
         logs={logs}
-        isLoading={isLoading}
       />
     </div>
   );

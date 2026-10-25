@@ -8,9 +8,12 @@ const CreateZone = () => {
     return (
         <div className="max-w-3xl mx-auto space-y-6 p-6">
             <CreateFormHeader
-                href="/manage/zones"
                 title="Create New Zone"
                 description='For tracking system please add latitude & longitude values from google map.'
+                breadcrumbs={[
+                    { label: "Zones", href: '/manage/zones' },
+                    { label: "Create Zone"}
+                ]}
             />
             <ZoneCreateForm
                 branchId={branchId}

@@ -7,19 +7,18 @@ import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
 import { CustomerStats } from "@/features/manage/customers/components/main/customer-stats";
 import { CustomersTable } from "@/features/manage/customers/components/main/customer-table";
-import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
-import { FilterTabs } from "@/features/manage/customers/components/data/dropdownOptions";
 import { CustomerRequestsList } from "@/features/manage/customers/components/main/customer-requests-list";
+import { useBranchSettings } from "@/features/admin/settings/api/use-branch-settings";
 
 export default function CustomersPage() {
   const { branchId } = useRole();
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || undefined;
   const debt = searchParams.get("debt") || undefined;
-
-  const { data, isError, error, isLoading } = useCustomers(branchId, debt, search);
-
+  const schedule = searchParams.get("schedule") || undefined;
+  const { data, isError, error, isLoading } = useCustomers(branchId, debt, search, schedule);
+  const { data: branchData } = useBranchSettings();
   const customers = data?.customers || [];
   const stats = data?.stats || { activeCount: 0, totalLedger: "0", totalAssets: 0 };
   const logs = data?.logs || [];
@@ -46,13 +45,10 @@ export default function CustomersPage() {
 
       {/* Main Data Table - Full Width */}
       <div className="w-full">
-        <DataTableFilterBar
-          searchPlaceholder="Search by customer name / phone..."
-          searchParamName="search"
-          tabParamName="debt"
-          tabs={FilterTabs}
+        <CustomersTable
+          customers={customers}
+          branchSettings={branchData}
         />
-        <CustomersTable customers={customers} />
       </div>
 
       {/* Bottom Section: Requests & Logs side-by-side on large screens */}
@@ -60,11 +56,11 @@ export default function CustomersPage() {
         <CustomerRequestsList
           requests={requests}
           isLoading={isLoading}
+          branchSettings={branchData}
         />
         <ActivityLogsCard
           title="Customer Activity Logs"
           logs={logs}
-          isLoading={isLoading}
         />
       </div>
     </div>

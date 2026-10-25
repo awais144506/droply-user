@@ -13,29 +13,51 @@ export const useOrderCalculations = (branchId: string, previousKhataBalance: num
 
     let grossTotal = 0;
     let totalSecurityDeposit = 0;
-    const discountBreakdown: { name: string; offerQty: number; }[] = [];
+    const discountBreakdown: { freeProductId: string; name: string; offerQty: number; }[] = [];
     let scale = "";
 
     items.forEach((item) => {
         const product = productData?.products.find(p => p.id === item.productId);
-        scale = product?.unitOfMeasure || "piece";
         if (!product) return;
+        
+        scale = product.unitOfMeasure || "piece";
+        
         const price = Number(product.salePrice) || 0;
         const depositRate = Number(product.securityDeposit) || 0;
         const qty = Number(item.paidQty) || 0;
         const offerQty = Number(item.offerQty) || 0;
         const emptiesIn = Number(item.emptiesIn) || 0;
-        const deficit = Math.max(0, (qty + offerQty) - emptiesIn);
+        
+        // Matches the exact deficit logic from SelectProduct.tsx
+        const deficit = Math.max(0, qty - emptiesIn);
         const deposit = item.isDepositCharged ? (deficit * depositRate) : 0;
+        
         grossTotal += (qty * price);
         totalSecurityDeposit += deposit;
+        
         if (offerQty > 0) {
-            discountBreakdown.push({ name: product.name, offerQty });
+            // Lookup the specific free product (fallback to the paid product if null)
+            const freeProductId = item.freeProductId || item.productId;
+            const freeProduct = productData?.products.find(p => p.id === freeProductId) || product;
+            
+            discountBreakdown.push({ 
+                freeProductId: freeProductId,
+                name: freeProduct.name, 
+                offerQty 
+            });
         }
     });
 
     const totalDue = (grossTotal - globalDiscount) + previousKhataBalance + totalSecurityDeposit + deliveryCharges;
     const remainingBalance = totalDue - amountPaid;
 
-    return { grossTotal, totalSecurityDeposit, deliveryCharges, totalDue, remainingBalance, discountBreakdown, scale };
+    return { 
+        grossTotal, 
+        totalSecurityDeposit, 
+        deliveryCharges, 
+        totalDue, 
+        remainingBalance, 
+        discountBreakdown, 
+        scale 
+    };
 };

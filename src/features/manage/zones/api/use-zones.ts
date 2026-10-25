@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { zoneKeys } from "./zone-keys";
 import { zoneApi } from "./zone.service";
@@ -5,12 +6,11 @@ import { formatCurrency } from "@/lib/utils/functions/setFormat";
 
 // 1. Fetch All Zones for a Branch
 export function useZones(branchId: string, searchFilter?: string) {
-    return useQuery({
-        queryKey: zoneKeys.branchList(branchId || ""),
-        queryFn: () => zoneApi.getAllZone(branchId),
-        select: (payload) => {
+    const selectZones = useCallback(
+        (payload: Awaited<ReturnType<typeof zoneApi.getAllZone>>) => {
             const rawZones = payload?.zones || [];
             const logs = payload?.logs || [];
+            
             const enrichedZones = rawZones.map((zone) => {
                 const calculatedLedger = (zone.customers || []).reduce(
                     (sum, c) => sum + Number(c.customerCredit || 0),
@@ -28,9 +28,10 @@ export function useZones(branchId: string, searchFilter?: string) {
                 };
             });
 
-            const filteredZones = searchFilter
+            const normalizedSearch = searchFilter?.toLowerCase().trim();
+            const filteredZones = normalizedSearch
                 ? enrichedZones.filter((zone) =>
-                    zone.name.toLowerCase().includes(searchFilter.toLowerCase().trim())
+                    zone.name.toLowerCase().includes(normalizedSearch)
                 )
                 : enrichedZones;
 
@@ -49,22 +50,31 @@ export function useZones(branchId: string, searchFilter?: string) {
                     totalLedger,
                     totalReturnables,
                 },
-                logs: logs,
+                logs,
             };
         },
-        enabled: !!branchId,
+        [searchFilter]
+    );
+
+    return useQuery({
+        queryKey: zoneKeys.branchList(branchId || ""),
+        queryFn: () => zoneApi.getAllZone(),
+        select: selectZones,
+        enabled: Boolean(branchId),
     });
 }
+
 // 2. Fetch Single Zone (for Edit Page)
 export function useZone(id: string, searchFilter?: string) {
-    return useQuery({
-        queryKey: zoneKeys.detail(id || ""),
-        queryFn: () => zoneApi.getZone(id),
-        select: (zone) => {
-
+    const selectZoneDetail = useCallback(
+        (zone: Awaited<ReturnType<typeof zoneApi.getZone>>) => {
             const calculatedLedger = zone.customers.reduce((sum, l) => sum + Number(l.customerCredit || 0), 0);
             const calculatedReturnables = zone.customers.reduce((sum, l) => sum + Number(l.returnablesLength || 0), 0);
-            const filterCustomer = searchFilter ? zone.customers.filter((c) => c.name.toLowerCase().includes(searchFilter.toLowerCase().trim())) : zone.customers;
+            
+            const normalizedSearch = searchFilter?.toLowerCase().trim();
+            const filterCustomer = normalizedSearch 
+                ? zone.customers.filter((c) => c.name.toLowerCase().includes(normalizedSearch)) 
+                : zone.customers;
 
             return {
                 zone,
@@ -74,11 +84,18 @@ export function useZone(id: string, searchFilter?: string) {
                     calculatedReturnables,
                 },
                 hasCustomers: (zone.customers?.length || 0) > 0,
-                hasLedger: (zone.calculatedLedger || 0) > 0,
-                hasReturnables: (zone.calculatedReturnables || 0) > 0,
+                hasLedger: calculatedLedger > 0,          // Fixed reference bug here
+                hasReturnables: calculatedReturnables > 0, // Fixed reference bug here
                 hasRiders: (zone.riders?.length || 0) > 0,
-            }
+            };
         },
-        enabled: !!id,
+        [searchFilter]
+    );
+
+    return useQuery({
+        queryKey: zoneKeys.detail(id || ""),
+        queryFn: () => zoneApi.getZone(id),
+        select: selectZoneDetail,
+        enabled: Boolean(id),
     });
 }

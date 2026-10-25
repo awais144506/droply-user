@@ -4,6 +4,7 @@ export const categoryOptions = [
     { value: "TRADE", label: "Trade Item" },
     { value: "PACKAGING", label: "Packaging" },
     { value: "EQUIPMENT", label: "Equipment" },
+    { value: "SERVICE", label: "Service" },
 ];
 
 export const trackingOptions = [
@@ -18,4 +19,5 @@ export const scaleOptions = [
     { value: "LITER", label: "Liter" },
     { value: "MILLILITER", label: "Milli Liter" },
     { value: "PACK", label: "Pack" },
+    { value: "CARTON", label: "Carton" },
 ];

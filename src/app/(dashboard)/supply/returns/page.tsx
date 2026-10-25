@@ -46,7 +46,6 @@ export default function PurchaseReturnsPage() {
       <ActivityLogsCard
         title="Purchase Return Activity"
         logs={logs}
-        isLoading={isLoading}
       />
     </div>
   );

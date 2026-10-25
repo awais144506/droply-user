@@ -3,8 +3,9 @@
 
 import { ReactNode, useId } from "react";
 import { useFormContext, Controller, get } from "react-hook-form";
-import Select from "react-select";
-import { Loader, LucideIcon } from "lucide-react";
+import Select, { components, MenuListProps } from "react-select";
+import { Loader, LucideIcon, Plus, Truck } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export interface SelectOption {
     label: string;
@@ -25,10 +26,22 @@ interface FormSelectProps {
     helperText?: ReactNode;
     isLoading?: boolean;
     formatOptionLabel?: (data: any) => ReactNode;
-    onValueChange?: (selectedOption: any) => void; // 🔥 Triggers auto-fill on selection
+    onValueChange?: (selectedOption: any) => void;
     lableTextColor?: string;
     labelIcon?: LucideIcon;
     iconColor?: string;
+    
+    // Primary Add Button (e.g., Create Customer link)
+    showAddButton?: boolean;
+    addButtonLabel?: string;
+    onAddButtonClick?: () => void;
+    addButtonHref?: string; 
+    
+    // 🔥 Secondary Action Button (e.g., Use 3rd Party Driver toggle)
+    showSecondaryAction?: boolean;
+    secondaryActionLabel?: string;
+    onSecondaryActionClick?: () => void;
+    secondaryActionIcon?: LucideIcon;
 }
 
 export function FormSelect({
@@ -48,11 +61,19 @@ export function FormSelect({
     lableTextColor = "text-slate-700",
     labelIcon: Icon,
     iconColor = "text-sky-500",
+    showAddButton = false,
+    addButtonLabel = "Add New",
+    onAddButtonClick,
+    addButtonHref,
+    showSecondaryAction = false,
+    secondaryActionLabel = "Alternative Action",
+    onSecondaryActionClick,
+    secondaryActionIcon: SecondaryIcon = Truck,
 }: FormSelectProps) {
     const { control, formState: { errors } } = useFormContext();
-    // 🔥 Supports both flat ("partyName") and nested ("items.0.productId") errors
     const error = get(errors, name)?.message as string;
     const inputId = useId();
+    const router = useRouter();
 
     return (
         <div className="space-y-1.5 w-full">
@@ -98,29 +119,76 @@ export function FormSelect({
                             menuPortalTarget={typeof window !== "undefined" ? document.body : null}
                             menuPosition="fixed"
                             styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                            components={{
+                                MenuList: (props: MenuListProps<any>) => (
+                                    <components.MenuList {...props}>
+                                        {props.children}
+                                        {(showAddButton || showSecondaryAction) && (
+                                            <div className="sticky bottom-0 bg-white border-t border-slate-100 p-2 z-10 mt-1 flex flex-col gap-1.5 shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)]">
+                                                {showAddButton && (
+                                                    <button
+                                                        type="button"
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            if (addButtonHref) {
+                                                                router.push(addButtonHref);
+                                                            } else if (onAddButtonClick) {
+                                                                onAddButtonClick();
+                                                            }
+                                                        }}
+                                                        className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                                                    >
+                                                        <Plus className="h-4 w-4" />
+                                                        {addButtonLabel}
+                                                    </button>
+                                                )}
+
+                                                {showSecondaryAction && (
+                                                    <button
+                                                        type="button"
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            onSecondaryActionClick?.();
+                                                        }}
+                                                        className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-lg text-xs font-bold transition-colors cursor-pointer border border-slate-200"
+                                                    >
+                                                        <SecondaryIcon className="h-4 w-4" />
+                                                        {secondaryActionLabel}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </components.MenuList>
+                                )
+                            }}
                             unstyled
                             classNames={{
-                                control: (state) => `min-h-[40px] rounded-xl border text-sm transition-all px-3 ${
+                                // 🔥 Forced cursor-pointer heavily here
+                                control: (state) => `min-h-[40px] rounded-xl border text-sm transition-all px-3 cursor-pointer hover:border-sky-400 ${
                                     error
                                         ? "border-rose-300 bg-rose-50/20"
                                         : state.isFocused
-                                        ? "border-sky-500 ring-1 ring-sky-500 bg-white"
-                                        : "bg-slate-50 border-slate-200"
-                                } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`,
-                                placeholder: () => "text-slate-400",
-                                singleValue: () => "text-slate-900",
-                                multiValue: () => "bg-sky-100 text-sky-700 rounded-md px-2 py-0.5 mr-1 mt-1 text-xs font-semibold flex items-center",
-                                multiValueRemove: () => "ml-1 hover:text-sky-900 hover:bg-sky-200 rounded px-0.5",
+                                            ? "border-sky-500 ring-1 ring-sky-500 bg-white"
+                                            : "bg-slate-50 border-slate-200"
+                                } ${disabled ? "opacity-50 !cursor-not-allowed" : ""}`,
+                                placeholder: () => "text-slate-400 cursor-pointer",
+                                singleValue: () => "text-slate-900 cursor-pointer",
+                                multiValue: () => "bg-sky-100 text-sky-700 rounded-md px-2 py-0.5 mr-1 mt-1 text-xs font-semibold flex items-center cursor-default",
+                                multiValueRemove: () => "ml-1 hover:text-sky-900 hover:bg-sky-200 rounded px-0.5 cursor-pointer",
                                 menu: () => "mt-1.5 rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden text-sm z-50",
+                                // 🔥 Forced cursor-pointer on options
                                 option: (state) => `px-3 py-2 cursor-pointer transition-colors ${
                                     state.isSelected
                                         ? "bg-sky-600 text-white font-medium"
                                         : state.isFocused
-                                        ? "bg-slate-100 text-slate-900"
-                                        : "text-slate-700 hover:bg-slate-50"
+                                            ? "bg-slate-100 text-slate-900"
+                                            : "text-slate-700 hover:bg-slate-50"
                                 }`,
                                 noOptionsMessage: () => "p-3 text-slate-500 text-sm",
-                                valueContainer: () => "gap-1 py-1",
+                                valueContainer: () => "gap-1 py-1 cursor-pointer",
+                                input: () => "cursor-text", // Keep text cursor for the actual typing area
                             }}
                         />
                     );

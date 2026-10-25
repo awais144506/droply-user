@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useFormContext, useWatch } from "react-hook-form";
 import { FormSelect } from "@/components/ui/form-select";
-import { User, MapPin, Phone } from "lucide-react";
-import { useCustomers } from "@/features/manage/customers/api/use-customer";
+import { User, MapPin, Phone, Loader2, Package } from "lucide-react";
+import { useCustomers, useCustomer } from "@/features/manage/customers/api/use-customer"; // 🔥 Import useCustomer
 import { OrderFormValues } from "../../schema/create-order-schema";
 import { formatPhoneNumber } from "react-phone-number-input";
 
@@ -13,14 +14,17 @@ type Props = {
 
 const CustomerSelection = ({ branchId }: Props) => {
     const { control } = useFormContext<OrderFormValues>();
+    
+    // Watch what mode we are in (Walk-In, Delivery, Recovery, etc.)
+    const category = useWatch({ control, name: "category" });
+    const selectedCustomerId = useWatch({ control, name: "customerId" });
+
+    // 1. Fetch the lightweight list for the dropdown
     const { data, isLoading } = useCustomers(branchId);
     const customerOptions = data?.customerOptions || [];
-    const selectedCustomerId = useWatch({
-        control,
-        name: "customerId",
-    });
+    const selectedCustomerLight = customerOptions.find(c => c.value === selectedCustomerId);
 
-    const selectedCustomer = customerOptions.find(c => c.value === selectedCustomerId);
+    const { data: detailedCustomer, isLoading: isDetailLoading } = useCustomer(selectedCustomerId || "");
 
     return (
         <section>
@@ -37,14 +41,20 @@ const CustomerSelection = ({ branchId }: Props) => {
                 isSearchable={true}
                 isLoading={isLoading}
                 options={customerOptions}
-                // 2. Custom Render for the Dropdown Options
+                showAddButton={true}
+                addButtonLabel="Register New Customer"
+                addButtonHref={`/manage/customers/create-customer`}
+                isClearable={true}
                 formatOptionLabel={(opt) => (
                     <div className="flex flex-col w-full pr-1 py-0.5">
                         <div className="flex items-center justify-between w-full">
                             <span className="font-bold truncate mr-2">
                                 {opt.label}
                                 <span className="flex items-center gap-1 mt-0.5 truncate">
-                                    <Phone className="h-2.5 w-2.5 shrink-0" /><span className="text-xs opacity-70 px-1.5 py-0.5"> {formatPhoneNumber(opt.phone)}</span>
+                                    <Phone className="h-2.5 w-2.5 shrink-0" />
+                                    <span className="text-xs opacity-70 px-1.5 py-0.5">
+                                        {formatPhoneNumber(opt.phone)}
+                                    </span>
                                 </span>
                             </span>
                             <span className="shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider border border-current opacity-70 shadow-sm">
@@ -62,27 +72,28 @@ const CustomerSelection = ({ branchId }: Props) => {
             />
 
             {/* The Context Banner as a Column Card */}
-            {selectedCustomer && (
+            {selectedCustomerLight && (
                 <div className="mt-4 bg-white border border-slate-200 rounded-2xl p-4 flex flex-col gap-4 shadow-sm transition-all animate-in fade-in slide-in-from-top-2">
 
                     {/* Top Section: Identity & Address */}
                     <div className="flex justify-between items-start border-b border-slate-100 pb-3">
                         <div>
-                            <h4 className="text-sm font-extrabold text-slate-900">
-                                {selectedCustomer.label}
+                            <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
+                                {selectedCustomerLight.label}
+                                {isDetailLoading && <Loader2 className="h-3 w-3 animate-spin text-slate-400" />}
                             </h4>
                             <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
                                 <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                                {selectedCustomer.address}
+                                {selectedCustomerLight.address}
                             </p>
-                            {selectedCustomer.zoneName && (
+                            {selectedCustomerLight.zoneName && (
                                 <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 pl-5">
-                                    Zone: {selectedCustomer.zoneName}
+                                    Zone: {selectedCustomerLight.zoneName}
                                 </p>
                             )}
                         </div>
                         <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-lg">
-                            {selectedCustomer.category}
+                            {selectedCustomerLight.category}
                         </span>
                     </div>
 
@@ -91,21 +102,35 @@ const CustomerSelection = ({ branchId }: Props) => {
                         {/* Financial Ledger (Khata) */}
                         <div className="bg-rose-50/50 border border-rose-100 rounded-xl p-3 flex flex-col">
                             <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wide mb-1">
-                                Payable Khata
+                                Payable Ledger
                             </span>
                             <span className="text-lg font-black text-rose-700">
-                                Rs {Number(selectedCustomer.customerCredit || 0).toLocaleString()}
+                                Rs {Number(selectedCustomerLight.customerCredit || 0).toLocaleString()}
                             </span>
                         </div>
 
                         {/* Asset Ledger (Returnables) */}
                         <div className="bg-sky-50/50 border border-sky-100 rounded-xl p-3 flex flex-col">
                             <span className="text-[10px] font-bold text-sky-500 uppercase tracking-wide mb-1">
-                                Assets Held
+                                Total Assets Held
                             </span>
                             <span className="text-lg font-black text-sky-700">
-                                {selectedCustomer.assetsHeld} <span className="text-xs font-bold text-sky-600/70">items</span>
+                                {selectedCustomerLight.assetsHeld} <span className="text-xs font-bold text-sky-600/70">items</span>
                             </span>
+                            {(category === "RECOVERY") && detailedCustomer?.returnables && detailedCustomer.returnables.length > 0 && (
+                                <div className="mt-2 pt-2 border-t border-sky-200/60 flex flex-col gap-1">
+                                    <span className="text-[9px] font-bold text-sky-600/70 uppercase tracking-wider mb-0.5">Asset Breakdown</span>
+                                    {detailedCustomer.returnables.map((item: any) => (
+                                        <div key={item.id} className="flex items-center justify-between text-xs font-medium text-sky-900 bg-white/60 px-2 py-1 rounded-md">
+                                            <span className="flex items-center gap-1.5 truncate">
+                                                <Package className="h-3 w-3 text-sky-500 shrink-0" />
+                                                <span className="truncate">{item.productName || "Unknown Asset"}</span>
+                                            </span>
+                                            <span className="font-bold ml-2 shrink-0">{item.currentBalance}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

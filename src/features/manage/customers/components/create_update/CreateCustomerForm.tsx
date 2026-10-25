@@ -26,7 +26,7 @@ export const CustomerForm = ({
     initialData?: Partial<CreateCustomerFormData>
     customerId?: string
 }) => {
-    const isEditMode = !!customerId;
+    const isEditMode = Boolean(customerId);
     const { mutate: createNewCustomer, isPending: isCreating } = useCreateCustomer(branchId);
     const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer();
     const isPending = isCreating || isUpdating;
@@ -34,31 +34,39 @@ export const CustomerForm = ({
     const form = useAppForm(createCustomerSchema, {
         partyType: "CUSTOMER",
         category: "DOMESTIC",
+        status: "ACTIVE",
         name: "",
         phone: "",
-        zoneId: "",
+        zoneId: null,
         address: "",
         email: "",
-        customerNtn: "",
-        customerStrn: "",
-        latitude: 31.5411,
+        ntn: "",
+        strn: "",
+        deliveryScheduleType: "ON_DEMAND",
+        deliveryDays: [],
+        latitude: 30.5411,
         longitude: 74.3591,
         customerCredit: 0,
         customerAdvance: 0,
         securityDeposit: 0,
         returnables: [],
         ...initialData,
-    })
+    });
 
     useEffect(() => {
         if (initialData) {
-            form.reset({ ...form.getValues(), ...initialData });
+            form.reset({
+                ...form.getValues(),
+                ...initialData,
+                zoneId: initialData.zoneId ?? null,
+            });
         }
     }, [initialData, form]);
 
     const onSubmit = (data: CreateCustomerFormData) => {
         const payload = {
             ...data,
+            zoneId: data.zoneId || null,
             branchId
         } as Parameters<typeof createNewCustomer>[0];
 

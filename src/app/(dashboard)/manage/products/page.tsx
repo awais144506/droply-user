@@ -15,7 +15,7 @@ export default function ProductsPage() {
 
   const products = data?.products;
   const logs = data?.logs;
-  const stats = data?.stats || { totalItems: 0, lowStockCount: 0, returnablesCount: 0, recipeItemsCount: 0 };
+  const stats = data?.stats || { totalItems: 0, activeItemsCount: 0, inactiveItemsCount: 0, lowStockCount: 0, returnablesCount: 0, recipeItemsCount: 0 };
 
   //LOADING & ERROR
   if (isLoading) return <Loading text="Loading Products..." />
@@ -32,6 +32,8 @@ export default function ProductsPage() {
       />
       <ProductStats
         totalItems={stats?.totalItems}
+        activeItemsCount={stats.activeItemsCount}
+        inactiveItemsCount={stats.inactiveItemsCount}
         lowStockCount={stats?.lowStockCount}
         returnablesCount={stats?.returnablesCount}
         recipeItemsCount={stats.recipeItemsCount}

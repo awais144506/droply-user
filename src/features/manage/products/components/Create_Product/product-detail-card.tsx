@@ -9,7 +9,7 @@ const ProductDetailCard = () => {
         <div><Card>
             <CardHeader className="pb-3 border-b border-slate-100">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <Package className="h-4 w-4 text-sky-600" /> Item Details
+                    <Package className="h-4 w-4 text-sky-600" /> Product Details
                 </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
@@ -25,6 +25,7 @@ const ProductDetailCard = () => {
                         name="unitOfMeasure"
                         options={scaleOptions}
                         required
+                        isSearchable={false}
                     />
                 </div>
 
@@ -35,6 +36,7 @@ const ProductDetailCard = () => {
                             name="category"
                             options={categoryOptions}
                             required
+                            isSearchable={false}
                         />
                     </div>
 
@@ -44,6 +46,7 @@ const ProductDetailCard = () => {
                             name="trackingType"
                             options={trackingOptions}
                             required
+                            isSearchable={false}
                         />
                     </div>
                 </div>

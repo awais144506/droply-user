@@ -1,78 +1,92 @@
-import { useQuery } from "@tanstack/react-query";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useCallback } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { customerKeys } from "./customer-keys";
 import { customerApi } from "./customer.service";
 import { formatCurrency } from "@/lib/utils/functions/setFormat";
 
-// 2. Fetch All Customers for a Branch
 export function useCustomers(
   branchId: string,
   tabFilter?: string,
   searchFilter?: string,
+  scheduleFilter?: string,
 ) {
-  return useQuery({
-    queryKey: customerKeys.branchList(branchId || ""),
-    queryFn: () => customerApi.getAllCustomers(branchId),
-    select: (payload) => {
+  const selectCustomers = useCallback(
+    (payload: Awaited<ReturnType<typeof customerApi.getAllCustomers>>) => {
       const customers = payload?.customer || [];
       const logs = payload?.logs || [];
       const newCustomerRequest = payload?.newCustomerRequest || [];
-      const activeCount = customers.filter((c) => c.status === "ACTIVE").length;
-      const totalLedger = customers.reduce((sum, c) => sum + Number(c.customerCredit || 0), 0);
-      const totalAssets = customers.reduce((sum, c) => sum + Number(c.returnablesLength || 0), 0)
 
-      const filteredCustomers = customers.filter(customer => {
-        let matchesTab = true;
+      const cleanSearch = searchFilter?.toLowerCase().trim() || "";
+      const rawDigits = cleanSearch.replace(/\D/g, "");
+      const adjustedSearchDigits = rawDigits.startsWith("0")
+        ? rawDigits.slice(1)
+        : rawDigits;
+
+      let activeCount = 0;
+      let totalLedger = 0;
+      let totalAssets = 0;
+
+      const filteredCustomers: typeof customers = [];
+      const customerOptions: any[] = [];
+
+      for (const customer of customers) {
         const credit = Number(customer.customerCredit || 0);
-        if (tabFilter === "DEBT") {
-          matchesTab = credit > 0;
-        } else if (tabFilter === "CLEAR") {
-          matchesTab = credit <= 0;
+        const assets = Number(customer.returnablesLength || 0);
+
+        totalLedger += credit;
+        totalAssets += assets;
+
+        if (customer.status === "ACTIVE") {
+          activeCount++;
+          customerOptions.push({
+            value: customer.id,
+            label: customer.name,
+            phone: customer.phone,
+            email: customer.email ?? null,
+            category: customer.category,
+            ntn: customer.ntn ?? null,
+            strn: customer.strn ?? null,
+            address: customer.address || "No Address Provided",
+            customerCredit: credit,
+            assetsHeld: assets,
+            zoneName: customer.zone?.name || "",
+          });
         }
 
-        const cleanSearch = searchFilter?.toLowerCase().trim();
-        const searchDigits = cleanSearch?.replace(/\D/g, "");
-        const phoneDigits = customer.phone ? customer.phone.replace(/\D/g, "") : "";
+        // 1. Tab Filter (Debt / Clear)
+        const matchesTab =
+          tabFilter === "DEBT"
+            ? credit > 0
+            : tabFilter === "CLEAR"
+              ? credit <= 0
+              : true;
 
-        const adjustedSearchDigits = searchDigits?.startsWith("0")
-          ? searchDigits.slice(1)
-          : searchDigits;
+        if (!matchesTab) continue;
 
-        const matchesSearch = searchFilter
-          ? customer.name.toLowerCase().includes(cleanSearch || "") ||
-          ((adjustedSearchDigits?.length || 0) > 0 && phoneDigits.includes(adjustedSearchDigits || ""))
-          : true;
+        // 2. Schedule Filter (Everyday, Custom Days, On-Demand)
+        if (scheduleFilter && scheduleFilter !== "all") {
+          if (customer.deliveryScheduleType !== scheduleFilter) continue;
+        }
 
-        return matchesTab && matchesSearch;
-      });
+        // 3. Search Filter (Name, Code, Phone)
+        if (cleanSearch) {
+          const phoneDigits = customer.phone
+            ? customer.phone.replace(/\D/g, "")
+            : "";
+          const matchesName = customer.name.toLowerCase().includes(cleanSearch);
+          const matchesCode = customer.customerCode
+            ?.toLowerCase()
+            .includes(cleanSearch);
+          const matchesPhone =
+            adjustedSearchDigits.length > 0 &&
+            phoneDigits.includes(adjustedSearchDigits);
 
-      const customerOptions = customers
-        .filter((c) => c.status === "ACTIVE")
-        .map((c) => ({
-          value: c.id,
-          label: c.name,
-          phone: c.phone,
-          category: c.category,
-          address: c.address || "No Address Provided",
-          customerCredit: Number(c.customerCredit || 0),
-          assetsHeld: Number(c.returnablesLength || 0),
-          zoneName: c.zone?.name || "",
-        }));
+          if (!matchesName && !matchesCode && !matchesPhone) continue;
+        }
 
-      const customerOptionsQuotaion = customers
-        .filter((c) => c.status === "ACTIVE")
-        .map((c) => ({
-          value: c.id,
-          label: c.name,
-          phone: c.phone,
-          email: c.email,
-          category: c.category,
-          ntn: c.customerNtn,
-          strn: c.customerStrn,
-          address: c.address || "No Address Provided",
-          customerCredit: Number(c.customerCredit || 0),
-          assetsHeld: Number(c.returnablesLength || 0),
-          zoneName: c.zone?.name || "",
-        }));
+        filteredCustomers.push(customer);
+      }
 
       return {
         customers: filteredCustomers,
@@ -82,27 +96,47 @@ export function useCustomers(
           totalAssets,
         },
         customerOptions,
-        logs: logs,
+        logs,
         newCustomerRequest,
-        customerOptionsQuotaion
-      }
+      };
     },
+    [tabFilter, searchFilter, scheduleFilter], // 👈 Added scheduleFilter dependency
+  );
+
+  return useQuery({
+    queryKey: [...customerKeys.branchList(branchId || ""), tabFilter, searchFilter, scheduleFilter],
+    queryFn: () => customerApi.getAllCustomers(),
+    select: selectCustomers,
     staleTime: 5 * 60 * 1000,
-    enabled: !!branchId,
+    enabled: Boolean(branchId),
   });
 }
 
-// 3. Fetch Single Customer Details
+// 2. Fetch Single Customer Details
 export function useCustomer(id: string) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: customerKeys.detail(id || ""),
     queryFn: () => customerApi.getCustomer(id),
-    select: (customer) => {
-      return {
-        ...customer,
-      }
-    },
     staleTime: 5 * 60 * 1000,
-    enabled: !!id,
+    enabled: Boolean(id),
+    placeholderData: () => {
+      const cachedLists = queryClient.getQueriesData<any>({
+        queryKey: customerKeys.lists(),
+      });
+
+      for (const [, data] of cachedLists) {
+        const found = data?.customer?.find((c: any) => c.id === id);
+        if (found) {
+          return {
+            ...found,
+            orders: [],
+            returnables: [],
+          } as any;
+        }
+      }
+      return undefined;
+    },
   });
 }

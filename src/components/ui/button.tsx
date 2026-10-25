@@ -18,7 +18,7 @@ const buttonVariants = cva(
 
         // Frosted Rose Glass (Deletes, Rejections, Cancellations)
         destructive:
-          "bg-rose-500/15 text-rose-700 border border-rose-400/50 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.7)] hover:bg-rose-500/25 hover:border-rose-400/80 hover:text-white hover:shadow-sm hover:shadow-rose-500/10",
+          "bg-rose-500/15 text-rose-700 border border-rose-400/50 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.7)] hover:bg-rose-500/25 hover:border-rose-400/80 hover:text-rose-800 hover:shadow-sm hover:shadow-rose-500/10",
 
         // Frosted Amber Glass (Warnings, Reschedule, Wastage)
         warning:

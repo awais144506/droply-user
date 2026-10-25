@@ -153,7 +153,7 @@ export const getBillingColumns = (onDelete: (id: string) => void): ColumnDef<Sub
         header: "Type",
         render: (row) => (
             <span className="text-xs font-medium text-slate-600">
-                {row.type.replace(/_/g, ' ')}
+                {row.type}
             </span>
         ),
     },

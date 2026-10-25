@@ -29,7 +29,7 @@ export function PaymentChannels() {
           No payment channels available at the moment.
         </div>
       ) : (
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-3 gap-6">
           {banks?.map((bank) => (
             <div
               key={bank.id}

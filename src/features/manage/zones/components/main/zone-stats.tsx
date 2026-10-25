@@ -1,7 +1,7 @@
 "use client";
-
 import { MapPin, Users, Wallet, RotateCcw } from "lucide-react";
 import PageStatsCard from "@/lib/utils/components/StatsMainPageCards";
+import { formatCurrency } from "@/lib/utils/functions/setFormat";
 
 interface ZoneStatsProps {
   totalZones: number;
@@ -18,9 +18,6 @@ export function ZoneStats({
   totalReturnables,
   isLoadingZones,
 }: ZoneStatsProps) {
-
-  const totalLedgerRupees = totalLedger.toLocaleString("en-PK", { maximumFractionDigits: 0 });
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <PageStatsCard
@@ -38,7 +35,7 @@ export function ZoneStats({
       />
       <PageStatsCard
         title="Total Outstanding"
-        value={totalLedgerRupees}
+        value={formatCurrency(totalLedger)}
         prefix="Rs."
         icon={Wallet}
         iconContainerClass="bg-amber-50 text-amber-600"

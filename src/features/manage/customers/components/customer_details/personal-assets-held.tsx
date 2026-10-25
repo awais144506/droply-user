@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     User, MapPin, Phone, Mail,
-    Package, Tag, Briefcase, Building2
+    Package, Tag, Briefcase, Building2, FileText, Calendar
 } from "lucide-react";
 import { CustomerDetails } from "../../types/customer";
 import { formatPhoneNumber } from "react-phone-number-input";
@@ -11,6 +11,19 @@ type Props = {
 }
 
 const PersonalInformationAssets = ({ customer }: Props) => {
+    // Format delivery schedule display text
+    const getScheduleDisplay = () => {
+        if (customer.deliveryScheduleType === "EVERYDAY") return "Everyday";
+        if (customer.deliveryScheduleType === "ON_DEMAND") return "On-Demand";
+        if (customer.deliveryScheduleType === "CUSTOM_DAYS" && customer.deliveryDays?.length > 0) {
+            const formattedDays = customer.deliveryDays
+                .map((day: string) => day.charAt(0) + day.slice(1).toLowerCase())
+                .join(", ");
+            return `Custom Days (${formattedDays})`;
+        }
+        return customer.deliveryScheduleType || "Not Set";
+    };
+
     return (
         <div>   {/* Profile Information Card */}
             <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
@@ -19,10 +32,11 @@ const PersonalInformationAssets = ({ customer }: Props) => {
                         <User className="h-5 w-5 text-sky-600" />
                         Profile Information
                     </h3>
-                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${customer.status === "ACTIVE"
-                        ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                        : "bg-rose-50 text-rose-600 border border-rose-100"
-                        }`}>
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
+                        customer.status === "ACTIVE"
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
+                            : "bg-rose-50 text-rose-600 border border-rose-100"
+                    }`}>
                         {customer.status}
                     </span>
                 </div>
@@ -57,6 +71,37 @@ const PersonalInformationAssets = ({ customer }: Props) => {
                         <div className="flex items-center gap-2 text-sm text-slate-900 font-medium">
                             <Tag className="h-4 w-4 text-slate-400" />
                             <span className="capitalize">{customer.category?.toLowerCase()}</span>
+                        </div>
+                    </div>
+
+                    {/* Conditional NTN Number */}
+                    {customer.ntn && (
+                        <div>
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">NTN Number</label>
+                            <div className="flex items-center gap-2 text-sm text-slate-900 font-medium">
+                                <FileText className="h-4 w-4 text-slate-400" />
+                                <span>{customer.ntn}</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Conditional STRN Number */}
+                    {customer.strn && (
+                        <div>
+                            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">STRN Number</label>
+                            <div className="flex items-center gap-2 text-sm text-slate-900 font-medium">
+                                <Building2 className="h-4 w-4 text-slate-400" />
+                                <span>{customer.strn}</span>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Delivery Schedule Preference */}
+                    <div className="md:col-span-2 pt-3 border-t border-slate-100">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1 block">Delivery Schedule Preference</label>
+                        <div className="flex items-center gap-2 text-sm text-slate-900 font-medium">
+                            <Calendar className="h-4 w-4 text-sky-500" />
+                            <span>{getScheduleDisplay()}</span>
                         </div>
                     </div>
 
@@ -117,8 +162,9 @@ const PersonalInformationAssets = ({ customer }: Props) => {
                         <p className="text-xs text-slate-400 mt-1">This customer has returned all company assets.</p>
                     </div>
                 )}
-            </div></div>
-    )
+            </div>
+        </div>
+    );
 }
 
-export default PersonalInformationAssets
+export default PersonalInformationAssets;

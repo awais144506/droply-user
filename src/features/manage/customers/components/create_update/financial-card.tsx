@@ -60,7 +60,7 @@ export default function FinancialsCard({ control, productOptions = [], isLoading
                         <div className="flex items-center mr-2">
                             <Package className="h-4 w-4 text-sky-600 mr-2" />
                             <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">
-                                Opening Returnables
+                                Opening Returnables (Only Returnables)
                             </label>
                         </div>
                         <Button

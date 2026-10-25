@@ -15,10 +15,9 @@ import ErrorBoundary from "@/app/error";
 const QuickSale = () => {
   const { branchId, userId } = useRole(); // Adjust if your staffId is named differently in useRole()
   const { data, isLoading: isLoadingProducts, isError, error } = useProducts(branchId);
-  const { fetchBranchSettings } = useBranchSettings(branchId);
+  const { data: branchData } = useBranchSettings(branchId);
 
   const products: QuickSaleProduct[] = data?.quickSaleOptions || [];
-  const branchDetails = fetchBranchSettings.data;
 
   const [completedOrder, setCompletedOrder] = useState<ReceiptOrderData | null>(null);
   const [editingSale, setEditingSale] = useState<QuickSaleRecord | null>(null);
@@ -53,7 +52,7 @@ const QuickSale = () => {
       {/* Live Paginated & Filtered Quick Sale History Table */}
       <QuickSaleHistory
         branchId={branchId || ""}
-        branchDetails={branchDetails}
+        branchDetails={branchData}
         onEditSale={handleStartEdit}
       />
 
@@ -61,7 +60,7 @@ const QuickSale = () => {
         isOpen={Boolean(completedOrder)}
         onClose={() => setCompletedOrder(null)}
         order={completedOrder}
-        branchDetails={branchDetails}
+        branchDetails={branchData}
       />
     </div>
   );

@@ -46,9 +46,13 @@ const SelectProduct = ({ branchId }: Props) => {
             emptiesIn: 0,
             hasOffer: false,
             offerQty: 0,
+            freeProductId: "",
             discountPrice: 0,
             chargedDeposit: 0,
-            isDepositCharged: false
+            isDepositCharged: false,
+            returnedToStoreQty: 0,
+            wastageQuantity: 0,
+            unitPrice: 0
         });
     };
 
@@ -75,16 +79,36 @@ const SelectProduct = ({ branchId }: Props) => {
                     const selectedProductDetails = allProducts.find(
                         p => p.id === currentItemState.productId
                     );
+
+                    // Logic for the Paid Item
                     const isReturnable = selectedProductDetails?.trackingType === "RETURNABLE";
                     const currentStock = selectedProductDetails?.currentStock || 0;
                     const depositRate = selectedProductDetails?.securityDeposit || 0;
                     const paidQty = Number(currentItemState.paidQty) || 0;
-                    const offerQty = Number(currentItemState.offerQty) || 0;
                     const emptiesIn = Number(currentItemState.emptiesIn) || 0;
-                    const totalRequested = paidQty + offerQty;
-                    const remainingStock = currentStock - totalRequested;
-                    const isOutOfStock = remainingStock < 0;
-                    const deficit = Math.max(0, totalRequested - emptiesIn);
+
+                    // Logic for Free Item
+                    const isSameFreeProduct = !currentItemState.freeProductId || currentItemState.freeProductId === currentItemState.productId;
+                    const freeProductDetails = isSameFreeProduct ? selectedProductDetails : allProducts.find(p => p.id === currentItemState.freeProductId);
+                    const freeStock = freeProductDetails?.currentStock || 0;
+                    const offerQty = Number(currentItemState.offerQty) || 0;
+
+                    // Calculate remaining stock
+                    let remainingPaidStock = currentStock - paidQty;
+                    let remainingFreeStock = freeStock - offerQty;
+
+                    // If they are giving away the SAME product for free, subtract both from the same stock pool
+                    if (isSameFreeProduct) {
+                        const totalRequested = paidQty + offerQty;
+                        remainingPaidStock = currentStock - totalRequested;
+                        remainingFreeStock = remainingPaidStock;
+                    }
+
+                    const isOutOfStock = remainingPaidStock < 0;
+                    const isFreeOutOfStock = remainingFreeStock < 0;
+
+                    // Deposit calculation (only applies to the paid item for now)
+                    const deficit = Math.max(0, paidQty - emptiesIn);
                     const showDepositWarning = isReturnable && deficit > 0;
                     const isDepositCharged = currentItemState.isDepositCharged === true;
                     const calculatedDepositNeeded = deficit * depositRate;
@@ -120,11 +144,11 @@ const SelectProduct = ({ branchId }: Props) => {
                                     />
                                     {selectedProductDetails && (
                                         <span className={`absolute -bottom-5 left-1 text-[11px] font-bold flex items-center gap-1 ${isOutOfStock ? 'text-rose-600' :
-                                            remainingStock <= (selectedProductDetails.lowStockThreshold || 0) ? 'text-amber-500' :
+                                            remainingPaidStock <= (selectedProductDetails.lowStockThreshold || 0) ? 'text-amber-500' :
                                                 'text-emerald-600'
                                             }`}>
                                             {isOutOfStock && <AlertCircle className="h-3 w-3" />}
-                                            {isOutOfStock ? "Stock Exceeded!" : `Stock Left: ${remainingStock} ( ${scale} )`}
+                                            {isOutOfStock ? "Stock Exceeded!" : `Stock Left: ${remainingPaidStock} ( ${scale} )`}
                                         </span>
                                     )}
                                 </div>
@@ -135,7 +159,7 @@ const SelectProduct = ({ branchId }: Props) => {
                                         type="number"
                                         name={`items.${index}.paidQty`}
                                         min={1}
-                                        max={currentStock - offerQty}
+                                        max={isSameFreeProduct ? currentStock - offerQty : currentStock}
                                         className={`text-center font-bold ${isOutOfStock ? 'bg-rose-100 text-rose-700 border-rose-300' : 'bg-white'}`}
                                     />
                                 </div>
@@ -160,7 +184,13 @@ const SelectProduct = ({ branchId }: Props) => {
                                 <div className="col-span-2 flex justify-center mt-2">
                                     <Switch
                                         checked={currentItemState.hasOffer}
-                                        onCheckedChange={(val) => setValue(`items.${index}.hasOffer`, val)}
+                                        onCheckedChange={(val) => {
+                                            setValue(`items.${index}.hasOffer`, val);
+                                            // Default the free product to the same product when toggled on
+                                            if (val && !currentItemState.freeProductId) {
+                                                setValue(`items.${index}.freeProductId`, currentItemState.productId);
+                                            }
+                                        }}
                                         disabled={currentStock <= 0}
                                     />
                                 </div>
@@ -179,25 +209,50 @@ const SelectProduct = ({ branchId }: Props) => {
 
                             {/* Nested FOC Row */}
                             {currentItemState.hasOffer && (
-                                <div className="mt-7 pl-5 pr-2 py-3 bg-emerald-50/50 border border-emerald-100 rounded-xl flex items-center gap-4">
-                                    <div className="flex items-center gap-2 flex-1">
-                                        <Gift className="h-4 w-4 text-emerald-500 shrink-0" />
-                                        <span className="text-xs font-bold text-emerald-700 truncate">
-                                            Free Item: {selectedProductDetails?.name || "Product"} ( {selectedProductDetails?.unitOfMeasure} )
-                                        </span>
+                                <div className="mt-7 pl-5 pr-2 py-3 bg-emerald-50/50 border border-emerald-100 rounded-xl flex items-start gap-4">
+                                    <Gift className="h-5 w-5 text-emerald-500 shrink-0 mt-2.5" />
+
+                                    {/* 🔥 NEW: Select Which Product to Give Away */}
+                                    <div className="flex-1 space-y-1">
+                                        <label className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Select Free Item</label>
+                                        <FormSelect
+                                            name={`items.${index}.freeProductId`}
+                                            label=""
+                                            options={productOptions}
+                                            placeholder="Select free product..."
+                                            formatOptionLabel={(opt) => (
+                                                <div className="flex items-center justify-between w-full pr-1">
+                                                    <span className="font-medium truncate mr-2">
+                                                        {opt.name}
+                                                        <span className="text-[10px] opacity-70 font-normal ml-1">
+                                                            (Rs {opt.price})
+                                                        </span>
+                                                    </span>
+                                                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm ${opt.trackingType === "RETURNABLE"
+                                                        ? "bg-purple-500"
+                                                        : "bg-indigo-500"
+                                                        }`}>
+                                                        {opt.trackingType}
+                                                    </span>
+                                                </div>
+                                            )}
+                                        />
+                                        {freeProductDetails && (
+                                            <span className={`text-[10px] font-bold ${isFreeOutOfStock ? 'text-rose-500' : 'text-emerald-600'}`}>
+                                                Stock Available: {remainingFreeStock}
+                                            </span>
+                                        )}
                                     </div>
 
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-[10px] font-bold text-emerald-600 uppercase">Qty Out:</span>
-                                        <div className="w-20">
-                                            <FormInput
-                                                type="number"
-                                                name={`items.${index}.offerQty`}
-                                                min={0}
-                                                max={currentStock - paidQty}
-                                                className={`text-center font-bold ${isOutOfStock ? 'bg-rose-100 border-rose-300 text-rose-700' : 'bg-white border-emerald-200 text-emerald-700'}`}
-                                            />
-                                        </div>
+                                    <div className="flex flex-col gap-1 w-24">
+                                        <label className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider text-center">Qty Out</label>
+                                        <FormInput
+                                            type="number"
+                                            name={`items.${index}.offerQty`}
+                                            min={0}
+                                            max={isSameFreeProduct ? currentStock - paidQty : freeStock}
+                                            className={`text-center font-bold ${isFreeOutOfStock ? 'bg-rose-100 border-rose-300 text-rose-700' : 'bg-white border-emerald-200 text-emerald-700'}`}
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -226,7 +281,7 @@ const SelectProduct = ({ branchId }: Props) => {
                                             type="button"
                                             variant="outline"
                                             size="sm"
-                                            className="border-emerald-200 text-emerald-600 hover:bg-emerald-100 text-[10px] h-8 shrink-0 shadow-sm"
+                                            className="border-emerald-200 text-emerald-600 hover:bg-emerald-100 text-[10px] h-8 shrink-0 shadow-sm cursor-pointer"
                                             onClick={() => setValue(`items.${index}.isDepositCharged`, false)}
                                         >
                                             Remove Deposit
@@ -235,7 +290,7 @@ const SelectProduct = ({ branchId }: Props) => {
                                         <Button
                                             type="button"
                                             size="sm"
-                                            className="bg-amber-500 hover:bg-amber-600 text-white text-[10px] h-8 shrink-0 shadow-sm"
+                                            className="bg-amber-500 hover:bg-amber-600 text-white text-[10px] h-8 shrink-0 shadow-sm cursor-pointer"
                                             onClick={() => setValue(`items.${index}.isDepositCharged`, true)}
                                         >
                                             Charge Rs {calculatedDepositNeeded}

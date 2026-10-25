@@ -19,8 +19,8 @@ const ZonePage = () => {
   const zones = data?.zones || [];
   const stats = data?.stats || { totalZones: 0, totalCustomers: 0, totalLedger: 0, totalReturnables: 0 };
   const logs = data?.logs || [];
-  if (isLoadingZones) return <Loading text="Loading Zones..." />
-  if (isError && !data?.zones) return <ErrorBoundary error={error.message} />;
+  if (isLoadingZones || !data?.zones) return <Loading text="Loading Zones..." />
+  if (isError) return <ErrorBoundary error={error.message} />;
 
   return (
     <div className="space-y-6 p-4 sm:p-6 lg:p-8">

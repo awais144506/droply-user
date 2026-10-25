@@ -28,8 +28,8 @@ export default function ZoneDetailsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  if (isLoading) return <Loading text="Loading zone details..." />
-  if (!data || !data.zone) return <NotFoundPage />
+  if (isLoading || !data?.zone) return <Loading text="Loading zone details..." />
+  if (!data) return <NotFoundPage />
 
   const { zone, filterCustomer, stats, hasCustomers, hasLedger, hasReturnables, hasRiders } = data;
 
@@ -57,14 +57,17 @@ export default function ZoneDetailsPage() {
 
   return (
     <>
-      <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
 
         {/* Header Section */}
         <div className="flex flex-col gap-3">
           <PageDetailHeader
+            breadcrumbs={[
+              { label: "Zones", href: '/manage/zones' },
+              { label: `${zone.name} Zone Details` }
+            ]}
             heading={zone.name}
             description="Zone Overview & Customer Directory"
-            href="/manage/zones"
             createdAt={zone.createdAt}
             updatedAt={zone.updatedAt}
           >

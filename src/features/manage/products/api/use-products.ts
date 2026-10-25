@@ -1,109 +1,166 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api-client";
-import { ProductItem } from "../types/product";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { ProductItem, ProductList } from "../types/product";
 import { productKeys } from "./product-keys";
 import { productApi } from "./product.service";
 
-// 1. Fetch All Products for a Branch
-export function useProducts(branchId: string) {
+// 1. Fetch All Products for a Branch (Single-Pass Optimized Selector)
+export function useProducts(branchId?: string) {
     return useQuery({
-        queryKey: productKeys.branchList(branchId || ""),
-        queryFn: () => productApi.getAllProducts(branchId),
+        queryKey: productKeys.branchList(branchId),
+        queryFn: () => productApi.getAllProducts(),
+        enabled: Boolean(branchId),
+        staleTime: 5 * 60 * 1000,
         select: (data) => {
-            const products = data.products;
-            const logs = data.logs;
-            const totalItems = products.length;
-            const lowStockCount = products.filter(p => p.currentStock <= p.lowStockThreshold).length;
-            const returnablesCount = products.filter(p => p.trackingType === "RETURNABLE").length;
-            const recipeItemsCount = products.filter(p => p.hasRecipe).length;
-            const productOptions = products?.filter(p => p.trackingType === "RETURNABLE").map(p => ({ value: p.id, label: p.name })) || [];
-            const lowStockProducts = products.filter(p => p.currentStock <= p.lowStockThreshold);
-            const quickSaleOptions = products?.map((p: any) => ({
-                id: p.id,
-                name: p.name,
-                code: p.productCode,
-                price: Number(p.salePrice ?? p.price ?? 0),
-                stock: p.currentStock ?? p.stock ?? p.quantity ?? 0,
-                trackingType: p.trackingType,
-                lowStock: p.lowStockThreshold ?? p.lowStock ?? 5,
-                security: p.securityDeposit ?? p.security ?? 0,
-                unit: p.unitOfMeasure ?? p.unit ?? "Unit",
-            })) || [];
+            const products = data?.products || [];
+            const logs = data?.logs || [];
 
-            const bomOptions = products?.map(p => ({
-                id: p.id,
-                name: p.name,
-                currentStock: p.currentStock,
-                lowStockThreshold: p.lowStockThreshold,
-                value: p.id,
-                label: p.name,
-                salePrice: p.salePrice,
-                unitCost: p.unitCost,
-                category: p.category,
-                unit: p.unitOfMeasure,
-            })) || [];
+            let lowStockCount = 0;
+            let returnablesCount = 0;
+            let recipeItemsCount = 0;
+            let activeItemsCount = 0;
+            let inactiveItemsCount = 0;
 
-            // Updated for Production WIP: Exclude Raw Materials!
-            const productionOptions = products?.filter(p => p.category === "FINISHED_GOOD" || p.hasRecipe)
-                .map(p => ({
+            const lowStockProducts: ProductList[] = [];
+            const productOptions: { value: string; label: string }[] = [];
+            const quickSaleOptions: any[] = [];
+            const bomOptions: any[] = [];
+            const productionOptions: any[] = [];
+
+            // Single-pass loop to compute all stats and dropdown options in O(N)
+            for (const p of products) {
+                const currentStock = p.currentStock ?? 0;
+                const lowStockThreshold = p.lowStockThreshold ?? 10;
+                const salePrice = Number(p.salePrice ?? 0);
+                const unitCost = Number(p.unitCost ?? 0);
+                const unitOfMeasure = p.unitOfMeasure || "PIECE";
+
+                // 1. Low Stock Check
+                if (currentStock <= lowStockThreshold) {
+                    lowStockCount++;
+                    lowStockProducts.push(p);
+                }
+                if (p.isActive) {
+                    activeItemsCount++;
+                } else {
+                    inactiveItemsCount++;
+                }
+
+                // 2. Returnables Check
+                if (p.trackingType === "RETURNABLE") {
+                    returnablesCount++;
+                    productOptions.push({ value: p.id, label: p.name });
+                }
+
+                // 3. Recipe Check
+                if (p.hasRecipe) {
+                    recipeItemsCount++;
+                }
+
+                // 4. Quick Sale / POS Options
+                quickSaleOptions.push({
+                    id: p.id,
+                    name: p.name,
+                    code: p.productCode,
+                    price: salePrice,
+                    stock: currentStock,
+                    trackingType: p.trackingType,
+                    lowStock: lowStockThreshold,
+                    security: p.securityDeposit ?? 0,
+                    unit: unitOfMeasure,
+                    priceTiers: p.priceTiers || [],
+                });
+
+                // 5. Unified BOM & Quotation Options
+                bomOptions.push({
+                    id: p.id,
                     value: p.id,
+                    name: p.name,
                     label: p.name,
-                    hasRecipe: p.hasRecipe,
-                    currentStock: p.currentStock,
+                    productCode: p.productCode,
+                    currentStock,
+                    lowStockThreshold,
+                    salePrice,
+                    unitCost,
                     category: p.category,
-                    recipe: p.recipeIngredients?.map((ri: any) => ({
-                        rawMaterialId: ri.childItemId,
-                        name: ri.childItem?.name || "Unknown Material",
-                        quantityNeeded: ri.quantity,
-                        unitOfMeasure: ri.childItem?.unitOfMeasure || "PIECE",
-                        currentStock: ri.childItem?.currentStock || 0
-                    })) || []
-                })) || [];
+                    unit: unitOfMeasure,
+                    unitOfMeasure,
+                });
 
-            const productOptionsQuotation = products.map((p) => ({
-                value: p.id,
-                label: p.name,
-                unitOfMeasure: p.unitOfMeasure,
-                currentStock: p.currentStock,
-                salePrice: p.salePrice ?? 0,
-            }))
+                // 6. Production WIP Options (Finished Goods or items with recipes)
+                if (p.category === "FINISHED_GOOD" || p.hasRecipe) {
+                    productionOptions.push({
+                        value: p.id,
+                        label: p.name,
+                        hasRecipe: p.hasRecipe,
+                        currentStock,
+                        category: p.category,
+                        recipe:
+                            p.recipeIngredients?.map((ri) => ({
+                                rawMaterialId: ri.childItemId,
+                                name: ri.childItem?.name || "Unknown Material",
+                                quantityNeeded: ri.quantity,
+                                unitOfMeasure: ri.childItem?.unitOfMeasure || "PIECE",
+                                currentStock: ri.childItem?.currentStock ?? 0,
+                            })) || [],
+                    });
+                }
+            }
+
             return {
                 products,
                 logs,
                 stats: {
-                    totalItems,
+                    totalItems: products.length,
+                    activeItemsCount,
+                    inactiveItemsCount,
                     lowStockCount,
                     returnablesCount,
-                    recipeItemsCount
+                    recipeItemsCount,
                 },
                 productOptions,
                 quickSaleOptions,
                 bomOptions,
+                productOptionsQuotation: bomOptions, // Shares unified structure without re-mapping
                 productionOptions,
                 lowStockProducts,
-                productOptionsQuotation
-            }
-
+            };
         },
-        staleTime: 5 * 60 * 1000,
-        enabled: !!branchId,
     });
 }
 
-// 2. Fetch Single Product (for Edit Page)
-export function useProduct(id: string) {
-    return useQuery({
-        queryKey: productKeys.detail(id),
-        queryFn: async (): Promise<ProductItem> => {
-            const response: any = await apiClient.get(`/product/${id}`);
-            const data = response?.data || response;
+export function useProduct(id?: string) {
+    const queryClient = useQueryClient();
 
+    return useQuery({
+        queryKey: productKeys.detail(id || ""),
+        queryFn: async (): Promise<ProductItem & { stockOnHand: number }> => {
+            const data = await productApi.getProduct(id!);
             return {
                 ...data,
-                stockOnHand: data.currentStock,
+                stockOnHand: data.currentStock ?? 0,
             };
         },
-        enabled: !!id,
+        initialData: () => {
+            if (!id) return undefined;
+
+            // Search across all cached product lists to find the item instantly
+            const queries = queryClient.getQueriesData<any>({ queryKey: productKeys.lists() });
+
+            for (const [, cachedData] of queries) {
+                if (cachedData?.products && Array.isArray(cachedData.products)) {
+                    const found = cachedData.products.find((p: any) => p.id === id);
+                    if (found) {
+                        return {
+                            ...found,
+                            stockOnHand: found.currentStock ?? 0,
+                        };
+                    }
+                }
+            }
+            return undefined;
+        },
+        enabled: Boolean(id),
+        staleTime: 5 * 60 * 1000,
     });
 }

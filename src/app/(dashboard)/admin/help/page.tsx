@@ -2,7 +2,7 @@
 import {
   ArrowRight,
 } from "lucide-react";
-import { FaWhatsapp, FaInstagram, FaEnvelope } from "react-icons/fa6";
+import { FaWhatsapp, FaInstagram, FaEnvelope, FaFacebookF, FaLinkedinIn } from "react-icons/fa6";
 
 const handleOpenWhatsApp = () => {
   const phoneNumber = "923116631476"; // Replace with your support WhatsApp number
@@ -21,10 +21,18 @@ const handleOpenInstagram = () => {
   window.open("https://instagram.com/dedroply", "_blank");
 };
 
+const handleOpenFacebook = () => {
+  window.open("https://www.facebook.com/profile.php?id=61595031518493", "_blank"); // Replace with your Facebook page/group
+};
+
+const handleOpenLinkedIn = () => {
+  window.open("https://www.linkedin.com/company/dedroply", "_blank"); // Replace with your LinkedIn page
+};
+
 export default function UserHelpPage() {
 
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-6">
+    <div className="max-w-5xl mx-auto p-6 space-y-6">
       {/* Top Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -35,11 +43,10 @@ export default function UserHelpPage() {
             Reach out via our official support channels or track your active tickets.
           </p>
         </div>
-
       </div>
 
       {/* PROMINENT DIRECT SUPPORT CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* WhatsApp Card */}
         <button
           onClick={handleOpenWhatsApp}
@@ -94,8 +101,45 @@ export default function UserHelpPage() {
             <ArrowRight className="h-3.5 w-3.5" />
           </div>
         </button>
+
+        {/* Facebook Card */}
+        <button
+          onClick={handleOpenFacebook}
+          className="group bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs hover:border-blue-600 hover:shadow-md transition-all flex flex-col justify-between text-left cursor-pointer"
+        >
+          <div>
+            <div className="h-10 w-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <FaFacebookF className="h-4 w-4" />
+            </div>
+            <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Facebook Community</h2>
+            <p className="text-[11px] text-slate-500 mt-1">Join our official community and get updates on <span className="text-blue-600 font-bold text-xs">Droply</span></p>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-xs font-bold text-blue-600 group-hover:translate-x-0.5 transition-transform">
+            <span>Visit Page</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </div>
+        </button>
+
+        {/* LinkedIn Card */}
+        <button
+          onClick={handleOpenLinkedIn}
+          className="group bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs hover:border-indigo-600 hover:shadow-md transition-all flex flex-col justify-between text-left cursor-pointer"
+        >
+          <div>
+            <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <FaLinkedinIn className="h-4 w-4" />
+            </div>
+            <h2 className="text-xs font-bold text-slate-900 uppercase tracking-wider">LinkedIn Network</h2>
+            <p className="text-[11px] text-slate-500 mt-1">Connect with our corporate and engineering updates on LinkedIn.</p>
+          </div>
+          <div className="mt-4 flex items-center gap-1 text-xs font-bold text-indigo-600 group-hover:translate-x-0.5 transition-transform">
+            <span>Connect</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </div>
+        </button>
       </div>
-      <p className="text-center font-semibold italic text-slate-500 text-xs">Droply V.1.0</p>
+
+      <p className="text-center font-semibold italic text-slate-500 text-xs pt-4">Droply V.1.0</p>
     </div>
   );
 }

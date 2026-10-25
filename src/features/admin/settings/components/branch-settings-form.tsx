@@ -5,7 +5,7 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Building2, Upload, Loader2, Save, X } from "lucide-react";
+import { Building2, Upload, Loader2, Save} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { BranchSettingData } from "../types/settings";
@@ -14,7 +14,6 @@ import { useUploadThing } from "@/lib/uploadthing";
 import { branchSettingsSchema, BranchSettingsFormValues } from "../schema/update-branch-settings.schema";
 import { FormInput } from "@/components/ui/form-input";
 import { FormPhoneInput } from "@/components/ui/form-phone-input";
-import { formatPhoneNumber } from "react-phone-number-input";
 
 interface BranchSettingsFormProps {
   initialData: BranchSettingData;
@@ -71,12 +70,6 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
     setIsLogoRemoved(false);
   };
 
-  const removeLogo = () => {
-    setLogoPreview(null);
-    setSelectedFile(null);
-    setIsLogoRemoved(true);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
 
   const handleFormSubmit = async (data: Partial<BranchSettingData>) => {
     let logoUrl = isLogoRemoved ? undefined : safeInitialLogo;
@@ -132,9 +125,6 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
                   {typeof logoPreview === 'string' && (logoPreview.startsWith('http') || logoPreview.startsWith('blob')) ? (
                     <>
                       <Image src={logoPreview} alt="Branch Logo" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-contain p-2" />
-                      <button type="button" onClick={removeLogo} className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <X className="h-6 w-6 text-white" />
-                      </button>
                     </>
                   ) : (
                     <Building2 className="h-8 w-8 opacity-20" />

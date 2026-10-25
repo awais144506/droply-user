@@ -1,4 +1,5 @@
 import * as yup from "yup";
+import { isValidPhoneNumber } from "react-phone-number-input";
 
 export const orderItemSchema = yup.object({
   id: yup.string().required(),
@@ -30,17 +31,35 @@ export const orderItemSchema = yup.object({
     .min(0)
     .default(0),
   isDepositCharged: yup.boolean().default(false),
+  returnedToStoreQty: yup.number().min(0).default(0),
+  wastageQuantity: yup.number().min(0).default(0),
+  unitPrice: yup.number().min(0).default(0),
+  freeProductId: yup.string().optional(),
 });
 
 export const orderSchema = yup.object({
-  saleType: yup.string().oneOf(["WALK_IN", "DELIVERY"]).required(),
+  category: yup.string().oneOf(["WALK_IN", "DELIVERY", "SALE_RETURN", "RECOVERY"]).required(),
+  orderType: yup.string().oneOf(["WALK_IN", "DELIVERY"]).required(),
   customerId: yup.string().required("Customer is required"),
 
-  // Conditionally require riderId if saleType is DELIVERY
-  riderId: yup.string().when("saleType", {
-    is: "DELIVERY",
-    then: (schema) => schema.required("Rider is required for scheduled deliveries"),
-    otherwise: (schema) => schema.optional(),
+  // 3rd Party / Local Driver manual fields
+  driverName: yup.string().optional(),
+  driverPhone: yup
+    .string()
+    .optional()
+    .test("is-valid-phone", "Must be a valid phone number", (value) => {
+      if (!value) return true;
+      return isValidPhoneNumber(value);
+    }),
+  driverCnic: yup.string().optional(),
+  vehiclePlate: yup.string().optional(),
+
+  // Conditionally require riderId if orderType is DELIVERY AND driverName is empty
+  riderId: yup.string().when(["orderType", "driverName"], ([orderType, driverName], schema) => {
+    if (orderType === "DELIVERY" && (!driverName || driverName.trim() === "")) {
+      return schema.required("Assign a branch rider or enter 3rd party driver details");
+    }
+    return schema.optional();
   }),
 
   scheduledDate: yup.string().optional(),
@@ -62,6 +81,7 @@ export const orderSchema = yup.object({
     .transform((value) => (isNaN(value) ? undefined : value))
     .min(0)
     .default(0),
+  returnOrderId: yup.string().optional(),
 });
 
 // Infer TypeScript types directly from the Yup schema

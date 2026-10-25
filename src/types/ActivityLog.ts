@@ -1,8 +1,16 @@
+export type ActivityLogActionEnums = 
+    | 'CREATED' 
+    | 'UPDATED' 
+    | 'DELETED' 
+    | 'STATUS' 
+    | 'RESTOCKED';
+
 export interface ActivityLog {
-    description: string;
     id: string;
-    action: "CREATED" | "UPDATED" | "DELETED" | "RESTOCKED" | "OTHER";
+    branchId: string;
     userName: string;
+    action: ActivityLogActionEnums;
     type: string;
+    description: string;
     createdAt: string;
 }

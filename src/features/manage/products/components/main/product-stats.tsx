@@ -5,12 +5,16 @@ import PageStatsCard from "@/lib/utils/components/StatsMainPageCards";
 
 interface ProductStatsProps {
     totalItems: number;
+    activeItemsCount: number;
+    inactiveItemsCount: number;
     lowStockCount: number;
     returnablesCount: number;
     recipeItemsCount: number;
 }
 export function ProductStats({
     totalItems,
+    activeItemsCount,
+    inactiveItemsCount,
     lowStockCount,
     returnablesCount,
     recipeItemsCount,
@@ -19,10 +23,11 @@ export function ProductStats({
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-            <PageStatsCard
+         <PageStatsCard
                 title="Total Catalog Items"
                 value={totalItems}
                 icon={Package}
+                description={`${activeItemsCount} Active • ${inactiveItemsCount} Inactive`}
             />
 
             <PageStatsCard

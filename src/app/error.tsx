@@ -15,8 +15,8 @@ export default function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
     typeof error === "string"
       ? error
       : error && typeof error === "object" && "message" in error
-      ? String(error.message)
-      : "The requested tenant plant could not be resolved.";
+        ? String(error.message)
+        : "The requested tenant plant could not be resolved.";
 
   return (
     <div className="p-8">
@@ -29,14 +29,7 @@ export default function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
           {errorMessage}
         </p>
         <div className="mt-4 flex items-center justify-center gap-2">
-          {reset && (
-            <button
-              onClick={() => reset()}
-              className={buttonVariants({ variant: "default", size: "sm" })}
-            >
-              Try Again
-            </button>
-          )}
+
           <Link
             href="/app"
             className={buttonVariants({ variant: "outline", size: "sm" })}
@@ -44,6 +37,14 @@ export default function ErrorBoundary({ error, reset }: ErrorBoundaryProps) {
             <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
             Back
           </Link>
+          {reset && (
+            <button
+              onClick={() => reset()}
+              className={buttonVariants({ variant: "destructive", size: "sm" })}
+            >
+              Try Again
+            </button>
+          )}
         </div>
       </div>
     </div>
