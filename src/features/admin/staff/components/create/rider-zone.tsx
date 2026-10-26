@@ -30,7 +30,6 @@ const RiderZoneCard = ({
                             options={zoneOptions}
                             isSearchable={true}
                             isLoading={isZoneLoading}
-                            required
 
                         />
                     </div>
@@ -42,7 +41,6 @@ const RiderZoneCard = ({
                             options={vehicleOptions}
                             isSearchable={true}
                             isLoading={isVehiclesLoading}
-                            required
                             formatOptionLabel={(opt) => (
                                 <div className="flex items-center justify-between w-full pr-1">
                                     <span className="font-medium truncate mr-2">

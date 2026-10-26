@@ -8,7 +8,7 @@ import TablePagination from "@/lib/utils/components/TablePagination";
 import { getSupplierColumns } from "./supplier-columns";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
 import { useDeleteSupplier } from "../../api/use-mutate-supplier";
 import { toast } from "sonner"
 

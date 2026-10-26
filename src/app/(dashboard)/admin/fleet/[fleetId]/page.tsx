@@ -1,7 +1,7 @@
 "use client"
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Edit, Receipt } from 'lucide-react';
+import { Edit, Wrench } from 'lucide-react';
 import PageDetailHeader from '@/lib/utils/components/PageDetailHeader';
 import FleetDetails from '@/features/admin/fleet/components/fleet_details/fleet-detail';
 import LogFuelTable from '@/features/admin/fleet/components/fleet_details/logFuel-table';
@@ -26,11 +26,14 @@ export default function VehicleDetailPage() {
     if (isLoading || !fleet) return <Loading text='Loading vehicle details...' />
 
     return (
-        <div className="max-w-6xl mx-auto p-6 space-y-6">
+        <div className="min-w-6xl mx-auto p-6 space-y-6">
             <PageDetailHeader
+                breadcrumbs={[
+                    { label: "Vehicles", href: "/admin/fleet" },
+                    { label: `${fleet.registration} Details` }
+                ]}
                 heading={`${fleet.registration} - ${fleet.modelInfo}`}
                 description='View and manage vehicle specifications and operational metrics.'
-                href='/admin/fleet'
                 createdAt={fleet.createdAt}
                 updatedAt={fleet.updatedAt}
             >
@@ -46,9 +49,9 @@ export default function VehicleDetailPage() {
 
                 <Button
                     onClick={() => setIsExpenseDialogOpen(true)}
-                    className="gap-2 bg-sky-600 hover:bg-sky-700 text-white"
+                    className="gap-2 bg-rose-600 hover:bg-rose-700 text-white"
                 >
-                    <Receipt className="h-4 w-4" />
+                    <Wrench className="h-4 w-4" />
                     Log Expense
                 </Button>
             </PageDetailHeader>
@@ -61,7 +64,7 @@ export default function VehicleDetailPage() {
             <LogFuelTable
                 branchId={branchId}
                 vehicleId={fleetId}
-                expenses={fleet.fuelExpenses || []} />
+                expenses={fleet.expenses || []} />
 
             {/* Dialog Mounts */}
             <EditVehicleDialog

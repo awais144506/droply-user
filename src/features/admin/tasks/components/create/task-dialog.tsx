@@ -32,7 +32,6 @@ export function TaskDialog({ isOpen, onClose, branchId, staffList = [], initialD
         resolver: yupResolver(createTaskSchema),
         mode: "onChange",
         defaultValues: {
-            branchId: branchId,
             description: "",
             assignedToId: "",
         },
@@ -43,13 +42,11 @@ export function TaskDialog({ isOpen, onClose, branchId, staffList = [], initialD
         if (isOpen) {
             if (initialData) {
                 form.reset({
-                    branchId: initialData.branchId,
                     description: initialData.description,
                     assignedToId: initialData.assignedToId,
                 });
             } else {
                 form.reset({
-                    branchId: branchId,
                     description: "",
                     assignedToId: "",
                 });

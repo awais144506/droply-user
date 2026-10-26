@@ -3,8 +3,7 @@
 import { useEffect } from "react";
 import { FormProvider } from "react-hook-form";
 import { Edit } from "lucide-react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { FormInput } from "@/components/ui/form-input";
 import { FormSelect } from "@/components/ui/form-select";
 import { useRole } from "@/lib/hooks/use-role";
@@ -12,6 +11,7 @@ import { useAppForm } from "@/lib/hooks/use-app-form";
 import { vehicleSchema, VehicleFormValues } from "../../schema/fleet.schema";
 import { Vehicle } from "../../types/fleet";
 import { useUpdateVehicle } from "../../api/use-create-fleet";
+import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
 
 interface EditVehicleDialogProps {
     isOpen: boolean;
@@ -34,7 +34,7 @@ export default function EditVehicleDialog({ isOpen, onClose, vehicle }: EditVehi
         assignedStaffId: vehicle.assignedStaffId || undefined,
     });
 
-    const { handleSubmit, reset } = methods;
+    const { handleSubmit, reset, formState } = methods;
 
     useEffect(() => {
         if (isOpen && vehicle) {
@@ -116,17 +116,15 @@ export default function EditVehicleDialog({ isOpen, onClose, vehicle }: EditVehi
                         </div>
 
                         <FormInput name="capacityInfo" label="Capacity Info (Optional)" placeholder="e.g. 500kg or 20 Bottles" />
+                        <FormCTAFooter
+                            href="/admin/fleet"
+                            isDirty={formState.isDirty}
+                            isValid={formState.isValid}
+                            isPending={isPending}
+                            isEditMode={true}
+                        />
                     </form>
                 </FormProvider>
-
-                <DialogFooter className="border-t border-slate-100 pt-4 mt-2">
-                    <Button type="button" variant="ghost" onClick={onClose} disabled={isPending}>
-                        Cancel
-                    </Button>
-                    <Button type="submit" form="edit-vehicle-form" disabled={isPending || !methods.formState.isDirty || !methods.formState.isValid} className="bg-sky-600 hover:bg-sky-700 text-white">
-                        {isPending ? "Saving..." : "Save Changes"}
-                    </Button>
-                </DialogFooter>
             </DialogContent>
         </Dialog>
     );

@@ -1,55 +1,47 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { UpdateStaffFormData } from "../schema/update-staff-schema";
+import { Staff } from "../types/staff";
+import { CreateStaffFormData } from "../schema/create-staff-schema";
+import { toDateInputString } from "@/lib/hooks/use-app-form";
 
-export const getEditStaffFormValues = (
-    user: any,
-    zoneOptions: any[],
-    vehicleOptions: any[]
-): UpdateStaffFormData => {
-    // 1. If data is still loading, return a safe empty shell
-    if (!user) {
-        return {
-            name: "", phone: "", role: "", cnic: "", salary: 0,
-            address: "", bloodGroup: "", fatherName: "", fatherCnic: "",
-            guarantorName: "", guarantorCnic: "", guarantorPhone: "",
-            licenseNumber: "", joiningDate: "", zoneIds: [],
-            vehicleId: "", // Empty string for single vehicle
-        };
-    }
+export const defaultCreateStaffValues: CreateStaffFormData = {
+    role: "RIDER",
+    name: "",
+    email: "",
+    phone: "",
+    cnic: "",
+    address: "",
+    joiningDate: toDateInputString(),
+    salary: 0,
+    zoneIds: [],
+    vehicleId: "",
+    licenseNumber: "",
+    fatherName: "",
+    fatherCnic: "",
+    bloodGroup: "",
+    guarantorName: "",
+    guarantorCnic: "",
+    guarantorPhone: "",
+};
 
-    // 2. Safely map the Zones (still an array)
-    const mappedZoneIds = user.zones?.map((userZone: any) => {
-        const matchedOption = zoneOptions.find((opt: any) => opt.label === userZone.name);
-        return matchedOption ? matchedOption.value : null;
-    }).filter(Boolean) || [];
+export const getEditStaffFormValues = (user?: Staff): CreateStaffFormData => {
+    if (!user) return defaultCreateStaffValues;
 
-    // 🔥 3. Safely map the single Vehicle ID
-    // Prisma returns an array, so we just grab the first assigned vehicle
-    const firstAssignedVehicle = user.assignedVehicles?.[0];
-    let mappedVehicleId = "";
-
-    if (firstAssignedVehicle) {
-        const matchedOption = vehicleOptions.find((opt: any) => opt.label === firstAssignedVehicle.registration);
-        mappedVehicleId = matchedOption ? matchedOption.value : "";
-    }
-
-    // 4. Return the perfectly shaped object
     return {
+        role: user.role === "MANAGER" ? "MANAGER" : "RIDER",
         name: user.name || "",
+        email: user.email || "",
         phone: user.phone || "",
-        role: user.designation || "",
         cnic: user.cnic || "",
-        salary: user.basicSalary || 0,
-        address: user.currentAddress || "",
-        bloodGroup: user.bloodGroup || "",
-        fatherName: user.fatherName || "",
-        fatherCnic: user.fatherCnic || "",
-        guarantorName: user.guarantorName || "",
-        guarantorCnic: user.guarantorCnic || "",
-        guarantorPhone: user.guarantorPhone || "",
-        licenseNumber: user.licenseNumber || "",
-        joiningDate: user.joiningDate ? new Date(user.joiningDate).toISOString().split('T')[0] : "",
-        zoneIds: mappedZoneIds,
-        vehicleId: mappedVehicleId,
+        address: user.address || "",
+        joiningDate: toDateInputString(user.joiningDate),
+        salary: Number(user.basicSalary ?? 0),
+        zoneIds: user.zones?.map((z) => z.id) || [],
+        vehicleId: user.assignedVehicles?.[0]?.id || "",
+        licenseNumber: user.hrProfile?.licenseNumber || "",
+        fatherName: user.hrProfile?.fatherName || "",
+        fatherCnic: user.hrProfile?.fatherCnic || "",
+        bloodGroup: user.hrProfile?.bloodGroup || "",
+        guarantorName: user.hrProfile?.guarantorName || "",
+        guarantorCnic: user.hrProfile?.guarantorCnic || "",
+        guarantorPhone: user.hrProfile?.guarantorPhone || "",
     };
 };

@@ -5,7 +5,7 @@ import { subscriptionKeys } from "./subscription-keys";
 export function useSubscription(branchId: string) {
   return useQuery({
     queryKey: subscriptionKeys.details(branchId),
-    queryFn: () => subApi.getSubscriptionDetails(branchId),
+    queryFn: () => subApi.getSubscriptionDetails(),
     enabled: Boolean(branchId),
   });
 }

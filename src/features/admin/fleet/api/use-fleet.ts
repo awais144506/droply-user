@@ -6,9 +6,10 @@ import { formatPhoneNumber } from "react-phone-number-input";
 
 export function useVehicles(branchId: string, statusFilter?: string, searchFilter?: string) {
   return useQuery({
-    queryKey: fleetKeys.vehicles.list({ branchId }),
-    queryFn: () => fleetApi.getVehicles(branchId),
-    select: (vehicles) => {
+    queryKey: fleetKeys.vehicles.lists(branchId),
+    queryFn: () => fleetApi.getVehicles(),
+    select: (data) => {
+      const vehicles = data.vehicles
       const activeCount = vehicles.filter(v => v.status === "ACTIVE").length;
       const maintenanceCount = vehicles.filter(v => v.status === "MAINTENANCE").length;
       const retiredCount = vehicles.filter(v => v.status === "RETIRED").length;
@@ -41,7 +42,7 @@ export function useVehicles(branchId: string, statusFilter?: string, searchFilte
         }
       }
     },
-    staleTime: 5 * 60 * 1000,
+    enabled: Boolean(branchId),
   })
 }
 
@@ -49,6 +50,6 @@ export function useVehicle(id: string) {
   return useQuery({
     queryKey: fleetKeys.vehicles.detail(id),
     queryFn: () => fleetApi.getVehicle(id),
-    enabled: !!id,
+    enabled: Boolean(id),
   })
 }

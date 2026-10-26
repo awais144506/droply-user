@@ -7,7 +7,7 @@ import { Calendar as CalendarIcon, X } from "lucide-react";
 import DataTable from "@/lib/utils/components/TableCreateMachine";
 import TablePagination from "@/lib/utils/components/TablePagination";
 import { usePagination } from "@/lib/utils/functions/pagination-calculation";
-import ConfirmActionDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import ConfirmActionDialog from "@/lib/utils/components/ConfirmDialog";
 import { Expense } from "../types/expenses";
 import { getExpenseColumns } from "./expenses-columns";
 import { useRole } from "@/lib/hooks/use-role";

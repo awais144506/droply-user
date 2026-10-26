@@ -10,7 +10,7 @@ import PageDetailHeader from "@/lib/utils/components/PageDetailHeader";
 import Loading from "@/app/loading";
 import NotFoundPage from "@/app/not-found";
 import { Button } from "@/components/ui/button";
-import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
 import EditZoneDialog from "@/features/manage/zones/components/zone_details/EditZone";
 import { ZoneDetailStats } from "@/features/manage/zones/components/zone_details/zone-detail-stats";
 import ZoneDetailMap from "@/features/manage/zones/components/zone_details/zone-detail-map";

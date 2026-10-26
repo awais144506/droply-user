@@ -2,10 +2,9 @@ import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
 import { Task } from "../../types/task";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
-import { Trash2, Edit2, CheckCircle2, Circle } from "lucide-react";
+import { Trash2, CheckCircle2, Circle } from "lucide-react";
 
 interface TaskActionHandlers {
-  onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
   onToggleStatus: (task: Task) => void;
 }
@@ -71,14 +70,6 @@ export const getTaskColumns = (
           {task.status === "COMPLETED" ? "Mark Incomplete" : "Mark Done"}
         </Button>
         
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={(e) => { e.stopPropagation(); handlers.onEdit(task); }} 
-          className="h-8 w-8 text-slate-400 hover:text-sky-600"
-        >
-          <Edit2 className="h-4 w-4" />
-        </Button>
 
         {isOwner && (
           <Button 

@@ -11,7 +11,7 @@ import { getInvoiceColumns } from "../columns/invoice-table-columns";
 import { useBranchSettings } from "@/features/admin/settings/api/use-branch-settings";
 import { generateInvoicePdf } from "@/lib/utils/functions/generatePdfs/generate-invoice";
 import { useDeleteQuotation, useUpdateInvoiceType } from "../../../api/use-mutate-quote";
-import ConfirmActionDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import ConfirmActionDialog from "@/lib/utils/components/ConfirmDialog";
 
 type Props = {
     docs: BillingDocument[] | undefined;

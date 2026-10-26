@@ -15,7 +15,7 @@ export const getVehicleExpenseColumns = (handlers: ExpenseColumnHandlers): Colum
         header: "DATE",
         render: (record) => (
             <span className="font-bold text-slate-900 text-sm">
-                {format(new Date(record.createdAt), "MMM d, yyyy")}
+                {format(new Date(record.date), "MMM d, yyyy")}
             </span>
         ),
     },
@@ -42,7 +42,7 @@ export const getVehicleExpenseColumns = (handlers: ExpenseColumnHandlers): Colum
             }
             return (
                 <div>
-                    <p className="font-medium text-slate-800">{record.serviceProvider || "General Maintenance"}</p>
+                    <p className="font-medium text-slate-800">{record.serviceProvider || "General Maintenance"} ({record.notes})</p>
                     {record.invoiceNumber && <p className="text-xs text-slate-400">Inv: {record.invoiceNumber}</p>}
                 </div>
             );

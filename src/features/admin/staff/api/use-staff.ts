@@ -1,14 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { staffKeys } from "./staff-keys";
 import { staffApi } from "./staff.service";
 import { useRole } from "@/lib/hooks/use-role";
+import { StaffApiResponse, Staff } from "../types/staff";
 
 // 2. Fetch All Staff for a Branch
 export function useStaffList(branchId: string, searchFilter?: string, roleFilter?: string, statusFilter?: string) {
   const { maxUsersLimit } = useRole();
   return useQuery({
     queryKey: staffKeys.branchList(branchId || ""),
-    queryFn: () => staffApi.getAllStaff(branchId),
+    queryFn: () => staffApi.getAllStaff(),
 
     select: (payload) => {
       const logs = payload.logs;
@@ -65,20 +66,23 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
 }
 
 // 3. Fetch Single Staff (for Edit/Details Page)
-export function useStaffDetail(id: string) {
+export function useStaffDetail(branchId: string, id: string) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: staffKeys.detail(id || ""),
     queryFn: () => staffApi.getStaff(id),
-    enabled: !!id,
+    enabled: !!id && !!branchId,
+    initialData: () => {
+      // 1. Grab the cached list data from the branch query
+      const cachedData = queryClient.getQueryData<StaffApiResponse>(
+        staffKeys.branchList(branchId || "")
+      );
+      const foundStaff = cachedData?.staff?.find((s) => s.id === id);
+      return foundStaff ? (foundStaff as Staff) : undefined;
+    },
+    staleTime: 1000 * 60 * 2,
   });
 }
 
-// 4. Fetch Staff Activity Logs
-export function useStaffLogs(branchId: string) {
-  return useQuery({
-    queryKey: staffKeys.logs(branchId || ""),
-    queryFn: () => staffApi.getStaffLogs(branchId),
-    enabled: !!branchId,
-  });
-}
 

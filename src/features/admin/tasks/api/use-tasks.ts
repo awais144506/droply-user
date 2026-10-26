@@ -5,7 +5,7 @@ import { tasksKeys } from "./tasks-keys";
 export const useTasks = (branchId: string, search?: string, status?: string) => {
   return useQuery({
     queryKey: tasksKeys.lists(branchId),
-    queryFn: () => tasksService.getAll(branchId),
+    queryFn: () => tasksService.getAll(),
     select: (allTasks) => {
       // 1. Calculate stats on ALL tasks so top cards remain accurate regardless of filters
       const pendingTasks = allTasks.filter(t => t.status === "INCOMPLETE").length;

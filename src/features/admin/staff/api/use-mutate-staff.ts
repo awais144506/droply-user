@@ -3,16 +3,17 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { staffKeys } from "./staff-keys";
 import { toast } from "sonner"
-import { staffApi, CreateStaffPayload } from "./staff.service";
+import { staffApi } from "./staff.service";
 import { updateStaffEmailValue } from "../utils/updateEmailDialog";
 import { UpdateStaffFormData } from "@/features/admin/staff/schema/update-staff-schema";
 import { zoneKeys } from "@/features/manage/zones/api/zone-keys";
+import { CreateStaffFormData } from "../schema/create-staff-schema";
 
 export function useCreateStaff(branchId: string) {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (payload: CreateStaffPayload) => staffApi.createNewStaff(payload),
+        mutationFn: async (payload: CreateStaffFormData) => staffApi.createNewStaff(payload),
         onSuccess: () => {
             toast.success("New staff created successfully")
             queryClient.invalidateQueries({

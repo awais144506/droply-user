@@ -14,11 +14,11 @@ const ExpenseStats = ({ vehicleId }: Props) => {
     const { data: vehicle, isLoading } = useVehicle(vehicleId);
 
     // Calculate totals safely
-    const fuelTotal = vehicle?.fuelExpenses
+    const fuelTotal = vehicle?.expenses
         ?.filter(expense => expense.category === "FUEL")
         .reduce((sum, expense) => sum + (expense.totalCost || 0), 0) || 0;
 
-    const maintenanceTotal = vehicle?.fuelExpenses
+    const maintenanceTotal = vehicle?.expenses
         ?.filter(expense => expense.category === "MAINTENANCE")
         .reduce((sum, expense) => sum + (expense.totalCost || 0), 0) || 0;
 

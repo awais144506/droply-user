@@ -3,6 +3,8 @@ export type ActivityLogActionEnums =
     | 'UPDATED' 
     | 'DELETED' 
     | 'STATUS' 
+    | 'ENABLE'
+    | 'DISABLE'
     | 'RESTOCKED';
 
 export interface ActivityLog {

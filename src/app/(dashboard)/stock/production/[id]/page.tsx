@@ -4,7 +4,7 @@ import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation"
 import { Button } from "@/components/ui/button"
 import { Trash2 } from "lucide-react"
 import { useState } from "react"
-import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
 import { useBatch } from "@/features/stock/production/api/use-production"
 import { useDeleteProduction } from "@/features/stock/production/api/use-mutate-production"
 import { useParams } from "next/navigation"

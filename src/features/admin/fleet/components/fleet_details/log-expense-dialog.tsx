@@ -101,6 +101,7 @@ export default function LogExpenseDialog({ isOpen, onClose, vehicle }: LogExpens
                             <FormSelect
                                 name="category"
                                 label="Expense Category"
+                                isSearchable={false}
                                 options={[
                                     { label: "Fuel Refill", value: "FUEL" },
                                     { label: "Maintenance / Repair", value: "MAINTENANCE" }

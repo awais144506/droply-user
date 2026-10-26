@@ -3,7 +3,7 @@ import { useRole } from "@/lib/hooks/use-role";
 import PageHeader from "@/lib/utils/components/MainPageHeader";
 import TierLimitCard from "@/features/admin/staff/components/main/tier-limit-card";
 import Loading from "@/app/loading";
-import { useStaffList, useStaffLogs } from "@/features/admin/staff/api/use-staff";
+import { useStaffList } from "@/features/admin/staff/api/use-staff";
 import ErrorBoundary from "@/app/error";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 import { StaffStats } from "@/features/admin/staff/components/main/staff-stats";
@@ -68,7 +68,7 @@ export default function StaffPage() {
             dropdownPlaceholder="All Statuses"
             dropdownOptions={[
               { label: "Active", value: "ACTIVE" },
-              { label: "Disabled", value: "DISABLE" },
+              { label: "Suspend", value: "SUSPENDED" },
             ]}
           />
           <StaffTable staff={staffData} />

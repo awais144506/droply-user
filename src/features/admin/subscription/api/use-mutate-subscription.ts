@@ -4,12 +4,12 @@ import { toast } from "sonner";
 import { subscriptionKeys } from "./subscription-keys";
 import { useRouter } from "next/navigation";
 
-export const useSubmitPayment = (branchId: string) => {
+export const useSubmitPayment = () => {
     const router = useRouter();
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (payload: SubmitPaymentApiPayload) => subApi.submitSubscriptionPayment(branchId, payload),
+        mutationFn: (payload: SubmitPaymentApiPayload) => subApi.submitSubscriptionPayment(payload),
         onSuccess: () => {
             toast.success("Payment submitted successfully!", {
                 description: "Your receipt is pending admin verification.",

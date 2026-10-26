@@ -16,7 +16,7 @@ const RENEWAL_WINDOW_DAYS = 7;
 
 export function useChangePlan() {
     const { branchId } = useRole();
-    const submitPaymentMutation = useSubmitPayment(branchId);
+    const submitPaymentMutation = useSubmitPayment();
 
     // 1. Fetch live data
     const { data: subData, isLoading: subLoading, isError: subError, error } = useSubscription(branchId);
@@ -43,10 +43,13 @@ export function useChangePlan() {
         return acc;
     }, {});
 
-    // 4. Staff & Date Calculations
+    // 4. Staff & Date Calculations (Counting only ACTIVE staff)
     const activeStaffCount = Array.isArray(staffData)
-        ? staffData.length
-        : staffData?.staff?.length || staffData?.stats?.active || 0;
+        ? staffData.filter((st) => st.status === 'ACTIVE').length
+        : staffData?.staff
+            ? staffData.staff.filter((st: any) => st.status === 'ACTIVE').length
+            : staffData?.stats?.activeStaffCount || 0;
+
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -56,10 +59,10 @@ export function useChangePlan() {
 
     // Calculate days left
     const daysLeft = Math.ceil((renewDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     // isPastDue triggers exactly at 0 days (Due Today) to unlock the renew button
-    const isPastDue = daysLeft <= 0; 
-    
+    const isPastDue = daysLeft <= 0;
+
     // Status strictly mirrors the Backend Cron Job
     let calculatedStatus = "ACTIVE";
     if (daysLeft < 0 && daysLeft >= -2) calculatedStatus = "PAST_DUE";
@@ -83,10 +86,10 @@ export function useChangePlan() {
     const selectedWeight = TIER_WEIGHT[selectedTier] || 0;
 
     const isSamePlan = !isTrial && selectedTier === currentUser.tier && selectedCycle === currentUser.cycle;
-    
+
     // Lock switching from Yearly -> Monthly while active (even if upgrading tier)
     const isCycleLocked = !isPastDue && currentUser.cycle === "YEARLY" && selectedCycle === "MONTHLY";
-    
+
     // Detect if user is switching from Monthly -> Yearly
     const isCycleUpgrade = !isTrial && currentUser.cycle === "MONTHLY" && selectedCycle === "YEARLY";
 
@@ -173,8 +176,8 @@ export function useChangePlan() {
 
         // 🔥 FIX 3: Use `isRenewal` to accurately label full-cycle extensions vs mid-cycle upgrades
         case !isPastDue && isUpgrade:
-            buttonText = isRenewal 
-                ? `Pay Rs. ${amountDue.toLocaleString()} to Upgrade & Renew` 
+            buttonText = isRenewal
+                ? `Pay Rs. ${amountDue.toLocaleString()} to Upgrade & Renew`
                 : `Pay Rs. ${amountDue.toLocaleString()} & Upgrade Now`;
             buttonClass = "bg-emerald-600 hover:bg-emerald-700 text-white";
             isButtonDisabled = false;

@@ -1,8 +1,5 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Edit2, Ban, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -10,14 +7,13 @@ import ProfileHeader from "./profile-header";
 import PersonalInfoCard from "./personal-info-card";
 import AssignmentCard from "./assignment-card";
 import PageDetailHeader from "@/lib/utils/components/PageDetailHeader";
-import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
-import ConfirmEnableDialog from "@/lib/utils/components/ConfirmEnableDialog";
+import ConfirmActionDialog from "@/lib/utils/components/ConfirmDialog";
 import { useStaffDisable, useStaffEnable } from "../../api/use-mutate-staff";
-// import { useUpdateStaff } from "../../api/use-mutate-staff"; // <-- Import your update hook when ready
 import { useStaffList } from "../../api/use-staff";
 import { toast } from "sonner";
+import { Staff } from "../../types/staff";
 
-export function StaffProfile({ user, userId, branchId }: { user: any, userId: string, branchId: string }) {
+export function StaffProfile({ user, userId, branchId }: { user: Staff, userId: string, branchId: string }) {
   const router = useRouter();
 
   const [isDisableOpen, setIsDisableOpen] = useState(false);
@@ -28,20 +24,6 @@ export function StaffProfile({ user, userId, branchId }: { user: any, userId: st
   const { data } = useStaffList(branchId);
 
   const isLimitReached = data?.isLimitReached;
-
-  const [localUser, setLocalUser] = useState<any>({
-    ...user,
-    isActive: user.status === "ACTIVE",
-    role: user.designation
-  });
-
-  useEffect(() => {
-    setLocalUser({
-      ...user,
-      isActive: user.status === "ACTIVE",
-      role: user.designation
-    });
-  }, [user]);
 
   const handleDisableConfirm = () => {
     disableUser(userId);
@@ -63,9 +45,12 @@ export function StaffProfile({ user, userId, branchId }: { user: any, userId: st
   return (
     <div className="space-y-6">
       <PageDetailHeader
-        href="/admin/staff"
         heading="Staff Profile"
         description="View and manage employee details and assignments."
+        breadcrumbs={[
+          { label: "Staff", href: "/admin/staff" },
+          { label: `${user.name} Details` }
+        ]}
       >
         <Button
           variant="outline"
@@ -101,31 +86,46 @@ export function StaffProfile({ user, userId, branchId }: { user: any, userId: st
       </PageDetailHeader>
 
       {/* Top Header */}
-      <ProfileHeader user={localUser} branchId={branchId} />
+      <ProfileHeader user={user} branchId={branchId} />
 
       {/* Clean 2-Column Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <PersonalInfoCard user={localUser} />
-        {localUser.role === "RIDER" && <AssignmentCard user={localUser} />}
+        <PersonalInfoCard user={user} />
+        {user.role === "RIDER" && <AssignmentCard user={user} />}
       </div>
 
-      <ConfirmDeleteDialog
-        title={localUser.name}
+      {/* Suspend / Disable Dialog */}
+      <ConfirmActionDialog
+        title={`Suspend ${user.name}?`}
         isOpen={isDisableOpen}
-        description
+        description={
+          <span>
+            Are you sure you want to suspend <strong className="text-slate-900">{user.name}</strong>? They will lose access to the branch portal immediately.
+          </span>
+        }
         onClose={() => setIsDisableOpen(false)}
         onConfirm={handleDisableConfirm}
         isLoading={isDisabling}
-        confirmText="Suspend"
+        confirmText="Suspend Staff"
+        confirmButtonClass="bg-rose-600 hover:bg-rose-700 text-white hover:text-white"
+        confirmButtonVariant="destructive"
       />
 
-      <ConfirmEnableDialog
-        itemName={localUser.name}
+      {/* Enable Dialog */}
+      <ConfirmActionDialog
+        title={`Enable ${user.name}?`}
         isOpen={isEnableOpen}
+        description={
+          <span>
+            Are you ready to re-activate <strong className="text-slate-900">{user.name}</strong>? Their login access will be restored immediately.
+          </span>
+        }
         onClose={() => setIsEnableOpen(false)}
         onConfirm={handleEnableConfirm}
-        isEnabling={isEnabling}
-        btnText="Enable"
+        isLoading={isEnabling}
+        confirmText="Enable Staff"
+        confirmButtonClass="bg-emerald-600 hover:bg-emerald-700 text-white"
+        confirmButtonVariant="default"
       />
     </div>
   );

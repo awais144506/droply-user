@@ -24,10 +24,13 @@ const CreateNewLog = () => {
     };
 
     return (
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto p-6">
             <CreateFormHeader
+                breadcrumbs={[
+                    { label: "Expenses", href: "/admin/expenses" },
+                    { label: "Log Expense" }
+                ]}
                 title="Log Petty Expense"
-                href="/admin/expenses"
             />
             <ExpenseLogForm
                 onSubmit={handleSubmit}

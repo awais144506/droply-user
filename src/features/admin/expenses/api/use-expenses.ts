@@ -5,7 +5,7 @@ import { expenseApi } from "./expenses.service";
 export function useExpenses(branchId: string, search?: string, category?: string) {
   return useQuery({
     queryKey: expensesKeys.list(branchId),
-    queryFn: () => expenseApi.getAll(branchId),
+    queryFn: () => expenseApi.getAll(),
     select: (allExpenses) => {
       const totalAmount = allExpenses.reduce((acc, expense) => acc + expense.amount, 0);
       let filteredExpenses = allExpenses;

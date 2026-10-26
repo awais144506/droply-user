@@ -7,7 +7,7 @@ import { usePagination } from "@/lib/utils/functions/pagination-calculation";
 import { ProductList } from "../../types/product";
 import DataTable from "@/lib/utils/components/TableCreateMachine";
 import TablePagination from "@/lib/utils/components/TablePagination";
-import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
 import { ProductsFilterBar } from "./products-filter-bar";
 import { getProductColumns } from "./products-columns";
 

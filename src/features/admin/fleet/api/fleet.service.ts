@@ -2,43 +2,43 @@
 import { apiClient } from "@/lib/api-client";
 import { Vehicle, VehicleExpense } from "../types/fleet";
 import { VehicleFormValues, VehicleExpenseFormValues } from "../schema/fleet.schema";
+import { VehicleListResponse } from "../types/fleet";
+
+
+const API = '/vehicle/user'
 
 export const fleetApi = {
     // --- VEHICLE ROUTES ---
 
-    getVehicles: async (branchId: string): Promise<Vehicle[]> => {
-        return apiClient.get<any, Vehicle[]>("/fleet/vehicles", {
-            params: { branchId }
-        });
+    getVehicles: async (): Promise<VehicleListResponse> => {
+        return apiClient.get(`${API}`);
     },
 
     getVehicle: async (id: string): Promise<Vehicle> => {
-        return apiClient.get(`/fleet/vehicles/${id}`);
+        return apiClient.get(`${API}/${id}`);
     },
 
     createVehicle: async (newVehicle: VehicleFormValues): Promise<Vehicle> => {
-        return apiClient.post<any, Vehicle>("/fleet/vehicles", newVehicle);
+        return apiClient.post<any, Vehicle>(`${API}`, newVehicle);
     },
 
     updateVehicle: async (id: string, updateData: Partial<VehicleFormValues>): Promise<Vehicle> => {
-        return apiClient.patch<any, Vehicle>(`/fleet/vehicles/${id}`, updateData);
+        return apiClient.patch<any, Vehicle>(`${API}/${id}`, updateData);
     },
 
     deleteVehicle: async (id: string): Promise<void> => {
-        return apiClient.delete(`/fleet/vehicles/${id}`);
+        return apiClient.delete(`${API}/${id}`);
     },
 
-    getVehicleExpenses: async (vehicleId?: string): Promise<VehicleExpense[]> => {
-        return apiClient.get<any, VehicleExpense[]>("/fleet/expenses", {
-            params: { vehicleId }
-        });
+    getVehicleExpenses: async (id?: string): Promise<VehicleExpense[]> => {
+        return apiClient.get<any, VehicleExpense[]>(`${API}/expense/${id}`);
     },
 
     createVehicleExpense: async (newExpense: VehicleExpenseFormValues): Promise<VehicleExpense> => {
-        return apiClient.post<any, VehicleExpense>("/fleet/expenses", newExpense);
+        return apiClient.post<any, VehicleExpense>(`${API}/expense`, newExpense);
     },
 
     deleteExpenseRecord: async (id: string) => {
-        return apiClient.delete(`/fleet/expenses/${id}`)
+        return apiClient.delete(`${API}/expense/${id}`)
     }
 };

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import DataTable from "@/lib/utils/components/TableCreateMachine";
 import TablePagination from "@/lib/utils/components/TablePagination";
-import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
 import { usePagination } from "@/lib/utils/functions/pagination-calculation";
 import { PurchaseReturn } from "../../types/returns";
 import { getReturnColumns } from "./return-columns";

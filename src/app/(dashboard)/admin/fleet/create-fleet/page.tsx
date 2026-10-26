@@ -10,7 +10,10 @@ const CreateVehicle = () => {
         <div className="max-w-7xl mx-auto space-y-6 p-6">
             <CreateFormHeader
                 title="Create New Vehicle"
-                href="/admin/fleet"
+                breadcrumbs={[
+                    { label: "Vehicles", href: "/admin/fleet" },
+                    { label: "Create Vehicle" }
+                ]}
             />
             <CreateVehicleForm
                 branchId={branchId}

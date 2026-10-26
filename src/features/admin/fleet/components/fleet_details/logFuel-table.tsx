@@ -6,7 +6,7 @@ import { Calendar as CalendarIcon, X } from "lucide-react";
 import DataTable from "@/lib/utils/components/TableCreateMachine";
 import { usePagination } from "@/lib/utils/functions/pagination-calculation";
 import TablePagination from "@/lib/utils/components/TablePagination";
-import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
 import { VehicleExpense } from "../../types/fleet";
 import { getVehicleExpenseColumns } from "./fuel-columns";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ const VehicleExpenseTable = ({ expenses = [], vehicleId, branchId }: VehicleExpe
     const filteredExpenses = useMemo(() => {
         if (!dateFilter) return expenses;
         const filterDateString = format(dateFilter, "yyyy-MM-dd");
-        return expenses.filter(exp => format(new Date(exp.createdAt), "yyyy-MM-dd") === filterDateString);
+        return expenses.filter(exp => format(new Date(exp.date), "yyyy-MM-dd") === filterDateString);
     }, [expenses, dateFilter]);
 
     // 2. Paginate the filtered data

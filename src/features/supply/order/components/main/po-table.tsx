@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import DataTable from "@/lib/utils/components/TableCreateMachine";
 import TablePagination from "@/lib/utils/components/TablePagination";
 import { usePagination } from "@/lib/utils/functions/pagination-calculation";
-import ConfirmActionDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import ConfirmActionDialog from "@/lib/utils/components/ConfirmDialog";
 import { sendPOWhatsApp } from "@/lib/utils/functions/whatsapp/whatsapp-utils";
 import { PurchaseOrder } from "../../types/po";
 import { getPOColumns } from "./po-columns";

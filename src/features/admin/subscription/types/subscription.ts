@@ -45,7 +45,7 @@ export interface SubscriptionPayment {
 }
 
 export interface SubscriptionResponse {
-  plans: SubscriptionPlan;
+  plans: SubscriptionPlan[];
   currentPlan: Subscription;
   paymentHistory: SubscriptionPayment[];
 }

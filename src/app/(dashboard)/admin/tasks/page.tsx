@@ -44,11 +44,6 @@ export default function AdminTasksPage() {
   // Use rawTasks so the badge count doesn't disappear when the user searches/filters the main table
   const myPendingTasks = rawTasks.filter(t => t.assignedToId === userId && t.status === "INCOMPLETE");
 
-  const handleEdit = (task: Task) => {
-    setEditingTask(task);
-    setIsModalOpen(true);
-  };
-
   const handleClose = () => {
     setIsModalOpen(false);
     setTimeout(() => setEditingTask(null), 200);
@@ -59,7 +54,7 @@ export default function AdminTasksPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto p-6 relative">
+    <div className="space-y-6 min-w-7xl mx-auto p-6 relative">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Task Delegation</h1>
@@ -90,7 +85,7 @@ export default function AdminTasksPage() {
 
       <DataTableFilterBar
         searchParamName="search"
-        searchPlaceholder="Search tasks or assignees..."
+        searchPlaceholder="Search by assignees name..."
         tabParamName="status"
         tabs={[
           { label: "All", value: "" },
@@ -99,7 +94,7 @@ export default function AdminTasksPage() {
         ]}
       />
 
-      <TaskTable tasks={tasks} onEdit={handleEdit} />
+      <TaskTable tasks={tasks}/>
 
       <TaskDialog
         isOpen={isModalOpen}

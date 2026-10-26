@@ -12,7 +12,7 @@ import { usePurchaseOrder } from "@/features/supply/order/api/use-po";
 import { useUpdatePO, useDeletePO } from "@/features/supply/order/api/use-mutate-po";
 import { CreatePOFormData } from "@/features/supply/order/schema/create-po-schema";
 import NotFoundPage from "@/app/not-found";
-import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
 import { Button } from "@/components/ui/button";
 import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
 

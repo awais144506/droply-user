@@ -11,11 +11,10 @@ export default function StaffMemberPage() {
   const params = useParams();
   const { branchId } = useRole();
   const staffId = params.staffId as string;
-  const { data: user, isLoading } = useStaffDetail(staffId);
+  const { data: user, isLoading, isError } = useStaffDetail(branchId, staffId);
 
-  if (isLoading) return <Loading text="Loading Staff Profile..."/>
-
-  if (!user) return <NotFoundPage />
+  if (isLoading || !user) return <Loading text="Loading Staff Profile..." />;
+  if (isError) return <NotFoundPage />;
 
   return (
     <div className=" p-6">

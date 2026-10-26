@@ -5,7 +5,7 @@ import { WastageRecord } from "../../types/wastage";
 import DataTable from "@/lib/utils/components/TableCreateMachine";
 import { usePagination } from "@/lib/utils/functions/pagination-calculation";
 import TablePagination from "@/lib/utils/components/TablePagination";
-import ConfirmActionDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import ConfirmActionDialog from "@/lib/utils/components/ConfirmDialog";
 import { getWastageColumns } from "./wastage-columns";
 import { useDeleteWastage } from "../../api/use-mutate-wastage";
 import { useRole } from "@/lib/hooks/use-role";

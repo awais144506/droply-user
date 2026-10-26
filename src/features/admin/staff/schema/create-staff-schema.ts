@@ -4,6 +4,11 @@ import { isValidPhoneNumber } from "react-phone-number-input";
 const stripFormat = (value: string | undefined) => (value ? value.replace(/[\s-]/g, "") : value);
 
 export const createStaffSchema = yup.object().shape({
+  role: yup
+    .string()
+    .oneOf(["RIDER", "MANAGER"], "Invalid role")
+    .default("RIDER")
+    .required("Role is required"),
   name: yup.string().min(3, "Name must be at least 3 characters").required("Name is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
   phone: yup
@@ -19,8 +24,10 @@ export const createStaffSchema = yup.object().shape({
     .matches(/^[0-9]{13}$/, "CNIC must be exactly 13 digits without dashes")
     .required("CNIC is required"),
 
-  address: yup.string().optional().nullable(),
+  address: yup.string().required("Address is required"),
   joiningDate: yup.string().optional().nullable(),
+
+  // Mapped to basicSalary for backend DTO
   salary: yup
     .number()
     .transform((value, originalValue) => (originalValue === "" ? 0 : value))
@@ -34,18 +41,15 @@ export const createStaffSchema = yup.object().shape({
     otherwise: (schema) => schema.optional().default([]),
   }),
 
-  // 🔥 CHANGED: Vehicle is now a single string
+  // Vehicle is a single string
   vehicleId: yup.string().when("$role", {
     is: "RIDER",
     then: (schema) => schema.required("Please assign exactly one vehicle"),
     otherwise: (schema) => schema.optional().nullable(),
   }),
 
-  licenseNumber: yup.string().when("$role", {
-    is: "RIDER",
-    then: (schema) => schema.optional(),
-  }),
-
+  // HR Profile & License Fields
+  licenseNumber: yup.string().optional().nullable(),
   fatherName: yup.string().optional().nullable(),
   fatherCnic: yup
     .string()

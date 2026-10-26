@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { useCustomer } from "@/features/manage/customers/api/use-customer";
 import { useDeleteCustomer, useToggleCustomerStatus } from "@/features/manage/customers/api/use-mutate-customer";
 import PageDetailHeader from "@/lib/utils/components/PageDetailHeader";
-import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
+import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
 import Loading from "@/app/loading";
 import NotFoundPage from "@/app/not-found";
 import CustomerDetailsStats from "@/features/manage/customers/components/customer_details/customer-details-stats";
