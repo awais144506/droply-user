@@ -30,12 +30,12 @@ export default function ChangePlanPage() {
         targetLimit,
         amountDue,
         selectedPlanFullPrice,
-        isRenewal,            // 🔥 Extracted new flag
+        isRenewal,           
         requirePayment,
         buttonText,
         buttonClass,
         isButtonDisabled,
-        isSubmittingPayment,  // 🔥 Extracted loading state for the button
+        isSubmittingPayment,
         handlePaymentSubmit,
     } = useChangePlan();
 

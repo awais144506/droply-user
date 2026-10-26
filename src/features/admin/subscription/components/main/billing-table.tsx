@@ -1,32 +1,24 @@
 "use client";
 
-import { useMemo, useCallback } from "react";
+import { useMemo } from "react";
 import { usePagination } from "@/lib/utils/functions/pagination-calculation";
 import DataTable from "@/lib/utils/components/TableCreateMachine";
 import TablePagination from "@/lib/utils/components/TablePagination";
 import { SubscriptionPayment } from "../../types/subscription";
 import { getBillingColumns } from "./billing-columns";
-import { useDeletePayment } from "../../api/use-mutate-subscription";
-import Loading from "@/app/loading";
+
 
 type Props = {
     ledger: SubscriptionPayment[] | undefined;
 };
 
 export default function BillingTable({ ledger }: Props) {
-    const { mutate: deletePayment, isPending } = useDeletePayment();
     const {
         currentPage, setCurrentPage, paginatedData, totalPages, totalItems, itemsPerPage
     } = usePagination(ledger);
 
-    // Handle Delete Logic (Can wire to React Query here later)
-    const handleDeletePayment = useCallback((paymentId: string) => {
-        deletePayment(paymentId);
-    }, [deletePayment]);
 
-
-    const columns = useMemo(() => getBillingColumns(handleDeletePayment), [handleDeletePayment]);
-    if (isPending) return <Loading text="Loading data..." />
+    const columns = useMemo(() => getBillingColumns(), []);
     return (
         <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
 

@@ -22,21 +22,3 @@ export const useSubmitPayment = () => {
         },
     });
 };
-
-export const useDeletePayment = () => {
-    const queryClient = useQueryClient();
-    const router = useRouter();
-    return useMutation({
-        mutationFn: (id: string) => subApi.deleteSubscriptionPayment(id),
-        onSuccess: () => {
-            toast.success("Payment submitted successfully!", {
-                description: "Your receipt is pending admin verification.",
-            });
-            router.back();
-            queryClient.invalidateQueries({ queryKey: subscriptionKeys.all });
-        },
-        onError: (error) => {
-            toast.error(error.message);
-        },
-    })
-}

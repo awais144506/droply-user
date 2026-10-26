@@ -1,36 +1,35 @@
+
 "use client";
 
-import { Check, Clock, XCircle, Eye, Trash2, MessageSquareText } from "lucide-react";
+import { Check, Clock, XCircle, Eye, MessageSquareText } from "lucide-react";
 import { SubscriptionPayment } from "../../types/subscription";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
 import { Dialog, DialogContent, DialogTrigger, DialogTitle, DialogHeader, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 // Mini component to safely handle hook states (like Dialogs) inside table cells
-const ActionCell = ({ 
-    row, 
-    onDelete 
-}: { 
-    row: SubscriptionPayment; 
-    onDelete: (id: string) => void;
+const ActionCell = ({
+    row,
+}: {
+    row: SubscriptionPayment;
 }) => {
     return (
         <div className="flex items-center gap-1.5">
-            
+
             {/* 1. View Remarks (ONLY for Rejected Payments with remarks) */}
             {row.status === "REJECTED" && row.remarks && (
                 <Dialog>
                     <DialogTrigger>
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-amber-500 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
                             title="View Rejection Reason"
                         >
                             <MessageSquareText className="h-4 w-4" />
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[420px]">
+                    <DialogContent className="sm:max-w-md">
                         <DialogHeader>
                             <DialogTitle className="flex items-center gap-2 text-rose-600">
                                 <XCircle className="h-5 w-5" /> Payment Rejected
@@ -47,53 +46,45 @@ const ActionCell = ({
             )}
 
             {/* 2. View Receipt Modal (Available for all statuses) */}
-            {row.imageUrl && (
+            {row.receiptUrl && (
                 <Dialog>
                     <DialogTrigger>
-                        <Button 
-                            variant="ghost" 
-                            size="icon" 
+                        <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-8 w-8 text-slate-400 hover:text-sky-600 hover:bg-sky-50 rounded-lg transition-colors"
                             title="View Receipt"
                         >
                             <Eye className="h-4 w-4" />
                         </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px] p-0 overflow-hidden border-0 bg-transparent shadow-2xl">
-                        <DialogTitle className="sr-only">Payment Receipt</DialogTitle>
-                        <div className="relative flex flex-col items-center justify-center p-4 rounded-xl">
-                            {row.imageUrl.endsWith(".pdf") ? (
-                                <iframe src={row.imageUrl} className="w-full h-[600px] rounded-lg bg-white" />
+                    <DialogContent className="sm:max-w-2xl p-6 bg-white rounded-2xl shadow-2xl border border-slate-100">
+                        <DialogHeader className="mb-4">
+                            <DialogTitle className="text-base font-bold text-slate-900">Payment Receipt</DialogTitle>
+                            <DialogDescription>
+                                Uploaded receipt proof for transaction verification.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="relative flex flex-col items-center justify-center p-2 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden">
+                            {row.receiptUrl.endsWith(".pdf") ? (
+                                <iframe src={row.receiptUrl} className="w-full h-125 rounded-lg bg-white" />
                             ) : (
-                                <img 
-                                    src={row.imageUrl} 
-                                    alt="Payment Receipt" 
-                                    className="max-w-full max-h-[80vh] object-contain rounded-lg" 
+                                <img
+                                    src={row.receiptUrl}
+                                    alt="Payment Receipt"
+                                    className="w-full max-h-[70vh] object-contain rounded-lg shadow-sm bg-white"
                                 />
                             )}
                         </div>
                     </DialogContent>
                 </Dialog>
             )}
-
-            {/* 3. Delete Button (ONLY for Rejected Payments) */}
-            {row.status === "REJECTED" && (
-                <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => onDelete(row.id)}
-                    className="h-8 w-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                    title="Delete Rejected Payment"
-                >
-                    <Trash2 className="h-4 w-4" />
-                </Button>
-            )}
         </div>
     );
 };
 
-// Column Generator now accepts the onDelete handler
-export const getBillingColumns = (onDelete: (id: string) => void): ColumnDef<SubscriptionPayment>[] => [
+// Column Generator no longer requires onDelete
+export const getBillingColumns = (): ColumnDef<SubscriptionPayment>[] => [
     {
         header: "Billing Month",
         render: (row) => {
@@ -152,8 +143,8 @@ export const getBillingColumns = (onDelete: (id: string) => void): ColumnDef<Sub
     {
         header: "Type",
         render: (row) => (
-            <span className="text-xs font-medium text-slate-600">
-                {row.type}
+            <span className="text-xs font-bold text-slate-600">
+                {row.paymentMethod}
             </span>
         ),
     },
@@ -171,6 +162,6 @@ export const getBillingColumns = (onDelete: (id: string) => void): ColumnDef<Sub
     },
     {
         header: "Actions",
-        render: (row) => <ActionCell row={row} onDelete={onDelete} />,
+        render: (row) => <ActionCell row={row} />,
     },
 ];

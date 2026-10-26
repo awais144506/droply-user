@@ -17,7 +17,4 @@ export const subApi = {
     submitSubscriptionPayment: async (payload: SubmitPaymentApiPayload) => {
         return await apiClient.post(`${API}/payment`, payload);
     },
-    deleteSubscriptionPayment: async (id: string): Promise<true> => {
-        return await apiClient.delete(`${API}/${id}`)
-    }
 }

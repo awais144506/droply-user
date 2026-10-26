@@ -33,8 +33,7 @@ export const ourFileRouter = {
 
   // 2. New endpoint for Subscription Payment Receipts
   paymentReceipt: f({
-    image: { maxFileSize: "4MB", maxFileCount: 1 },
-    pdf: { maxFileSize: "4MB", maxFileCount: 1 }
+    image: { maxFileSize: "2MB", maxFileCount: 1 },
   })
     .onUploadComplete(async ({ file }) => {
       console.log("✅ Payment receipt uploaded, URL:", file.ufsUrl);

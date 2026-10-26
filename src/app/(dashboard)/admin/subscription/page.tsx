@@ -5,14 +5,15 @@ import { PlanOverview } from "@/features/admin/subscription/components/main/plan
 import ErrorBoundary from "@/app/error";
 import Loading from "@/app/loading";
 import BillingTable from "@/features/admin/subscription/components/main/billing-table";
+import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 
 export default function SubscriptionPage() {
   const { branchId } = useRole();
-  const { data, isLoading, isError, error } = useSubscription(branchId);
+  const { data, isLoading, isError, error, refetch, isRefetching } = useSubscription(branchId);
   const currentPlan = data?.currentPlan
   const paymentHistory = data?.paymentHistory;
 
-  if (isLoading) return <Loading text="Loading Subscription..." />
+  if (isLoading || !data) return <Loading text="Loading Subscription..." />
   if (isError) return <ErrorBoundary error={error.message} />
 
   if (!currentPlan) {
@@ -25,12 +26,12 @@ export default function SubscriptionPage() {
 
   return (
     <div className="space-y-8 p-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Billing & Subscription</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Manage your workspace plan, clear pending invoices, and track billing history.
-        </p>
-      </div>
+      <MainPageHeader
+        heading="Billing & Subscription"
+        description="Manage your workspace plan, clear pending invoices, and track billing history."
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
+      />
 
       {/* FIXED: Changed 'plan' to 'currentPlan' */}
       <PlanOverview currentPlan={currentPlan} />

@@ -2,15 +2,16 @@ import * as yup from "yup";
 import { SubscriptionPaymentType } from "../types/subscription";
 
 // --- CONSTANTS ---
-const MAX_FILE_SIZE = 4 * 1024 * 1024; // 4MB
-const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
+const SUPPORTED_FORMATS = ["image/jpeg", "image/png","image/webp"];
 
 // --- TYPES ---
 export interface CheckoutSubmitPayload {
     amountPaid: number;
     type: SubscriptionPaymentType;
     transactionId?: string;
-    imageUrl: string;
+    receiptImage?: File;
+    imageUrl?: string;
     isRenewal: boolean;
 }
 
@@ -22,6 +23,7 @@ export const getCheckoutSchema = (requirePayment: boolean) => {
             type: yup.string().default("BANK"),
             transactionId: yup.string().optional(),
             receiptImage: yup.mixed<File>().optional(),
+            isRenewal: yup.boolean().default(false),
         });
     }
 
@@ -36,14 +38,14 @@ export const getCheckoutSchema = (requirePayment: boolean) => {
         receiptImage: yup
             .mixed<File>()
             .required("Please upload a payment receipt")
-            .test("fileSize", "File size must be less than 4MB", (value) => {
+            .test("fileSize", "File size must be less than 2MB", (value) => {
                 if (!value) return false;
                 return value.size <= MAX_FILE_SIZE;
             })
-            .test("fileType", "Only JPG, PNG, WEBP, or PDF are allowed", (value) => {
+            .test("fileType", "Only JPG, PNG & Webp, are allowed", (value) => {
                 if (!value) return false;
                 return SUPPORTED_FORMATS.includes(value.type);
             }),
-        isRenewal: yup.boolean(),
+        isRenewal: yup.boolean().default(false),
     });
 };

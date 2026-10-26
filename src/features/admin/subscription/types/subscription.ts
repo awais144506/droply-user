@@ -31,6 +31,8 @@ export interface Subscription {
 }
 
 export interface SubscriptionPayment {
+  receiptUrl: string | undefined;
+  paymentMethod: string;
   id: string;
   amountPaid: number;
   tier: SubscriptionTier;

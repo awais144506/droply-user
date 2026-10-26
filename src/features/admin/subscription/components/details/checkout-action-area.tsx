@@ -1,8 +1,9 @@
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect, useMemo } from "react";
-import { useForm, FormProvider } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { FormProvider } from "react-hook-form";
 import {
     CreditCard,
     ShieldCheck,
@@ -23,6 +24,8 @@ import { FormSelect, SelectOption } from "@/components/ui/form-select";
 import { PaymentChannels } from "./payment-channels";
 import { useUploadThing } from "@/lib/uploadthing";
 import { getCheckoutSchema, CheckoutSubmitPayload } from "../../schema/payment.schema";
+import { useAppForm } from "@/lib/hooks/use-app-form";
+import { compressImageFile } from "@/lib/utils/functions/compress-image";
 
 const PAYMENT_TYPE_OPTIONS: SelectOption[] = [
     { label: "Bank Transfer", value: "BANK" },
@@ -55,19 +58,15 @@ export default function CheckoutArea({
 
     const schema = useMemo(() => getCheckoutSchema(requirePayment), [requirePayment]);
 
-    const methods = useForm({
-        resolver: yupResolver(schema),
-        defaultValues: {
-            amountPaid: requirePayment ? amountDue : 0,
-            type: "BANK",
-            transactionId: "",
-            receiptImage: undefined,
-        },
-    });
+    const methods = useAppForm(schema, {
+        amountPaid: requirePayment ? amountDue : 0,
+        type: "BANK",
+        transactionId: "",
+        receiptImage: undefined,
+    })
 
     const { startUpload, isUploading } = useUploadThing("paymentReceipt", {
         onUploadError: (err) => {
-            // 🔥 THIS WILL PRINT THE REAL REASON IN YOUR F12 CONSOLE!
             console.error("🔥 REAL UPLOADTHING ERROR:", err.message, err.data);
             methods.setError("receiptImage", { message: `Upload Error: ${err.message}` });
         },
@@ -80,10 +79,12 @@ export default function CheckoutArea({
     const selectedFile = methods.watch("receiptImage");
     const fileError = methods.formState.errors.receiptImage?.message as string | undefined;
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            methods.setValue("receiptImage", file, { shouldValidate: true });
+            // Compress image right before setting into form state
+            const compressedFile = await compressImageFile(file);
+            methods.setValue("receiptImage", compressedFile, { shouldValidate: true });
         }
     };
 
@@ -181,7 +182,7 @@ export default function CheckoutArea({
                             <div className="space-y-1.5">
                                 <Label className="flex items-center text-xs font-bold text-slate-700 uppercase tracking-wide">
                                     <UploadCloud className="h-3.5 w-3.5 mr-1.5 text-sky-500" />
-                                    Upload Payment Receipt (Image or PDF)
+                                    Upload Payment Receipt (Image Only)
                                     <span className="text-rose-500 ml-1">*</span>
                                 </Label>
 
@@ -203,7 +204,7 @@ export default function CheckoutArea({
                                         <div className="flex flex-col items-center justify-center text-slate-500">
                                             <UploadCloud className="w-6 h-6 mb-1 text-slate-400" />
                                             <p className="text-xs font-semibold">Click to upload receipt</p>
-                                            <p className="text-[10px] text-slate-400">PNG, JPG, WEBP or PDF (Max 4MB)</p>
+                                            <p className="text-[10px] text-slate-400">PNG, JPG (Max 2MB)</p>
                                         </div>
                                     )}
                                     <input id="receipt-upload" disabled={!requirePayment || isBusy} type="file" className="hidden" accept="image/*,application/pdf" onChange={handleFileChange} />

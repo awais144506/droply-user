@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Info, AlertTriangle, CheckCircle2, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import PricingTierCard from "./pricing-card";
@@ -44,26 +45,24 @@ export default function PlanSelection({
         <Card className="rounded-2xl border-slate-200 shadow-sm flex flex-col">
             <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                 <h3 className="text-lg font-bold text-slate-900">1. Select Plan & Cycle</h3>
-                
+
                 <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
                     <button
                         onClick={() => onCycleChange("MONTHLY")}
                         disabled={disableMonthlyBtn}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                            selectedCycle === "MONTHLY" 
-                                ? "bg-white text-slate-900 shadow-sm" 
-                                : disableMonthlyBtn 
-                                ? "text-slate-400 cursor-not-allowed" 
-                                : "text-slate-500 hover:text-slate-900"
-                        }`}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedCycle === "MONTHLY"
+                                ? "bg-white text-slate-900 shadow-sm"
+                                : disableMonthlyBtn
+                                    ? "text-slate-400 cursor-not-allowed"
+                                    : "text-slate-500 hover:text-slate-900"
+                            }`}
                     >
                         Monthly
                     </button>
                     <button
                         onClick={() => onCycleChange("YEARLY")}
-                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
-                            selectedCycle === "YEARLY" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
-                        }`}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${selectedCycle === "YEARLY" ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"
+                            }`}
                     >
                         Yearly <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-sm">20% SAVE</span>
                     </button>
@@ -73,7 +72,7 @@ export default function PlanSelection({
             <CardContent className="p-6 flex-1 flex flex-col">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                     {Object.keys(pricingDb).map((tier) => (
-                        <PricingTierCard 
+                        <PricingTierCard
                             key={tier}
                             tier={tier}
                             price={pricingDb[tier][selectedCycle.toLowerCase()]}
@@ -87,7 +86,7 @@ export default function PlanSelection({
 
                 {/* DYNAMIC STATUS NOTES */}
                 <div className="mt-auto space-y-3">
-                    
+
                     {/* 1. Staff Limit Warning (Always show if over limit) */}
                     {isOverLimit && (
                         <div className="bg-rose-50 border border-rose-200 p-4 rounded-xl flex items-start gap-3">
@@ -103,7 +102,7 @@ export default function PlanSelection({
                         <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl flex items-start gap-3">
                             <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
                             <p className="text-sm font-medium text-slate-600">
-                                Your <strong>{currentUser.tier} ({currentUser.cycle})</strong> plan is currently active. To avoid duplicate payments, renewal payments will unlock once your cycle ends on <strong>{currentUser.renewDate.toLocaleDateString()}</strong>.
+                                Your <strong>{currentUser.tier} ({currentUser.cycle})</strong> plan is currently active. To avoid duplicate payments, renewal payments will unlock once your cycle ends on <strong>{currentUser.renewDate.toLocaleDateString("en-PK", { day: "numeric", month: "long", year: "numeric" })}</strong>.
                             </p>
                         </div>
                     )}
@@ -113,7 +112,7 @@ export default function PlanSelection({
                         <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-start gap-3">
                             <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                             <p className="text-sm font-medium text-amber-800">
-                                Downgrades take effect after your current cycle expires. You can select and pay for the <strong>{selectedTier}</strong> plan after <strong>{currentUser.renewDate.toLocaleDateString()}</strong>.
+                                Downgrades take effect after your current cycle expires. You can select and pay for the <strong>{selectedTier}</strong> plan after <strong>{currentUser.renewDate.toLocaleDateString("en-PK", { day: "numeric", month: "long", year: "numeric" })}</strong>.
                             </p>
                         </div>
                     )}
