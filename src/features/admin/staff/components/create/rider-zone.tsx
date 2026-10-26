@@ -46,7 +46,7 @@ const RiderZoneCard = ({
                                     <span className="font-medium truncate mr-2">
                                         {opt.label}
                                     </span>
-                                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm ${opt.status === "ACTIVE"
+                                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider text-white shadow-sm ${opt.status === "ACTIVE"
                                         ? "bg-emerald-500"
                                         : "bg-amber-500"
                                         }`}>

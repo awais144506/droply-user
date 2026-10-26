@@ -24,7 +24,7 @@ export default function CreateStaffPage() {
   const vehicleOptions = vehiclesData?.vehicleOptions;
   const isLimitReached = activeStaff?.isLimitReached
 
-  const { mutate: createStaff, isPending } = useCreateStaff(branchId);
+  const { mutate: createStaff, isPending } = useCreateStaff();
 
   // Wizard State
   const [step, setStep] = useState<"SELECT_ROLE" | "FORM">("SELECT_ROLE");

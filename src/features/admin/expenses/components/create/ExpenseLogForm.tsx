@@ -7,6 +7,7 @@ import { FormSelect } from "@/components/ui/form-select";
 import { FormInput } from "@/components/ui/form-input";
 import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
 import { ExpenseType, ExpensePaymentType } from "../../types/expenses";
+import { Receipt } from "lucide-react";
 
 type ExpenseLogFormProps = {
   onSubmit: (data: CreateExpenseFormData) => void;
@@ -90,6 +91,7 @@ export default function ExpenseLogForm({ onSubmit, isPending }: ExpenseLogFormPr
           isPending={isPending}
           isDirty={isDirty}
           isValid={isValid}
+          icon={Receipt}
         />
       </form>
     </FormProvider>

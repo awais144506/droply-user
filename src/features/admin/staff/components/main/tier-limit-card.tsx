@@ -102,10 +102,10 @@ export default function TierLimitCard({
         <Card className={`relative overflow-hidden rounded-2xl border transition-all duration-300 ${tierConfig.colors.card}`}>
             <CardContent className="p-5 sm:p-6">
                 <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-                    
+
                     {/* Left & Center: Icon, Details & Progress */}
                     <div className="flex items-start gap-4 sm:gap-5 flex-1 w-full">
-                        
+
                         {/* Elevated Tier Icon */}
                         <div className={`h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-2xl border flex items-center justify-center transition-transform duration-300 hover:scale-105 ${tierConfig.colors.iconBox}`}>
                             <tierConfig.Icon className="h-6 w-6 sm:h-7 sm:w-7" />
@@ -113,7 +113,7 @@ export default function TierLimitCard({
 
                         {/* Content Container */}
                         <div className="flex-1 w-full space-y-3">
-                            
+
                             {/* Top Row: Plan Badge & Numeric Counter */}
                             <div className="flex flex-wrap items-center justify-between gap-2">
                                 <div className="flex items-center gap-2.5">
@@ -143,11 +143,10 @@ export default function TierLimitCard({
                             </div>
 
                             {/* Bottom Info / Tip Pill */}
-                            <div className={`flex items-center justify-between gap-2 px-3 py-2 rounded-xl border text-xs ${
-                                limitHit && !tierConfig.isDark
+                            <div className={`flex items-center justify-between gap-2 px-3 py-2 rounded-xl border text-xs ${limitHit && !tierConfig.isDark
                                     ? "bg-rose-50/70 border-rose-200/70 text-rose-800"
                                     : tierConfig.colors.infoBox
-                            }`}>
+                                }`}>
                                 <div className="flex items-center gap-2">
                                     {limitHit ? (
                                         <AlertCircle className="h-3.5 w-3.5 shrink-0 text-rose-500" />

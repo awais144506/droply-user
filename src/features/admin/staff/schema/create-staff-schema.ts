@@ -64,7 +64,7 @@ export const createStaffSchema = yup.object().shape({
     .transform(stripFormat)
     .matches(/^[0-9]{13}$/, { message: "Must be exactly 13 digits", excludeEmptyString: true })
     .optional().nullable(),
-  guarantorPhone: yup.string().optional().nullable(),
+  guarantorPhone: yup.string().max(20,"Max 20 characters.").optional().nullable(),
 });
 
 export type CreateStaffFormData = yup.InferType<typeof createStaffSchema>;

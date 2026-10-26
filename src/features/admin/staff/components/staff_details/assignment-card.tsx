@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Bike, MapPin, Truck } from "lucide-react";
+import { Staff } from "../../types/staff";
 
 const getStatusStyles = (status: string) => {
   switch (status?.toUpperCase()) {
@@ -14,7 +15,7 @@ const getStatusStyles = (status: string) => {
   }
 };
 
-export default function AssignmentCard({ user }: { user: any }) {
+export default function AssignmentCard({ user }: { user: Staff }) {
   return (
     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-5 w-full">
 
@@ -26,7 +27,7 @@ export default function AssignmentCard({ user }: { user: any }) {
 
         <div className="mb-4 flex items-center justify-between border-t border-slate-100 pt-4">
           <span className="text-xs font-bold text-slate-500 tracking-wide">RIDER LICENSE NO.</span>
-          <span className="text-xs font-bold text-slate-900">{user.licenseNumber || "—"}</span>
+          <span className="text-xs font-bold text-slate-900">{user.hrProfile?.licenseNumber || "—"}</span>
         </div>
 
         {user.assignedVehicles && user.assignedVehicles.length > 0 ? (

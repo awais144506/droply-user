@@ -75,7 +75,7 @@ export function StaffProfile({ user, userId, branchId }: { user: Staff, userId: 
         >
           {isDisabled ? (
             <>
-              <CheckCircle2 className="h-4 w-4 mr-1.5" /> Enable
+              <CheckCircle2 className="h-4 w-4 mr-1.5" /> Activate
             </>
           ) : (
             <>
@@ -123,7 +123,7 @@ export function StaffProfile({ user, userId, branchId }: { user: Staff, userId: 
         onClose={() => setIsEnableOpen(false)}
         onConfirm={handleEnableConfirm}
         isLoading={isEnabling}
-        confirmText="Enable Staff"
+        confirmText="Activate Staff"
         confirmButtonClass="bg-emerald-600 hover:bg-emerald-700 text-white"
         confirmButtonVariant="default"
       />

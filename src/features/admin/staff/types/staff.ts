@@ -45,6 +45,7 @@ export interface StaffList {
     imageUrl?: string | null;
     zones?: StaffZone[];
     assignedVehicles?: StaffVehicle[];
+    hrProfile: StaffHrProfile;
 }
 
 // 2. Represents the branch staff stats object

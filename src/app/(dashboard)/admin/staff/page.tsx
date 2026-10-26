@@ -18,14 +18,14 @@ export default function StaffPage() {
   const role = searchParams.get("role") || undefined;
   const status = searchParams.get("status") || undefined;
 
-  const { data, isLoading, isError, error } = useStaffList(branchId, search, role, status);
+  const { data, isLoading, isError, error, refetch, isRefetching } = useStaffList(branchId, search, role, status);
 
   const staffData = data?.staff || [];
   const stats = data?.stats || { totalStaff: 0, activeStaffCount: 0, activeManagers: 0, activeRiders: 0, disableStaff: 0 };
   const logs = data?.logs;
   const isLimitReached = data?.isLimitReached
 
-  if (isLoading) return <Loading text="Loading Staff..."/>;
+  if (isLoading || !data) return <Loading text="Loading Staff..." />;
   if (isError) return <ErrorBoundary error={error.message} />;
 
   return (
@@ -37,6 +37,8 @@ export default function StaffPage() {
         href="/admin/staff/create-staff"
         btnText="Add Staff"
         isDisabled={isLimitReached}
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
       />
 
       <TierLimitCard

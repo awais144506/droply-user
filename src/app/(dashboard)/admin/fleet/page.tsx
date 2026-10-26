@@ -15,10 +15,10 @@ export default function FleetManagementPage() {
   const search = searchParams.get("search") || undefined;
   const status = searchParams.get("status") || undefined;
   const { branchId } = useRole();
-  const { data, isLoading, isError, error } = useVehicles(branchId, status, search);
+  const { data, isLoading, isError, error, isRefetching, refetch } = useVehicles(branchId, status, search);
   const { list: vehicles, stats } = data || { list: [], stats: { total: 0, active: 0, inMaintenance: 0, retired: 0 } };
 
-  if (isLoading) return <Loading />
+  if (isLoading || !data) return <Loading text="Loading Vehicles..." />
   if (isError) return <ErrorBoundary error={error.message} />
   return (
     <div className="p-6 space-y-8">
@@ -27,6 +27,8 @@ export default function FleetManagementPage() {
         description="Manage your delivery vehicles, track maintenance, and monitor fuel expenses."
         href="/admin/fleet/create-fleet"
         btnText="Add Vehicle"
+        isRefreshing={isRefetching}
+        onRefresh={refetch}
       />
       <FleetStats
         total={stats.total}

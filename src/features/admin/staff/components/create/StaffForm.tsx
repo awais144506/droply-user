@@ -1,21 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
-import { useRouter } from "next/navigation";
 import { FormProvider } from "react-hook-form";
-import { AlertTriangle, Loader2, Save, UserPlus, ArrowLeft } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import { AlertTriangle, UserPlus } from "lucide-react";
 import { FormSelect } from "@/components/ui/form-select";
 import CreateStaffIdentityCard from "./identity-card";
 import RiderZoneCard from "./rider-zone";
 import StaffExtraDetails from "./staff-extra-details";
-
 import { useAppForm } from "@/lib/hooks/use-app-form";
 import { createStaffSchema, CreateStaffFormData } from "../../schema/create-staff-schema";
 import { defaultCreateStaffValues } from "../../utils/staff-defaults";
 import Loading from "@/app/loading";
 import { toast } from "sonner";
+import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
 
 interface OptionItem {
     label: string;
@@ -27,10 +23,10 @@ interface CreateStaffFormProps {
     initialValues?: CreateStaffFormData;
     onSubmit: (payload: any) => void;
     isPending: boolean;
-    zoneOptions?: OptionItem[];       // 👈 Made optional
-    isZoneLoading?: boolean;          // 👈 Made optional
-    vehicleOptions?: OptionItem[];    // 👈 Made optional
-    isVehiclesLoading?: boolean;      // 👈 Made optional
+    zoneOptions?: OptionItem[];
+    isZoneLoading?: boolean;
+    vehicleOptions?: OptionItem[];
+    isVehiclesLoading?: boolean;
     setStep?: (step: "SELECT_ROLE" | "FORM") => void;
     isLimitReached?: boolean;
 }
@@ -44,10 +40,8 @@ export function CreateStaffForm({
     isZoneLoading = false,
     vehicleOptions = [],
     isVehiclesLoading = false,
-    setStep,
     isLimitReached,
 }: CreateStaffFormProps) {
-    const router = useRouter();
     const isEditMode = Boolean(initialValues);
 
     const formDefaults: CreateStaffFormData = initialValues || {
@@ -138,6 +132,7 @@ export function CreateStaffForm({
                     {activeRole === "RIDER" && (
                         <div className="w-full">
                             <RiderZoneCard
+                                key={`${initialValues?.vehicleId || "new"}-${zoneOptions.length}-${vehicleOptions.length}`}
                                 selectedRole={activeRole}
                                 zoneOptions={zoneOptions}
                                 vehicleOptions={vehicleOptions}
@@ -150,50 +145,14 @@ export function CreateStaffForm({
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto flex items-center justify-between border-t border-slate-200 pt-6">
-                    {!isEditMode && setStep ? (
-                        <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => setStep("SELECT_ROLE")}
-                            className="gap-2"
-                        >
-                            <ArrowLeft className="h-4 w-4" /> Back to Role Selection
-                        </Button>
-                    ) : <div />}
-
-                    <div className="flex items-center gap-3">
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => router.back()}
-                            disabled={isPending}
-                        >
-                            Cancel
-                        </Button>
-
-                        <Button
-                            type="submit"
-                            disabled={isPending || !methods.formState.isValid || (isEditMode && !methods.formState.isDirty)}
-                            variant="success"
-                        >
-                            {isPending ? (
-                                <>
-                                    <Loader2 className="h-4 w-4 animate-spin mr-1.5" />
-                                    {isEditMode ? "Saving..." : "Creating..."}
-                                </>
-                            ) : isEditMode ? (
-                                <>
-                                    <Save className="h-4 w-4 mr-1.5" /> Save Changes
-                                </>
-                            ) : (
-                                <>
-                                    <UserPlus className="h-4 w-4 mr-1.5" /> Create Staff
-                                </>
-                            )}
-                        </Button>
-                    </div>
-                </div>
+                <FormCTAFooter
+                    ctaText={isEditMode ? "Update Staff" : "Create Staff"}
+                    icon={UserPlus}
+                    isPending={isPending}
+                    isEditMode={isEditMode}
+                    isDirty={methods.formState.isDirty}
+                    isValid={methods.formState.isValid}
+                />
             </form>
         </FormProvider>
     );

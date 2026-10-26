@@ -10,6 +10,8 @@ import { useRole } from "@/lib/hooks/use-role";
 import Loading from "@/app/loading";
 import NotFoundPage from "@/app/not-found";
 import { getEditStaffFormValues } from "@/features/admin/staff/utils/staff-defaults";
+import { useZones } from "@/features/manage/zones/api/use-zones";
+import { useVehicles } from "@/features/admin/fleet/api/use-fleet";
 
 export default function EditStaffPage() {
     const router = useRouter();
@@ -19,6 +21,12 @@ export default function EditStaffPage() {
 
     const { data: user, isLoading, isError, } = useStaffDetail(branchId, staffId);
     const { mutate: updateStaff, isPending: isUpdating } = useUpdateStaff();
+    // Data Fetching
+    const { data: zoneData, isLoading: isZoneLoading } = useZones(branchId);
+    const { data: vehiclesData, isLoading: isVehiclesLoading } = useVehicles(branchId);
+
+    const zoneOptions = zoneData?.zoneOptions;
+    const vehicleOptions = vehiclesData?.vehicleOptions;
 
     const initialValues = getEditStaffFormValues(user);
 
@@ -45,8 +53,11 @@ export default function EditStaffPage() {
             />
 
             <CreateStaffForm
-                key={user.id}
                 initialValues={initialValues}
+                zoneOptions={zoneOptions}
+                isZoneLoading={isZoneLoading}
+                vehicleOptions={vehicleOptions}
+                isVehiclesLoading={isVehiclesLoading}
                 onSubmit={onUpdateSubmit}
                 isPending={isUpdating}
             />
