@@ -184,7 +184,7 @@ export default function ThermalReceiptDialog({
                 {branchDetails?.address || "Main Boulevard, Sahiwal"}
               </p>
               <p className="text-[11px] text-slate-600">
-                Tel: {formatPhoneNumber(branchDetails?.phone) || "0300-1234567"}
+                Tel: {formatPhoneNumber(branchDetails?.phone || "") || "0300-1234567"}
               </p>
             </div>
 

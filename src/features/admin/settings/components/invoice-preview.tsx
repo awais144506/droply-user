@@ -41,7 +41,7 @@ export function InvoicePreview({ data, logoUrl }: InvoicePreviewProps) {
                             {data.address || "123 Main Street, City"}
                         </p>
                         <div className="flex items-center justify-center gap-2 mt-2 text-[11px] text-slate-500 font-medium">
-                            <span>{formatPhoneNumber(data.phone )|| "03001234567"}</span>
+                            <span>{formatPhoneNumber(data.phone || "") || "03001234567"}</span>
                             <span className="text-slate-300">•</span>
                             <span>{data.email || "billing@branch.com"}</span>
                         </div>
