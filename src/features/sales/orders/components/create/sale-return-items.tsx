@@ -47,8 +47,11 @@ const SaleReturnItems = () => {
         if (targetOrder && targetOrder.lineItems && targetOrder.lineItems.length > 0) {
             const currentFormItems = getValues("items") || [];
 
-            const isAlreadyPopulated = currentFormItems.length === targetOrder.lineItems.length &&
-                currentFormItems.every((item: any, idx: number) => item.productId === targetOrder.lineItems[idx].productId);
+            const lineItems = targetOrder?.lineItems || [];
+
+            const isAlreadyPopulated =
+                currentFormItems.length === lineItems.length &&
+                currentFormItems.every((item: any, idx: number) => item.productId === lineItems[idx]?.productId);
 
             if (!isAlreadyPopulated) {
                 const newItems = targetOrder.lineItems.map((item: any) => ({

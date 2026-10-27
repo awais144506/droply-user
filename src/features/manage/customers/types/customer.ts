@@ -47,7 +47,9 @@ export interface CustomerDetails {
     orders: CustomerOrderHistory[];
 }
 export interface CustomerOrderHistory {
-    lineItems: [] | undefined;
+    lineItems: {
+        productId:string;
+    }[] | undefined;
     orderCode: string;
     id: string
     status: OrderStatus;

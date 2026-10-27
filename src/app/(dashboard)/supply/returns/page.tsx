@@ -15,7 +15,7 @@ export default function PurchaseReturnsPage() {
   const search = searchParams.get('search') || undefined;
   const status = searchParams.get('status') || undefined;
   const { branchId, isLoading: isTenantLoading } = useRole();
-  const { data, isLoading } = useReturns(branchId, search, status);
+  const { data, isLoading, refetch, isRefetching } = useReturns(branchId, search, status);
   const logs = data?.logs || [];
 
   if (isTenantLoading || isLoading || !data) return <Loading text="Loading PO Returns..." />
@@ -27,6 +27,8 @@ export default function PurchaseReturnsPage() {
         description="Manage debit notes for damaged or rejected vendor shipments."
         href="/supply/returns/create-return"
         btnText="New Return"
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
       />
 
       <ReturnStats stats={data.stats} />

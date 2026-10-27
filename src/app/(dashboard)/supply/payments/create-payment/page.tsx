@@ -10,7 +10,10 @@ export default function CreateNewPayment() {
             {/* Page Header */}
             <CreateFormHeader
                 title="Create New Payement"
-                href="/supply/payments"
+                breadcrumbs={[
+                    { label: "Payments", href: "/supply/payments" },
+                    { label: "Create Payment" }
+                ]}
             />
 
             {/* Form Container */}

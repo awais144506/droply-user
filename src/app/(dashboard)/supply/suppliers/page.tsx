@@ -15,7 +15,7 @@ export default function SuppliersPage() {
   const search = searchParams.get("search") || undefined;
   const status = searchParams.get("status") || undefined
 
-  const { data, isLoading } = useSuppliers(branchId, search, status);
+  const { data, isLoading, refetch, isRefetching } = useSuppliers(branchId, search, status);
   const { suppliers, totalDueAmount } = data || {};
   if (isLoading || !data) return <Loading text="Loading Suppliers..." />
 
@@ -26,6 +26,8 @@ export default function SuppliersPage() {
         description="Vendors you purchase inventory, raw materials, and plant equipment from."
         href="/supply/suppliers/create-supplier"
         btnText="Create Supplier"
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
       />
       <SupplierStats
         totalDueAmount={totalDueAmount}

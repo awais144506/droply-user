@@ -15,7 +15,7 @@ export default function SupplierPaymentsPage() {
   const status = searchParamas.get('status') || undefined;
 
   const { branchId, isLoading: isTenantLoading } = useRole();
-  const { data, isLoading, isError, error } = usePayments(branchId, search, status);
+  const { data, isLoading, isError, error, refetch, isRefetching } = usePayments(branchId, search, status);
   const payments = data?.payments
   const logs = data?.logs;
 
@@ -34,6 +34,8 @@ export default function SupplierPaymentsPage() {
         description="Record bank transfers, cash vouchers, and cheques issued to vendors."
         href="/supply/payments/create-payment"
         btnText="New Payment"
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
       />
 
       <DataTableFilterBar

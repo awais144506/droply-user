@@ -15,7 +15,7 @@ export default function PurchaseOrdersPage() {
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || undefined;
   const status = searchParams.get("status") || undefined
-  const { data, isLoading, isError, error } = usePurchaseOrders(branchId, search, status);;
+  const { data, isLoading, isError, error, refetch, isRefetching } = usePurchaseOrders(branchId, search, status);;
 
   const orders = data?.orders;
   const logs = data?.logs;
@@ -31,6 +31,8 @@ export default function PurchaseOrdersPage() {
         description="Issue procurement orders to vendors and receive incoming inventory."
         href="/supply/order/create-po"
         btnText="Create PO"
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
       />
 
       <POStats stats={stats} />

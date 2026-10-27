@@ -90,6 +90,7 @@ const ProductList = ({ products, isLoading, handleAddProduct, cart }: Props) => 
       stock: 999999,
       trackingType: "UNTRACKED",
       unit: "PIECE",
+      priceTiers: []
     });
     setCustomName("");
     setCustomPrice("");
@@ -170,18 +171,18 @@ const ProductList = ({ products, isLoading, handleAddProduct, cart }: Props) => 
                   const cardStyles = isOutOfStock
                     ? "border-rose-400 bg-rose-50/70 ring-1 ring-rose-400 cursor-not-allowed opacity-90"
                     : isLowStock
-                    ? inCart
-                      ? "border-amber-500 bg-amber-50/80 ring-1 ring-amber-500"
-                      : "border-amber-300 bg-amber-50/40 hover:border-amber-400"
-                    : inCart
-                    ? "border-sky-500 bg-sky-50/70 ring-1 ring-sky-500"
-                    : "border-slate-300 bg-white hover:border-sky-300 hover:bg-slate-50/60";
+                      ? inCart
+                        ? "border-amber-500 bg-amber-50/80 ring-1 ring-amber-500"
+                        : "border-amber-300 bg-amber-50/40 hover:border-amber-400"
+                      : inCart
+                        ? "border-sky-500 bg-sky-50/70 ring-1 ring-sky-500"
+                        : "border-slate-300 bg-white hover:border-sky-300 hover:bg-slate-50/60";
 
                   const qtyBadgeStyles = isOutOfStock
                     ? "bg-rose-600 text-white"
                     : isLowStock
-                    ? "bg-amber-600 text-white"
-                    : "bg-sky-600 text-white";
+                      ? "bg-amber-600 text-white"
+                      : "bg-sky-600 text-white";
 
                   return (
                     <div
@@ -226,16 +227,14 @@ const ProductList = ({ products, isLoading, handleAddProduct, cart }: Props) => 
                               type="button"
                               onClick={(e) => togglePinProduct(e, product.id)}
                               title={isPinned ? "Unpin product" : "Pin to top"}
-                              className={`p-1 rounded-md transition-colors ${
-                                isPinned
+                              className={`p-1 rounded-md transition-colors ${isPinned
                                   ? "text-sky-600 bg-sky-100/80 hover:bg-sky-200/70"
                                   : "text-slate-500 opacity-0 group-hover:opacity-100 hover:text-slate-600 hover:bg-slate-100"
-                              }`}
+                                }`}
                             >
                               <Pin
-                                className={`h-3.5 w-3.5 ${
-                                  isPinned ? "fill-sky-600 rotate-45" : ""
-                                }`}
+                                className={`h-3.5 w-3.5 ${isPinned ? "fill-sky-600 rotate-45" : ""
+                                  }`}
                               />
                             </button>
                           </div>
@@ -248,21 +247,19 @@ const ProductList = ({ products, isLoading, handleAddProduct, cart }: Props) => 
                             </span>
                           ) : (
                             <span
-                              className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded ${
-                                isOutOfStock
+                              className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded ${isOutOfStock
                                   ? "bg-rose-100 text-rose-700 border border-rose-200"
                                   : isLowStock
-                                  ? "bg-amber-100 text-amber-800 border border-amber-300/70"
-                                  : "bg-slate-100 text-slate-600"
-                              }`}
+                                    ? "bg-amber-100 text-amber-800 border border-amber-300/70"
+                                    : "bg-slate-100 text-slate-600"
+                                }`}
                             >
                               {(isLowStock || isOutOfStock) && (
                                 <AlertTriangle
-                                  className={`h-2.5 w-2.5 ${
-                                    isOutOfStock
+                                  className={`h-2.5 w-2.5 ${isOutOfStock
                                       ? "text-rose-600"
                                       : "text-amber-600"
-                                  }`}
+                                    }`}
                                 />
                               )}
                               {isOutOfStock
@@ -275,13 +272,12 @@ const ProductList = ({ products, isLoading, handleAddProduct, cart }: Props) => 
 
                       <div className="mt-3 pt-2 border-t border-slate-100/80 flex items-baseline justify-between w-full">
                         <span
-                          className={`text-sm font-extrabold ${
-                            isOutOfStock
+                          className={`text-sm font-extrabold ${isOutOfStock
                               ? "text-rose-700"
                               : isLowStock
-                              ? "text-amber-700"
-                              : "text-sky-700"
-                          }`}
+                                ? "text-amber-700"
+                                : "text-sky-700"
+                            }`}
                         >
                           Rs. {Number(product.price).toLocaleString()}
                         </span>

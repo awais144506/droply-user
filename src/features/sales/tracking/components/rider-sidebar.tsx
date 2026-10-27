@@ -49,7 +49,7 @@ export function RiderSidebar({ branchId, riders, selectedRider, onSelect }: Side
       id: staffRider.id,
       name: staffRider.name,
       zone: "Unassigned",
-      isDisable: staffRider.status === "DISABLE",
+      isDisable: staffRider.status === "SUSPENDED",
       status: derivedStatus,
       lastActive: formattedLastActive,
       stopsCompleted: 0,

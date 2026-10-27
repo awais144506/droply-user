@@ -38,7 +38,10 @@ const EditProductionBatch = () => {
                     <CreateFormHeader
                         title="Edit Production Batch"
                         description="Update batch details. Yields and materials cannot be edited to preserve inventory integrity."
-                        href="/stock/production"
+                        breadcrumbs={[
+                            { label: "Production Batches", href: "/stock/production" },
+                            { label: "Edit Batch" }
+                        ]}
                     />
 
                     {/* Hide delete button if already completed */}

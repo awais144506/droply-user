@@ -45,7 +45,7 @@ export const getPaymentColumns = (
                         {payment.supplier?.firmName || "Unknown"}
                     </p>
                     <p className="text-xs text-slate-500 font-medium truncate max-w-37.5">
-                        {payment.supplier?.supplierName}
+                        {payment.supplier?.name}
                     </p>
                 </div>
             ),

@@ -20,7 +20,10 @@ export default function EditSupplierPayment() {
     <div className="w-full max-w-4xl mx-auto py-6 space-y-6">
       <CreateFormHeader
         title="Edit Payment Voucher"
-        href="/supply/payments"
+        breadcrumbs={[
+          { label: "Payments", href: "/supply/payments" },
+          { label: "Edit Payment" }
+        ]}
       />
 
       <div className="w-full">

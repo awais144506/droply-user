@@ -15,7 +15,7 @@ const RecoveryItems = () => {
     const selectedCustomerId = useWatch({ control, name: "customerId" });
     const { data: detailedCustomer, isLoading } = useCustomer(selectedCustomerId || "");
 
-    useEffect(() => {
+   useEffect(() => {
         if (detailedCustomer?.returnables) {
             const currentItems = getValues("items") || [];
 
@@ -24,6 +24,7 @@ const RecoveryItems = () => {
                 return {
                     id: existing?.id || crypto.randomUUID(),
                     productId: r.productId,
+                    unitPrice: existing?.unitPrice || 0,
                     paidQty: existing?.paidQty || 0,
                     emptiesIn: 0,
                     hasOffer: false,
@@ -31,6 +32,8 @@ const RecoveryItems = () => {
                     discountPrice: 0,
                     chargedDeposit: 0,
                     isDepositCharged: false,
+                    returnedToStoreQty: existing?.returnedToStoreQty || 0,
+                    wastageQuantity: existing?.wastageQuantity || 0,
                 };
             });
 
