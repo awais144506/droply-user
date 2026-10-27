@@ -3,7 +3,7 @@
 
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { FormProvider, useWatch } from "react-hook-form"; 
+import { FormProvider, useWatch } from "react-hook-form";
 import { AlertTriangle, Trash2 } from "lucide-react";
 
 import { FormInput } from "@/components/ui/form-input";
@@ -28,7 +28,7 @@ export default function WastageForm() {
             value: p.id,
             label: p.name,
             currentStock: p.currentStock,
-            unitOfMeasure: p.unitOfMeasure || "Unit", 
+            unitOfMeasure: p.unitOfMeasure || "Unit",
         })) || [];
     }, [productsData]);
 
@@ -91,6 +91,7 @@ export default function WastageForm() {
                                 placeholder="Search inventory items..."
                                 isSearchable={true}
                                 isLoading={isLoadingProducts}
+                                isClearable={true}
                                 formatOptionLabel={(opt) => {
                                     const isSelected = opt.value === selectedMaterialId;
                                     const deduction = isSelected ? (Number(quantityWasted) || 0) : 0;
@@ -101,11 +102,10 @@ export default function WastageForm() {
                                         <div className="flex justify-between items-center w-full pr-2">
                                             <span>{opt.label}</span>
                                             {opt.currentStock !== undefined && (
-                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase transition-colors ${
-                                                    isNegative ? "bg-rose-100 text-rose-700" 
-                                                    : isSelected ? "bg-amber-100 text-amber-700" 
-                                                    : "bg-slate-100 text-slate-500"
-                                                }`}>
+                                                <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase transition-colors ${isNegative ? "bg-rose-100 text-rose-700"
+                                                        : isSelected ? "bg-amber-100 text-amber-700"
+                                                            : "bg-slate-100 text-slate-500"
+                                                    }`}>
                                                     {/* 🔥 Append UOM to the stock badge */}
                                                     Stock: {displayStock} {opt.unitOfMeasure.toLowerCase()}
                                                 </span>
@@ -149,6 +149,7 @@ export default function WastageForm() {
                     isDirty={methods.formState.isDirty}
                     isEditMode={false}
                     isPending={methods.formState.isSubmitting}
+                    icon={Trash2}
                 />
             </form>
         </FormProvider>

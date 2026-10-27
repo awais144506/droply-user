@@ -6,7 +6,7 @@ import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, FormProvider, useFieldArray, useWatch } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Plus, Trash2, Info, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, Info, AlertTriangle, Undo2 } from "lucide-react";
 
 import { FormInput } from "@/components/ui/form-input";
 import { FormSelect } from "@/components/ui/form-select";
@@ -243,8 +243,8 @@ export default function ReturnForm({ initialData }: ReturnFormProps) {
                                                         <div className="flex flex-col items-start">
                                                             <span className="font-medium text-slate-900">{opt.label}</span>
                                                             <span className={`text-[10px] font-bold uppercase tracking-wider mt-0.5 transition-colors ${isNegative ? "text-rose-600"
-                                                                    : isSelected ? "text-amber-600"
-                                                                        : "text-slate-500"
+                                                                : isSelected ? "text-amber-600"
+                                                                    : "text-slate-500"
                                                                 }`}>
                                                                 Stock: {displayStock}
                                                             </span>
@@ -342,6 +342,7 @@ export default function ReturnForm({ initialData }: ReturnFormProps) {
                         isValid={methods.formState.isValid && !isStockError}
                         isEditMode={isEditing}
                         href="/supply/returns"
+                        icon={Undo2}
                     />
                 </form>
             </FormProvider>

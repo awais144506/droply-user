@@ -89,7 +89,7 @@ export const generateInvoicePdf = async (
     }
     if (companyPhone) {
         const formattedPhone = formatPhoneNumber(companyPhone) || companyPhone;
-        doc.text(`Phone no.: ${formattedPhone}`, leftX, leftY);
+        doc.text(`Phone No: ${formattedPhone}`, leftX, leftY);
         leftY += 4.5;
     }
     if (companyEmail) {
@@ -97,10 +97,10 @@ export const generateInvoicePdf = async (
         leftY += 4.5;
     }
 
-  if (branch?.logoUrl) {
+    if (branch?.logoUrl) {
         try {
             const base64Logo = await getBase64ImageFromUrl(branch.logoUrl);
-            doc.addImage(base64Logo, 'PNG', 155, 14, 30, 30);
+            doc.addImage(base64Logo, 'PNG', 170, 15, 20, 18);
         } catch (error) {
             console.warn("Failed to load logo", error);
         }
@@ -352,17 +352,22 @@ export const generateInvoicePdf = async (
     // =========================================================================
     // 6. AUTHORIZED SIGNATORY FOOTER (Bottom Right, Matches PDF)
     // =========================================================================
-    const sigY = Math.max(bottomLeftY, summaryY) + 14;
+    let sigY = Math.max(bottomLeftY, summaryY) + 12;
 
-    // Space for stamp/signature
+    // If signature block would cross the bottom page margin, push it to a new page
+    if (sigY > 265) {
+        doc.addPage();
+        sigY = 40;
+    }
+
     doc.setDrawColor(...colors.slate500);
     doc.setLineWidth(0.3);
-    doc.line(145, sigY + 18, rightColX, sigY + 18);
+    doc.line(145, sigY + 12, rightColX, sigY + 12);
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...colors.slate900);
-    doc.text("Authorized Signatory", rightColX, sigY + 23, { align: "right" });
+    doc.text("Authorized Signatory", rightColX, sigY + 17, { align: "right" });
 
     // Pagination Footer
     const pageCount = (doc as any).internal.getNumberOfPages();

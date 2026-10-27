@@ -16,10 +16,10 @@ export default function ProductionPage() {
   const search = searchParams.get("search") || undefined;
   const status = searchParams.get("status") || undefined
 
-  const { data, isLoading } = useProduction(branchId, search, status);
+  const { data, isLoading, isRefetching, refetch } = useProduction(branchId, search, status);
   const stats = data?.stats || { totalYield: 0, completedBatches: 0, inProgressBatches: 0 }
   const batches = data?.batchesData || [];
-  const logs = data?.logsData|| [];
+  const logs = data?.logsData || [];
   if (isLoading) return <Loading text="Loading batches..." />;
   return (
     <div className="space-y-6 p-6">
@@ -28,6 +28,8 @@ export default function ProductionPage() {
         description="Track assembly output, raw material consumption, and daily stock conversions."
         href="/stock/production/create-batch"
         btnText="Log New Batch"
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
       />
 
       <ProductionStats

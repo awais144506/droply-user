@@ -5,10 +5,11 @@ import { toast } from "sonner";
 import { CreatePOFormData } from "../schema/create-po-schema";
 import { supplierKeys } from "../../suppliers/api/supplier-keys";
 import { productKeys } from "@/features/manage/products/api/product-keys";
+import { useRouter } from "next/navigation";
 
 export function useCreatePO(branchId: string) {
     const queryClient = useQueryClient();
-
+    const router = useRouter();
     return useMutation({
         mutationFn: (payload: CreatePOFormData) => poApi.create(payload),
         onSuccess: () => {
@@ -16,6 +17,7 @@ export function useCreatePO(branchId: string) {
             queryClient.invalidateQueries({ queryKey: poKeys.list(branchId) });
             queryClient.invalidateQueries({ queryKey: supplierKeys.lists(branchId) });
             queryClient.invalidateQueries({ queryKey: productKeys.lists() });
+            router.back();
         },
         onError: (error) => {
             toast.error("Failed to generate PO", {
@@ -28,7 +30,7 @@ export function useCreatePO(branchId: string) {
 
 export function useUpdatePO(branchId: string) {
     const queryClient = useQueryClient();
-
+    const router = useRouter();
     return useMutation({
         mutationFn: ({ id, payload }: { id: string; payload: CreatePOFormData }) => poApi.update(id, payload),
         onSuccess: (_, variables) => {
@@ -36,6 +38,7 @@ export function useUpdatePO(branchId: string) {
             queryClient.invalidateQueries({ queryKey: poKeys.detail(variables.id) });
             queryClient.invalidateQueries({ queryKey: poKeys.lists() });
             queryClient.invalidateQueries({ queryKey: supplierKeys.lists(branchId) });
+            router.back();
         },
         onError: (error) => {
             toast.error("Failed to update PO", {
@@ -73,6 +76,7 @@ export function useReceivePO() {
             toast.success("Order status updated successfully!");
             queryClient.invalidateQueries({ queryKey: poKeys.lists() });
             queryClient.invalidateQueries({ queryKey: poKeys.logs() });
+            queryClient.invalidateQueries({ queryKey: productKeys.lists() });
         },
         onError: (error) => {
             toast.error("Failed to process order", {

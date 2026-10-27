@@ -9,7 +9,6 @@ import {
     FileText,
     Hash,
     MapPin,
-    Phone,
     Mail,
     ShieldAlert,
     PackageCheck,
@@ -24,13 +23,11 @@ import { FormPhoneInput } from "@/components/ui/form-phone-input";
 interface Props {
     customerOptions: any[];
     isLoadingCustomers: boolean;
-    isEditMode?: boolean;
 }
 
 export function QuotationCustomerSection({
     customerOptions = [],
     isLoadingCustomers,
-    isEditMode = false,
 }: Props) {
     const { setValue, watch } = useFormContext();
     const selectedCustomerId = watch("customerId");
@@ -67,13 +64,6 @@ export function QuotationCustomerSection({
                 </CardHeader>
                 <CardContent className="p-5 space-y-4">
 
-                    <FormInput
-                        name="issueDate"
-                        label="Issue Date"
-                        type="date"
-                        required
-                        labelIcon={Calendar}
-                    />
 
                     {/* Registered Customer Selector (Optional) */}
                     <div className="pt-2 border-t border-slate-100">
@@ -160,7 +150,15 @@ export function QuotationCustomerSection({
                 </CardHeader>
 
                 <CardContent className="p-5 space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Row 1: Issue Date, Client Name, Phone (Balanced 3 columns) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <FormInput
+                            name="issueDate"
+                            label="Issue Date"
+                            type="date"
+                            required
+                            labelIcon={Calendar}
+                        />
                         <FormInput
                             name="partyName"
                             label="Company / Client Name"
@@ -172,10 +170,10 @@ export function QuotationCustomerSection({
                             name="partyPhone"
                             label="Phone"
                             placeholder="e.g. 03216903582"
-                            labelIcon={Phone}
                         />
                     </div>
 
+                    {/* Row 2: NTN, STRN, Email (Consistent 3 columns) */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                         <FormInput
                             name="partyNtn"
@@ -197,6 +195,7 @@ export function QuotationCustomerSection({
                         />
                     </div>
 
+                    {/* Row 3: Full Width Address */}
                     <FormInput
                         name="partyAddress"
                         label="Address"

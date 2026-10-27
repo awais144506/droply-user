@@ -56,27 +56,66 @@ export const getReturnColumns = (
 
                 const firstItem = record.items[0];
                 const extraCount = record.items.length - 1;
+                const totalQuantity = record.items.reduce((sum, item) => sum + (item.quantityReturned || 0), 0);
+                const totalCredited = record.items.reduce((sum, item) => sum + (item.quantityCredited || 0), 0);
+                const totalReplaced = record.items.reduce((sum, item) => sum + (item.quantityReplaced || 0), 0);
+                const totalRejected = record.items.reduce((sum, item) => sum + (item.quantityRejected || 0), 0);
 
                 return (
-                    <div className="text-sm font-medium text-slate-600 truncate max-w-62.5">
-                        <span className="text-rose-600 font-bold mr-1">-{firstItem.quantityReturned}x</span>
-                        {firstItem.supplierItemName}
-                        {extraCount > 0 && (
-                            <span className="text-xs text-slate-400 ml-1 italic">
-                                (+{extraCount} more)
-                            </span>
-                        )}
+                    <div>
+                        <div className="text-sm font-medium text-slate-800 truncate max-w-50">
+                            <span className="text-rose-600 font-bold mr-1">-{firstItem.quantityReturned}x</span>
+                            {firstItem.supplierItemName || firstItem.branchProduct?.name}
+                            {extraCount > 0 && (
+                                <span className="text-xs text-slate-400 ml-1 italic">
+                                    (+{extraCount} more)
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-slate-500 font-medium">
+                            <span>Returned: <strong className="text-slate-700">{totalQuantity}</strong></span>
+                            <span>•</span>
+                            <span className="text-emerald-600">Credited: <strong>{totalCredited}</strong></span>
+                            {totalReplaced > 0 && (
+                                <>
+                                    <span>•</span>
+                                    <span className="text-sky-600">Replaced: <strong>{totalReplaced}</strong></span>
+                                </>
+                            )}
+                            {totalRejected > 0 && (
+                                <>
+                                    <span>•</span>
+                                    <span className="text-rose-600">Rejected: <strong>{totalRejected}</strong></span>
+                                </>
+                            )}
+                        </div>
                     </div>
                 );
             },
         },
         {
             header: "TOTAL VALUE",
-            render: (record) => (
-                <span className="font-bold text-slate-900 text-sm">
-                    Rs {formatCurrency(record.totalValue)}
-                </span>
-            ),
+            render: (record) => {
+                const totalVal = record.totalValue || 0;
+                const recovered = record.creditRecovered || 0;
+
+                return (
+                    <div>
+                        <p className="font-bold text-slate-900 text-sm">
+                            Rs {formatCurrency(totalVal)}
+                        </p>
+                        {recovered > 0 ? (
+                            <p className="text-xs text-emerald-600 font-semibold mt-0.5">
+                                Credited: Rs {formatCurrency(recovered)}
+                            </p>
+                        ) : (
+                            <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                No credit applied yet
+                            </p>
+                        )}
+                    </div>
+                );
+            },
         },
         {
             header: "STATUS",

@@ -3,23 +3,24 @@ import { apiClient } from "@/lib/api-client";
 import { ReturnsApiResponse, PurchaseReturn } from "../types/returns";
 import { CreateReturnFormValues } from "../schema/returns-schema";
 
+const API = '/supply/return/user'
 export const returnApi = {
     getAll: async (branchId: string): Promise<ReturnsApiResponse> => {
-        return await apiClient.get(`/supply/returns/branch/${branchId}`);
+        return await apiClient.get(`${API}`);
     },
 
     getById: async (id: string): Promise<PurchaseReturn> => {
-        return await apiClient.get(`/supply/returns/${id}`);
+        return await apiClient.get(`${API}/${id}`);
     },
 
     create: async (payload: CreateReturnFormValues): Promise<PurchaseReturn> => {
-        return await apiClient.post('/supply/returns', payload);
+        return await apiClient.post(`${API}`, payload);
     },
 
     delete: async (id: string): Promise<void> => {
-        await apiClient.delete(`/supply/returns/${id}`);
+        await apiClient.delete(`${API}/${id}`);
     },
     resolve: async (id: string, payload: any): Promise<PurchaseReturn> => {
-        return await apiClient.patch(`/supply/returns/${id}/resolve`, payload);
+        return await apiClient.patch(`${API}/${id}/resolve`, payload);
     }
 };

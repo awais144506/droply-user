@@ -8,7 +8,7 @@ const utapi = new UTApi();
 export const ourFileRouter = {
 
   // 1. Your existing branch logo endpoint
-  branchLogo: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+  branchLogo: f({ image: { maxFileSize: "2MB", maxFileCount: 1 } })
     .input(z.object({ oldImageUrl: z.string().optional() }))
     .middleware(async ({ input }) => {
       return { oldImageUrl: input.oldImageUrl };

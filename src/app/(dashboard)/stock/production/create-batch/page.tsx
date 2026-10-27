@@ -11,7 +11,10 @@ const CreateNewBatch = () => {
       <CreateFormHeader
         title="Log New Production Batch"
         description="Record finished goods output and deduct raw materials from inventory."
-        href="/stock/production"
+        breadcrumbs={[
+          { label: "Production Batches", href: "/stock/production" },
+          { label: "Create Batch" }
+        ]}
       />
 
       <ProductionBatchForm

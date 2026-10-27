@@ -1,11 +1,12 @@
-export type ActivityLogActionEnums = 
-    | 'CREATED' 
-    | 'UPDATED' 
-    | 'DELETED' 
-    | 'STATUS' 
+export type ActivityLogActionEnums =
+    | 'CREATED'
+    | 'UPDATED'
+    | 'DELETED'
+    | 'STATUS'
     | 'ENABLE'
     | 'DISABLE'
-    | 'RESTOCKED';
+    | 'RESTOCKED'
+    | 'RESOLVED';
 
 export interface ActivityLog {
     id: string;

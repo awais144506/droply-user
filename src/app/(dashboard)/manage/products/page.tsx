@@ -11,7 +11,7 @@ import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 
 export default function ProductsPage() {
   const { branchId } = useRole();
-  const { data, isLoading, isError, error } = useProducts(branchId);
+  const { data, isLoading, isError, error, refetch, isRefetching } = useProducts(branchId);
 
   const products = data?.products;
   const logs = data?.logs;
@@ -29,6 +29,8 @@ export default function ProductsPage() {
         description="Manage your finished goods, raw materials, returnables, and pricing."
         href="/manage/products/create-item"
         btnText="Add New Item"
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
       />
       <ProductStats
         totalItems={stats?.totalItems}

@@ -34,8 +34,7 @@ export function POTable({ orders = [] }: POTableProps) {
   // Extract isPending to show loading spinners on the dialog
   const { mutate: processReceipt, isPending: isReceiving } = useReceivePO();
   const { mutate: undoReceipt, isPending: isUndoing } = useUndoPO();
-  const { fetchBranchSettings } = useBranchSettings(branchId);
-  const branchSettings = fetchBranchSettings.data;
+  const { data: branchData, isLoading } = useBranchSettings(branchId);
   const [dialog, setDialog] = useState<DialogState>({ isOpen: false, type: null, po: null });
 
   const {
@@ -56,7 +55,7 @@ export function POTable({ orders = [] }: POTableProps) {
     },
     onPrint: async (po: PurchaseOrder) => {
       // 1. Guard clause: Ensure settings have finished loading from the API
-      if (!branchSettings) {
+      if (!branchData) {
         toast.error("Branch settings are still loading. Please wait a second.");
         return;
       }
@@ -65,7 +64,7 @@ export function POTable({ orders = [] }: POTableProps) {
 
       try {
         // 2. Pass the actual data payload (branchSettings), not the hook!
-        await generatePOPdf(po, branchSettings);
+        await generatePOPdf(po, branchData);
         toast.success("PDF Downloaded successfully!", { id: "pdf-toast" });
       } catch (error) {
         console.error("PDF Generation Error:", error);
@@ -74,16 +73,16 @@ export function POTable({ orders = [] }: POTableProps) {
     },
     onWhatsApp: (po: PurchaseOrder) => {
       // Guard clause to ensure settings are loaded before sending
-      if (!branchSettings) {
+      if (!branchData) {
         toast.error("Branch settings are still loading. Please wait a second.");
         return;
       }
-      sendPOWhatsApp(po, branchSettings);
+      sendPOWhatsApp(po, branchData);
     },
     onEdit: (po: PurchaseOrder) => {
       router.push(`/supply/order/${po.id}`);
     }
-  }), [branchSettings, router]);
+  }), [branchData, router]);
 
   const columns = useMemo(() => getPOColumns(router, handlers, isOwner, isManager), [router, handlers, isOwner, isManager]);
 

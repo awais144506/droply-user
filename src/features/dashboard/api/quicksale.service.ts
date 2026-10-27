@@ -7,10 +7,12 @@ import {
     QuickSaleQueryParams,
 } from "../types/quicksale";
 
+const API = '/quick/user'
+
 export const quickSaleService = {
     // 1. Create a Quick Sale & deduct stock
     create: async (payload: CreateQuickSalePayload): Promise<QuickSaleRecord> => {
-        return await apiClient.post("/quick", payload);
+        return await apiClient.post(`${API}`, payload);
     },
 
     // 2. Fetch paginated & filtered Quick Sales by Branch
@@ -19,14 +21,14 @@ export const quickSaleService = {
         params?: QuickSaleQueryParams
     ): Promise<QuickSaleListResponse> => {
         return await apiClient.get(
-            `/quick/branch/${branchId}`,
+            `${API}`,
             { params }
         );
     },
 
     // 3. Get a single Quick Sale receipt by ID
     getById: async (id: string): Promise<QuickSaleRecord> => {
-        return await apiClient.get(`/quick/${id}`);
+        return await apiClient.get(`${API}/${id}`);
     },
 
     // 4. Update an active Quick Sale (reconciles stock automatically)
@@ -35,13 +37,13 @@ export const quickSaleService = {
         payload: UpdateQuickSalePayload
     ): Promise<QuickSaleRecord> => {
         return await apiClient.patch(
-            `/quick/${id}`,
+            `${API}/${id}`,
             payload
         );
     },
 
     // 5. Void a Quick Sale (restores stock & marks VOIDED)
     voidSale: async (id: string): Promise<QuickSaleRecord> => {
-        return await apiClient.patch(`/quick/${id}/void`);
+        return await apiClient.patch(`${API}/${id}/void`);
     },
 };

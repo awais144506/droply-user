@@ -1,7 +1,7 @@
 "use client";
 import { useForm, useFieldArray, useWatch, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Plus, Trash2, Info } from "lucide-react";
+import { Plus, Trash2, Info, FileText } from "lucide-react";
 
 import { createPOSchema, CreatePOFormData } from "../../schema/create-po-schema";
 import { Button } from "@/components/ui/button";
@@ -212,6 +212,7 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
                         isDirty={form.formState.isDirty}
                         isValid={form.formState.isValid && !isAdvanceError}
                         isEditMode={isEditing}
+                        icon={FileText}
                     />
                 )}
             </form>

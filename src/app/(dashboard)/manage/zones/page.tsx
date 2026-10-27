@@ -15,7 +15,7 @@ const ZonePage = () => {
   const { branchId } = useRole();
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || undefined;
-  const { data, isError, error, isLoading: isLoadingZones } = useZones(branchId, search);
+  const { data, isError, error, isLoading: isLoadingZones, refetch, isRefetching } = useZones(branchId, search);
   const zones = data?.zones || [];
   const stats = data?.stats || { totalZones: 0, totalCustomers: 0, totalLedger: 0, totalReturnables: 0 };
   const logs = data?.logs || [];
@@ -29,6 +29,8 @@ const ZonePage = () => {
         description="Manage distribution sectors, route riders, and track total liabilities per area."
         href="/manage/zones/create-zone"
         btnText="Create Zone"
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
       />
 
       <ZoneStats

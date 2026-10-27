@@ -133,6 +133,7 @@ export const ProductionBatchForm = ({ branchId, initialData, isEdit }: Productio
           isDirty={methods.formState.isDirty}
           isEditMode={isEdit}
           isPending={methods.formState.isSubmitting}
+          icon={Factory}
         />
       </form>
     </FormProvider>

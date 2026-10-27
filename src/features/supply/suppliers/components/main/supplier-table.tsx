@@ -8,7 +8,7 @@ import TablePagination from "@/lib/utils/components/TablePagination";
 import { getSupplierColumns } from "./supplier-columns";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
+import ConfirmActionDialog from "@/lib/utils/components/ConfirmDialog";
 import { useDeleteSupplier } from "../../api/use-mutate-supplier";
 import { toast } from "sonner"
 
@@ -68,13 +68,20 @@ export function SupplierTable({ suppliers }: SupplierTableProps) {
           />
         )}
       </div>
-      <ConfirmDeleteDialog
-        title={`Supplier "${supplierToDelete?.firmName}"`}
-        description
+      <ConfirmActionDialog
+        title={`Supplier Firm "${supplierToDelete?.firmName}"`}
+        description={
+          <span>
+            Are you sure you want to delete <strong className="text-slate-900">{supplierToDelete?.firmName}</strong>?
+          </span>
+        }
         isOpen={!!supplierToDelete}
         onClose={() => setSupplierToDelete(null)}
         onConfirm={confirmDelete}
         isLoading={isDeleting}
+        confirmText="Delete Supplier"
+        confirmButtonClass="bg-rose-600 hover:bg-rose-700 text-white hover:text-white"
+        confirmButtonVariant="destructive"
       />
     </>
   );

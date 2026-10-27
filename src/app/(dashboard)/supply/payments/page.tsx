@@ -6,6 +6,8 @@ import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 import Loading from "@/app/loading";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
+import ErrorBoundary from "@/app/error";
+import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 
 export default function SupplierPaymentsPage() {
   const searchParamas = useSearchParams();
@@ -13,10 +15,17 @@ export default function SupplierPaymentsPage() {
   const status = searchParamas.get('status') || undefined;
 
   const { branchId, isLoading: isTenantLoading } = useRole();
-  const { data, isLoading } = usePayments(branchId, search, status);
+  const { data, isLoading, isError, error } = usePayments(branchId, search, status);
   const payments = data?.payments
+  const logs = data?.logs;
 
-  if (isTenantLoading || isLoading || !data) return <Loading text="Loading Payments..." />
+  if (isTenantLoading || !branchId || isLoading) {
+    return <Loading text="Loading Payments..." />;
+  }
+
+  if (isError) {
+    return <ErrorBoundary error={error?.message || "Failed to load payments"} />;
+  }
 
   return (
     <div className="space-y-6 p-6">
@@ -40,6 +49,10 @@ export default function SupplierPaymentsPage() {
       <PaymentsTable
         branchId={branchId}
         payments={payments}
+      />
+      <ActivityLogsCard
+        title="Supplier Payment Activity"
+        logs={logs}
       />
     </div>
   );

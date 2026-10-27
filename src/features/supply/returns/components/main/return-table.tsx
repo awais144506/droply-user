@@ -23,15 +23,14 @@ interface ReturnTableProps {
 export const ReturnTable = ({ returns = [] }: ReturnTableProps) => {
     const router = useRouter();
     const { branchId } = useRole();
-    
+
     // Mutations
     const { mutate: deleteReturn, isPending: isDeleting } = useDeleteReturn();
     const { mutate: resolveReturn, isPending: isResolving } = useResolveReturn(branchId);
-    
+
     // Settings
-    const { fetchBranchSettings } = useBranchSettings(branchId);
-    const branchSettings = fetchBranchSettings.data;
-    
+    const { data: branchData } = useBranchSettings(branchId);
+
     // Dialog States
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [isResolveDialogOpen, setIsResolveDialogOpen] = useState(false);
@@ -53,20 +52,20 @@ export const ReturnTable = ({ returns = [] }: ReturnTableProps) => {
         },
         onPrint: (returnRecord: PurchaseReturn) => {
             toast.info(`Generating PDF for ${returnRecord.debitNoteNumber}...`);
-            generateReturnPdf(returnRecord, branchSettings);
+            generateReturnPdf(returnRecord, branchData);
         },
         onWhatsApp: (returnRecord: PurchaseReturn) => {
-            if (!branchSettings) {
+            if (!branchData) {
                 toast.error("Branch settings are still loading. Please wait a second.");
                 return;
             }
-            sendReturnWhatsApp(returnRecord, branchSettings);
+            sendReturnWhatsApp(returnRecord, branchData);
         },
         onDelete: (returnRecord: PurchaseReturn) => {
             setSelectedReturn(returnRecord);
             setIsDeleteDialogOpen(true);
         },
-    }), [branchSettings]);
+    }), [branchData]);
 
     const handleDeleteConfirm = () => {
         if (selectedReturn) {

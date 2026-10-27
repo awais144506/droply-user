@@ -26,8 +26,7 @@ const InvoiceTable = ({ docs = [], branchId }: Props) => {
     const [selectedDocToDelete, setSelectedDocToDelete] = useState<BillingDocument | null>(null);
     const [selectedDocToToggle, setSelectedDocToToggle] = useState<BillingDocument | null>(null);
 
-    const { fetchBranchSettings } = useBranchSettings(branchId);
-    const branchSettings = fetchBranchSettings.data;
+    const { data: branchData, isLoading } = useBranchSettings(branchId);
 
     const { currentPage, setCurrentPage, paginatedData, totalPages, totalItems, itemsPerPage } = usePagination(docs);
 
@@ -68,8 +67,8 @@ const InvoiceTable = ({ docs = [], branchId }: Props) => {
     };
 
     const handleDownloadPdf = useCallback((doc: BillingDocument) => {
-        generateInvoicePdf(doc, branchSettings);
-    }, [branchSettings]);
+        generateInvoicePdf(doc, branchData);
+    }, [branchData]);
 
     // 3. Build Columns
     const columns = useMemo(

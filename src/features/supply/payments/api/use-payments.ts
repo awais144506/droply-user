@@ -5,9 +5,11 @@ import { paymentKeys } from "./payments-keys";
 export function usePayments(branchId: string, search?: string, status?: string) {
     return useQuery({
         queryKey: paymentKeys.list(branchId),
-        queryFn: () => paymentApi.getAll(branchId),
-        select: (allPayments) => {
+        queryFn: () => paymentApi.getAll(),
+        select: (payload) => {
             // Calculate global stats for the cards
+            const allPayments = payload.payments;
+            const logs = payload.logs;
             const totalAmountPaid = allPayments.reduce((acc, p) => acc + p.amountPaid, 0);
             let filteredPayments = allPayments;
 
@@ -28,7 +30,8 @@ export function usePayments(branchId: string, search?: string, status?: string) 
                 payments: filteredPayments,
                 stats: {
                     totalAmountPaid,
-                }
+                },
+                logs
             };
         },
         enabled: !!branchId,

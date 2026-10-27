@@ -3,15 +3,18 @@ import { toast } from "sonner";
 import { supplierApi } from "./supplier.service";
 import { supplierKeys } from "./supplier-keys";
 import { SupplierFormData } from "../schema/create-supplier-schema";
+import { useRouter } from "next/navigation";
 
 export function useCreateSupplier() {
     const queryClient = useQueryClient();
+    const router = useRouter();
 
     return useMutation({
         mutationFn: (payload: SupplierFormData) => supplierApi.create(payload),
         onSuccess: () => {
             toast.success("Supplier created successfully");
             queryClient.invalidateQueries({ queryKey: supplierKeys.all });
+            router.back();
         },
         onError: (err) => {
             toast.error("Creation Failed", { description: err.message });

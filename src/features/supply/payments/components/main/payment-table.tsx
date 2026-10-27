@@ -19,8 +19,7 @@ interface PaymentsTableProps {
 
 export const PaymentsTable = ({ payments = [], branchId }: PaymentsTableProps) => {
     const router = useRouter();
-    const { fetchBranchSettings } = useBranchSettings(branchId);
-    const branchSettings = fetchBranchSettings.data;
+    const { data: branchData } = useBranchSettings(branchId);
 
     const {
         currentPage,
@@ -42,12 +41,12 @@ export const PaymentsTable = ({ payments = [], branchId }: PaymentsTableProps) =
         },
         onPrint: (payment: SupplierPayment) => {
             toast.info(`Generating voucher PDF for ${payment.voucherNumber}...`);
-            generatePaymentPdf(payment, branchSettings);
+            generatePaymentPdf(payment, branchData);
         },
         onWhatsApp: (payment: SupplierPayment) => {
-            sendPOPaymentMessage(payment, branchSettings)
+            sendPOPaymentMessage(payment, branchData)
         }
-    }), [branchSettings, router]);
+    }), [branchData, router]);
 
     const columns = useMemo(() => getPaymentColumns(router, handlers), [router, handlers]);
 

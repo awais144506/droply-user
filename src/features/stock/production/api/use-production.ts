@@ -5,7 +5,7 @@ import { productionKeys } from "./production-keys";
 export const useProduction = (branchId: string, search?: string, status?: string) => {
   return useQuery({
     queryKey: productionKeys.lists(branchId),
-    queryFn: () => productionService.getAll(branchId),
+    queryFn: () => productionService.getAll(),
     select: (batchesData) => {
 
       const totalYield = batchesData.batches.reduce((sum, batch) => sum + (batch.actualYield || 0), 0);

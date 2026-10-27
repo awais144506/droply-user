@@ -77,12 +77,11 @@ export const getPaymentColumns = (
         {
             header: "PO Ref",
             render: (payment) => (
-                <button
-                    onClick={() => router.push(`/supply/order/${payment.poId}`)}
+                <span
                     className="font-bold text-sky-600 text-sm hover:underline text-left"
                 >
                     {payment.purchaseOrder?.poNumber || "N/A"}
-                </button>
+                </span>
             ),
         },
         {

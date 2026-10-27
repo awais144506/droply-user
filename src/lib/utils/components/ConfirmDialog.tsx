@@ -30,7 +30,7 @@ export default function ConfirmActionDialog({
     title,
     description,
     confirmText = "Confirm",
-    confirmButtonClass = "bg-sky-600 hover:bg-sky-700 text-white",
+    confirmButtonClass = "",
     confirmButtonVariant = "default",
 }: ConfirmActionDialogProps) {
     return (

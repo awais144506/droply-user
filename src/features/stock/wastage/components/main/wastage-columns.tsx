@@ -43,7 +43,7 @@ export const getWastageColumns = (
         {
             header: "Value Loss",
             render: (log) => {
-                const calculateCost = log.quantityWasted * log.rawMaterial.unitCost;
+                const calculateCost = log.quantityWasted * log.rawMaterial.priceTiers[0].unitCost;
                 return (
                     <span className="font-bold text-rose-600">
                         Rs {formatCurrency(calculateCost)}

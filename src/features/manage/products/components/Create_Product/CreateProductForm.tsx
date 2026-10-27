@@ -9,6 +9,7 @@ import ProductPriceCard from "./product-price-card";
 import ProductDetailCard from "./product-detail-card";
 import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
 import { useAppForm } from "@/lib/hooks/use-app-form";
+import { LayersPlus } from "lucide-react";
 
 interface ProductFormProps {
     initialValues?: any;
@@ -127,6 +128,7 @@ export function ProductForm({ initialValues, onSubmit, isPending = false }: Prod
                     isDirty={form.formState.isDirty}
                     isEditMode={isEditMode}
                     href="/manage/products"
+                    icon={LayersPlus}
                 />
             </form>
         </FormProvider>

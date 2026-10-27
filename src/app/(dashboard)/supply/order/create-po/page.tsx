@@ -1,5 +1,4 @@
 "use client"
-import { useRouter } from "next/navigation";
 import POForm from "@/features/supply/order/components/create_update/POForm";
 import { useProducts } from "@/features/manage/products/api/use-products";
 import { useRole } from "@/lib/hooks/use-role";
@@ -10,7 +9,7 @@ import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
 
 const CreatePoOrder = () => {
     const { branchId } = useRole();
-    const router = useRouter();
+
 
     const { data: productsData, isLoading: isLoadingProducts } = useProducts(branchId);
     const { data: suppliersData, isLoading: isLoadingSuppliers } = useSuppliers(branchId);
@@ -19,18 +18,7 @@ const CreatePoOrder = () => {
     const supplierOptions = suppliersData?.supplierOptions || [];
 
     const handleSubmit = (data: CreatePOFormData) => {
-        const payload = {
-            ...data,
-            branchId
-        }
-        createPO(
-            payload,
-            {
-                onSuccess: () => {
-                    router.push("/supply/order");
-                }
-            }
-        );
+        createPO(data);
     };
 
     return (
@@ -38,7 +26,10 @@ const CreatePoOrder = () => {
             <CreateFormHeader
                 title="Create Purchase Order"
                 description="Issue a new PO to restock branch inventory."
-                href="/supply/order"
+                breadcrumbs={[
+                    { label: "Purchase Orders", href: "/supply/order" },
+                    { label: "Create PO" }
+                ]}
             />
             <POForm
                 supplierOptions={supplierOptions}

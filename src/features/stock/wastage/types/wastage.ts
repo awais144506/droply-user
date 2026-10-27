@@ -1,4 +1,6 @@
 type Source = 'PRODUCTION' | 'TRANSIT' | 'WAREHOUSE' | 'GENERAL';
+
+
 export interface WastageRecord {
     id: string;
     branchId: string;
@@ -10,8 +12,10 @@ export interface WastageRecord {
     createdAt: string;
     rawMaterial: {
         name: string;
-        unitCost: number;
         unitOfMeasure: string;
+        priceTiers: {
+            unitCost: number;
+        }[];
     };
 }
 

@@ -2,24 +2,25 @@ import { apiClient } from "@/lib/api-client";
 import { SupplierList } from "../types/supplier";
 import { SupplierFormData } from "../schema/create-supplier-schema";
 
+const API = '/supplier/user'
 export const supplierApi = {
-    getAll: async (branchId: string): Promise<SupplierList[]> => {
-        return await apiClient.get(`/suppliers/branch/${branchId}`);
+    getAll: async (): Promise<SupplierList[]> => {
+        return await apiClient.get(`${API}`);
     },
 
     getById: async (id: string): Promise<SupplierList> => {
-        return await apiClient.get(`/suppliers/${id}`);
+        return await apiClient.get(`${API}/${id}`);
     },
 
     create: async (payload: SupplierFormData): Promise<SupplierList> => {
-        return await apiClient.post("/suppliers", payload);
+        return await apiClient.post(`${API}`, payload);
     },
 
     update: async (id: string, payload: SupplierFormData): Promise<SupplierList> => {
-        return await apiClient.patch(`/suppliers/${id}`, payload);
+        return await apiClient.patch(`${API}/${id}`, payload);
     },
 
     delete: async (id: string): Promise<void> => {
-        await apiClient.delete(`/suppliers/${id}`);
+        await apiClient.delete(`${API}/${id}`);
     }
 };

@@ -2,23 +2,24 @@ import { apiClient } from "@/lib/api-client";
 import { BillingDocumentFormValues } from "../schema/quotation-schema";
 import { BillingDocumentApiResponse, BillingDocument } from "../types/quotation";
 
+const API = '/invoice/user'
 export const quoteService = {
     createNewQuotation: async (payload: BillingDocumentFormValues): Promise<BillingDocument> => {
-        return apiClient.post(`/invoice/branch`, payload)
+        return apiClient.post(`${API}`, payload)
     },
     getAllQuotations: async (branchId: string): Promise<BillingDocumentApiResponse> => {
-        return apiClient.get(`/invoice/branch/${branchId}`)
+        return apiClient.get(`${API}/${branchId}`)
     },
     getQuotationById: async (id: string): Promise<BillingDocument> => {
-        return apiClient.get(`/invoice/branch/${id}/single`)
+        return apiClient.get(`${API}/${id}/single`)
     },
     updateQuotation: async (id: string, payload: BillingDocumentFormValues): Promise<BillingDocument> => {
-        return apiClient.patch(`/invoice/branch/${id}/edit`, payload);
+        return apiClient.patch(`${API}/${id}/edit`, payload);
     },
     deleteQuotation: async (id: string): Promise<true> => {
-        return apiClient.delete(`/invoice/branch/${id}/delete`)
+        return apiClient.delete(`${API}/${id}/delete`)
     },
     updateInvoiceType: async (id: string, type: 'INVOICE' | 'QUOTATION'): Promise<BillingDocument> => {
-        return apiClient.patch(`/invoice/branch/${id}/type`, { type });
+        return apiClient.patch(`${API}/${id}/type`, { type });
     },
 }

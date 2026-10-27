@@ -1,10 +1,10 @@
-import { FormProvider, useForm, SubmitHandler } from "react-hook-form"
-import { yupResolver } from "@hookform/resolvers/yup"
-
+import { FormProvider, SubmitHandler } from "react-hook-form"
 import { SupplierFormData, supplierSchema } from "../../schema/create-supplier-schema"
 import { FormInput } from "@/components/ui/form-input"
 import { FormPhoneInput } from "@/components/ui/form-phone-input"
 import FormCTAFooter from "@/lib/utils/components/FormCTAFooter"
+import { useAppForm } from "@/lib/hooks/use-app-form"
+import { UserPlus } from "lucide-react"
 
 type Props = {
     onSubmit: SubmitHandler<SupplierFormData>;
@@ -14,17 +14,15 @@ type Props = {
 }
 
 const SupplierForm = ({ onSubmit, isPending, initialData, isEditMode }: Props) => {
-    const form = useForm<SupplierFormData>({
-        resolver: yupResolver(supplierSchema),
-        mode: "onChange",
-        values: {
-            firmName: initialData?.firmName || "",
-            supplierName: initialData?.supplierName || "",
-            email: initialData?.email || "",
-            phone: initialData?.phone || "",
-            address: initialData?.address || "",
-            city: initialData?.city || "",
-        }
+    const form = useAppForm(supplierSchema, {
+        firmName: initialData?.firmName || "",
+        name: initialData?.name || "",
+        email: initialData?.email || "",
+        phone: initialData?.phone || "",
+        address: initialData?.address || "",
+        city: initialData?.city || "",
+        ntn: initialData?.ntn || "",
+        strn: initialData?.strn || "",
     });
 
     return (
@@ -34,7 +32,7 @@ const SupplierForm = ({ onSubmit, isPending, initialData, isEditMode }: Props) =
                     {/* Input Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                         <FormInput label="Firm Name" name="firmName" placeholder="e.g. SES Group Packaging" required />
-                        <FormInput label="Contact Person Name" name="supplierName" placeholder="Rasheed Anjum" required />
+                        <FormInput label="Contact Person Name" name="name" placeholder="Rasheed Anjum" required />
                         <FormPhoneInput
                             label="Phone Number"
                             required
@@ -44,6 +42,8 @@ const SupplierForm = ({ onSubmit, isPending, initialData, isEditMode }: Props) =
                         <FormInput label="Email Address" name="email" placeholder="Optional" />
                         <FormInput label="Address" name="address" required placeholder="e.g Factory Road" />
                         <FormInput label="City" name="city" required placeholder="e.g Lahore" />
+                        <FormInput label="NTN" name="ntn" placeholder="e.g 15414616546" />
+                        <FormInput label="STRN" name="strn" placeholder="e.g 265146-45" />
                     </div>
                     <FormCTAFooter
                         href="/supply/suppliers"
@@ -51,6 +51,8 @@ const SupplierForm = ({ onSubmit, isPending, initialData, isEditMode }: Props) =
                         isDirty={form.formState.isDirty}
                         isValid={form.formState.isValid}
                         isEditMode={isEditMode}
+                        ctaText="Create Supplier"
+                        icon={UserPlus}
                     />
                 </form>
             </FormProvider>

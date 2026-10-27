@@ -17,10 +17,10 @@ export default function SuppliersPage() {
 
   const { data, isLoading } = useSuppliers(branchId, search, status);
   const { suppliers, totalDueAmount } = data || {};
-  if (isLoading) return <Loading text="Loading Suppliers..." />
+  if (isLoading || !data) return <Loading text="Loading Suppliers..." />
 
   return (
-    <div className="space-y-6 max-w-350 mx-auto p-6">
+    <div className="space-y-6 p-6">
       <MainPageHeader
         heading="Suppliers & Vendor Accounts"
         description="Vendors you purchase inventory, raw materials, and plant equipment from."

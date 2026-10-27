@@ -36,7 +36,7 @@ const EditPoOrder = () => {
     const productOptions = productsData?.bomOptions || [];
     const supplierOptions = suppliersData?.supplierOptions || [];
 
-    if (isLoadingProducts || isLoadingSuppliers || isLoadingPO) return <Loading text="Loading PO details..." />;
+    if (isLoadingProducts || isLoadingSuppliers || isLoadingPO || !currentPO) return <Loading text="Loading PO details..." />;
     if (!currentPO) return <NotFoundPage />;
 
     const isLocked = currentPO.status !== "ORDERED";
@@ -55,13 +55,11 @@ const EditPoOrder = () => {
 
     const handleSubmit = (data: CreatePOFormData) => {
         if (isLocked) return; // Hard block submission if bypassed via DevTools
-
         updatePO(
             {
                 id: poId,
-                payload: { ...data, branchId } as CreatePOFormData & { branchId: string }
+                payload: data,
             },
-            { onSuccess: () => router.push("/supply/order") }
         );
     };
 
@@ -83,7 +81,10 @@ const EditPoOrder = () => {
                     <CreateFormHeader
                         title="Edit Purchase Order Details"
                         description={`View or update ${currentPO.poNumber}`}
-                        href="/supply/order"
+                        breadcrumbs={[
+                            { label: "Purchase Orders", href: "/supply/order" },
+                            { label: `Edit PO: ${currentPO.poNumber}` }
+                        ]}
                     />
 
                     {!isLocked && (

@@ -1,34 +1,23 @@
 "use client"
-
-import { useRole } from "@/lib/hooks/use-role";
 import SupplierForm from "@/features/supply/suppliers/components/create/SupplierForm"
 import { useCreateSupplier } from "@/features/supply/suppliers/api/use-mutate-supplier";
 import { SupplierFormData } from "@/features/supply/suppliers/schema/create-supplier-schema";
-import { useRouter } from "next/navigation";
 import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation"
 
 const CreateSupplier = () => {
-
-    const { branchId } = useRole();
-    const router = useRouter();
     const { mutate: createSupplier, isPending } = useCreateSupplier();
     const handleSubmit = (data: SupplierFormData) => {
-        const payload = {
-            ...data,
-            branchId,
-        }
-        createSupplier(payload, {
-            onSuccess: () => {
-                router.back();
-            }
-        });
+        createSupplier(data);
     };
 
     return (
         <div className="max-w-5xl mx-auto space-y-6 p-6">
             <CreateFormHeader
                 title="Create New Supplier"
-                href="/supply/suppliers"
+                breadcrumbs={[
+                    { label: "Suppliers", href: "/supply/suppliers" },
+                    { label: "Create Supplier" }
+                ]}
             />
             <SupplierForm
                 onSubmit={handleSubmit}

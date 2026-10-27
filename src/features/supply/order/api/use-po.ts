@@ -4,8 +4,8 @@ import { poApi } from "./po.service";
 
 export function usePurchaseOrders(branchId: string, search?: string, status?: string) {
     return useQuery({
-        queryKey: poKeys.list(branchId), // Client-side filtering keeps this simple
-        queryFn: () => poApi.getAll(branchId),
+        queryKey: poKeys.list(branchId),
+        queryFn: () => poApi.getAll(),
         select: (data) => {
 
             const allOrders = data.po;

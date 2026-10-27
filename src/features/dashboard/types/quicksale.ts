@@ -1,21 +1,26 @@
 export interface QuickSaleProduct {
+  id: string;
+  name: string;
+  code?: string;
+  price: number;
+  stock: number;
+  trackingType?: string;
+  lowStock?: number;
+  security?: number | null;
+  unit: string;
+  priceTiers: {
     id: string;
-    name: string;
-    code?: string;
-    price: number;
-    stock: number;
-    trackingType?: string;
-    lowStock?: number;
-    security?: number | null;
-    unit: string;
+    salePrice: number;
+    title:string;
+  }[]
 }
 
 export interface CartItem {
-    id: string;
-    name: string;
-    price: number;
-    qty: number;
-    unit?: string;
+  id: string;
+  name: string;
+  price: number;
+  qty: number;
+  unit?: string;
 }
 
 export type QuickSaleStatus = "COMPLETED" | "VOIDED";

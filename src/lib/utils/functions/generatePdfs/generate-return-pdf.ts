@@ -1,193 +1,384 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { format } from "date-fns";
 import { PurchaseReturn } from "@/features/supply/returns/types/returns";
 import { BranchSettingData } from "@/features/admin/settings/types/settings";
-import { formatCurrency } from "@/lib/utils/functions/setFormat";
 import { getBase64ImageFromUrl } from "./getBase64Image";
 import { formatPhoneNumber } from "react-phone-number-input";
+import { toWords } from "number-to-words";
 
-const colors = {
-    primary: [2, 132, 199] as [number, number, number],
-    slate900: [15, 23, 42] as [number, number, number],
-    slate500: [100, 116, 139] as [number, number, number],
-    slate200: [226, 232, 240] as [number, number, number],
-    sky50: [240, 249, 255] as [number, number, number],
-    emerald600: [5, 150, 105] as [number, number, number],
-    rose50: [255, 241, 242] as [number, number, number],
-    rose600: [225, 29, 72] as [number, number, number],
-    amber600: [217, 119, 6] as [number, number, number],
-};
+export const generateReturnPdf = async (
+    returnRecord: PurchaseReturn & {
+        supplier?: Record<string, any>;
+    },
+    branch?: BranchSettingData & Record<string, any>
+) => {
+    const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+    });
 
-export const generateReturnPdf = async (returnRecord: PurchaseReturn, branch?: BranchSettingData) => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.width;
+    const docTitle = "Purchase Return (Debit Note)";
 
+    const formatCurrency = (val: number) =>
+        `Rs ${Number(val || 0).toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        })}`;
 
-    let textStartX = 14;
+    const formatDateDMY = (dateStr: string | Date) => {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return "N/A";
+        const day = String(d.getDate()).padStart(2, "0");
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const year = d.getFullYear();
+        return `${day}-${month}-${year}`;
+    };
+
+    const colors = {
+        primary: [3, 105, 161] as [number, number, number],      // Deep Sky/Navy Header
+        brandAccent: [2, 132, 199] as [number, number, number],  // Sky 600
+        slate900: [15, 23, 42] as [number, number, number],
+        slate700: [51, 65, 85] as [number, number, number],
+        slate500: [100, 116, 139] as [number, number, number],
+        slate200: [226, 232, 240] as [number, number, number],
+        slate100: [241, 245, 249] as [number, number, number],
+    };
+
+    const companyName = branch?.name || branch?.displayName || "Company Name";
+    const companyNtn = branch?.ntn || branch?.displayNtn || "";
+    const companyStrn = branch?.strn || branch?.displayStrn || "";
+    const companyAddress = branch?.address || branch?.displayAddress || "";
+    const companyPhone = branch?.phone || branch?.displayPhone || "";
+    const companyEmail = branch?.email || branch?.displayEmail || "";
+
+    // =========================================================================
+    // 1. TOP HEADER: Company Details (Left) & Logo (Right)
+    // =========================================================================
+    let leftY = 18;
+    const leftX = 14;
+    const rightColX = 196;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(...colors.slate900);
+    const companyNameLines = doc.splitTextToSize(companyName, 115);
+    doc.text(companyNameLines, leftX, leftY);
+    leftY += companyNameLines.length * 5.5;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.slate700);
+
+    if (companyNtn) {
+        doc.text(`NTN: (${companyNtn})`, leftX, leftY);
+        leftY += 4.5;
+    }
+    if (companyStrn) {
+        doc.text(`STRN: ${companyStrn}`, leftX, leftY);
+        leftY += 4.5;
+    }
+    if (companyAddress) {
+        const addressLines = doc.splitTextToSize(companyAddress, 115);
+        doc.text(addressLines, leftX, leftY);
+        leftY += addressLines.length * 4.5;
+    }
+    if (companyPhone) {
+        const formattedPhone = formatPhoneNumber(companyPhone) || companyPhone;
+        doc.text(`Phone no.: ${formattedPhone}`, leftX, leftY);
+        leftY += 4.5;
+    }
+    if (companyEmail) {
+        doc.text(`Email: ${companyEmail}`, leftX, leftY);
+        leftY += 4.5;
+    }
 
     if (branch?.logoUrl) {
         try {
             const base64Logo = await getBase64ImageFromUrl(branch.logoUrl);
-            doc.addImage(base64Logo, 'PNG', 14, 15, 20, 18);
-            textStartX = 40;
+            doc.addImage(base64Logo, "PNG", 170, 15, 20, 18);
         } catch (error) {
             console.warn("Failed to load logo", error);
         }
     }
 
-    // Header
+    // =========================================================================
+    // 2. CENTER TITLE & DIVIDER
+    // =========================================================================
+    const titleY = Math.max(leftY + 6, 52);
+
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(24);
+    doc.setFontSize(18);
     doc.setTextColor(...colors.primary);
-    doc.text((branch?.displayName?.toUpperCase() || ""), textStartX, 22);
+    doc.text(docTitle, 105, titleY, { align: "center" });
 
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(...colors.slate500);
-    doc.text((branch?.displayAddress || ""), textStartX, 29);
-    doc.text(`Phone: ${formatPhoneNumber(branch?.displayPhone || "")}`, textStartX, 34);
-    doc.text(`Email: ${branch?.displayEmail || ""}`, textStartX, 39);
-
-    // Document Title
-  doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.setTextColor(...colors.slate900);
-    doc.text("PURCHASE RETURN", 196, 25, { align: "right" });
-
-    // --- 2. META DATA & SUPPLIER SECTION ---
     doc.setDrawColor(...colors.slate200);
-    doc.line(14, 38, pageWidth - 14, 38);
+    doc.setLineWidth(0.4);
+    doc.line(14, titleY + 3, 196, titleY + 3);
 
-    const startY = 46;
+    // =========================================================================
+    // 3. ISSUED TO (Full Supplier Details) & RETURN DETAILS
+    // =========================================================================
+    let billY = titleY + 10;
+    const detailsStartY = billY;
 
-    // Supplier (Left)
+    // Left: Issued To (Supplier)
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...colors.slate900);
-    doc.text("ISSUED TO (SUPPLIER):", 14, startY);
+    doc.text("Issued To (Supplier)", leftX, billY);
+    billY += 5;
 
-    doc.setFontSize(11);
-    doc.text(returnRecord.supplier?.firmName || "Unknown Supplier", 14, startY + 6);
+    doc.text(`MS: ${returnRecord.supplier?.firmName || "Unknown Supplier"}`, leftX, billY);
+    billY += 4.8;
 
     doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.slate700);
+
+    const contactPerson = returnRecord.supplier?.name || returnRecord.supplier?.supplierName;
+    if (contactPerson) {
+        doc.text(`Contact Person: ${contactPerson}`, leftX, billY);
+        billY += 4.5;
+    }
+    if (returnRecord.supplier?.ntn) {
+        doc.text(`NTN No.${returnRecord.supplier.ntn}`, leftX, billY);
+        billY += 4.5;
+    }
+    if (returnRecord.supplier?.strn) {
+        doc.text(`STRN No.${returnRecord.supplier.strn}`, leftX, billY);
+        billY += 4.5;
+    }
+    if (returnRecord.supplier?.address) {
+        const supplierAddr = `${returnRecord.supplier.address}${returnRecord.supplier.city ? `, ${returnRecord.supplier.city}` : ""
+            }`;
+        const addrLines = doc.splitTextToSize(supplierAddr, 110);
+        doc.text(addrLines, leftX, billY);
+        billY += addrLines.length * 4.5;
+    }
+    if (returnRecord.supplier?.phone) {
+        const supplierPhone =
+            formatPhoneNumber(returnRecord.supplier.phone) || returnRecord.supplier.phone;
+        doc.text(`Contact No.: ${supplierPhone}`, leftX, billY);
+        billY += 4.5;
+    }
+    if (returnRecord.supplier?.email) {
+        doc.text(`Email: ${returnRecord.supplier.email}`, leftX, billY);
+        billY += 4.5;
+    }
+
+    // Right: Return Details
+    doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.setTextColor(...colors.slate500);
-    doc.text(`Attn: ${returnRecord.supplier?.supplierName || "N/A"}`, 14, startY + 11);
-    doc.text(`Phone: ${returnRecord.supplier?.phone || "N/A"}`, 14, startY + 16);
-
-    // Document Details (Right)
-    const rightColX = pageWidth - 60;
-
-    doc.setFont("helvetica", "bold");
     doc.setTextColor(...colors.slate900);
-    doc.text("Debit Note #:", rightColX, startY);
-    doc.text("Date:", rightColX, startY + 6);
-    doc.text("Status:", rightColX, startY + 12);
-    doc.text("Original PO:", rightColX, startY + 18);
+    doc.text("Return Details", rightColX, detailsStartY, { align: "right" });
 
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(...colors.slate500);
-    doc.text(returnRecord.debitNoteNumber, pageWidth - 14, startY, { align: "right" });
-    doc.text(format(new Date(returnRecord.returnDate), "MMM dd, yyyy"), pageWidth - 14, startY + 6, { align: "right" });
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.slate700);
+    doc.text(
+        `Debit Note No.: ${returnRecord.debitNoteNumber}`,
+        rightColX,
+        detailsStartY + 5,
+        { align: "right" }
+    );
+    doc.text(
+        `Original PO: ${returnRecord.purchaseOrder?.poNumber || "N/A"}`,
+        rightColX,
+        detailsStartY + 10,
+        { align: "right" }
+    );
+    doc.text(
+        `Return Date: ${formatDateDMY(returnRecord.returnDate)}`,
+        rightColX,
+        detailsStartY + 15,
+        { align: "right" }
+    );
 
-    // Status formatting
-    const statusText = returnRecord.status.replace("_", " ");
-    let statusColor = colors.slate500;
-    if (returnRecord.status === "PENDING_RESOLUTION") statusColor = colors.amber600;
-    if (returnRecord.status === "CREDIT_APPLIED" || returnRecord.status === "REPLACED") statusColor = colors.emerald600;
+    const statusText = (returnRecord.status || "PENDING").replace(/_/g, " ");
+    doc.text(
+        `Status: ${statusText}`,
+        rightColX,
+        detailsStartY + 20,
+        { align: "right" }
+    );
 
-    doc.setTextColor(...statusColor);
-    doc.setFont("helvetica", "bold");
-    doc.text(statusText, pageWidth - 14, startY + 12, { align: "right" });
+    // =========================================================================
+    // 4. LINE ITEMS TABLE
+    // =========================================================================
+    const tableStartY = Math.max(billY + 4, detailsStartY + 26);
+    const items = returnRecord.items || [];
 
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(...colors.slate500);
-    doc.text(returnRecord.purchaseOrder?.poNumber || "N/A", pageWidth - 14, startY + 18, { align: "right" });
+    const totalQty = items.reduce(
+        (sum, item) => sum + Number(item.quantityReturned || 0),
+        0
+    );
+    const totalReturnVal = Number(returnRecord.totalValue || 0);
 
-    // --- 3. ITEMS TABLE ---
-    const tableData = returnRecord.items.map((item, index) => [
-        index + 1,
+    const tableBody: any[] = items.map((item, idx) => [
+        String(idx + 1),
         item.branchProduct?.name || "Unknown Product",
         item.supplierItemName || "-",
-        item.quantityReturned.toString(),
-        `Rs ${formatCurrency(item.unitCost)}`,
-        `Rs ${formatCurrency(item.quantityReturned * item.unitCost)}`
+        String(item.quantityReturned),
+        formatCurrency(item.unitCost),
+        formatCurrency(item.quantityReturned * item.unitCost),
+    ]);
+
+    // Bottom Total Row
+    tableBody.push([
+        "",
+        { content: "Total", styles: { fontStyle: "bold" } },
+        "",
+        { content: String(totalQty), styles: { fontStyle: "bold", halign: "right" } },
+        "",
+        { content: formatCurrency(totalReturnVal), styles: { fontStyle: "bold", halign: "right" } },
     ]);
 
     autoTable(doc, {
-        startY: startY + 28,
-        head: [['#', 'Inventory Product', 'Supplier Ref', 'Return Qty', 'Unit Cost', 'Total Value']],
-        body: tableData,
-        theme: 'grid',
+        startY: tableStartY,
+        margin: { left: 14, right: 14 },
+        head: [["#", "Inventory Product", "Supplier Ref", "Return Qty", "Unit Cost", "Total Value"]],
+        body: tableBody,
+        theme: "grid",
         headStyles: {
-            fillColor: colors.slate900,
-            textColor: 255,
-            fontSize: 9,
-            fontStyle: 'bold',
-            halign: 'center',
+            fillColor: colors.primary,
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            fontSize: 9.5,
+            cellPadding: 3,
         },
         bodyStyles: {
-            fontSize: 9,
             textColor: colors.slate900,
+            fontSize: 9.5,
+            cellPadding: 3,
+            lineColor: colors.slate200,
+            lineWidth: 0.2,
         },
         columnStyles: {
-            0: { halign: 'center', cellWidth: 10 },
-            1: { halign: 'left' },
-            2: { halign: 'left' },
-            3: { halign: 'center', cellWidth: 25 },
-            4: { halign: 'right', cellWidth: 30 },
-            5: { halign: 'right', cellWidth: 35 },
-        },
-        alternateRowStyles: {
-            fillColor: colors.slate200,
+            0: { cellWidth: 10, halign: "left" },
+            1: { cellWidth: "auto", halign: "left" },
+            2: { cellWidth: 35, halign: "left" },
+            3: { cellWidth: 24, halign: "right" },
+            4: { cellWidth: 32, halign: "right" },
+            5: { cellWidth: 35, halign: "right" },
         },
     });
 
-    // --- 4. FINANCIAL SUMMARY ---
-    // @ts-expect-error - autoTable adds finalY to doc
-    const finalY = doc.lastAutoTable.finalY + 10;
-    const labelX = pageWidth - 60;
-    const valueX = pageWidth - 14;
+    // =========================================================================
+    // 5. BOTTOM SECTION: Amount in Words, Notes & Financial Summary Box
+    // =========================================================================
+    let finalY = (doc as any).lastAutoTable.finalY + 8;
 
-    const remainingToResolve = returnRecord.totalValue - (returnRecord.creditRecovered || 0);
+    if (finalY > 230) {
+        doc.addPage();
+        finalY = 20;
+    }
 
-    doc.setFontSize(10);
-    doc.setTextColor(...colors.slate500);
-    doc.text("Total Return Value:", labelX, finalY, { align: "right" });
-    doc.text("Credit Recovered:", labelX, finalY + 7, { align: "right" });
+    let bottomLeftY = finalY;
 
+    // Left: Return Value in Words
     doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
     doc.setTextColor(...colors.slate900);
-    doc.text(`Rs ${formatCurrency(returnRecord.totalValue)}`, valueX, finalY, { align: "right" });
+    doc.text("Return Value In Words", leftX, bottomLeftY);
+    bottomLeftY += 5;
 
-    doc.setTextColor(...colors.emerald600);
-    doc.text(`- Rs ${formatCurrency(returnRecord.creditRecovered || 0)}`, valueX, finalY + 7, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.slate700);
+    const amountWords = toWords(totalReturnVal).toUpperCase();
+    const wordLines = doc.splitTextToSize(amountWords, 95);
+    doc.text(wordLines, leftX, bottomLeftY);
+    bottomLeftY += wordLines.length * 4.5 + 5;
 
-    // Highlight box for the final remaining balance
-    doc.setFillColor(...colors.rose50);
-    doc.roundedRect(pageWidth - 75, finalY + 12, 61, 10, 1, 1, "F");
-
-    doc.setFontSize(11);
-    doc.setTextColor(...colors.rose600);
-    doc.text("Value to Resolve:", labelX, finalY + 19, { align: "right" });
-    doc.text(`Rs ${formatCurrency(remainingToResolve)}`, valueX, finalY + 19, { align: "right" });
-
-    // --- 5. NOTES & FOOTER ---
+    // Left: Notes / Reason
     if (returnRecord.notes) {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(10);
         doc.setTextColor(...colors.slate900);
-        doc.text("Notes / Reason:", 14, finalY);
+        doc.text("Notes / Return Reason", leftX, bottomLeftY);
+        bottomLeftY += 5;
 
         doc.setFont("helvetica", "normal");
-        doc.setFontSize(9);
-        doc.setTextColor(...colors.slate500);
-
-        const splitNotes = doc.splitTextToSize(returnRecord.notes, 120);
-        doc.text(splitNotes, 14, finalY + 5);
+        doc.setFontSize(9.5);
+        doc.setTextColor(...colors.slate700);
+        const noteLines = doc.splitTextToSize(returnRecord.notes, 95);
+        doc.text(noteLines, leftX, bottomLeftY);
+        bottomLeftY += noteLines.length * 4.5 + 4;
     }
+
+    // Right: Financial Summary Box
+    let summaryY = finalY;
+    const summaryLabelX = 120;
+    const summaryValX = 196;
+
+    const drawSummaryRow = (
+        label: string,
+        val: string,
+        options?: { isBold?: boolean; isHighlighted?: boolean }
+    ) => {
+        if (options?.isHighlighted) {
+            doc.setFillColor(...colors.primary);
+            doc.rect(summaryLabelX - 2, summaryY - 4.2, 78, 6.5, "F");
+        }
+        doc.setFont("helvetica", options?.isBold ? "bold" : "normal");
+        doc.setFontSize(9.5);
+        if (options?.isHighlighted) {
+            doc.setTextColor(...colors.slate100);
+        } else {
+            doc.setTextColor(...colors.slate900);
+        }
+        doc.text(label, summaryLabelX, summaryY);
+        doc.text(val, summaryValX, summaryY, { align: "right" });
+        summaryY += 6.5;
+    };
+
+    const creditRecovered = Number(returnRecord.creditRecovered || 0);
+    const totalReplacedUnits = items.reduce(
+        (sum, item) => sum + Number((item as any).quantityReplaced || 0),
+        0
+    );
+    const totalRejectedUnits = items.reduce(
+        (sum, item) => sum + Number((item as any).quantityRejected || 0),
+        0
+    );
+    const remainingToResolve = Math.max(0, totalReturnVal - creditRecovered);
+
+    drawSummaryRow("Total Return Value", formatCurrency(totalReturnVal), {
+        isBold: true,
+        isHighlighted: true,
+    });
+    drawSummaryRow("Credit Recovered", formatCurrency(creditRecovered));
+    if (totalReplacedUnits > 0) {
+        drawSummaryRow("Units Replaced", `${totalReplacedUnits} Units`);
+    }
+    if (totalRejectedUnits > 0) {
+        drawSummaryRow("Units Rejected", `${totalRejectedUnits} Units`);
+    }
+    drawSummaryRow("Value to Resolve", formatCurrency(remainingToResolve), {
+        isBold: true,
+    });
+
+    // =========================================================================
+    // 6. AUTHORIZED SIGNATORY FOOTER
+    // =========================================================================
+    let sigY = Math.max(bottomLeftY, summaryY) + 12;
+
+    // If signature block would cross the bottom page margin, push it to a new page
+    if (sigY > 265) {
+        doc.addPage();
+        sigY = 40;
+    }
+
+    doc.setDrawColor(...colors.slate500);
+    doc.setLineWidth(0.3);
+    doc.line(145, sigY + 12, rightColX, sigY + 12);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(...colors.slate900);
+    doc.text("Authorized Signatory", rightColX, sigY + 17, { align: "right" });
 
     // Pagination Footer
     const pageCount = (doc as any).internal.getNumberOfPages();
@@ -200,10 +391,15 @@ export const generateReturnPdf = async (returnRecord: PurchaseReturn, branch?: B
         doc.setFontSize(8);
         doc.setTextColor(...colors.slate500);
 
-        doc.text(`Generated by Droply System • ${new Date().toLocaleString()}`, 14, pageHeight - 10);
-        doc.text(`Page ${i} of ${pageCount}`, 196, pageHeight - 10, { align: "right" });
+        doc.text(
+            `Generated by Droply System • ${new Date().toLocaleString()}`,
+            14,
+            pageHeight - 10
+        );
+        doc.text(`Page ${i} of ${pageCount}`, 196, pageHeight - 10, {
+            align: "right",
+        });
     }
 
-    // --- 6. SAVE/OPEN ---
-    doc.save(`${returnRecord.debitNoteNumber}.pdf`);
+    doc.save(`Return_${returnRecord.debitNoteNumber}.pdf`);
 };

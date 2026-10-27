@@ -21,8 +21,8 @@ export default function PurchaseOrdersPage() {
   const logs = data?.logs;
   const stats = data?.stats || { activeOrders: 0, pendingValue: 0, checkedByManager: 0, completedOrders: 0 };
 
-  if (isLoading) return <Loading text="Loading Orders..." />
-  if(isError) return <ErrorBoundary error={error.message}/>
+  if (isLoading || !data) return <Loading text="Loading PO Orders..." />
+  if (isError) return <ErrorBoundary error={error.message} />
 
   return (
     <div className="space-y-6 p-6">

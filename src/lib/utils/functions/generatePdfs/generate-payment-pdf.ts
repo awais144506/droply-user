@@ -5,192 +5,332 @@ import { SupplierPayment } from "@/features/supply/payments/types/payments";
 import { BranchSettingData } from "@/features/admin/settings/types/settings";
 import { formatPhoneNumber } from "react-phone-number-input";
 import { getBase64ImageFromUrl } from "./getBase64Image";
+import { toWords } from "number-to-words";
 
-export const generatePaymentPdf = async (payment: SupplierPayment & { purchaseOrder?: { supplierPayments?: SupplierPayment[], totalAmount?: number, advancePaid?: number, balanceDue?: number, poNumber?: string } }, branch?: BranchSettingData) => {
-    const doc = new jsPDF();
+export const generatePaymentPdf = async (
+    payment: SupplierPayment & {
+        purchaseOrder?: {
+            supplierPayments?: SupplierPayment[];
+            totalAmount?: number;
+            advancePaid?: number;
+            balanceDue?: number;
+            poNumber?: string;
+        };
+    },
+    branch?: BranchSettingData & Record<string, any>
+) => {
+    const doc = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+    });
 
-    const formatCurrency = (val: number) => `Rs ${val.toLocaleString("en-PK")}`;
-    const formatDate = (date: string | Date) => new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", });
+    const docTitle = "Payment Receipt";
 
-    const colors = {
-        primary: [2, 132, 199] as [number, number, number],
-        slate900: [15, 23, 42] as [number, number, number],
-        slate500: [100, 116, 139] as [number, number, number],
-        slate200: [226, 232, 240] as [number, number, number],
-        sky50: [240, 249, 255] as [number, number, number],
-        emerald600: [5, 150, 105] as [number, number, number],
-        rose50: [255, 241, 242] as [number, number, number],
-        rose600: [225, 29, 72] as [number, number, number],
+    const formatCurrency = (val: number) =>
+        `Rs ${Number(val || 0).toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        })}`;
+
+    const formatDateDMY = (dateStr: string | Date) => {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return "N/A";
+        const day = String(d.getDate()).padStart(2, "0");
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const year = d.getFullYear();
+        return `${day}-${month}-${year}`;
     };
 
-    let textStartX = 14;
+    const colors = {
+        primary: [3, 105, 161] as [number, number, number],      // Primary/Sky
+        brandAccent: [2, 132, 199] as [number, number, number],  // Sky 600
+        slate900: [15, 23, 42] as [number, number, number],
+        slate700: [51, 65, 85] as [number, number, number],
+        slate500: [100, 116, 139] as [number, number, number],
+        slate200: [226, 232, 240] as [number, number, number],
+        slate100: [241, 245, 249] as [number, number, number],
+        emerald600: [5, 150, 105] as [number, number, number],
+    };
+
+    const companyName = branch?.name || branch?.displayName || "Company Name";
+    const companyNtn = branch?.ntn || branch?.displayNtn || "";
+    const companyStrn = branch?.strn || branch?.displayStrn || "";
+    const companyAddress = branch?.address || branch?.displayAddress || "";
+    const companyPhone = branch?.phone || branch?.displayPhone || "";
+    const companyEmail = branch?.email || branch?.displayEmail || "";
+
+    // =========================================================================
+    // 1. TOP HEADER: Company Details (Left) & Logo (Right)
+    // =========================================================================
+    let leftY = 18;
+    const leftX = 14;
+    const rightColX = 196;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(...colors.slate900);
+    const companyNameLines = doc.splitTextToSize(companyName, 115);
+    doc.text(companyNameLines, leftX, leftY);
+    leftY += companyNameLines.length * 5.5;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.slate700);
+
+    if (companyNtn) {
+        doc.text(`NTN: (${companyNtn})`, leftX, leftY);
+        leftY += 4.5;
+    }
+    if (companyStrn) {
+        doc.text(`STRN: ${companyStrn}`, leftX, leftY);
+        leftY += 4.5;
+    }
+    if (companyAddress) {
+        const addressLines = doc.splitTextToSize(companyAddress, 115);
+        doc.text(addressLines, leftX, leftY);
+        leftY += addressLines.length * 4.5;
+    }
+    if (companyPhone) {
+        const formattedPhone = formatPhoneNumber(companyPhone) || companyPhone;
+        doc.text(`Phone no.: ${formattedPhone}`, leftX, leftY);
+        leftY += 4.5;
+    }
+    if (companyEmail) {
+        doc.text(`Email: ${companyEmail}`, leftX, leftY);
+        leftY += 4.5;
+    }
 
     if (branch?.logoUrl) {
         try {
             const base64Logo = await getBase64ImageFromUrl(branch.logoUrl);
-            doc.addImage(base64Logo, 'PNG', 14, 15, 20, 18);
-            textStartX = 40;
+            doc.addImage(base64Logo, 'PNG', 170, 15, 20, 18);
         } catch (error) {
             console.warn("Failed to load logo", error);
         }
     }
 
-    // Header
+    // =========================================================================
+    // 2. CENTER TITLE & DIVIDER
+    // =========================================================================
+    const titleY = Math.max(leftY + 6, 52);
+
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(24);
+    doc.setFontSize(18);
     doc.setTextColor(...colors.primary);
-    doc.text((branch?.displayName?.toUpperCase() || ""), textStartX, 22);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(...colors.slate500);
-    doc.text((branch?.displayAddress || ""), textStartX, 29);
-    doc.text(`Phone: ${formatPhoneNumber(branch?.displayPhone || "")}`, textStartX, 34);
-    doc.text(`Email: ${branch?.displayEmail || ""}`, textStartX, 39);
-
-    // Document Meta 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(16);
-    doc.setTextColor(...colors.slate900);
-    doc.text("PAYMENT RECEIPT", 196, 25, { align: "right" });
-
-    doc.setFontSize(10);
-    doc.setTextColor(...colors.slate500);
-    doc.text(`Receipt No:`, 135, 32);
-    doc.text(`PO Reference:`, 135, 37);
-    doc.text(`Date Issued:`, 135, 42);
-    doc.text(`PO Status:`, 135, 47);
-
-    // We use the PO details here since the receipt acts as a ledger for the PO
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...colors.slate900);
-    doc.text(payment.voucherNumber || "N/A", 196, 32, { align: "right" });
-    doc.setTextColor(...colors.slate900);
-    doc.text(payment.purchaseOrder?.poNumber || "N/A", 196, 37, { align: "right" });
-    doc.text(formatDate(payment.paymentDate), 196, 42, { align: "right" });
-    doc.setTextColor(...colors.primary);
-
-    // Determine overall PO status rather than just the single payment status
-    const poStatus = (payment.purchaseOrder?.balanceDue || 0) <= 0 ? "CLEARED" : "PARTIAL";
-    doc.text(poStatus, 196, 47, { align: "right" });
+    doc.text(docTitle, 105, titleY, { align: "center" });
 
     doc.setDrawColor(...colors.slate200);
-    doc.line(14, 50, 196, 50);
+    doc.setLineWidth(0.4);
+    doc.line(14, titleY + 3, 196, titleY + 3);
 
-    // Vendor Section
+    // =========================================================================
+    // 3. PAID TO (Left) & RECEIPT DETAILS (Right)
+    // =========================================================================
+    let billY = titleY + 10;
+    const detailsStartY = billY;
+
+    // Left: Issued To (Supplier)
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
-    doc.setTextColor(...colors.slate500);
-    doc.text("PAID TO:", 14, 58);
-
-    doc.setFontSize(12);
     doc.setTextColor(...colors.slate900);
-    doc.text(payment.supplier?.firmName || "Unknown Supplier", 14, 65);
+    doc.text("Issued To", leftX, billY);
+    billY += 5;
+
+    doc.text(`MS: ${payment.supplier?.firmName || "Unknown Supplier"}`, leftX, billY);
+    billY += 4.8;
 
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(...colors.slate500);
-    doc.text(`Contact: ${payment.supplier?.supplierName || "N/A"}`, 14, 70);
-    doc.text(`Phone: ${formatPhoneNumber(payment.supplier?.phone || "N/A")}`, 14, 75);
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.slate700);
 
-    // Dynamic Table Data Mapping (Historical Ledger)
+    if (payment.supplier?.ntn) {
+        doc.text(`NTN No: ${payment.supplier.ntn}`, leftX, billY);
+        billY += 4.5;
+    }
+    if (payment.supplier?.strn) {
+        doc.text(`STRN No: ${payment.supplier.strn}`, leftX, billY);
+        billY += 4.5;
+    }
+    if (payment.supplier?.address) {
+        const supplierAddr = `${payment.supplier.address}${payment.supplier.city ? `, ${payment.supplier.city}` : ""}`;
+        const addrLines = doc.splitTextToSize(supplierAddr, 110);
+        doc.text(addrLines, leftX, billY);
+        billY += addrLines.length * 4.5;
+    }
+    if (payment.supplier?.phone) {
+        const supplierPhone = formatPhoneNumber(payment.supplier.phone) || payment.supplier.phone;
+        doc.text(`Contact No: ${supplierPhone}`, leftX, billY);
+        billY += 4.5;
+    }
+    if (payment.supplier?.email) {
+        doc.text(`Email: ${payment.supplier.email}`, leftX, billY);
+        billY += 4.5;
+    }
+
+    // Right: Receipt Details
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(...colors.slate900);
+    doc.text("Receipt Details", rightColX, detailsStartY, { align: "right" });
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.slate700);
+    doc.text(`Receipt No.: ${payment.voucherNumber || "N/A"}`, rightColX, detailsStartY + 5, { align: "right" });
+    doc.text(`PO Reference: ${payment.purchaseOrder?.poNumber || "N/A"}`, rightColX, detailsStartY + 10, { align: "right" });
+    doc.text(`Date Issued: ${formatDateDMY(payment.paymentDate)}`, rightColX, detailsStartY + 15, { align: "right" });
+
+    // =========================================================================
+    // 4. LINE ITEMS TABLE (Payment Ledger)
+    // =========================================================================
+    const tableStartY = Math.max(billY + 4, detailsStartY + 22);
     let tableData: any[][] = [];
 
-    // Check if the backend included the historical payments array
     if (payment.purchaseOrder?.supplierPayments && payment.purchaseOrder.supplierPayments.length > 0) {
-        tableData = payment.purchaseOrder.supplierPayments.map((p) => {
-            const methodDisplay = p.paymentMethod.replace("_", " ");
+        tableData = payment.purchaseOrder.supplierPayments.map((p, idx) => {
+            const methodDisplay = (p.paymentMethod || "CASH").replace("_", " ");
+            const formattedMethod = methodDisplay.charAt(0).toUpperCase() + methodDisplay.slice(1).toLowerCase();
             return [
-                formatDate(p.paymentDate),
-                methodDisplay.charAt(0).toUpperCase() + methodDisplay.slice(1).toLowerCase(),
+                String(idx + 1),
+                formatDateDMY(p.paymentDate),
+                formattedMethod,
                 p.referenceNote || "-",
                 formatCurrency(p.amountPaid),
-                formatCurrency(p.balanceDue) // Balance *after* this specific payment
+                formatCurrency(p.balanceDue),
             ];
         });
     } else {
-        // Fallback for single payment if the array isn't populated
-        const methodDisplay = payment.paymentMethod.replace("_", " ");
+        const methodDisplay = (payment.paymentMethod || "CASH").replace("_", " ");
+        const formattedMethod = methodDisplay.charAt(0).toUpperCase() + methodDisplay.slice(1).toLowerCase();
         tableData = [
             [
-                formatDate(payment.paymentDate),
-                methodDisplay.charAt(0).toUpperCase() + methodDisplay.slice(1).toLowerCase(),
+                "1",
+                formatDateDMY(payment.paymentDate),
+                formattedMethod,
                 payment.referenceNote || "-",
                 formatCurrency(payment.amountPaid),
-                formatCurrency(payment.balanceDue)
+                formatCurrency(payment.balanceDue),
             ]
         ];
     }
 
     autoTable(doc, {
-        startY: 85,
-        head: [['Date', 'Method', 'Reference Note', 'Amount Paid', 'Remaining']],
+        startY: tableStartY,
+        margin: { left: 14, right: 14 },
+        head: [["#", "Date", "Method", "Reference Note", "Amount Paid", "Remaining"]],
         body: tableData,
-        theme: 'plain',
+        theme: "grid",
         headStyles: {
-            fillColor: colors.sky50,
-            textColor: colors.primary,
-            fontStyle: 'bold',
-            lineColor: colors.slate200,
-            lineWidth: { bottom: 0.5 }
+            fillColor: colors.primary,
+            textColor: [255, 255, 255],
+            fontStyle: "bold",
+            fontSize: 9.5,
+            cellPadding: 3,
         },
         bodyStyles: {
             textColor: colors.slate900,
+            fontSize: 9.5,
+            cellPadding: 3,
             lineColor: colors.slate200,
-            lineWidth: { bottom: 0.1 }
+            lineWidth: 0.2,
         },
-        styles: { fontSize: 9, cellPadding: 5 },
         columnStyles: {
-            0: { cellWidth: 25 },
-            1: { cellWidth: 30 },
-            2: { cellWidth: 'auto' },
-            3: { cellWidth: 35, halign: 'right', fontStyle: 'bold' },
-            4: { cellWidth: 35, halign: 'right', fontStyle: 'bold', textColor: colors.primary }
-        }
+            0: { cellWidth: 10, halign: "left" },
+            1: { cellWidth: 25, halign: "left" },
+            2: { cellWidth: 28, halign: "left" },
+            3: { cellWidth: "auto", halign: "left" },
+            4: { cellWidth: 32, halign: "right", fontStyle: "bold" },
+            5: { cellWidth: 32, halign: "right", fontStyle: "bold" },
+        },
     });
 
-    // Global PO Financials Summary
-    const finalY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 15;
+    // =========================================================================
+    // 5. BOTTOM SECTION: Amount in Words & Financial Summary Box
+    // =========================================================================
+    let finalY = (doc as any).lastAutoTable.finalY + 8;
 
-    const labelX = 135;
-    const valueX = 196;
+    if (finalY > 230) {
+        doc.addPage();
+        finalY = 20;
+    }
 
-    // Use absolute truth from the PO level
-    const poTotal = payment.purchaseOrder?.totalAmount || 0;
-    const totalAdvancePaid = payment.purchaseOrder?.advancePaid || 0;
-    const totalPaid = payment.purchaseOrder?.supplierPayments?.reduce((sum, t) => {
-        return sum + (t.amountPaid || 0);
-    }, 0) || payment.amountPaid;
+    let bottomLeftY = finalY;
 
-    const currentBalance = payment.purchaseOrder?.balanceDue || payment.balanceDue;
-    const isClear = (payment.purchaseOrder?.balanceDue || payment.balanceDue) <= 0;
-    doc.setFontSize(10);
-    doc.setTextColor(...colors.slate500);
-    doc.text("Purchase Order Total:", labelX, finalY);
-    doc.text("Total Advance Paid:", labelX, finalY + 7);
-    doc.text("Total Amount Paid:", labelX, finalY + 14);
+    // Amount in Words
+    const totalPaid = payment.purchaseOrder?.supplierPayments?.reduce((sum, t) => sum + (t.amountPaid || 0), 0) || payment.amountPaid;
 
     doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
     doc.setTextColor(...colors.slate900);
-    doc.text(formatCurrency(poTotal), valueX, finalY, { align: "right" });
+    doc.text("Payment Amount In Words", leftX, bottomLeftY);
+    bottomLeftY += 5;
 
-    doc.setTextColor(...colors.emerald600);
-    doc.text(`- ${formatCurrency(totalAdvancePaid)}`, valueX, finalY + 7, { align: "right" });
-    doc.text(`- ${formatCurrency(totalPaid)}`, valueX, finalY + 14, { align: "right" });
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9.5);
+    doc.setTextColor(...colors.slate700);
+    const amountWords = toWords(totalPaid).toUpperCase();
+    const wordLines = doc.splitTextToSize(amountWords, 95);
+    doc.text(wordLines, leftX, bottomLeftY);
+    bottomLeftY += wordLines.length * 4.5 + 5;
 
-    if (isClear) {
-        doc.setFontSize(15);
-        doc.setTextColor(...colors.emerald600);
-        doc.text("Payment Clear", labelX + 10, finalY + 26);
+    // Right: Financial Summary Box
+    let summaryY = finalY;
+    const summaryLabelX = 120;
+    const summaryValX = 196;
+
+    const drawSummaryRow = (
+        label: string,
+        val: string,
+        options?: { isBold?: boolean; isHighlighted?: boolean }
+    ) => {
+        if (options?.isHighlighted) {
+            doc.setFillColor(...colors.primary);
+            doc.rect(summaryLabelX - 2, summaryY - 4.2, 78, 6.5, "F");
+        }
+        doc.setFont("helvetica", options?.isBold ? "bold" : "normal");
+        doc.setFontSize(9.5);
+        if (options?.isHighlighted) {
+            doc.setTextColor(...colors.slate100);
+        } else {
+            doc.setTextColor(...colors.slate900);
+        }
+        doc.text(label, summaryLabelX, summaryY);
+        doc.text(val, summaryValX, summaryY, { align: "right" });
+        summaryY += 6.5;
+    };
+
+    const poTotal = payment.purchaseOrder?.totalAmount || 0;
+    const totalAdvancePaid = payment.purchaseOrder?.advancePaid || 0;
+    const currentBalance = payment.purchaseOrder?.balanceDue ?? payment.balanceDue;
+
+    drawSummaryRow("Purchase Order Total", formatCurrency(poTotal));
+    drawSummaryRow("Total Advance Paid", formatCurrency(totalAdvancePaid));
+    drawSummaryRow("Total Amount Paid", formatCurrency(totalPaid), { isBold: true });
+    drawSummaryRow("Current Balance Due", formatCurrency(currentBalance), {
+        isBold: true,
+        isHighlighted: true,
+    });
+
+    // =========================================================================
+    // 6. AUTHORIZED SIGNATORY FOOTER
+    // =========================================================================
+    let sigY = Math.max(bottomLeftY, summaryY) + 12;
+
+    // If signature block would cross the bottom page margin, push it to a new page
+    if (sigY > 265) {
+        doc.addPage();
+        sigY = 40;
     }
-    else {
-        doc.setFillColor(...colors.rose50);
-        doc.roundedRect(labelX - 5, finalY + 19, 70, 10, 1, 1, "F");
-        doc.setFontSize(11);
-        doc.setTextColor(...colors.rose600);
-        doc.text("Current Balance Due:", labelX, finalY + 26);
-        doc.text(formatCurrency(currentBalance), valueX, finalY + 26, { align: "right" });
-    }
+
+    doc.setDrawColor(...colors.slate500);
+    doc.setLineWidth(0.3);
+    doc.line(145, sigY + 12, rightColX, sigY + 12);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(...colors.slate900);
+    doc.text("Authorized Signatory", rightColX, sigY + 17, { align: "right" });
 
     // Pagination Footer
     const pageCount = (doc as any).internal.getNumberOfPages();
@@ -207,5 +347,5 @@ export const generatePaymentPdf = async (payment: SupplierPayment & { purchaseOr
         doc.text(`Page ${i} of ${pageCount}`, 196, pageHeight - 10, { align: "right" });
     }
 
-    doc.save(`PO-${payment.purchaseOrder?.poNumber || payment.voucherNumber}-Payment-Ledger.pdf`);
+    doc.save(`Receipt_${payment.voucherNumber || "Payment"}.pdf`);
 };

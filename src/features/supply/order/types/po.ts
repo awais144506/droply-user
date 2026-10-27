@@ -15,9 +15,14 @@ export interface POItem {
 }
 
 export interface POSupplier {
+    strn: string;
+    ntn: string;
+    address: string;
+    city: string;
+    name: string;
     firmName: string;
-    supplierName: string;
     phone: string;
+    email: string | null;
 }
 
 export interface PurchaseOrder {

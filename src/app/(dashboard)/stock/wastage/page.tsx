@@ -14,10 +14,9 @@ export default function WastageDashboard() {
   const { branchId } = useRole();
   const search = searchParams.get("search") || undefined;
   const type = searchParams.get("type") || undefined
-  const { data, isLoading } = useWastage(branchId, search, type);
+  const { data, isLoading, refetch, isRefetching } = useWastage(branchId, search, type);
   const wastageLogs = data?.logs
   const stats = data?.stats || { totalItemsDamaged: 0, estimatedLossValue: 0 }
-  console.log(stats);
 
   if (isLoading) return <Loading text="Loading wastage logs..." />
 
@@ -28,6 +27,8 @@ export default function WastageDashboard() {
         description="Track damaged inventory, container leaks, and asset loss."
         href="/stock/wastage/create-wastage"
         btnText="Add Wastage"
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
       />
       <WastageStats
         totalItemsDamaged={stats.totalItemsDamaged}

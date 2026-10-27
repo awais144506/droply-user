@@ -29,7 +29,7 @@ const QuotationForm = ({ initialData, documentId }: Props) => {
   const { data: productList, isLoading: isLoadingProducts } = useProducts(branchId);
   const productOptions = productList?.productOptionsQuotation || [];
   const { data: customerList, isLoading: isLoadingCustomers } = useCustomers(branchId);
-  const customerOptions = customerList?.customerOptionsQuotaion || [];
+  const customerOptions = customerList?.customerOptions || [];
 
   // 2. Initialize mutation hook
   const { mutate: createQuotation, isPending: isCreating } = useCreateQuotation();
@@ -87,7 +87,6 @@ const QuotationForm = ({ initialData, documentId }: Props) => {
         <QuotationCustomerSection
           customerOptions={customerOptions}
           isLoadingCustomers={isLoadingCustomers}
-          isEditMode={isEditMode}
         />
 
         <QuotationItemsSection

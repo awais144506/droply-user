@@ -4,7 +4,6 @@ import { ProductItem, ProductList } from "../types/product";
 import { productKeys } from "./product-keys";
 import { productApi } from "./product.service";
 
-// 1. Fetch All Products for a Branch (Single-Pass Optimized Selector)
 export function useProducts(branchId?: string) {
     return useQuery({
         queryKey: productKeys.branchList(branchId),
@@ -35,29 +34,36 @@ export function useProducts(branchId?: string) {
                 const unitCost = Number(p.unitCost ?? 0);
                 const unitOfMeasure = p.unitOfMeasure || "PIECE";
 
-                // 1. Low Stock Check
-                if (currentStock <= lowStockThreshold) {
-                    lowStockCount++;
-                    lowStockProducts.push(p);
-                }
+                // 1. Active / Inactive Stats Tracking
                 if (p.isActive) {
                     activeItemsCount++;
                 } else {
                     inactiveItemsCount++;
                 }
 
-                // 2. Returnables Check
+                // 2. Low Stock Check (Only track active low-stock items or all according to biz rule)
+                if (currentStock <= lowStockThreshold) {
+                    lowStockCount++;
+                    lowStockProducts.push(p);
+                }
+
+                // 🔥 If product is inactive, skip adding it to transactional/POS/quotation options
+                if (!p.isActive) {
+                    continue; 
+                }
+
+                // 3. Returnables Check (Active only)
                 if (p.trackingType === "RETURNABLE") {
                     returnablesCount++;
                     productOptions.push({ value: p.id, label: p.name });
                 }
 
-                // 3. Recipe Check
+                // 4. Recipe Check
                 if (p.hasRecipe) {
                     recipeItemsCount++;
                 }
 
-                // 4. Quick Sale / POS Options
+                // 5. Quick Sale / POS Options (Active only)
                 quickSaleOptions.push({
                     id: p.id,
                     name: p.name,
@@ -71,7 +77,7 @@ export function useProducts(branchId?: string) {
                     priceTiers: p.priceTiers || [],
                 });
 
-                // 5. Unified BOM & Quotation Options
+                // 6. Unified BOM & Quotation Options (Active only)
                 bomOptions.push({
                     id: p.id,
                     value: p.id,
@@ -87,8 +93,8 @@ export function useProducts(branchId?: string) {
                     unitOfMeasure,
                 });
 
-                // 6. Production WIP Options (Finished Goods or items with recipes)
-                if (p.category === "FINISHED_GOOD" || p.hasRecipe) {
+                // 7. Production WIP Options (Active with recipes)
+                if (p.hasRecipe) {
                     productionOptions.push({
                         value: p.id,
                         label: p.name,

@@ -8,7 +8,10 @@ const CreateWastage = () => {
       <CreateFormHeader
         title="Log New Wastage"
         description="Manage the logs of your wastage"
-        href="/stock/wastage"
+        breadcrumbs={[
+          { label: "Wastage Records", href: "/stock/wastage" },
+          { label: "Create Wastage" }
+        ]}
       />
       <WastageForm />
     </div>

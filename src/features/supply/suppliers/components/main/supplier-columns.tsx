@@ -15,7 +15,7 @@ export const getSupplierColumns = (
                 <div>
                     <p className="font-bold text-slate-900 text-sm mb-1">{supplier.firmName}</p>
                     <p className="text-xs text-slate-500 font-medium">
-                        Attn: {supplier.supplierName}
+                        Attn: {supplier.name}
                     </p>
                 </div>
             ),

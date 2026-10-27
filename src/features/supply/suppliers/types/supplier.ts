@@ -3,8 +3,10 @@ export interface SupplierList {
     id: string;
     branchId: string;
     firmName: string;
-    supplierName: string;
+    name: string;
     email: string | null;
+    ntn: string | null;
+    strn: string | null;
     phone: string;
     address: string;
     city: string;

@@ -58,8 +58,8 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 4 * 1024 * 1024) {
-      toast.error("File size exceeds 4MB limit.");
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("File size exceeds 2MB limit.");
       e.target.value = "";
       return;
     }
@@ -141,7 +141,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
                   >
                     <Upload className="h-3.5 w-3.5 mr-2 text-sky-600" /> {logoPreview ? "Change Logo" : "Upload New Logo"}
                   </Button>
-                  <p className="text-[10px] text-slate-400 font-medium">PNG, JPG or SVG. Max size 4MB.</p>
+                  <p className="text-[10px] text-slate-600 font-medium">PNG, JPG or SVG. Max size 2MB.</p>
                 </div>
               </div>
             </div>

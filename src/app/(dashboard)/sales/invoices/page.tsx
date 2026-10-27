@@ -12,7 +12,7 @@ export default function InvoicesPage() {
     const searchParams = useSearchParams();
     const search = searchParams.get("search") || undefined;
     const type = searchParams.get("type") || undefined;
-    const { data, isLoading, isError, error } = useQuotaions(branchId, search, type);
+    const { data, isLoading, isError, error, refetch, isRefetching } = useQuotaions(branchId, search, type);
 
     const quotations = data?.quotations;
     console.log(data?.quotations)
@@ -26,6 +26,8 @@ export default function InvoicesPage() {
                 href="/sales/invoices/create-new"
                 btnText="Create New Quotation"
                 heading="Invoices & Quotations"
+                onRefresh={refetch}
+                isRefreshing={isRefetching}
                 description="Manage B2B quotations, convert them to invoices, and download official PDF statements."
             />
 

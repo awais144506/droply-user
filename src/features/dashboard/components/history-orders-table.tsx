@@ -33,6 +33,7 @@ import { useQuickSales } from "../api/use-quicksale";
 import { useVoidQuickSale } from "../api/use-mutate-quicksale";
 import { QuickSaleRecord, QuickSaleStatus } from "../types/quicksale";
 import { BranchSettingData } from "@/features/admin/settings/types/settings";
+import ConfirmActionDialog from "@/lib/utils/components/ConfirmDialog";
 
 type Props = {
   branchId: string;
@@ -54,6 +55,9 @@ const QuickSaleHistory = ({ branchId, branchDetails, onEditSale }: Props) => {
   // Thermal Receipt Reprint Modal State
   const [reprintOrder, setReprintOrder] = useState<ReceiptOrderData | null>(null);
   const [voidingId, setVoidingId] = useState<string | null>(null);
+
+  // 🔥 State for ConfirmActionDialog modal
+  const [saleToVoid, setSaleToVoid] = useState<QuickSaleRecord | null>(null);
 
   // Debounce search input by 350ms so we don't spam the backend on every keystroke
   useEffect(() => {
@@ -77,11 +81,6 @@ const QuickSaleHistory = ({ branchId, branchDetails, onEditSale }: Props) => {
 
   const sales = data?.data || [];
   const meta = data?.meta || { totalCount: 0, page: 1, limit: 20, totalPages: 1 };
-  const summary = data?.summary || {
-    completedOrdersCount: 0,
-    totalRevenue: 0,
-    totalDiscount: 0,
-  };
 
   // Convert Database Record -> Thermal Receipt Format for Reprinting
   const handleOpenReprint = (sale: QuickSaleRecord) => {
@@ -113,18 +112,16 @@ const QuickSaleHistory = ({ branchId, branchDetails, onEditSale }: Props) => {
     setReprintOrder(formatted);
   };
 
-  // Trigger Void Mutation (Restores Stock Automatically on Backend)
-  const handleVoidReceipt = async (sale: QuickSaleRecord) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to VOID Receipt #${sale.receiptNumber}? This will restore all tracked product stock back to inventory and cannot be undone.`
-    );
-    if (!confirmed) return;
+  // 🔥 Execute Void Mutation after confirmation
+  const confirmVoidReceipt = async () => {
+    if (!saleToVoid) return;
 
     try {
-      setVoidingId(sale.id);
-      await voidMutation.mutateAsync(sale.id);
+      setVoidingId(saleToVoid.id);
+      await voidMutation.mutateAsync(saleToVoid.id);
     } finally {
       setVoidingId(null);
+      setSaleToVoid(null);
     }
   };
 
@@ -210,10 +207,11 @@ const QuickSaleHistory = ({ branchId, branchDetails, onEditSale }: Props) => {
                       setStatusFilter(status);
                       setPage(1);
                     }}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${statusFilter === status
-                      ? "bg-white text-slate-900 shadow-2xs"
-                      : "text-slate-500 hover:text-slate-800"
-                      }`}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
+                      statusFilter === status
+                        ? "bg-white text-slate-900 shadow-2xs"
+                        : "text-slate-500 hover:text-slate-800"
+                    }`}
                   >
                     {status}
                   </button>
@@ -332,20 +330,22 @@ const QuickSaleHistory = ({ branchId, branchDetails, onEditSale }: Props) => {
 
                         <TableCell className="py-3.5 text-xs">
                           <span
-                            className={`inline-flex px-2 py-0.5 rounded-md font-bold text-[10px] ${sale.paymentMethod === "ONLINE"
-                              ? "bg-sky-50 text-sky-700 border border-sky-200/60"
-                              : "bg-slate-100 text-slate-700"
-                              }`}
+                            className={`inline-flex px-2 py-0.5 rounded-md font-bold text-[10px] ${
+                              sale.paymentMethod === "ONLINE"
+                                ? "bg-sky-50 text-sky-700 border border-sky-200/60"
+                                : "bg-slate-100 text-slate-700"
+                            }`}
                           >
                             {sale.paymentMethod}
                           </span>
                         </TableCell>
 
                         <TableCell
-                          className={`py-3.5 text-xs font-extrabold ${isVoided
-                            ? "line-through text-slate-400"
-                            : "text-sky-700"
-                            }`}
+                          className={`py-3.5 text-xs font-extrabold ${
+                            isVoided
+                              ? "line-through text-slate-400"
+                              : "text-sky-700"
+                          }`}
                         >
                           Rs. {Number(sale.totalAmount).toLocaleString()}
                         </TableCell>
@@ -409,7 +409,7 @@ const QuickSaleHistory = ({ branchId, branchDetails, onEditSale }: Props) => {
                                 variant="outline"
                                 size="sm"
                                 disabled={isVoidingThis}
-                                onClick={() => handleVoidReceipt(sale)}
+                                onClick={() => setSaleToVoid(sale)}
                                 className="h-8 px-2.5 text-xs border-rose-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300"
                                 title="Void Receipt & Restore Stock"
                               >
@@ -485,6 +485,17 @@ const QuickSaleHistory = ({ branchId, branchDetails, onEditSale }: Props) => {
         onClose={() => setReprintOrder(null)}
         order={reprintOrder}
         branchDetails={branchDetails}
+      />
+
+      <ConfirmActionDialog
+        isOpen={Boolean(saleToVoid)}
+        onClose={() => setSaleToVoid(null)}
+        onConfirm={confirmVoidReceipt}
+        title="Void Receipt"
+        description={`Are you sure you want to VOID Receipt #${saleToVoid?.receiptNumber}? This will restore all tracked product stock back to inventory and cannot be undone.`}
+        confirmText="Yes, Void Receipt"
+        confirmButtonVariant="destructive"
+        isLoading={voidMutation.isPending}
       />
     </div>
   );
