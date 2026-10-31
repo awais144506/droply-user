@@ -1,22 +1,18 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  ChevronDown,
-} from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { LayoutDashboard, ChevronDown } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Badge } from "@/components/ui/badge";
 import { BRANCH_NAV_CONFIG, UserRole, SubscriptionTier } from "@/config/navigation.config";
 import { useRole } from "@/lib/hooks/use-role";
 
+// 🔥 Import your existing hook for fetching requests
+import { useCustomerRequests } from "@/features/sales/requests/api/use-customerRequests";
+
 export function NavMain() {
   const pathname = usePathname();
-  const { isOwner, userTier } = useRole();
+  const { isOwner, userTier, branchId } = useRole(); 
   const isDashboardActive = pathname === "/app";
 
   const userRole: UserRole = isOwner ? "OWNER" : "MANAGER";
@@ -24,9 +20,12 @@ export function NavMain() {
 
   const isProduction = process.env.NEXT_PUBLIC_NODE_ENV === "production";
 
+  const { data } = useCustomerRequests(branchId, undefined);
+  const pendingCount = (data?.filter((p) => p.status === "PENDING").length || 0);
+
   return (
     <div className="space-y-3 px-3 py-2 select-none">
-      {/* 1. Operations Desk (Standalone Hero Link) */}
+      {/* 1. Operations Desk */}
       <Link
         href="/app"
         className={`flex items-center gap-3 w-full p-2.5 rounded-2xl border transition-all duration-200 ${isDashboardActive
@@ -43,26 +42,25 @@ export function NavMain() {
           <LayoutDashboard className="h-5 w-5" />
         </div>
         <div className="flex flex-col text-left min-w-0">
-          <span className="font-bold text-xs leading-none">
-            Quick Sale
-          </span>
+          <span className="font-bold text-xs leading-none">Quick Sale</span>
         </div>
       </Link>
 
       {/* 2. Grouped Category Cards */}
       {BRANCH_NAV_CONFIG.map((group) => {
-
-        const visibleItems = group.items.filter((item) =>
-          item.allowedRoles.includes(userRole) &&
-          item.allowedTiers.includes(currentTier)
+        const visibleItems = group.items.filter(
+          (item) =>
+            item.allowedRoles.includes(userRole) &&
+            item.allowedTiers.includes(currentTier)
         );
 
         if (visibleItems.length === 0) return null;
 
-        const isGroupActive = visibleItems.some(
-          (item) =>
-            pathname === item.url || pathname.startsWith(`${item.url}/`)
-        );
+        // 🔥 Extract base path to determine if the group is active
+        const isGroupActive = visibleItems.some((item) => {
+          const basePath = item.url.split('?')[0];
+          return pathname === basePath || pathname.startsWith(`${basePath}/`);
+        });
 
         return (
           <div
@@ -79,9 +77,7 @@ export function NavMain() {
                       : "bg-muted-foreground/40"
                       }`}
                   />
-                  <span className={group.headerColor.text}>
-                    {group.label}
-                  </span>
+                  <span className={group.headerColor.text}>{group.label}</span>
                 </div>
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-data-[state=open]/collapsible:rotate-0 -rotate-90" />
               </CollapsibleTrigger>
@@ -89,9 +85,10 @@ export function NavMain() {
               {/* Group Items */}
               <CollapsibleContent className="space-y-1 mt-1">
                 {visibleItems.map((item) => {
-                  const isActive =
-                    pathname === item.url ||
-                    pathname.startsWith(`${item.url}/`);
+                  
+                  // 🔥 Extract base path to determine if the specific item is active
+                  const basePath = item.url.split('?')[0];
+                  const isActive = pathname === basePath || pathname.startsWith(`${basePath}/`);
                   const Icon = item.icon;
 
                   return (
@@ -111,6 +108,14 @@ export function NavMain() {
 
                       {/* Right-side container for Badge & Dev Dot */}
                       <div className="ml-auto flex items-center gap-2">
+                        
+                        {/* 🔥 Ensure the badge check also uses the base path */}
+                        {basePath === "/sales/requests" && pendingCount > 0 && (
+                          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white shadow-sm animate-in fade-in zoom-in duration-300">
+                            {pendingCount > 99 ? "99+" : pendingCount}
+                          </span>
+                        )}
+
                         {item.badge && (
                           <Badge
                             variant="outline"
@@ -125,15 +130,14 @@ export function NavMain() {
                           </Badge>
                         )}
 
-                        {/* 🔥 Render Dev Status Dot ONLY in non-production environments */}
                         {!isProduction && item.devStatus && (
                           <span
                             title={`Status: ${item.devStatus}`}
                             className={`h-2 w-2 rounded-full shrink-0 shadow-sm ${item.devStatus === "DONE"
-                                ? "bg-emerald-500" // Green
-                                : item.devStatus === "PARTIAL"
-                                  ? "bg-amber-400" // Yellow
-                                  : "bg-rose-500" // Red (TODO)
+                              ? "bg-emerald-500"
+                              : item.devStatus === "PARTIAL"
+                                ? "bg-amber-400"
+                                : "bg-rose-500"
                               }`}
                           />
                         )}

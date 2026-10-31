@@ -20,6 +20,7 @@ export function ProductsTable({ products }: { products: ProductList[] | undefine
     // States
     const [searchQuery, setSearchQuery] = useState("");
     const [showLowStockOnly, setShowLowStockOnly] = useState(false);
+    const [showPublicOnly, setShowPublicOnly] = useState(false); // 🔥 Changed to boolean switch
     const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
     const [trackingFilter, setTrackingFilter] = useState<string>("ALL");
     const [statusFilter, setStatusFilter] = useState<string>("ALL");
@@ -35,18 +36,23 @@ export function ProductsTable({ products }: { products: ProductList[] | undefine
         const matchesStatus = 
             statusFilter === "ACTIVE" ? p.isActive === true :
             statusFilter === "INACTIVE" ? p.isActive === false : true;
+        
+        // 🔥 Simplified boolean check
+        const matchesPublic = showPublicOnly ? !!p.isPublic : true;
 
-        return matchesSearch && matchesLowStock && matchesCategory && matchesTracking && matchesStatus;
+        return matchesSearch && matchesLowStock && matchesCategory && matchesTracking && matchesStatus && matchesPublic;
     });
 
     const activeFiltersCount = 
         (showLowStockOnly ? 1 : 0) + 
+        (showPublicOnly ? 1 : 0) + // 🔥 Boolean check
         (categoryFilter !== "ALL" ? 1 : 0) + 
         (trackingFilter !== "ALL" ? 1 : 0) + 
         (statusFilter !== "ALL" ? 1 : 0);
 
     const clearFilters = () => {
         setShowLowStockOnly(false);
+        setShowPublicOnly(false); // 🔥 Reset switch
         setCategoryFilter("ALL");
         setTrackingFilter("ALL");
         setStatusFilter("ALL");
@@ -79,6 +85,7 @@ export function ProductsTable({ products }: { products: ProductList[] | undefine
             <ProductsFilterBar
                 searchQuery={searchQuery} setSearchQuery={setSearchQuery}
                 showLowStockOnly={showLowStockOnly} setShowLowStockOnly={setShowLowStockOnly}
+                showPublicOnly={showPublicOnly} setShowPublicOnly={setShowPublicOnly} // 🔥 Pass new props
                 categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter}
                 trackingFilter={trackingFilter} setTrackingFilter={setTrackingFilter}
                 statusFilter={statusFilter} setStatusFilter={setStatusFilter}

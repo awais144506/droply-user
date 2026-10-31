@@ -64,6 +64,7 @@ export function ProductForm({ initialValues, onSubmit, isPending = false }: Prod
         lowStockThreshold: Number(initialValues?.lowStockThreshold ?? 10),
         hasRecipe: Boolean(initialValues?.hasRecipe),
         securityDeposit: Number(initialValues?.securityDeposit ?? 0),
+        isPublic: Boolean(initialValues?.isPublic ?? false),
         priceTiers: defaultPriceTiers,
         recipeIngredients: defaultRecipeIngredients,
     });
@@ -82,7 +83,7 @@ export function ProductForm({ initialValues, onSubmit, isPending = false }: Prod
             lowStockThreshold: Number(formData.lowStockThreshold ?? 10),
             securityDeposit: formData.trackingType === "RETURNABLE" ? Number(formData.securityDeposit ?? 0) : 0,
             hasRecipe: Boolean(formData.hasRecipe),
-            // Pricing is entirely encapsulated in priceTiers now
+            isPublic: Boolean(formData.isPublic),
             priceTiers: (formData.priceTiers || []).map((t) => ({
                 ...(t.id ? { id: t.id } : {}),
                 title: t.title?.trim() || "Standard",

@@ -29,10 +29,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           toast: "cn-toast font-bold",
-          success: "!bg-emerald-600 !text-white !border-emerald-600 [&>svg]:!text-white",
-          error: "!bg-rose-600 !text-white !border-rose-600 [&>svg]:!text-white",
-          warning: "!bg-amber-500 !text-white !border-amber-600 [&>svg]:!text-white",
-          info: "!bg-white !text-slate-800 !border-slate-600 [&>svg]:!text-slate-800",
+          success: "!bg-emerald-600 !text-white !border-emerald-600 [&>svg]:!text-white [&_[data-description]]:!text-white",
+          error: "!bg-rose-600 !text-white !border-rose-600 [&>svg]:!text-white [&_[data-description]]:!text-white",
+          warning: "!bg-amber-500 !text-white !border-amber-600 [&>svg]:!text-white [&_[data-description]]:!text-white",
+          info: "!bg-white !text-slate-800 !border-slate-600 [&>svg]:!text-slate-800 [&_[data-description]]:!text-slate-600",
         },
       }}
       {...props}

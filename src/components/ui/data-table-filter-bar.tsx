@@ -2,13 +2,16 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useState, useEffect } from "react";
-import { Search, SlidersHorizontal, Check } from "lucide-react";
+import { Search, SlidersHorizontal, Check, CalendarIcon, X } from "lucide-react";
+import { format } from "date-fns";
 import { useDebounce } from "@/lib/hooks/use-debounce";
 
 // Shadcn Imports
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
 
 export interface FilterTab {
     label: string;
@@ -28,6 +31,10 @@ interface DataTableFilterBarProps {
     dropdownOptions?: FilterDropdownOption[];
     dropdownParamName?: string;
     dropdownPlaceholder?: string;
+    // 🔥 Date Filter Props
+    showDateFilter?: boolean;
+    dateParamName?: string;
+    datePlaceholder?: string;
 }
 
 export function DataTableFilterBar({
@@ -37,7 +44,10 @@ export function DataTableFilterBar({
     tabParamName = "role",
     dropdownOptions = [],
     dropdownParamName = "status",
-    dropdownPlaceholder = "All Statuses"
+    dropdownPlaceholder = "All Statuses",
+    showDateFilter = false,
+    dateParamName = "date",
+    datePlaceholder = "Filter by Date",
 }: DataTableFilterBarProps) {
     const router = useRouter();
     const pathName = usePathname();
@@ -46,7 +56,6 @@ export function DataTableFilterBar({
     const setQueryString = useCallback(
         (name: string, value: string) => {
             const params = new URLSearchParams(searchParams.toString());
-            // If value is empty or "all", we delete the param to keep the URL clean
             if (value && value !== "all") {
                 params.set(name, value);
             } else {
@@ -68,13 +77,16 @@ export function DataTableFilterBar({
         }
     }, [debouncedSearchValue, currentSearchUrlValue, searchParamName, setQueryString]);
 
-    const currentTabValue = searchParams.get(tabParamName) || tabs[0]?.value || "";
+    const currentTabValue = searchParams.get(tabParamName) ?? tabs[0]?.value ?? "";
     const currentDropdownValue = searchParams.get(dropdownParamName) || "all";
     const isDropdownActive = currentDropdownValue !== "all";
 
-    // Find the matching label for the currently selected dropdown value
     const selectedDropdownOption = dropdownOptions.find(opt => opt.value === currentDropdownValue);
     const displayDropdownLabel = selectedDropdownOption ? selectedDropdownOption.label : dropdownPlaceholder;
+
+    // Date Filter State from URL (formatted as yyyy-MM-dd)
+    const currentDateParam = searchParams.get(dateParamName) || "";
+    const selectedDate = currentDateParam ? new Date(`${currentDateParam}T00:00:00`) : undefined;
 
     return (
         <div className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-4">
@@ -93,7 +105,7 @@ export function DataTableFilterBar({
                 />
             </div>
 
-            {/* Right: Tabs & Dropdown Container */}
+            {/* Right: Tabs, Date Picker & Dropdown Container */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto overflow-hidden">
 
                 {/* 1. Shadcn Tabs */}
@@ -116,8 +128,56 @@ export function DataTableFilterBar({
                         </TabsList>
                     </Tabs>
                 )}
+                {showDateFilter && (
+                    <div className="relative flex items-center w-full sm:w-auto">
+                        <Popover>
+                            <PopoverTrigger>
+                                <button
+                                    type="button"
+                                    className={`w-full sm:w-48 h-11 px-3.5 bg-white border rounded-xl flex items-center justify-between text-xs font-semibold shadow-xs transition-all cursor-pointer ${
+                                        selectedDate
+                                            ? "border-sky-400 bg-sky-50/40 text-sky-900 ring-1 ring-sky-400/30 pr-8"
+                                            : "border-slate-200 text-slate-700 hover:border-slate-300"
+                                    }`}
+                                >
+                                    <div className="flex items-center gap-2 truncate">
+                                        <CalendarIcon className={`h-3.5 w-3.5 shrink-0 ${selectedDate ? "text-sky-600" : "text-slate-400"}`} />
+                                        <span className="truncate">
+                                            {selectedDate ? format(selectedDate, "dd MMM yyyy") : datePlaceholder}
+                                        </span>
+                                    </div>
+                                </button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0 rounded-xl border-slate-200 shadow-xl bg-white" align="end">
+                                <Calendar
+                                    mode="single"
+                                    selected={selectedDate}
+                                    onSelect={(date) => {
+                                        setQueryString(dateParamName, date ? format(date, "yyyy-MM-dd") : "");
+                                    }}
+                                    
+                                />
+                            </PopoverContent>
+                        </Popover>
 
-                {/* 2. Redesigned Shadcn Select Dropdown */}
+                        {/* Clear Date Button */}
+                        {selectedDate && (
+                            <button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setQueryString(dateParamName, "");
+                                }}
+                                className="absolute right-2.5 p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                                title="Clear date filter"
+                            >
+                                <X className="h-3.5 w-3.5" />
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* 3. Shadcn Select Dropdown */}
                 {dropdownOptions.length > 0 && (
                     <Select
                         value={currentDropdownValue}
@@ -136,7 +196,7 @@ export function DataTableFilterBar({
                         <SelectContent className="rounded-xl border-slate-200 shadow-xl p-1 bg-white">
                             <SelectItem 
                                 value="all" 
-                                className="cursor-pointer rounded-lg py-2.5 px-3 text-xs font-semibold text-slate-600 focus:bg-slate-50 focus:text-slate-900 data-[highlighted]:bg-slate-50"
+                                className="cursor-pointer rounded-lg py-2.5 px-3 text-xs font-semibold text-slate-600 focus:bg-slate-50 focus:text-slate-900 data-highlighted:bg-slate-50"
                             >
                                 <div className="flex items-center justify-between w-full">
                                     <span>{dropdownPlaceholder}</span>

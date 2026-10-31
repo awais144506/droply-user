@@ -4,24 +4,17 @@ import { toast } from "sonner";
 import { BranchSettingData } from "../types/settings";
 import { branchSettingsKeys } from "./branch-setting-keys";
 import { branchSettingApi } from "./branch-settings.service";
+import { useRouter } from "next/navigation";
 
 export function useUpdateBranchSettings(branchId?: string) {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   return useMutation({
     mutationFn: async (data: Partial<BranchSettingData>) => {
       return branchSettingApi.updateBranchSettings(data);
     },
-    onMutate: async (newData) => {
-      await queryClient.cancelQueries({ queryKey: branchSettingsKeys.branch(branchId || "") });
-      const previousSettings = queryClient.getQueryData(branchSettingsKeys.branch(branchId || ""));
-      queryClient.setQueryData(branchSettingsKeys.branch(branchId || ""), (old: any) => ({
-        ...old,
-        ...newData,
-      }));
-      return { previousSettings };
-    },
-    onError: (error: any, newData, context: any) => {
+    onError: (error: any, context: any) => {
       if (context?.previousSettings) {
         queryClient.setQueryData(branchSettingsKeys.branch(branchId || ""), context.previousSettings);
       }
@@ -30,13 +23,12 @@ export function useUpdateBranchSettings(branchId?: string) {
         error?.response?.data?.message || "Failed to update settings. Please try again."
       );
     },
-    onSettled: () => {
+    onSuccess: () => {
+      toast.success("Branch settings updated successfully!");
       queryClient.invalidateQueries({
         queryKey: branchSettingsKeys.branch(branchId || ""),
       });
-    },
-    onSuccess: () => {
-      toast.success("Branch settings updated successfully!");
+      router.refresh();
     },
   });
 }

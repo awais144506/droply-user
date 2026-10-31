@@ -47,14 +47,20 @@ export const getProductColumns = (
             render: (product) => (
                 <div className="flex flex-wrap items-center gap-2">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${product.trackingType === "RETURNABLE"
-                            ? "bg-indigo-50 text-indigo-700 border-indigo-100"
-                            : "bg-slate-100 text-slate-600 border-slate-200"
+                        ? "bg-indigo-50 text-indigo-700 border-indigo-100"
+                        : "bg-slate-100 text-slate-600 border-slate-200"
                         }`}>
                         {product.trackingType === "RETURNABLE" ? "Returnable" : "Outright"}
                     </span>
                     <span className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-200">
                         {product.category?.replace(/_/g, " ")}
                     </span>
+                    {/* 🔥 New Public Flag added here */}
+                    {product.isPublic && (
+                        <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider border border-emerald-100">
+                            Public
+                        </span>
+                    )}
                 </div>
             )
         },
@@ -131,8 +137,8 @@ export const getProductColumns = (
             render: (product) => (
                 <span
                     className={`rounded-sm font-bold border transition-colors text-xs px-3 py-1 ${product.isActive
-                            ? "bg-emerald-100 text-emerald-600 border border-emerald-100 hover:bg-emerald-100"
-                            : "bg-rose-100 text-rose-600 border-rose-100 hover:bg-rose-100"
+                        ? "bg-emerald-100 text-emerald-600 border border-emerald-100 hover:bg-emerald-100"
+                        : "bg-rose-100 text-rose-600 border-rose-100 hover:bg-rose-100"
                         }`}
                 >
                     {product.isActive ? "ACTIVE" : "INACTIVE"}
@@ -152,8 +158,8 @@ export const getProductColumns = (
                             size="sm"
                             onClick={() => onToggleStatus && onToggleStatus(product.id)}
                             className={`cursor-pointer ${product.isActive
-                                    ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                                    : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
+                                ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
+                                : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
                                 }`}
                             title={product.isActive ? "Deactivate product" : "Activate product"}
                         >

@@ -29,6 +29,7 @@ export const recipeIngredientSchema = yup.object().shape({
 export const createItemSchema = yup.object().shape({
   productCode: yup.string().optional(),
   name: yup.string().min(3, "Item name too short").required("Item name is required"),
+  isPublic: yup.boolean().optional(),
 
   category: yup
     .string()

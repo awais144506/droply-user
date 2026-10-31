@@ -47,6 +47,7 @@ export interface RecipeIngredientItem {
 }
 
 export interface ProductItem {
+    isPublic: boolean;
     id: string;
     branchId: string;
     productCode: string;
@@ -78,6 +79,7 @@ export interface ProductItem {
 }
 
 export interface ProductList {
+    isPublic: import("react").JSX.Element;
     isUsedInRecipes: boolean | undefined;
     id: string;
     productCode: string;

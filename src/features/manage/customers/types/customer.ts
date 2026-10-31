@@ -28,6 +28,7 @@ export interface CustomerDetails {
     customerAdvance: number;
     securityDeposit: number;
     partyType: CustomerPartyType;
+    magicLink:string;
     category: CustomerCategory;
     lastVisitDate: string | null;
     createdAt: string;

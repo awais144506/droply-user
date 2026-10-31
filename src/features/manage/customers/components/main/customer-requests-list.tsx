@@ -62,12 +62,20 @@ export function CustomerRequestsList({
                     <UserPlus className="h-4 w-4 text-sky-600" />
                     New Customer Requests
                 </h3>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide ${
-                    pendingCount === 0 
-                        ? "bg-emerald-100 text-emerald-700" 
-                        : "bg-rose-100 text-rose-700"
-                }`}>
-                    {pendingCount === 0 ? "0 Pending (All Contacted)" : `${pendingCount} Pending`}
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide inline-flex items-center gap-1.5 ${isStatusPending
+                        ? "bg-sky-100 text-sky-700"
+                        : pendingCount === 0
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-rose-100 text-rose-700"
+                    }`}>
+                    {isStatusPending ? (
+                        <>
+                            <Loader2 className="h-3 w-3 animate-spin" />
+                            <span>Syncing...</span>
+                        </>
+                    ) : (
+                        pendingCount === 0 ? "0 Pending (All Contacted)" : `${pendingCount} Pending`
+                    )}
                 </span>
             </div>
 
@@ -78,19 +86,18 @@ export function CustomerRequestsList({
 
                     return (
                         <div key={request.id} className="p-4 hover:bg-slate-50/50 transition-colors">
-                            
+
                             {/* Two-Column Side-by-Side Layout */}
                             <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                                
+
                                 {/* Left Side: Information */}
                                 <div className="md:col-span-7 space-y-1.5">
                                     <div className="flex items-center justify-between md:justify-start gap-2">
                                         <h4 className="text-sm font-bold text-slate-900">{request.name}</h4>
-                                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
-                                            isContacted 
-                                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200" 
-                                                : "bg-amber-50 text-amber-700 border border-amber-200"
-                                        }`}>
+                                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${isContacted
+                                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                                            }`}>
                                             {request.status}
                                         </span>
                                         <span className="text-[10px] text-slate-400 font-medium flex items-center ml-auto">
@@ -133,13 +140,12 @@ export function CustomerRequestsList({
                                             type="button"
                                             disabled={isStatusPending}
                                             onClick={() => statusChange(request.id)}
-                                            className={`flex-1 text-xs font-bold py-2 px-3 rounded-xl border transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5 ${
-                                                isContacted
-                                                    ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
-                                                    : "bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200"
-                                            }`}
+                                            className={`flex-1 text-xs font-bold py-2 px-3 rounded-xl border transition-colors cursor-pointer text-center flex items-center justify-center gap-1.5 ${isContacted
+                                                ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
+                                                : "bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200"
+                                                }`}
                                         >
-                                            {isStatusPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+
                                             {isContacted ? "Contacted ✓" : "Mark Contacted"}
                                         </button>
                                     </div>

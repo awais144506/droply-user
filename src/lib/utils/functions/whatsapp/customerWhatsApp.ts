@@ -4,8 +4,12 @@ import { formatPhoneNumber } from "react-phone-number-input";
 
 export const sendWhatsAppMessage = (phone: string, message: string) => {
     if (!phone) return;
+
+    // Remove all non-numeric characters for the wa.me link
+    const cleanPhone = phone.replace(/\D/g, "");
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${phone}?text=${encodedMessage}`, '_blank');
+
+    window.open(`https://wa.me/${cleanPhone}?text=${encodedMessage}`, '_blank');
 };
 
 export const sendCustomerCreatedMessage = (customer: CustomerDetails, settings?: BranchSettingData) => {
@@ -13,18 +17,24 @@ export const sendCustomerCreatedMessage = (customer: CustomerDetails, settings?:
 
     const branchName = settings?.name || "Droply";
 
+    // 🔥 Build the personal magic-link URL
+    const portalUrl = customer.magicLink
+        ? `https://app.droply.com/order/${customer.magicLink}`
+        : null;
+
     // Build the formatted details list
-    const message =
-        `Hi *${customer.name}*, your ledger account has been created in *${branchName}*.
+    let message = `Hi *${customer.name}*, your ledger account has been created in *${branchName}*.
 
 Here are your account details:
-• *Phone:* ${formatPhoneNumber(customer.phone)}
-${customer.email ? `• *Email:* ${customer.email}\n` : ''}• *Customer Credit:* ${customer.customerCredit}
-• *Advance:* ${customer.customerAdvance > 0 ? customer.customerAdvance : 0}
-• *Security Deposit:* ${customer.securityDeposit > 0 ? customer.securityDeposit : 0}
-• *Returnables Items:* ${customer.returnablesLength > 0 ? customer.returnablesLength : 0}
-${customer.zone?.name ? `• *Zone:* ${customer.zone.name}\n` : ''}• *Address:* ${customer.address || "No Address Provided"}`;
-
+- *Phone:* ${formatPhoneNumber(customer.phone) || customer.phone}
+${customer.email ? `- *Email:* ${customer.email}\n` : ''}- *Customer Credit:* Rs. ${customer.customerCredit || 0}
+- *Advance:* Rs. ${customer.customerAdvance > 0 ? customer.customerAdvance : 0}
+- *Security Deposit:* Rs. ${customer.securityDeposit > 0 ? customer.securityDeposit : 0}
+- *Returnable Items:* ${customer.returnablesLength > 0 ? customer.returnablesLength : 0}
+${customer.zone?.name ? `- *Zone:* ${customer.zone.name}\n` : ''}- *Address:* ${customer.address || "No Address Provided"}`;
+    if (portalUrl) {
+        message += `\n\n *Your Personal Branch Ordering Link:*\nYou can use this secure link anytime to place orders directly with ${branchName} without needing a password:\n${portalUrl}\n\n *Please do not share this link with anyone*, as it gives direct access to place orders by your account.`;
+    }
     sendWhatsAppMessage(customer.phone, message);
 };
 

@@ -41,6 +41,7 @@ export const mappedProductData = (product: ProductItem | undefined) => {
         lowStockThreshold: Number(product.lowStockThreshold ?? 10),
         hasRecipe: Boolean(product.hasRecipe),
         securityDeposit: Number(product.securityDeposit ?? 0),
+        isPublic: Boolean(product?.isPublic ?? false),
         priceTiers: mappedPriceTiers,
         recipeIngredients: mappedRecipeIngredients,
     };

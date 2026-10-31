@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/incompatible-library */
 "use client";
@@ -5,7 +6,7 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Building2, Upload, Loader2, Save} from "lucide-react";
+import { Building2, Upload, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { BranchSettingData } from "../types/settings";
@@ -14,6 +15,7 @@ import { useUploadThing } from "@/lib/uploadthing";
 import { branchSettingsSchema, BranchSettingsFormValues } from "../schema/update-branch-settings.schema";
 import { FormInput } from "@/components/ui/form-input";
 import { FormPhoneInput } from "@/components/ui/form-phone-input";
+import { compressImageFile } from "@/lib/utils/functions/compress-image";
 
 interface BranchSettingsFormProps {
   initialData: BranchSettingData;
@@ -49,27 +51,34 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
 
   const { startUpload, isUploading } = useUploadThing("branchLogo");
 
+  // 🔥 Strict tracking of whether the logo has actually been modified or removed
   const hasLogoChanged = !!selectedFile || (isLogoRemoved && safeInitialLogo !== null);
   const isFormDirty = isDirty || hasLogoChanged;
 
   const handleUploadClick = () => { fileInputRef.current?.click(); };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("File size exceeds 2MB limit.");
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size exceeds 5MB limit.");
       e.target.value = "";
       return;
     }
 
-    const previewUrl = URL.createObjectURL(file);
-    setLogoPreview(previewUrl);
-    setSelectedFile(file);
-    setIsLogoRemoved(false);
-  };
+    try {
+      // 🔥 Compress the image file using our utility function
+      const compressedFile = await compressImageFile(file);
+      const previewUrl = URL.createObjectURL(compressedFile);
 
+      setLogoPreview(previewUrl);
+      setSelectedFile(compressedFile);
+      setIsLogoRemoved(false);
+    } catch (error) {
+      toast.error("Failed to process and compress image.");
+    }
+  };
 
   const handleFormSubmit = async (data: Partial<BranchSettingData>) => {
     let logoUrl = isLogoRemoved ? undefined : safeInitialLogo;
@@ -94,7 +103,18 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
         return;
       }
     }
-    onSubmit({ ...data, logoUrl: logoUrl || "" });
+    const finalPayload = { ...data, logoUrl: logoUrl || "" };
+    await onSubmit(finalPayload);
+    methods.reset({
+      name: data.name || "",
+      phone: data.phone || "",
+      email: data.email || "",
+      address: data.address || "",
+      ntn: data.ntn || "",
+      strn: data.strn || "",
+    });
+    setSelectedFile(null);
+    setIsLogoRemoved(false);
   };
 
   return (
@@ -117,7 +137,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
             </div>
 
             {/* Logo Upload Section */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
               <h3 className="text-sm font-bold text-slate-900 mb-1">Invoice Logo</h3>
               <p className="text-xs text-slate-500 mb-6">This logo will appear on your printed invoices and PDFs.</p>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
@@ -141,13 +161,13 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
                   >
                     <Upload className="h-3.5 w-3.5 mr-2 text-sky-600" /> {logoPreview ? "Change Logo" : "Upload New Logo"}
                   </Button>
-                  <p className="text-[10px] text-slate-600 font-medium">PNG, JPG or SVG. Max size 2MB.</p>
+                  <p className="text-[10px] text-slate-600 font-medium">PNG, JPG or SVG. Compressed automatically.</p>
                 </div>
               </div>
             </div>
 
             {/* Branch Details Section */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 mb-1">Branch Details</h3>
                 <p className="text-xs text-slate-500">Update the contact information displayed to your customers and suppliers.</p>
@@ -186,7 +206,6 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
                     label="NTN"
                     placeholder="e.g. 2532465134"
                   />
-
                 </div>
 
                 <div className="space-y-1.5">
@@ -195,9 +214,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
                     label="STRN"
                     placeholder="e.g. 55-12254"
                   />
-
                 </div>
-
               </div>
 
               <div className="space-y-1.5">
@@ -208,8 +225,6 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
                 />
               </div>
             </div>
-
-
           </form>
         </FormProvider>
       </div>

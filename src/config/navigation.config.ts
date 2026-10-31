@@ -1,7 +1,7 @@
 import {
   MapPin, Package, Truck, FileText, Navigation, Factory, Building,
   Receipt, UserCog, LucideIcon, UserPlus, Settings, ArchiveX, TruckIcon,
-  BadgeDollarSign, Undo2, Headphones, CreditCard
+  BadgeDollarSign, Undo2, Headphones, CreditCard,Bike
 } from "lucide-react";
 
 export type UserRole = "OWNER" | "MANAGER";
@@ -44,6 +44,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     headerColor: { text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500", border: "border-emerald-500/20", bgHover: "hover:bg-emerald-500/5" },
     items: [
       { title: "Deliveries & Sales", url: "/sales/orders", icon: Truck, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "PARTIAL" },
+      { title: "Order Requests", url: '/sales/requests?status=ALL', icon: Bike, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Daily Sales", url: "/sales/daily", icon: Receipt, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Invoices/Quotations", url: "/sales/invoices", icon: FileText, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Live Tracking", url: "/sales/tracking", icon: Navigation, badge: "GPS", allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "PARTIAL" },
