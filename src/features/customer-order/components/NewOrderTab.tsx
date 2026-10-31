@@ -44,8 +44,13 @@ export function NewOrderTab({ token, products, onSuccess }: NewOrderTabProps) {
     };
 
     const onSubmit = (data: CustomerOrderFormValues) => {
-        submitRequest.mutate(data);
-        methods.reset();
+        submitRequest.mutate(data, {
+            onSuccess: () => {
+                methods.reset();
+                setCart({});
+                onSuccess();
+            }
+        });
     };
 
     const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
