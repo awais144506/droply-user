@@ -19,7 +19,7 @@ export const sendCustomerCreatedMessage = (customer: CustomerDetails, settings?:
 
     // 🔥 Build the personal magic-link URL
     const portalUrl = customer.magicLink
-        ? `https://app.droply.com/order/${customer.magicLink}`
+        ? `${window.location.origin}/order/${customer.magicLink}`
         : null;
 
     // Build the formatted details list

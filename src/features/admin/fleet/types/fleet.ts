@@ -1,4 +1,3 @@
-import { ActivityLog } from "@/types/ActivityLog";
 export type VehicleType = "MOTORCYCLE" | "VAN" | "RIKSHAW" | "TRUCK" | "OTHER";
 export type FuelType = "PETROL" | "DIESEL" | "ELECTRIC";
 export type VehicleStatus = "ACTIVE" | "MAINTENANCE" | "RETIRED";
@@ -26,7 +25,7 @@ export interface Vehicle {
     branchId: string;
     registration: string;
     modelInfo: string;
-    make?: string | null; // Optional fallback if used in UI forms
+    make?: string | null;
     capacityInfo?: string | null;
     type: VehicleType;
     fuelType: FuelType;
@@ -34,7 +33,7 @@ export interface Vehicle {
     currentOdometer: number;
     assignedStaffId?: string | null;
     assignedTo?: { id: string; name: string; phone: string; status?: string } | null;
-    expenses?: VehicleExpense[]; // 🔥 Updated from fuelExpenses to expenses
+    expenses?: VehicleExpense[];
     createdAt?: string | Date;
     updatedAt?: string | Date;
 }
@@ -48,8 +47,19 @@ export interface FleetStats {
     unassignedCount: number;
 }
 
+export interface ExpenseLogs {
+    id: string;
+    category: 'PETROL' | 'MAINTENANCE';
+    amount: number;
+    odometerReading: number;
+    riderName: string;
+    vehicleRegistration: string;
+    vehicleId: string;
+    createdAt: string;
+}
+
 export interface VehicleListResponse {
     vehicles: Vehicle[];
-    logs: ActivityLog[];
+    logs: ExpenseLogs[];
     stats: FleetStats;
 }

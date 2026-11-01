@@ -59,9 +59,8 @@ export default function CreateSaleForm({
     methods.setValue("orderType", orderType, { shouldValidate: true });
   }, [category, orderType, methods]);
 
+  const products = productData?.products.filter(p => p.isActive === true) || [];
   const onSubmit = async (data: OrderFormValues) => {
-    toast.success("FORM SUBMITTED")
-    const products = productData?.products || [];
 
     const filteredItems = data.items.filter(item => {
       if (data.category === "SALE_RETURN") {
@@ -97,7 +96,6 @@ export default function CreateSaleForm({
       const payload = {
         ...data,
         items: filteredItems,
-        branchId,
       };
       await mutateAsync(payload);
       methods.reset();

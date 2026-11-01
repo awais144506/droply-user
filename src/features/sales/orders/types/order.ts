@@ -14,7 +14,6 @@ export interface OrderItemPayload {
 }
 
 export interface CreateOrderPayload {
-    branchId: string;
     orderType: OrderType;
     customerId: string;
     riderId?: string;

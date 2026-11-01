@@ -133,3 +133,20 @@ export function useMarkCustomerRequest() {
     },
   });
 }
+
+export function useUpdateCustomerToken() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => customerApi.updateToken(id),
+    onSuccess: () => {
+      toast.success("Link Updated", {
+        description: "Customer order link updated successfully",
+      });
+      queryClient.invalidateQueries({ queryKey: customerKeys.all });
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Failed to process.");
+    },
+  });
+}

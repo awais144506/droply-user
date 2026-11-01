@@ -42,7 +42,7 @@ export const getVehicleExpenseColumns = (handlers: ExpenseColumnHandlers): Colum
             }
             return (
                 <div>
-                    <p className="font-medium text-slate-800">{record.serviceProvider || "General Maintenance"} ({record.notes})</p>
+                    <p className="font-medium text-slate-800">{record.serviceProvider || "General Maintenance"} . {record.notes}</p>
                     {record.invoiceNumber && <p className="text-xs text-slate-400">Inv: {record.invoiceNumber}</p>}
                 </div>
             );

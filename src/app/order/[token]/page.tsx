@@ -15,7 +15,7 @@ export default function CustomerOrderPortal() {
 
     const [activeTab, setActiveTab] = useState("new-order");
 
-    const { data, isLoading, isError, refetch } = useCustomerPortalData(token);
+    const { data, isLoading, isError, refetch,error } = useCustomerPortalData(token);
 
     if (isLoading || !data) {
         return (
@@ -28,7 +28,7 @@ export default function CustomerOrderPortal() {
     if (isError) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6 text-center text-rose-600 font-bold text-lg">
-                Server Error. Contact Branch Please.
+                {error.message} Please contact your branch
             </div>
         );
     }

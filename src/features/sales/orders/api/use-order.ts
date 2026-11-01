@@ -1,12 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery,keepPreviousData } from "@tanstack/react-query";
 import { orderService } from "./order.service";
 import { orderKeys } from "./order-keys";
 
-export const useOrders = (branchId: string) => {
-    return useQuery({
-        queryKey: orderKeys.todays(branchId),
-        queryFn: () => orderService.getTodaysOrders(branchId),
-        enabled: !!branchId,
-        refetchInterval: 1000 * 30 * 2,
-    });
+export interface OrderFilterParams {
+  search?: string;
+  category?: string;
+  status?: string;
+  date?: string;
+}
+
+export const useOrders = (branchId: string, filters?: OrderFilterParams) => {
+  return useQuery({
+    queryKey: [...orderKeys.lists(), branchId, filters],
+    queryFn: () => orderService.getTodaysOrders(filters),
+    enabled: !!branchId,
+    placeholderData: keepPreviousData,
+    refetchInterval: 1000 * 30 * 2,
+  });
 };

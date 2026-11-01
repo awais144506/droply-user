@@ -39,5 +39,8 @@ export const customerApi = {
 
   markRequest: async (id: string) => {
     return await apiClient.patch(`${API}/${id}/new`);
+  },
+  updateToken: async (id: string) => {
+    return await apiClient.patch(`${API}/${id}/token`)
   }
 };

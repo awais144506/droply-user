@@ -8,7 +8,7 @@ import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { FleetTable } from "@/features/admin/fleet/components/fleet-table";
-
+import { FleetExpenseLogs } from "@/features/admin/fleet/components/fleet-expense-logs";
 
 export default function FleetManagementPage() {
   const searchParams = useSearchParams();
@@ -17,9 +17,11 @@ export default function FleetManagementPage() {
   const { branchId } = useRole();
   const { data, isLoading, isError, error, isRefetching, refetch } = useVehicles(branchId, status, search);
   const { list: vehicles, stats } = data || { list: [], stats: { total: 0, active: 0, inMaintenance: 0, retired: 0 } };
+  const logs = data?.logs || [];
 
   if (isLoading || !data) return <Loading text="Loading Vehicles..." />
   if (isError) return <ErrorBoundary error={error.message} />
+  
   return (
     <div className="p-6 space-y-8">
       <FleetMainPageHeader
@@ -30,12 +32,14 @@ export default function FleetManagementPage() {
         isRefreshing={isRefetching}
         onRefresh={refetch}
       />
+      
       <FleetStats
         total={stats.total}
         active={stats.active}
         inMaintenance={stats.inMaintenance}
         retired={stats.retired}
       />
+      
       <DataTableFilterBar
         searchPlaceholder="Search registration or model..."
         searchParamName="search"
@@ -47,9 +51,19 @@ export default function FleetManagementPage() {
           { label: "Retired", value: "RETIRED" }
         ]}
       />
-      <FleetTable
-        vehicles={vehicles}
-      />
+      
+      {/* Responsive Grid Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        {/* Table takes up 2 columns on Desktop */}
+        <div className="lg:col-span-2">
+          <FleetTable vehicles={vehicles} />
+        </div>
+
+        {/* Logs take up 1 column on Desktop */}
+        <div className="lg:col-span-1">
+          <FleetExpenseLogs logs={logs} />
+        </div>
+      </div>
     </div>
   );
 }

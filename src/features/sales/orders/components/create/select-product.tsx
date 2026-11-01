@@ -18,7 +18,7 @@ const SelectProduct = ({ branchId }: Props) => {
     const { control, setValue } = useFormContext<OrderFormValues>();
 
     const { data, isLoading } = useProducts(branchId);
-    const allProducts = data?.products || [];
+    const allProducts = data?.products.filter(p => p.isActive === true) || [];
 
     const productOptions = allProducts.map(p => ({
         label: `${p.name} - ${p.trackingType} (Rs ${p.salePrice})`,

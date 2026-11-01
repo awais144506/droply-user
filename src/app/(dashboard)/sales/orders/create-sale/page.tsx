@@ -19,7 +19,7 @@ const CreateNewSalePage = () => {
     }
 
     return (
-        <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+        <div className="space-y-6 p-4 sm:p-6 lg:p-8 min-h-500">
             <ChooseSale
                 step={step}
                 handleSaleSelect={handleSaleSelect}

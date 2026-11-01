@@ -1,5 +1,5 @@
 import { ActivityLog } from "@/types/ActivityLog";
-import { Plus, Pen, Trash2, PackagePlus, ToggleLeft, Info, CheckCircle2, XCircle, CheckCheck } from "lucide-react";
+import { Plus, Pen, Trash2, PackagePlus, ToggleLeft, Info, CheckCircle2, XCircle, CheckCheck, Link2 } from "lucide-react";
 
 export const getActionBadge = (action: ActivityLog["action"]) => {
     switch (action) {
@@ -7,6 +7,8 @@ export const getActionBadge = (action: ActivityLog["action"]) => {
             return { icon: Plus, classes: "bg-emerald-50 text-emerald-600 border-emerald-100" };
         case "UPDATED":
             return { icon: Pen, classes: "bg-sky-50 text-sky-600 border-sky-100" };
+        case "TOKEN":
+            return { icon: Link2, classes: "bg-indigo-50 text-indigo-600 border-indigo-100" };
         case "STATUS":
             return { icon: ToggleLeft, classes: "bg-amber-50 text-amber-600 border-amber-100" };
         case "ENABLE":

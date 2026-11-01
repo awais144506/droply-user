@@ -10,6 +10,7 @@ export function useVehicles(branchId: string, statusFilter?: string, searchFilte
     queryFn: () => fleetApi.getVehicles(),
     select: (data) => {
       const vehicles = data.vehicles
+      const logs = data.logs
       const activeCount = vehicles.filter(v => v.status === "ACTIVE").length;
       const maintenanceCount = vehicles.filter(v => v.status === "MAINTENANCE").length;
       const retiredCount = vehicles.filter(v => v.status === "RETIRED").length;
@@ -29,11 +30,12 @@ export function useVehicles(branchId: string, statusFilter?: string, searchFilte
         displayName: `${vehicle.modelInfo} (${vehicle.registration})`,
       }));
 
-      const vehicleOptions = vehicles.map(z => ({ value: z.id, label: z.registration, status: z.status }));
+      const vehicleOptions = vehicles.filter(v=>v.status!=="RETIRED").map(z => ({ value: z.id, label: z.registration, status: z.status }));
 
       return {
         list: formattedList,
         vehicleOptions,
+        logs,
         stats: {
           total: vehicles.length,
           active: activeCount,

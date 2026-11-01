@@ -3,11 +3,16 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Trash2, Edit, ShieldBan, ShieldCheck } from "lucide-react";
+import { Trash2, Edit, ShieldBan, ShieldCheck, Link2 } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useCustomer } from "@/features/manage/customers/api/use-customer";
-import { useDeleteCustomer, useToggleCustomerStatus } from "@/features/manage/customers/api/use-mutate-customer";
+import { 
+  useDeleteCustomer, 
+  useToggleCustomerStatus, 
+  useUpdateCustomerToken 
+} from "@/features/manage/customers/api/use-mutate-customer";
 import PageDetailHeader from "@/lib/utils/components/PageDetailHeader";
 import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
 import Loading from "@/app/loading";
@@ -16,6 +21,7 @@ import CustomerDetailsStats from "@/features/manage/customers/components/custome
 import PersonalInformationAssets from "@/features/manage/customers/components/customer_details/personal-assets-held";
 import CustomerOrderHistory from "@/features/manage/customers/components/customer_details/customer-order-history";
 import CustomerVisitMapDetails from "@/features/manage/customers/components/customer_details/customer-visit-map";
+import { sendWhatsAppMessage } from "@/lib/utils/functions/whatsapp/customerWhatsApp";
 
 export default function CustomerDetailsPage() {
   const params = useParams();
@@ -24,9 +30,11 @@ export default function CustomerDetailsPage() {
   const { data: customer, isLoading } = useCustomer(customerId);
   const { mutate: deleteCustomer, isPending: isDeleting } = useDeleteCustomer();
   const { mutate: toggleStatus, isPending: isTogglingStatus } = useToggleCustomerStatus();
+  const { mutate: updateToken, isPending: isUpdatingToken } = useUpdateCustomerToken();
   
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
+  const [isTokenDialogOpen, setIsTokenDialogOpen] = useState(false);
 
   if (isLoading) return <Loading text="Loading customer details..." />;
   if (!customer) return <NotFoundPage />;
@@ -52,6 +60,29 @@ export default function CustomerDetailsPage() {
         },
       }
     );
+  };
+
+  // Magic Link Token Update Handler
+  const handleConfirmUpdateToken = () => {
+    updateToken(customerId, {
+      onSuccess: () => {
+        setIsTokenDialogOpen(false);
+      },
+      onError: () => {
+        setIsTokenDialogOpen(false);
+      },
+    });
+  };
+
+  // WhatsApp Quick Messaging Handler
+  const handleWhatsAppClick = () => {
+    if (!customer.phone) {
+      toast.error("No phone number available for this customer.");
+      return;
+    }
+    const portalUrl = `${window.location.origin}/order/${customer.magicLink}`;
+    const msg = `Hi *${customer.name}*, here is your updated secure ordering portal link:\n\n${portalUrl}\n\nYou can use this link anytime to place orders directly with us!`;
+    sendWhatsAppMessage(customer.phone, msg);
   };
 
   // Deletion Safety Check
@@ -92,6 +123,29 @@ export default function CustomerDetailsPage() {
           createdAt={customer.createdAt}
           updatedAt={customer.updatedAt}
         >
+          {/* WhatsApp Button */}
+          <Button
+            type="button"
+            onClick={handleWhatsAppClick}
+            variant="outline"
+            className="border-emerald-200 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-800 hover:border-emerald-300 gap-2"
+          >
+            <FaWhatsapp className="h-4 w-4 text-emerald-600" />
+            WhatsApp
+          </Button>
+
+          {/* Update Magic Link Button */}
+          <Button
+            type="button"
+            onClick={() => setIsTokenDialogOpen(true)}
+            variant="outline"
+            disabled={isUpdatingToken}
+            className="border-sky-200 bg-sky-50/50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 hover:border-sky-300 gap-2"
+          >
+            <Link2 className="h-4 w-4" />
+            Update Magic Link
+          </Button>
+
           {/* Block / Activate Button opens confirmation dialog */}
           <Button
             type="button"
@@ -167,6 +221,23 @@ export default function CustomerDetailsPage() {
           />
         </div>
       </div>
+
+      {/* Magic Link Update Confirmation Dialog */}
+      <ConfirmDeleteDialog
+        title={`Regenerate Magic Link for "${customer.name}"?`}
+        description={
+          <span>
+            Are you sure you want to regenerate the magic link token for <span className="font-bold text-slate-900">{customer.name}</span>? 
+            Any previously shared links will immediately stop working.
+          </span>
+        }
+        isLoading={isUpdatingToken}
+        confirmText="Yes, Regenerate Link"
+        confirmButtonClass="bg-sky-600 hover:bg-sky-700 text-white"
+        isOpen={isTokenDialogOpen}
+        onClose={() => setIsTokenDialogOpen(false)}
+        onConfirm={handleConfirmUpdateToken}
+      />
 
       {/* Status Toggle Confirmation Dialog */}
       <ConfirmDeleteDialog

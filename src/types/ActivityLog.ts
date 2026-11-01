@@ -6,7 +6,8 @@ export type ActivityLogActionEnums =
     | 'ENABLE'
     | 'DISABLE'
     | 'RESTOCKED'
-    | 'RESOLVED';
+    | 'RESOLVED'
+    | 'TOKEN';
 
 export interface ActivityLog {
     id: string;

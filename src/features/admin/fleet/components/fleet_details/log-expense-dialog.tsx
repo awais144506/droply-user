@@ -38,15 +38,22 @@ export default function LogExpenseDialog({ isOpen, onClose, vehicle }: LogExpens
     const { handleSubmit, reset, control, setValue } = methods;
 
     const selectedCategory = useWatch({ control, name: "category" });
-    const liters = useWatch({ control, name: "liters" });
+    const totalCost = useWatch({ control, name: "totalCost" });
     const costPerLiter = useWatch({ control, name: "costPerLiter" });
 
-    // Auto-calculate total cost for FUEL
     useEffect(() => {
-        if (selectedCategory === "FUEL" && liters && costPerLiter) {
-            setValue("totalCost", Number(liters) * Number(costPerLiter), { shouldValidate: true });
+        const cost = Number(totalCost);
+        const price = Number(costPerLiter);
+
+        if (selectedCategory === "FUEL" && cost > 0 && price > 0) {
+            // Formula: Liters = Total Paid / Price per Liter (rounded to 2 decimals)
+            const calculatedLiters = Number((cost / price).toFixed(2));
+            setValue("liters", calculatedLiters, { shouldValidate: true });
+        } else if (selectedCategory === "FUEL" && (!cost || !price)) {
+            // Reset liters if inputs are cleared
+            setValue("liters", null, { shouldValidate: true });
         }
-    }, [liters, costPerLiter, selectedCategory, setValue]);
+    }, [totalCost, costPerLiter, selectedCategory, setValue]);
 
     // Clear fuel-specific values when switching to MAINTENANCE (and vice versa)
     useEffect(() => {
@@ -107,15 +114,24 @@ export default function LogExpenseDialog({ isOpen, onClose, vehicle }: LogExpens
                                     { label: "Maintenance / Repair", value: "MAINTENANCE" }
                                 ]}
                             />
-                            <FormInput name="date" label="Date of Expense" type="date" />
+                            <FormInput name="date" label="Date of Expense" type="date" disableFutureDates />
                         </div>
 
                         <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-4">
                             {selectedCategory === "FUEL" ? (
                                 <div className="grid grid-cols-3 gap-4">
-                                    <FormInput name="liters" label="Volume (Liters)" type="number" min={0.1} />
-                                    <FormInput name="costPerLiter" label="Unit Cost (Rs/L)" type="number" min={1} />
-                                    <FormInput name="totalCost" label="Total Cost (Rs)" type="number" min={1} disabled={!!(liters && costPerLiter)} />
+                                    {/* User inputs Total Cost and Unit Cost */}
+                                    <FormInput name="totalCost" label="Amount Paid (Rs)" type="number" min={1} />
+                                    <FormInput name="costPerLiter" label="Fuel Price (Rs/L)" type="number" min={1} />
+
+                                    {/* Liters auto-calculates and is read-only */}
+                                    <FormInput
+                                        name="liters"
+                                        label="Calculated Liters"
+                                        type="number"
+                                        disabled={true}
+                                        className="bg-slate-100 text-slate-500 font-bold"
+                                    />
                                 </div>
                             ) : (
                                 <div className="space-y-4">
