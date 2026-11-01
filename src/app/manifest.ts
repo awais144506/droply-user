@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Droply Customer Portal',
+    name: 'Droply Customer',
     short_name: 'Droply',
     description: 'Place your water and gas orders instantly',
     start_url: '/order/',
