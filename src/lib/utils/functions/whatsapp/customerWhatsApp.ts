@@ -16,8 +16,7 @@ export const sendCustomerCreatedMessage = (customer: CustomerDetails, settings?:
     if (!customer?.phone) return;
 
     const branchName = settings?.name || "Droply";
-
-    // 🔥 Build the personal magic-link URL
+    console.log(settings?.name)
     const portalUrl = customer.magicLink
         ? `${window.location.origin}/order/${customer.magicLink}`
         : null;

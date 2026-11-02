@@ -120,6 +120,7 @@ export function FormInput({
                         id={inputId}
                         type={type}
                         step={type === "number" ? "any" : undefined}
+                        onWheel={(e) => e.currentTarget.blur()}
                         placeholder={placeholder}
                         disabled={disabled}
                         min={min}

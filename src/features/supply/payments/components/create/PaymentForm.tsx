@@ -47,7 +47,7 @@ export default function PaymentForm({ initialData }: PaymentFormProps) {
         mode: "onChange",
         defaultValues: {
             supplierId: initialData?.supplierId || "",
-            poId: initialData?.poId || "",
+            purchaseOrderId: initialData?.purchaseOrderId || "",
             amountPaid: initialData?.amountPaid || 0,
             paymentMethod: initialData?.paymentMethod || "CASH",
             paymentDate: initialData ? new Date(initialData.paymentDate) : new Date(),
@@ -62,23 +62,23 @@ export default function PaymentForm({ initialData }: PaymentFormProps) {
         if (!poData?.orders) return [];
 
         return poData.orders
-            .filter(po => po.supplierId === selectedSupplierId && (po.balanceDue > 0 || po.id === initialData?.poId))
+            .filter(po => po.supplierId === selectedSupplierId && (po.balanceDue > 0 || po.id === initialData?.purchaseOrderId))
             .map(po => ({
                 label: po.poNumber,
                 value: po.id,
                 balanceDue: po.balanceDue
             }));
-    }, [poData?.orders, selectedSupplierId, initialData?.poId]);
+    }, [poData?.orders, selectedSupplierId, initialData?.purchaseOrderId]);
 
     // Auto-reset PO selection if the user changes the Supplier
     useEffect(() => {
         if (!isEditing) {
-            setValue("poId", "");
+            setValue("purchaseOrderId", "");
         }
     }, [selectedSupplierId, setValue, isEditing]);
 
     const onSubmit = (values: CreatePaymentFormValues) => {
-        const selectedPO = poData?.orders?.find(po => po.id === values.poId);
+        const selectedPO = poData?.orders?.find(po => po.id === values.purchaseOrderId);
         const currentBalanceDue = selectedPO?.balanceDue || 0;
         const newBalanceDue = currentBalanceDue - values.amountPaid
         const payload = {
@@ -132,7 +132,7 @@ export default function PaymentForm({ initialData }: PaymentFormProps) {
                         />
 
                         <FormSelect
-                            name="poId"
+                            name="purchaseOrderId"
                             label="Purchase Order Ref"
                             options={poOptions}
                             placeholder={!selectedSupplierId ? "Select a supplier first" : isLoadingPOs ? "Loading POs..." : "Select PO"}

@@ -4,8 +4,8 @@ import {
 } from "lucide-react";
 import { FaWhatsapp, FaInstagram, FaEnvelope, FaFacebookF, FaLinkedinIn } from "react-icons/fa6";
 
+const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP;
 const handleOpenWhatsApp = () => {
-  const phoneNumber = "923116631476"; // Replace with your support WhatsApp number
   const message = encodeURIComponent("Hello Droply Support, I need assistance with my branch.");
   window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
 };

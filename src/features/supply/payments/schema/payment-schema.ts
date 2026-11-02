@@ -4,7 +4,7 @@ export const createPaymentSchema = yup.object().shape({
     
     supplierId: yup.string().required("Please select a supplier"),
     
-    poId: yup.string().required("Please select a purchase order to pay against"),
+    purchaseOrderId: yup.string().required("Please select a purchase order to pay against"),
     
     amountPaid: yup.number()
         .typeError("Amount must be a valid number")

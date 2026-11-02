@@ -14,7 +14,7 @@ export interface SupplierPayment {
     status: PaymentStatus;
     branchId: string;
     supplierId: string;
-    poId: string;
+    purchaseOrderId: string;
     supplier?: {
         strn: string;
         ntn: string;

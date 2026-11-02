@@ -18,11 +18,13 @@ export default function CustomersPage() {
   const debt = searchParams.get("debt") || undefined;
   const schedule = searchParams.get("schedule") || undefined;
   const { data, isError, error, isLoading, refetch, isRefetching } = useCustomers(branchId, debt, search, schedule);
-  const { data: branchData } = useBranchSettings();
+  const { data: branchData } = useBranchSettings(branchId);
   const customers = data?.customers || [];
   const stats = data?.stats || { activeCount: 0, totalLedger: "0", totalAssets: 0 };
   const logs = data?.logs || [];
   const requests = data?.newCustomerRequest || [];
+
+  console.log(branchData)
 
   if (isLoading) return <Loading text="Loading Customers..." />;
   if (isError) return <ErrorBoundary error={error.message} />;
