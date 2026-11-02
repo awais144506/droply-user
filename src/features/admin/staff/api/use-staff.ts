@@ -28,12 +28,14 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
           : true;
         return matchesSearch && matchesRole && matchesStatus;
       });
-      const riderOptions = payload.staff
-        .filter((member: { role: string }) => member.role === "RIDER")
-        .map((rider: { name: string; phone: string; id: string }) => ({
-          label: `${rider.name} (${rider.phone})`,
-          value: rider.id,
-        }));
+  const riderOptions = payload.staff
+    .filter((member: { role: string; status: string }) => 
+        member.role === "RIDER" && member.status === "ACTIVE"
+    )
+    .map((rider: { name: string; phone: string; id: string }) => ({
+        label: `${rider.name} (${rider.phone})`,
+        value: rider.id,
+    }));
 
       const staffOptions = payload.staff
         .map((staff: { name: string; phone: string; id: string }) => ({
