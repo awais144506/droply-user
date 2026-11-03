@@ -47,9 +47,8 @@ export function useProducts(branchId?: string) {
                     lowStockProducts.push(p);
                 }
 
-                // 🔥 If product is inactive, skip adding it to transactional/POS/quotation options
                 if (!p.isActive) {
-                    continue; 
+                    continue;
                 }
 
                 // 3. Returnables Check (Active only)
@@ -64,18 +63,20 @@ export function useProducts(branchId?: string) {
                 }
 
                 // 5. Quick Sale / POS Options (Active only)
-                quickSaleOptions.push({
-                    id: p.id,
-                    name: p.name,
-                    code: p.productCode,
-                    price: salePrice,
-                    stock: currentStock,
-                    trackingType: p.trackingType,
-                    lowStock: lowStockThreshold,
-                    security: p.securityDeposit ?? 0,
-                    unit: unitOfMeasure,
-                    priceTiers: p.priceTiers || [],
-                });
+                if (p.category !== 'RAW_MATERIAL') {
+                    quickSaleOptions.push({
+                        id: p.id,
+                        name: p.name,
+                        code: p.productCode,
+                        price: salePrice,
+                        stock: currentStock,
+                        trackingType: p.trackingType,
+                        lowStock: lowStockThreshold,
+                        security: p.securityDeposit ?? 0,
+                        unit: unitOfMeasure,
+                        priceTiers: p.priceTiers || [],
+                    });
+                }
 
                 // 6. Unified BOM & Quotation Options (Active only)
                 bomOptions.push({

@@ -5,6 +5,7 @@ import { VehicleFormValues, VehicleExpenseFormValues } from "../schema/fleet.sch
 import { toast } from "sonner";
 import { fleetApi } from "./fleet.service";
 import { useRouter } from "next/navigation";
+import { staffKeys } from "../../staff/api/staff-keys";
 
 export function useCreateVehicle(branchId: string) {
     const queryClient = useQueryClient();
@@ -31,6 +32,7 @@ export function useUpdateVehicle(branchId: string, vehicleId: string) {
             toast.success("Vehicle updated successfully!");
             queryClient.invalidateQueries({ queryKey: fleetKeys.vehicles.lists(branchId) });
             queryClient.invalidateQueries({ queryKey: fleetKeys.vehicles.detail(vehicleId) });
+            queryClient.invalidateQueries({ queryKey: staffKeys.all });
         },
         onError: (err: any) => {
             toast.error(err.response?.data?.message || err.message || "Failed to update vehicle.");
@@ -46,6 +48,7 @@ export function useDeleteVehicle(branchId: string) {
         onSuccess: () => {
             toast.success("Vehicle deleted successfully.");
             queryClient.invalidateQueries({ queryKey: fleetKeys.vehicles.lists(branchId) });
+            queryClient.invalidateQueries({ queryKey: staffKeys.all });
         },
         onError: (err: any) => {
             toast.error(err.response?.data?.message || err.message || "Failed to delete vehicle.");

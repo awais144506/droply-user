@@ -55,7 +55,7 @@ const OrderTable = ({ orders = [], isFetching = false }: Props) => {
       <OrdersFilterBar />
 
       {/* 2. Table Container with Localized Spinner Overlay */}
-      <div className="relative rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden min-h-[220px]">
+      <div className="relative rounded-2xl border border-slate-200/90 bg-white shadow-xs overflow-hidden min-h-55">
         {isFetching && (
           <div className="absolute inset-0 z-20 bg-white/60 backdrop-blur-[1px] flex items-center justify-center">
             <div className="flex items-center gap-2.5 bg-white px-4 py-2.5 rounded-xl shadow-md border border-slate-200">

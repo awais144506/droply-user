@@ -120,9 +120,9 @@ export const getOrderColumns = ({
       const dateStr = order.createdAt || order.scheduleDate;
 
       return (
-        <div className="space-y-1.5 min-w-[130px]">
+        <div className="space-y-1.5 min-w-32.5">
           <div className="flex items-center gap-2">
-            <span className="font-black text-slate-900 text-xs tracking-tight">
+            <span className="font-bold text-slate-900 text-xs tracking-tight">
               #{code}
             </span>
           </div>
@@ -154,7 +154,7 @@ export const getOrderColumns = ({
       }
 
       return (
-        <div className="space-y-1 min-w-[170px]">
+        <div className="space-y-1 min-w-42.5">
           <div className="font-bold text-slate-800 text-xs leading-none">
             {customer.name}
           </div>
@@ -194,7 +194,7 @@ export const getOrderColumns = ({
       }
 
       return (
-        <div className="space-y-1 min-w-[150px] max-w-[220px]">
+        <div className="space-y-1 min-w-37.5 max-w-55">
           {items.slice(0, 2).map((item: any, idx: number) => {
             const qty = (item.paidQuantity ?? 0) + (item.freeQuantity ?? 0) || item.quantity || 0;
             return (
@@ -231,7 +231,7 @@ export const getOrderColumns = ({
       const balance = total - paid;
 
       return (
-        <div className="space-y-1 min-w-[120px]">
+        <div className="space-y-1 min-w-30">
           <div className="flex items-center justify-between text-xs">
             <span className="text-slate-400 font-medium">Total:</span>
             <span className="font-black text-slate-900">

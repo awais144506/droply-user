@@ -46,6 +46,13 @@ export interface CustomerDetails {
         currentBalance: number;
     }[];
     orders: CustomerOrderHistory[];
+    customerPrices:{
+        id:string;
+        branchId:string;
+        customerId:string;
+        productId: string;
+        priceTierId:string;
+    }[]
 }
 export interface CustomerOrderHistory {
     lineItems: {

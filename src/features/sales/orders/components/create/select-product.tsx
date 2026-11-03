@@ -1,13 +1,25 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React from "react";
-import { Package, Plus, Trash2, Gift, AlertCircle, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { useEffect, useRef,useMemo } from "react";
+import {
+    Package,
+    Plus,
+    Trash2,
+    Gift,
+    AlertCircle,
+    AlertTriangle,
+    CheckCircle2,
+    Tag,
+    Sparkles,
+} from "lucide-react";
 import { useFormContext, useFieldArray, useWatch } from "react-hook-form";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { FormSelect } from "@/components/ui/form-select";
 import { FormInput } from "@/components/ui/form-input";
 import { useProducts } from "@/features/manage/products/api/use-products";
+import { useCustomers } from "@/features/manage/customers/api/use-customer";
 import { OrderFormValues } from "../../schema/create-order-schema";
 
 type Props = {
@@ -17,31 +29,96 @@ type Props = {
 const SelectProduct = ({ branchId }: Props) => {
     const { control, setValue } = useFormContext<OrderFormValues>();
 
+    // 1. Fetch Products & Customers (Cached from CustomerSelection)
     const { data, isLoading } = useProducts(branchId);
-    const allProducts = data?.products.filter(p => p.isActive === true) || [];
+    const { data: customerData } = useCustomers(branchId);
 
-    const productOptions = allProducts.map(p => ({
-        label: `${p.name} - ${p.trackingType} (Rs ${p.salePrice})`,
-        value: p.id,
-        trackingType: p.trackingType,
-        name: p.name,
-        price: p.salePrice
-    }));
+    const allProducts = useMemo(() => {
+        return data?.products?.filter((p: any) => p.isActive === true) || [];
+    }, [data?.products]);
+
+    // Watch Customer & Line Items
+    const selectedCustomerId = useWatch({ control, name: "customerId" });
+    const watchedItems = useWatch({ control, name: "items" });
+
+    // Grab the selected customer's saved product prices from customerOptions
+    const selectedCustomerOption = customerData?.customerOptions?.find(
+        (c: any) => c.value === selectedCustomerId
+    );
+const customerPrices: { productId: string; priceTierId: string | null }[] = useMemo(() => {
+        return selectedCustomerOption?.customerPrices || [];
+    }, [selectedCustomerOption?.customerPrices]);
+
+    const productOptions = allProducts.map((p: any) => {
+        const defaultPrice = p.salePrice ?? p.priceTiers?.[0]?.salePrice ?? 0;
+        return {
+            label: `${p.name} ${p.trackingType} (Rs ${defaultPrice})`,
+            value: p.id,
+            trackingType: p.trackingType,
+            name: p.name,
+            price: defaultPrice,
+        };
+    });
 
     const { fields, append, remove } = useFieldArray({
         control,
         name: "items",
     });
 
-    const watchedItems = useWatch({
-        control,
-        name: "items",
-    });
+    // Track last evaluated (customerId + productId) per row so we only auto-fill when product or customer changes
+    const prevSelectionRef = useRef<Record<number, string>>({});
+
+    useEffect(() => {
+        if (!watchedItems) return;
+
+        watchedItems.forEach((item: any, index: number) => {
+            if (!item?.productId) return;
+
+            const selectionKey = `${selectedCustomerId || "walkin"}_${item.productId}`;
+            if (prevSelectionRef.current[index] === selectionKey) return;
+            prevSelectionRef.current[index] = selectionKey;
+
+            const product: any = allProducts.find((p: any) => p.id === item.productId);
+            if (!product) return;
+
+            const priceTiers: any[] = product.priceTiers || [];
+
+            // Check if this customer has a saved priceTierId for this product
+            const savedPriceRecord = customerPrices.find(
+                (cp) => cp.productId === item.productId
+            );
+
+            if (savedPriceRecord?.priceTierId) {
+                const matchedTier = priceTiers.find(
+                    (t: any) => t.id === savedPriceRecord.priceTierId
+                );
+                if (matchedTier) {
+                    setValue(`items.${index}.priceTierId` as any, matchedTier.id, { shouldDirty: true, shouldValidate: true });
+                    setValue(`items.${index}.unitPrice`, Number(matchedTier.salePrice), { shouldDirty: true, shouldValidate: true });
+                    return;
+                }
+            }
+
+            // First time selling this product to this customer:
+            // If product only has 1 tier (or no tiers), default to it; if multiple tiers, clear priceTierId so user is prompted to choose
+            if (priceTiers.length === 1) {
+                setValue(`items.${index}.priceTierId` as any, priceTiers[0].id, { shouldDirty: true, shouldValidate: true });
+                setValue(`items.${index}.unitPrice`, Number(priceTiers[0].salePrice), { shouldDirty: true, shouldValidate: true });
+            } else if (priceTiers.length > 1) {
+                setValue(`items.${index}.priceTierId` as any, "", { shouldDirty: true, shouldValidate: true });
+                setValue(`items.${index}.unitPrice`, Number(product.salePrice || priceTiers[0]?.salePrice || 0), { shouldDirty: true });
+            } else {
+                setValue(`items.${index}.priceTierId` as any, null, { shouldDirty: true });
+                setValue(`items.${index}.unitPrice`, Number(product.salePrice || 0), { shouldDirty: true });
+            }
+        });
+    }, [watchedItems, selectedCustomerId, customerPrices, allProducts, setValue]);
 
     const handleAdd = () => {
         append({
             id: crypto.randomUUID(),
             productId: "",
+            priceTierId: "",
             paidQty: 1,
             emptiesIn: 0,
             hasOffer: false,
@@ -52,8 +129,8 @@ const SelectProduct = ({ branchId }: Props) => {
             isDepositCharged: false,
             returnedToStoreQty: 0,
             wastageQuantity: 0,
-            unitPrice: 0
-        });
+            unitPrice: 0,
+        } as any);
     };
 
     return (
@@ -75,10 +152,20 @@ const SelectProduct = ({ branchId }: Props) => {
 
             <div className="space-y-4">
                 {fields.map((field, index) => {
-                    const currentItemState = watchedItems?.[index] || field;
-                    const selectedProductDetails = allProducts.find(
-                        p => p.id === currentItemState.productId
+                    const currentItemState: any = watchedItems?.[index] || field;
+                    const selectedProductDetails: any = allProducts.find(
+                        (p: any) => p.id === currentItemState.productId
                     );
+
+                    // Customer-Specific Pricing Logic
+                    const productTiers: any[] = selectedProductDetails?.priceTiers || [];
+                    const savedCustomerPrice = customerPrices.find(
+                        (cp) => cp.productId === currentItemState.productId
+                    );
+                    const isFirstTimeProduct =
+                        Boolean(selectedCustomerId) &&
+                        Boolean(currentItemState.productId) &&
+                        !savedCustomerPrice?.priceTierId;
 
                     // Logic for the Paid Item
                     const isReturnable = selectedProductDetails?.trackingType === "RETURNABLE";
@@ -88,8 +175,12 @@ const SelectProduct = ({ branchId }: Props) => {
                     const emptiesIn = Number(currentItemState.emptiesIn) || 0;
 
                     // Logic for Free Item
-                    const isSameFreeProduct = !currentItemState.freeProductId || currentItemState.freeProductId === currentItemState.productId;
-                    const freeProductDetails = isSameFreeProduct ? selectedProductDetails : allProducts.find(p => p.id === currentItemState.freeProductId);
+                    const isSameFreeProduct =
+                        !currentItemState.freeProductId ||
+                        currentItemState.freeProductId === currentItemState.productId;
+                    const freeProductDetails: any = isSameFreeProduct
+                        ? selectedProductDetails
+                        : allProducts.find((p: any) => p.id === currentItemState.freeProductId);
                     const freeStock = freeProductDetails?.currentStock || 0;
                     const offerQty = Number(currentItemState.offerQty) || 0;
 
@@ -97,7 +188,6 @@ const SelectProduct = ({ branchId }: Props) => {
                     let remainingPaidStock = currentStock - paidQty;
                     let remainingFreeStock = freeStock - offerQty;
 
-                    // If they are giving away the SAME product for free, subtract both from the same stock pool
                     if (isSameFreeProduct) {
                         const totalRequested = paidQty + offerQty;
                         remainingPaidStock = currentStock - totalRequested;
@@ -107,7 +197,7 @@ const SelectProduct = ({ branchId }: Props) => {
                     const isOutOfStock = remainingPaidStock < 0;
                     const isFreeOutOfStock = remainingFreeStock < 0;
 
-                    // Deposit calculation (only applies to the paid item for now)
+                    // Deposit calculation
                     const deficit = Math.max(0, paidQty - emptiesIn);
                     const showDepositWarning = isReturnable && deficit > 0;
                     const isDepositCharged = currentItemState.isDepositCharged === true;
@@ -115,7 +205,14 @@ const SelectProduct = ({ branchId }: Props) => {
                     const scale = selectedProductDetails?.unitOfMeasure;
 
                     return (
-                        <div key={field.id} className={`p-3 border rounded-xl transition-colors ${isOutOfStock ? 'bg-rose-50/30 border-rose-200' : 'bg-white border-slate-100'}`}>
+                        <div
+                            key={field.id}
+                            className={`p-3 border rounded-xl transition-colors ${
+                                isOutOfStock
+                                    ? "bg-rose-50/30 border-rose-200"
+                                    : "bg-white border-slate-100"
+                            }`}
+                        >
                             <div className="grid grid-cols-12 gap-3 items-start">
                                 {/* Product Selection */}
                                 <div className="col-span-5 relative -mt-0.5">
@@ -125,7 +222,7 @@ const SelectProduct = ({ branchId }: Props) => {
                                         isSearchable={true}
                                         isLoading={isLoading}
                                         options={productOptions}
-                                        formatOptionLabel={(opt) => (
+                                        formatOptionLabel={(opt: any) => (
                                             <div className="flex items-center justify-between w-full pr-1">
                                                 <span className="font-medium truncate mr-2">
                                                     {opt.name}
@@ -133,22 +230,33 @@ const SelectProduct = ({ branchId }: Props) => {
                                                         (Rs {opt.price})
                                                     </span>
                                                 </span>
-                                                <span className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm ${opt.trackingType === "RETURNABLE"
-                                                    ? "bg-purple-500"
-                                                    : "bg-indigo-500"
-                                                    }`}>
+                                                <span
+                                                    className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm ${
+                                                        opt.trackingType === "RETURNABLE"
+                                                            ? "bg-purple-500"
+                                                            : "bg-indigo-500"
+                                                    }`}
+                                                >
                                                     {opt.trackingType}
                                                 </span>
                                             </div>
                                         )}
                                     />
                                     {selectedProductDetails && (
-                                        <span className={`absolute -bottom-5 left-1 text-[11px] font-bold flex items-center gap-1 ${isOutOfStock ? 'text-rose-600' :
-                                            remainingPaidStock <= (selectedProductDetails.lowStockThreshold || 0) ? 'text-amber-500' :
-                                                'text-emerald-600'
-                                            }`}>
+                                        <span
+                                            className={`absolute -bottom-5 left-1 text-[11px] font-bold flex items-center gap-1 ${
+                                                isOutOfStock
+                                                    ? "text-rose-600"
+                                                    : remainingPaidStock <=
+                                                        (selectedProductDetails.lowStockThreshold || 0)
+                                                      ? "text-amber-500"
+                                                      : "text-emerald-600"
+                                            }`}
+                                        >
                                             {isOutOfStock && <AlertCircle className="h-3 w-3" />}
-                                            {isOutOfStock ? "Stock Exceeded!" : `Stock Left: ${remainingPaidStock} ( ${scale} )`}
+                                            {isOutOfStock
+                                                ? "Stock Exceeded!"
+                                                : `Stock Left: ${remainingPaidStock} ( ${scale} )`}
                                         </span>
                                     )}
                                 </div>
@@ -160,7 +268,11 @@ const SelectProduct = ({ branchId }: Props) => {
                                         name={`items.${index}.paidQty`}
                                         min={1}
                                         max={isSameFreeProduct ? currentStock - offerQty : currentStock}
-                                        className={`text-center font-bold ${isOutOfStock ? 'bg-rose-100 text-rose-700 border-rose-300' : 'bg-white'}`}
+                                        className={`text-center font-bold ${
+                                            isOutOfStock
+                                                ? "bg-rose-100 text-rose-700 border-rose-300"
+                                                : "bg-white"
+                                        }`}
                                     />
                                 </div>
 
@@ -175,7 +287,9 @@ const SelectProduct = ({ branchId }: Props) => {
                                         />
                                     ) : (
                                         <div className="h-10 flex items-center justify-center bg-slate-100 rounded-xl border border-slate-200">
-                                            <span className="text-[10px] text-slate-400 font-bold uppercase">N/A</span>
+                                            <span className="text-[10px] text-slate-400 font-bold uppercase">
+                                                N/A
+                                            </span>
                                         </div>
                                     )}
                                 </div>
@@ -186,9 +300,11 @@ const SelectProduct = ({ branchId }: Props) => {
                                         checked={currentItemState.hasOffer}
                                         onCheckedChange={(val) => {
                                             setValue(`items.${index}.hasOffer`, val);
-                                            // Default the free product to the same product when toggled on
                                             if (val && !currentItemState.freeProductId) {
-                                                setValue(`items.${index}.freeProductId`, currentItemState.productId);
+                                                setValue(
+                                                    `items.${index}.freeProductId`,
+                                                    currentItemState.productId
+                                                );
                                             }
                                         }}
                                         disabled={currentStock <= 0}
@@ -207,20 +323,112 @@ const SelectProduct = ({ branchId }: Props) => {
                                 </div>
                             </div>
 
+                            {/* 🔥 CUSTOMER PRICE TIER SELECTOR (Auto-fills from history or asks on first time) */}
+                            {selectedProductDetails && productTiers.length > 0 && (
+                                <div
+                                    className={`mt-7 p-3 rounded-xl border transition-all ${
+                                        isFirstTimeProduct && !currentItemState.priceTierId
+                                            ? "bg-amber-50/70 border-amber-200"
+                                            : "bg-slate-50/80 border-slate-200/80"
+                                    }`}
+                                >
+                                    <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                        <div className="flex items-center gap-1.5">
+                                            <Tag
+                                                className={`h-3.5 w-3.5 ${
+                                                    isFirstTimeProduct && !currentItemState.priceTierId
+                                                        ? "text-amber-600"
+                                                        : "text-sky-600"
+                                                }`}
+                                            />
+                                            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-700">
+                                                Customer Price Tier
+                                            </span>
+                                        </div>
+
+                                        {savedCustomerPrice?.priceTierId ? (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200">
+                                                <Sparkles className="h-3 w-3 text-sky-600" />
+                                                {currentItemState.priceTierId === savedCustomerPrice.priceTierId
+                                                    ? "Previous Customer Rate Applied"
+                                                    : "Updating Customer Rate on Save"}
+                                            </span>
+                                        ) : selectedCustomerId ? (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                                First-Time Sale • Select Rate to Save for Customer
+                                            </span>
+                                        ) : null}
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-2">
+                                        {productTiers.map((tier: any) => {
+                                            const isSelected = currentItemState.priceTierId === tier.id;
+                                            const isSavedDefault =
+                                                savedCustomerPrice?.priceTierId === tier.id;
+
+                                            return (
+                                                <button
+                                                    key={tier.id}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setValue(
+                                                            `items.${index}.priceTierId` as any,
+                                                            tier.id,
+                                                            { shouldDirty: true, shouldValidate: true }
+                                                        );
+                                                        setValue(
+                                                            `items.${index}.unitPrice`,
+                                                            Number(tier.salePrice),
+                                                            { shouldDirty: true, shouldValidate: true }
+                                                        );
+                                                    }}
+                                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
+                                                        isSelected
+                                                            ? "bg-sky-600 text-white border-sky-600 shadow-xs"
+                                                            : "bg-white text-slate-700 border-slate-200 hover:border-sky-300 hover:bg-sky-50/40"
+                                                    }`}
+                                                >
+                                                    <span>{tier.name || tier.tierName || "Tier"}</span>
+                                                    <span
+                                                        className={`text-[11px] font-extrabold ${
+                                                            isSelected ? "text-sky-100" : "text-sky-600"
+                                                        }`}
+                                                    >
+                                                        Rs {Number(tier.salePrice).toLocaleString()}
+                                                    </span>
+                                                    {isSavedDefault && (
+                                                        <span
+                                                            className={`text-[9px] px-1 py-0.2 rounded uppercase ${
+                                                                isSelected
+                                                                    ? "bg-sky-700 text-sky-100"
+                                                                    : "bg-slate-100 text-slate-500"
+                                                            }`}
+                                                        >
+                                                            Saved
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Nested FOC Row */}
                             {currentItemState.hasOffer && (
-                                <div className="mt-7 pl-5 pr-2 py-3 bg-emerald-50/50 border border-emerald-100 rounded-xl flex items-start gap-4">
+                                <div className="mt-4 pl-5 pr-2 py-3 bg-emerald-50/50 border border-emerald-100 rounded-xl flex items-start gap-4">
                                     <Gift className="h-5 w-5 text-emerald-500 shrink-0 mt-2.5" />
 
-                                    {/* 🔥 NEW: Select Which Product to Give Away */}
                                     <div className="flex-1 space-y-1">
-                                        <label className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Select Free Item</label>
+                                        <label className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
+                                            Select Free Item
+                                        </label>
                                         <FormSelect
                                             name={`items.${index}.freeProductId`}
                                             label=""
                                             options={productOptions}
                                             placeholder="Select free product..."
-                                            formatOptionLabel={(opt) => (
+                                            formatOptionLabel={(opt: any) => (
                                                 <div className="flex items-center justify-between w-full pr-1">
                                                     <span className="font-medium truncate mr-2">
                                                         {opt.name}
@@ -228,30 +436,43 @@ const SelectProduct = ({ branchId }: Props) => {
                                                             (Rs {opt.price})
                                                         </span>
                                                     </span>
-                                                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm ${opt.trackingType === "RETURNABLE"
-                                                        ? "bg-purple-500"
-                                                        : "bg-indigo-500"
-                                                        }`}>
+                                                    <span
+                                                        className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm ${
+                                                            opt.trackingType === "RETURNABLE"
+                                                                ? "bg-purple-500"
+                                                                : "bg-indigo-500"
+                                                        }`}
+                                                    >
                                                         {opt.trackingType}
                                                     </span>
                                                 </div>
                                             )}
                                         />
                                         {freeProductDetails && (
-                                            <span className={`text-[10px] font-bold ${isFreeOutOfStock ? 'text-rose-500' : 'text-emerald-600'}`}>
+                                            <span
+                                                className={`text-[10px] font-bold ${
+                                                    isFreeOutOfStock ? "text-rose-500" : "text-emerald-600"
+                                                }`}
+                                            >
                                                 Stock Available: {remainingFreeStock}
                                             </span>
                                         )}
                                     </div>
 
                                     <div className="flex flex-col gap-1 w-24">
-                                        <label className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider text-center">Qty Out</label>
+                                        <label className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider text-center">
+                                            Qty Out
+                                        </label>
                                         <FormInput
                                             type="number"
                                             name={`items.${index}.offerQty`}
                                             min={0}
                                             max={isSameFreeProduct ? currentStock - paidQty : freeStock}
-                                            className={`text-center font-bold ${isFreeOutOfStock ? 'bg-rose-100 border-rose-300 text-rose-700' : 'bg-white border-emerald-200 text-emerald-700'}`}
+                                            className={`text-center font-bold ${
+                                                isFreeOutOfStock
+                                                    ? "bg-rose-100 border-rose-300 text-rose-700"
+                                                    : "bg-white border-emerald-200 text-emerald-700"
+                                            }`}
                                         />
                                     </div>
                                 </div>
@@ -259,30 +480,45 @@ const SelectProduct = ({ branchId }: Props) => {
 
                             {/* Asset Deficit Warning & Deposit Toggle */}
                             {showDepositWarning && (
-                                <div className={`mt-6 p-3 border rounded-xl flex items-start sm:items-center gap-3 transition-all animate-in fade-in ${isDepositCharged ? "bg-emerald-50/50 border-emerald-200" : "bg-amber-50 border-amber-200"
-                                    }`}>
+                                <div
+                                    className={`mt-4 p-3 border rounded-xl flex items-start sm:items-center gap-3 transition-all animate-in fade-in ${
+                                        isDepositCharged
+                                            ? "bg-emerald-50/50 border-emerald-200"
+                                            : "bg-amber-50 border-amber-200"
+                                    }`}
+                                >
                                     {isDepositCharged ? (
                                         <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5 sm:mt-0" />
                                     ) : (
                                         <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 sm:mt-0" />
                                     )}
                                     <div className="flex-1">
-                                        <p className={`text-[13px] font-extrabold ${isDepositCharged ? "text-emerald-800" : "text-amber-800"}`}>
+                                        <p
+                                            className={`text-[13px] font-extrabold ${
+                                                isDepositCharged ? "text-emerald-800" : "text-amber-800"
+                                            }`}
+                                        >
                                             Deficit: {deficit} Missing Container(s)
                                         </p>
-                                        <p className={`text-[10px] font-medium leading-tight mt-0.5 ${isDepositCharged ? "text-emerald-600" : "text-amber-700"}`}>
-                                            Deposit Required: Rs {calculatedDepositNeeded.toLocaleString()} (@ Rs {depositRate}/ea)
+                                        <p
+                                            className={`text-[10px] font-medium leading-tight mt-0.5 ${
+                                                isDepositCharged ? "text-emerald-600" : "text-amber-700"
+                                            }`}
+                                        >
+                                            Deposit Required: Rs {calculatedDepositNeeded.toLocaleString()} (@ Rs{" "}
+                                            {depositRate}/ea)
                                         </p>
                                     </div>
 
-                                    {/* Toggle buttons hooked up to the boolean state */}
                                     {isDepositCharged ? (
                                         <Button
                                             type="button"
                                             variant="outline"
                                             size="sm"
                                             className="border-emerald-200 text-emerald-600 hover:bg-emerald-100 text-[10px] h-8 shrink-0 shadow-sm cursor-pointer"
-                                            onClick={() => setValue(`items.${index}.isDepositCharged`, false)}
+                                            onClick={() =>
+                                                setValue(`items.${index}.isDepositCharged`, false)
+                                            }
                                         >
                                             Remove Deposit
                                         </Button>
@@ -291,7 +527,9 @@ const SelectProduct = ({ branchId }: Props) => {
                                             type="button"
                                             size="sm"
                                             className="bg-amber-500 hover:bg-amber-600 text-white text-[10px] h-8 shrink-0 shadow-sm cursor-pointer"
-                                            onClick={() => setValue(`items.${index}.isDepositCharged`, true)}
+                                            onClick={() =>
+                                                setValue(`items.${index}.isDepositCharged`, true)
+                                            }
                                         >
                                             Charge Rs {calculatedDepositNeeded}
                                         </Button>

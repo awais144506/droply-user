@@ -51,6 +51,7 @@ export function useCustomers(
             customerCredit: credit,
             assetsHeld: assets,
             zoneName: customer.zone?.name || "",
+            customerPrices: customer.customerPrices || [],
           });
         }
 
