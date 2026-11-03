@@ -9,8 +9,8 @@ const CreateNewSalePage = () => {
     const { branchId } = useRole();
 
     const [step, setStep] = useState<"SELECT_SALE" | "FORM">("SELECT_SALE");
-    const [selectedCategory, setSelectedCategory] = useState<OrderCategory>("DELIVERY");
-    const [selectedType, setSelectedType] = useState<OrderType>("DELIVERY");
+    const [selectedCategory, setSelectedCategory] = useState<OrderCategory>("WALK_IN");
+    const [selectedType, setSelectedType] = useState<OrderType>("WALK_IN");
 
     const handleSaleSelect = (category: OrderCategory, type: OrderType) => {
         setSelectedCategory(category);

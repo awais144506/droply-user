@@ -5,6 +5,7 @@ import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { FormInput } from "@/components/ui/form-input";
 import { Calculator, Settings2, AlertCircle, Plus, Trash2, CheckCircle2 } from "lucide-react";
 import { CreateItemFormData } from "../../schema/create-item.schema";
+import { FormNumberStepper } from "@/components/ui/form-number-stepper";
 
 interface ProductPriceCardProps {
     isEditMode: boolean;
@@ -169,18 +170,10 @@ const ProductPriceCard = ({ isEditMode, itemType }: ProductPriceCardProps) => {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4 grid grid-cols-2 gap-4">
-                    <FormInput
+                    <FormNumberStepper
                         label={isEditMode ? "Adjust Current Stock" : "Opening Stock"}
-                        type="number"
                         required
                         name="openingStock"
-                        helperText={
-                            isEditMode ? (
-                                <p className="text-[10px] text-amber-600 flex items-center gap-1">
-                                    <AlertCircle className="h-3 w-3" /> Adjusts live inventory.
-                                </p>
-                            ) : undefined
-                        }
                     />
                     <FormInput
                         label="Low Stock Alert At"

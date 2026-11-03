@@ -15,6 +15,5 @@ export const useOrders = (branchId: string, filters?: OrderFilterParams) => {
     queryFn: () => orderService.getTodaysOrders(filters),
     enabled: !!branchId,
     placeholderData: keepPreviousData,
-    refetchInterval: 1000 * 30 * 2,
   });
 };
