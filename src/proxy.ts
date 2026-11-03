@@ -71,9 +71,10 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 
-  // --- B. AUTHENTICATED BUT UNAUTHORIZED / INACTIVE ---
-  // If the owner fired them (userStatus), or they have no branch, kick them out
-  if (!isAllowedTenantUser || userStatus === "INACTIVE" || userStatus === "SUSPENDED") {
+const isBranchInactiveOrSuspended = branchStatus === "INACTIVE" || branchStatus === "SUSPENDED";
+  const isUserInactiveOrSuspended = userStatus === "INACTIVE" || userStatus === "SUSPENDED";
+
+  if (!isAllowedTenantUser || isUserInactiveOrSuspended || isBranchInactiveOrSuspended) {
     if (isUnauthorizedRoute(req)) return NextResponse.next();
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
@@ -81,16 +82,6 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   // --- C. VALID USERS HITTING PUBLIC ROUTES ---
   if (isAuthRoute(req) || isUnauthorizedRoute(req)) {
     return NextResponse.redirect(new URL("/app", req.url));
-  }
-
-  // --- D. BRANCH BILLING SUSPENSION (Controlled by Backend Cron Job) ---
-  const isStrictlySuspended = branchStatus === "SUSPENDED";
-
-  if (isStrictlySuspended && !isBillingRoute(req)) {
-    if (req.nextUrl.pathname.startsWith("/api")) {
-      return NextResponse.json({ error: "Account Suspended" }, { status: 403 });
-    }
-    return NextResponse.redirect(new URL("/admin/subscription", req.url));
   }
 
   // --- E. ROLE & TIER-BASED ROUTE PROTECTION ---
