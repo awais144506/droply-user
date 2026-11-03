@@ -4,6 +4,7 @@ import { isValidPhoneNumber } from "react-phone-number-input";
 export const orderItemSchema = yup.object({
   id: yup.string().required(),
   productId: yup.string().required("Product is required"),
+  priceTierId: yup.string().nullable().optional(),
   paidQty: yup
     .number()
     .transform((value) => (isNaN(value) ? undefined : value))
@@ -31,14 +32,12 @@ export const orderItemSchema = yup.object({
     .min(0)
     .default(0),
   isDepositCharged: yup.boolean().default(false),
-  returnedToStoreQty: yup.number().min(0).default(0),
-  wastageQuantity: yup.number().min(0).default(0),
   unitPrice: yup.number().min(0).default(0),
   freeProductId: yup.string().optional(),
 });
 
 export const orderSchema = yup.object({
-  category: yup.string().oneOf(["WALK_IN", "DELIVERY", "SALE_RETURN", "RECOVERY"]).required(),
+  category: yup.string().oneOf(["WALK_IN", "DELIVERY"]).required(),
   orderType: yup.string().oneOf(["WALK_IN", "DELIVERY"]).required(),
   customerId: yup.string().required("Customer is required"),
 
@@ -64,7 +63,6 @@ export const orderSchema = yup.object({
 
   scheduledDate: yup.string().optional(),
   items: yup.array().of(orderItemSchema).min(1, "Add at least one item").required(),
-  remarks: yup.string().optional(),
   discount: yup
     .number()
     .transform((value) => (isNaN(value) ? undefined : value))
@@ -81,7 +79,6 @@ export const orderSchema = yup.object({
     .transform((value) => (isNaN(value) ? undefined : value))
     .min(0)
     .default(0),
-  returnOrderId: yup.string().optional(),
 });
 
 // Infer TypeScript types directly from the Yup schema

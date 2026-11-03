@@ -134,6 +134,7 @@ export function useCustomer(id: string) {
             ...found,
             orders: [],
             returnables: [],
+            customerPrices: found.customerPrices || [],
           } as any;
         }
       }

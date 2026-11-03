@@ -38,14 +38,11 @@ export const ORDER_CATEGORIES = [
   { label: "All Categories", value: "ALL", icon: Layers },
   { label: "Walk-In", value: "WALK_IN", icon: ShoppingBag },
   { label: "Delivery", value: "DELIVERY", icon: Truck },
-  { label: "Recovery", value: "RECOVERY", icon: Banknote },
-  { label: "Sale Return", value: "SALE_RETURN", icon: Undo2 },
 ];
 
 export const ORDER_STATUSES = [
   { label: "All Statuses", value: "ALL" },
   { label: "Pending", value: "PENDING" },
-  { label: "Assigned", value: "ASSIGNED" },
   { label: "On Route", value: "ON_ROUTE" },
   { label: "Arrived", value: "ARRIVED" },
   { label: "Rescheduled", value: "RESCHEDULED" },

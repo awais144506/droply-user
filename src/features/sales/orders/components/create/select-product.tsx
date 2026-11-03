@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useEffect, useRef, useMemo } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import {
     Package,
     Plus,
@@ -41,36 +41,33 @@ const SelectProduct = ({ branchId }: Props) => {
     // Watch Customer & Line Items
     const selectedCustomerId = useWatch({ control, name: "customerId" });
     const watchedItems = useWatch({ control, name: "items" });
-
-    // 🔥 Fetch detailed customer data to get their live returnable balances
     const { data: detailedCustomer } = useCustomer(selectedCustomerId || "");
 
-    // Grab the selected customer's saved product prices from customerOptions
-    const selectedCustomerOption = customerData?.customerOptions?.find(
-        (c: any) => c.value === selectedCustomerId
-    );
+    // Grab the selected customer's saved product prices from detailedCustomer
     const customerPrices: { productId: string; priceTierId: string | null }[] = useMemo(() => {
-        return selectedCustomerOption?.customerPrices || [];
-    }, [selectedCustomerOption?.customerPrices]);
+        return detailedCustomer?.customerPrices || [];
+    }, [detailedCustomer?.customerPrices]);
 
-    const productOptions = allProducts.map((p: any) => {
-        const defaultPrice = p.salePrice ?? p.priceTiers?.[0]?.salePrice ?? 0;
-        return {
-            label: `${p.name} ${p.trackingType} (Rs ${defaultPrice})`,
-            value: p.id,
-            trackingType: p.trackingType,
-            name: p.name,
-            price: defaultPrice,
-            category: p.category,
-        };
-    });
+    const productOptions = useMemo(() => {
+        return allProducts.map((p: any) => {
+            const defaultPrice = p.salePrice ?? p.priceTiers?.[0]?.salePrice ?? 0;
+            return {
+                label: `${p.name} ${p.trackingType} (Rs ${defaultPrice})`,
+                value: p.id,
+                trackingType: p.trackingType,
+                name: p.name,
+                price: defaultPrice,
+                category: p.category,
+            };
+        });
+    }, [allProducts]);
 
     const { fields, append, remove } = useFieldArray({
         control,
         name: "items",
     });
 
-    // Track last evaluated (customerId + productId) per row so we only auto-fill when product or customer changes
+    // Track last evaluated selection to prevent infinite render loops
     const prevSelectionRef = useRef<Record<number, string>>({});
 
     useEffect(() => {
@@ -122,7 +119,7 @@ const SelectProduct = ({ branchId }: Props) => {
         append({
             id: crypto.randomUUID(),
             productId: "",
-            priceTierId: "",
+            priceTierId: null,
             paidQty: 1,
             emptiesIn: 0,
             hasOffer: false,
@@ -131,8 +128,6 @@ const SelectProduct = ({ branchId }: Props) => {
             discountPrice: 0,
             chargedDeposit: 0,
             isDepositCharged: false,
-            returnedToStoreQty: 0,
-            wastageQuantity: 0,
             unitPrice: 0,
         } as any);
     };
@@ -170,7 +165,7 @@ const SelectProduct = ({ branchId }: Props) => {
                     const paidQty = Number(currentItemState.paidQty) || 0;
                     const emptiesIn = Number(currentItemState.emptiesIn) || 0;
 
-                    // 🔥 Find how many empties this specific customer actually holds of this product
+                    // Find how many empties this specific customer actually holds of this product
                     const customerReturnableLedger = detailedCustomer?.returnables?.find(
                         (r: any) => r.productId === currentItemState.productId
                     );
@@ -215,29 +210,30 @@ const SelectProduct = ({ branchId }: Props) => {
                                 }`}
                         >
                             <div className="grid grid-cols-12 gap-3 items-start">
-                                {/* Product Selection */}
+                                {/* Product Selection using the native built-in FormSelect exclusion */}
                                 <div className="col-span-5 relative -mt-0.5">
                                     <FormSelect
-
                                         name={`items.${index}.productId`}
                                         label="Product"
                                         isSearchable={true}
                                         isLoading={isLoading}
                                         options={productOptions}
+                                        excludeFromList={watchedItems}
+                                        excludeKey="productId"
+                                        currentIndex={index}
                                         isClearable={true}
-                              formatOptionLabel={(opt: any) => (
+                                        formatOptionLabel={(opt: any) => (
                                             <div className="flex items-center justify-between w-full pr-1 py-0.5">
-                                                
                                                 {/* Left Side: Stacked Name, Price, and Category */}
                                                 <div className="flex flex-col truncate mr-2">
                                                     <span className="text-sm font-bold truncate">
                                                         {opt.name}
                                                     </span>
                                                     <div className="flex items-center gap-1.5 mt-0.5">
-                                                        <span className="text-[10px] font-bold ">
+                                                        <span className="text-[10px] font-bold text-emerald-600">
                                                             Rs {opt.price}
                                                         </span>
-                                                        <span className="text-[10px] font-medium uppercase tracking-wider">
+                                                        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
                                                             • {opt.category}
                                                         </span>
                                                     </div>
@@ -245,15 +241,13 @@ const SelectProduct = ({ branchId }: Props) => {
 
                                                 {/* Right Side: Tracking Type Badge */}
                                                 <span
-                                                    className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm ${
-                                                        opt.trackingType === "RETURNABLE"
+                                                    className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm ${opt.trackingType === "RETURNABLE"
                                                             ? "bg-purple-500"
                                                             : "bg-indigo-500"
-                                                    }`}
+                                                        }`}
                                                 >
                                                     {opt.trackingType}
                                                 </span>
-                                                
                                             </div>
                                         )}
                                     />
@@ -314,7 +308,6 @@ const SelectProduct = ({ branchId }: Props) => {
                                         onCheckedChange={(val) => {
                                             setValue(`items.${index}.hasOffer`, val);
                                             if (val && !currentItemState.freeProductId) {
-                                                // Default to the same product, unless it's returnable (handled by the nested block)
                                                 setValue(
                                                     `items.${index}.freeProductId`,
                                                     currentItemState.productId
@@ -336,6 +329,7 @@ const SelectProduct = ({ branchId }: Props) => {
                                     </button>
                                 </div>
                             </div>
+
                             {selectedProductDetails && productTiers.length > 0 && (
                                 <div
                                     className={`mt-7 p-3 rounded-xl border transition-all ${isFirstTimeProduct && !currentItemState.priceTierId
@@ -358,7 +352,6 @@ const SelectProduct = ({ branchId }: Props) => {
 
                                         {savedCustomerPrice?.priceTierId ? (
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-100 text-sky-800 border border-sky-200">
-                                                <Sparkles className="h-3 w-3 text-sky-600" />
                                                 {currentItemState.priceTierId === savedCustomerPrice.priceTierId
                                                     ? "Previous Customer Rate Applied"
                                                     : "Updating Customer Rate on Save"}
@@ -397,7 +390,7 @@ const SelectProduct = ({ branchId }: Props) => {
                                                         : "bg-white text-slate-700 border-slate-200 hover:border-sky-300 hover:bg-sky-50/40"
                                                         }`}
                                                 >
-                                                    <span>{tier.name || tier.tierName || tier.title || "Tier"}</span>
+                                                    <span>{tier.title || "Tier"}</span>
                                                     <span
                                                         className={`text-[11px] font-extrabold ${isSelected ? "text-sky-100" : "text-sky-600"
                                                             }`}
@@ -433,7 +426,6 @@ const SelectProduct = ({ branchId }: Props) => {
                                         <FormSelect
                                             name={`items.${index}.freeProductId`}
                                             label=""
-                                            // 🔥 Exclude returnable assets from the free item dropdown
                                             options={productOptions.filter(opt => opt.trackingType !== "RETURNABLE")}
                                             placeholder="Select free product..."
                                             formatOptionLabel={(opt: any) => (

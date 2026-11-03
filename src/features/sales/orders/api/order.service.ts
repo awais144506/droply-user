@@ -1,11 +1,12 @@
-import { CreateOrderPayload, OrderResponse } from "../types/order";
+import { OrderResponse } from "../types/order";
 import { apiClient } from "@/lib/api-client";
 import { OrderFilterParams } from "./use-order";
+import { OrderFormValues } from "../schema/create-order-schema";
 
 const API = '/order/user'
 
 export const orderService = {
-    createOrder: async (payload: CreateOrderPayload): Promise<OrderResponse> => {
+    createOrder: async (payload: OrderFormValues): Promise<OrderResponse> => {
         return await apiClient.post(API, payload);
     },
     getTodaysOrders: async (filters?: OrderFilterParams): Promise<OrderResponse[]> => {

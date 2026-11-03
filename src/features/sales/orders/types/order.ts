@@ -1,4 +1,4 @@
-export type OrderCategory = "WALK_IN" | "DELIVERY" | "SALE_RETURN" | "RECOVERY";
+export type OrderCategory = "WALK_IN" | "DELIVERY";
 export type OrderStatus = "PENDING" | "ASSIGNED" | "ON_ROUTE" | "ARRIVED" | "COMPLETED" | "CANCELLED"
 export type OrderType = "WALK_IN" | "DELIVERY";
 export type PaymentMethod = "CASH" | "BANK" | "KHATA";

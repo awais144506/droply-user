@@ -31,13 +31,19 @@ interface FormSelectProps {
     labelIcon?: LucideIcon;
     iconColor?: string;
     
+    // 🔥 Smart Array Filtering Props
+    excludeValues?: (string | number)[]; // Direct array of values to hide
+    excludeFromList?: any[];             // The watched array (e.g., watchedItems)
+    excludeKey?: string;                 // The object key to check (e.g., "productId")
+    currentIndex?: number;               // The current row index to ignore
+    
     // Primary Add Button (e.g., Create Customer link)
     showAddButton?: boolean;
     addButtonLabel?: string;
     onAddButtonClick?: () => void;
     addButtonHref?: string; 
     
-    // 🔥 Secondary Action Button (e.g., Use 3rd Party Driver toggle)
+    // Secondary Action Button (e.g., Use 3rd Party Driver toggle)
     showSecondaryAction?: boolean;
     secondaryActionLabel?: string;
     onSecondaryActionClick?: () => void;
@@ -61,6 +67,10 @@ export function FormSelect({
     lableTextColor = "text-slate-700",
     labelIcon: Icon,
     iconColor = "text-sky-500",
+    excludeValues = [],
+    excludeFromList,
+    excludeKey,
+    currentIndex,
     showAddButton = false,
     addButtonLabel = "Add New",
     onAddButtonClick,
@@ -74,6 +84,17 @@ export function FormSelect({
     const error = get(errors, name)?.message as string;
     const inputId = useId();
     const router = useRouter();
+
+    // 🔥 Smart Filtering Logic: Automatically extracts excluded values if the list props are provided
+    const dynamicallyExcluded = excludeFromList && excludeKey && currentIndex !== undefined
+        ? excludeFromList
+            .filter((_, idx) => idx !== currentIndex)
+            .map((item) => item[excludeKey])
+        : excludeValues;
+
+    const filteredOptions = options.filter(
+        (opt) => !dynamicallyExcluded.includes(opt.value)
+    );
 
     return (
         <div className="space-y-1.5 w-full">
@@ -98,7 +119,7 @@ export function FormSelect({
                             formatOptionLabel={formatOptionLabel}
                             ref={ref}
                             inputId={inputId}
-                            options={options}
+                            options={filteredOptions} // 🔥 Filtered options passed here
                             value={selectedValue}
                             isDisabled={disabled}
                             isMulti={isMulti}
@@ -165,7 +186,6 @@ export function FormSelect({
                             }}
                             unstyled
                             classNames={{
-                                // 🔥 Forced cursor-pointer heavily here
                                 control: (state) => `min-h-[40px] rounded-xl border text-sm transition-all px-3 cursor-pointer hover:border-sky-400 ${
                                     error
                                         ? "border-rose-300 bg-rose-50/20"
@@ -178,7 +198,6 @@ export function FormSelect({
                                 multiValue: () => "bg-sky-100 text-sky-700 rounded-md px-2 py-0.5 mr-1 mt-1 text-xs font-semibold flex items-center cursor-default",
                                 multiValueRemove: () => "ml-1 hover:text-sky-900 hover:bg-sky-200 rounded px-0.5 cursor-pointer",
                                 menu: () => "mt-1.5 rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden text-sm z-50",
-                                // 🔥 Forced cursor-pointer on options
                                 option: (state) => `px-3 py-2 cursor-pointer transition-colors ${
                                     state.isSelected
                                         ? "bg-sky-600 text-white font-medium"
@@ -188,7 +207,7 @@ export function FormSelect({
                                 }`,
                                 noOptionsMessage: () => "p-3 text-slate-500 text-sm",
                                 valueContainer: () => "gap-1 py-1 cursor-pointer",
-                                input: () => "cursor-text", // Keep text cursor for the actual typing area
+                                input: () => "cursor-text",
                             }}
                         />
                     );

@@ -39,11 +39,13 @@ export default function CreateSaleForm({
       id: crypto.randomUUID(),
       productId: "",
       paidQty: 1,
+      priceTierId: "",
       emptiesIn: 0,
       hasOffer: false,
       offerQty: 0,
       chargedDeposit: 0,
-      isDepositCharged: false
+      isDepositCharged: false,
+      unitPrice: 0,
     }],
     discount: 0,
     paymentMethod: "CASH",
@@ -59,12 +61,7 @@ export default function CreateSaleForm({
   const products = productData?.products.filter(p => p.isActive === true) || [];
   const onSubmit = async (data: OrderFormValues) => {
 
-    const filteredItems = data.items.filter(item => {
-      if (data.category === "SALE_RETURN") {
-        return (Number(item.returnedToStoreQty) > 0 || Number(item.wastageQuantity) > 0);
-      }
-      return Number(item.paidQty) > 0;
-    });
+    const filteredItems = data.items.filter(item => item.paidQty > 0);
 
     // Block submission if cart/return bucket is empty
     if (filteredItems.length === 0) {
@@ -103,11 +100,9 @@ export default function CreateSaleForm({
   };
 
   const isDelivery = orderType === "DELIVERY";
-  const isStandardSale = category === "WALK_IN" || category === "DELIVERY";
 
   const onError = (errors: any) => {
     console.error("❌ RAW FORM ERRORS:", errors);
-    toast.error("Form validation failed. Check console (F12) for exact field.");
   };
 
   return (
@@ -129,7 +124,7 @@ export default function CreateSaleForm({
           <div className="lg:col-span-2 space-y-8">
             <CustomerSelection branchId={branchId} />
             {isDelivery && <DeliveryRider branchId={branchId} />}
-            {isStandardSale && <SelectProduct branchId={branchId} />}
+            <SelectProduct branchId={branchId} />
           </div>
           <div className="lg:col-span-1 h-full">
 
