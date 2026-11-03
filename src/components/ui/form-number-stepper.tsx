@@ -93,7 +93,7 @@ export function FormNumberStepper({
                                 onChange={handleChange}
                                 onWheel={(e) => e.currentTarget.blur()}
                                 disabled={disabled}
-                                className="w-10 text-center text-sm font-bold border-none bg-transparent outline-none p-0 focus:ring-0 disabled:cursor-not-allowed"
+                                className="w-20 text-center text-sm font-bold border-none bg-transparent outline-none p-0 focus:ring-0 disabled:cursor-not-allowed"
                             />
 
                             <button

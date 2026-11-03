@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { Banknote, Receipt, TrendingDown, BadgeDollarSign, Truck, ShoppingCart, CreditCard } from "lucide-react";
 import { useFormContext, useWatch } from "react-hook-form";
@@ -10,7 +11,7 @@ import { FormSelect } from "@/components/ui/form-select";
 import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
 
 const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: boolean }) => {
-    const { control, formState: { isValid, isSubmitting, isDirty, errors } } = useFormContext<OrderFormValues>();
+    const { control, formState: { isSubmitting, isDirty } } = useFormContext<OrderFormValues>();
 
     // Fetch Customers and Products
     const { data: customerData } = useCustomers(branchId);
@@ -56,7 +57,7 @@ const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: 
                             <Receipt className="h-3 w-3" /> Free Goods
                         </div>
                         {discountBreakdown.map((disc, idx) => {
-                            const freeProduct = products.find(p => p.id === disc.freeProductId)
+                            const freeProduct = products.find((p: any) => p.id === disc.freeProductId)
                             const freeProductName = freeProduct?.name || "Unknown Product";
                             const freeProductScale = freeProduct?.unitOfMeasure || scale;
                             return (
@@ -153,6 +154,7 @@ const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: 
                                 name="amountPaid"
                                 label="Amount Received Now"
                                 lableTextColor="text-gray-600"
+                                type="number"
                                 prefix="Rs"
                                 required
                                 labelIcon={BadgeDollarSign}

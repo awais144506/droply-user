@@ -9,10 +9,7 @@ import { orderSchema, OrderFormValues } from "../../schema/create-order-schema";
 import CustomerSelection from "./customer-selection";
 import DeliveryRider from "./delivery-rider";
 import SelectProduct from "./select-product";
-import RecoveryItems from "./recovery-items";
 import CheckoutSale from "./checkout-sale";
-import SubmitActionPanel from "./submit-action-panel";
-import SaleReturnItems from "./sale-return-items";
 import { useProducts } from "@/features/manage/products/api/use-products";
 import { useCreateOrder } from "../../api/use-mutate-order";
 import { useAppForm } from "@/lib/hooks/use-app-form";
@@ -106,8 +103,6 @@ export default function CreateSaleForm({
   };
 
   const isDelivery = orderType === "DELIVERY";
-  const isRecovery = category === "RECOVERY";
-  const isReturn = category === "SALE_RETURN";
   const isStandardSale = category === "WALK_IN" || category === "DELIVERY";
 
   const onError = (errors: any) => {
@@ -133,17 +128,13 @@ export default function CreateSaleForm({
         <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
             <CustomerSelection branchId={branchId} />
-            {isRecovery && <RecoveryItems />}
-            {isReturn && <SaleReturnItems />}
             {isDelivery && <DeliveryRider branchId={branchId} />}
             {isStandardSale && <SelectProduct branchId={branchId} />}
           </div>
           <div className="lg:col-span-1 h-full">
-            {isStandardSale ? (
-              <CheckoutSale branchId={branchId} isDelivery={isDelivery} />
-            ) : (
-              <SubmitActionPanel category={category} orderType={orderType} />
-            )}
+
+            <CheckoutSale branchId={branchId} isDelivery={isDelivery} />
+
           </div>
 
         </div>

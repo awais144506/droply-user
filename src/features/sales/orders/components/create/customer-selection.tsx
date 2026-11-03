@@ -3,8 +3,8 @@
 
 import { useFormContext, useWatch } from "react-hook-form";
 import { FormSelect } from "@/components/ui/form-select";
-import { User, MapPin, Phone, Loader2, Package } from "lucide-react";
-import { useCustomers, useCustomer } from "@/features/manage/customers/api/use-customer"; // 🔥 Import useCustomer
+import { User, MapPin, Phone, Loader2, Package, CalendarClock } from "lucide-react";
+import { useCustomers, useCustomer } from "@/features/manage/customers/api/use-customer";
 import { OrderFormValues } from "../../schema/create-order-schema";
 import { formatPhoneNumber } from "react-phone-number-input";
 
@@ -15,8 +15,6 @@ type Props = {
 const CustomerSelection = ({ branchId }: Props) => {
     const { control } = useFormContext<OrderFormValues>();
     
-    // Watch what mode we are in (Walk-In, Delivery, Recovery, etc.)
-    const category = useWatch({ control, name: "category" });
     const selectedCustomerId = useWatch({ control, name: "customerId" });
 
     // 1. Fetch the lightweight list for the dropdown
@@ -75,7 +73,7 @@ const CustomerSelection = ({ branchId }: Props) => {
             {selectedCustomerLight && (
                 <div className="mt-4 bg-white border border-slate-200 rounded-2xl p-4 flex flex-col gap-4 shadow-sm transition-all animate-in fade-in slide-in-from-top-2">
 
-                    {/* Top Section: Identity & Address */}
+                    {/* Top Section: Identity, Address, and Last Visit */}
                     <div className="flex justify-between items-start border-b border-slate-100 pb-3">
                         <div>
                             <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
@@ -91,8 +89,22 @@ const CustomerSelection = ({ branchId }: Props) => {
                                     Zone: {selectedCustomerLight.zoneName}
                                 </p>
                             )}
+                            
+                            {detailedCustomer?.lastVisitDate && (
+                                <p className="text-[10px] font-semibold text-emerald-600/80 mt-2 flex items-center gap-1.5">
+                                    <CalendarClock className="h-3.5 w-3.5" />
+                                    Last Order: {new Intl.DateTimeFormat('en-PK', {
+                                        month: 'short', 
+                                        day: 'numeric', 
+                                        year: 'numeric',
+                                        hour: 'numeric',
+                                        minute: 'numeric',
+                                        hour12: true
+                                    }).format(new Date(detailedCustomer.lastVisitDate))}
+                                </p>
+                            )}
                         </div>
-                        <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-lg">
+                        <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-lg shrink-0">
                             {selectedCustomerLight.category}
                         </span>
                     </div>
@@ -117,7 +129,9 @@ const CustomerSelection = ({ branchId }: Props) => {
                             <span className="text-lg font-black text-sky-700">
                                 {selectedCustomerLight.assetsHeld} <span className="text-xs font-bold text-sky-600/70">items</span>
                             </span>
-                            {(category === "RECOVERY") && detailedCustomer?.returnables && detailedCustomer.returnables.length > 0 && (
+                            
+                            {/* Always show detailed breakdown if they hold returnables */}
+                            {detailedCustomer?.returnables && detailedCustomer.returnables.length > 0 && (
                                 <div className="mt-2 pt-2 border-t border-sky-200/60 flex flex-col gap-1">
                                     <span className="text-[9px] font-bold text-sky-600/70 uppercase tracking-wider mb-0.5">Asset Breakdown</span>
                                     {detailedCustomer.returnables.map((item: any) => (

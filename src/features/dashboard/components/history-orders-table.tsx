@@ -34,6 +34,7 @@ import { useVoidQuickSale } from "../api/use-mutate-quicksale";
 import { QuickSaleRecord, QuickSaleStatus } from "../types/quicksale";
 import { BranchSettingData } from "@/features/admin/settings/types/settings";
 import ConfirmActionDialog from "@/lib/utils/components/ConfirmDialog";
+import { LocalTime } from "@/lib/utils/functions/LocalTime";
 
 type Props = {
   branchId: string;
@@ -207,11 +208,10 @@ const QuickSaleHistory = ({ branchId, branchDetails, onEditSale }: Props) => {
                       setStatusFilter(status);
                       setPage(1);
                     }}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
-                      statusFilter === status
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${statusFilter === status
                         ? "bg-white text-slate-900 shadow-2xs"
                         : "text-slate-500 hover:text-slate-800"
-                    }`}
+                      }`}
                   >
                     {status}
                   </button>
@@ -330,22 +330,20 @@ const QuickSaleHistory = ({ branchId, branchDetails, onEditSale }: Props) => {
 
                         <TableCell className="py-3.5 text-xs">
                           <span
-                            className={`inline-flex px-2 py-0.5 rounded-md font-bold text-[10px] ${
-                              sale.paymentMethod === "ONLINE"
+                            className={`inline-flex px-2 py-0.5 rounded-md font-bold text-[10px] ${sale.paymentMethod === "ONLINE"
                                 ? "bg-sky-50 text-sky-700 border border-sky-200/60"
                                 : "bg-slate-100 text-slate-700"
-                            }`}
+                              }`}
                           >
                             {sale.paymentMethod}
                           </span>
                         </TableCell>
 
                         <TableCell
-                          className={`py-3.5 text-xs font-extrabold ${
-                            isVoided
+                          className={`py-3.5 text-xs font-extrabold ${isVoided
                               ? "line-through text-slate-400"
                               : "text-sky-700"
-                          }`}
+                            }`}
                         >
                           Rs. {Number(sale.totalAmount).toLocaleString()}
                         </TableCell>
@@ -361,15 +359,11 @@ const QuickSaleHistory = ({ branchId, branchDetails, onEditSale }: Props) => {
                             </span>
                           )}
                         </TableCell>
-
                         <TableCell className="py-3.5 text-xs text-slate-500 whitespace-nowrap">
                           <div>
                             <div className="flex items-center gap-1.5">
                               <Calendar className="h-3 w-3 text-slate-400" />
-                              {new Date(sale.createdAt).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
+                              <LocalTime date={sale.createdAt} />
                             </div>
                             <span>By: {sale.processedBy}</span>
                           </div>
