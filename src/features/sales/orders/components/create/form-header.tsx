@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, RefreshCw, Store, Truck, RotateCcw, HandCoins } from "lucide-react";
+import { ArrowLeft, RefreshCw, Store, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OrderCategory, OrderType } from "../../types/order";
 
@@ -43,36 +43,7 @@ const FormHeader = ({ category, orderType, onBack }: Props) => {
                     btnHoverBorder: "hover:border-indigo-300",
                     btnText: "text-indigo-700"
                 };
-            case "SALE_RETURN":
-                return {
-                    bg: "bg-rose-50/40",
-                    border: "border-b-rose-500",
-                    iconBg: "bg-rose-100",
-                    iconText: "text-rose-600",
-                    Icon: RotateCcw,
-                    title: `Sale Return (${orderType === "WALK_IN" ? "Counter" : "Rider"})`,
-                    desc: "Process defective items or returned assets",
-                    btnBorder: "border-rose-200",
-                    btnHoverBg: "hover:bg-rose-50",
-                    btnHoverBorder: "hover:border-rose-300",
-                    btnText: "text-rose-700"
-                };
-            case "RECOVERY":
-                return {
-                    bg: "bg-emerald-50/40",
-                    border: "border-b-emerald-500",
-                    iconBg: "bg-emerald-100",
-                    iconText: "text-emerald-600",
-                    Icon: HandCoins,
-                    title: `Ledger Recovery (${orderType === "WALK_IN" ? "Counter" : "Rider"})`,
-                    desc: "Collect pending cash debts or retrieve empty assets",
-                    btnBorder: "border-emerald-200",
-                    btnHoverBg: "hover:bg-emerald-50",
-                    btnHoverBorder: "hover:border-emerald-300",
-                    btnText: "text-emerald-700"
-                };
-        }
-    };
+    };}
 
     const config = getHeaderConfig();
     const { Icon } = config;

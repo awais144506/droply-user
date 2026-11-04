@@ -32,8 +32,6 @@ const RecoveryItems = () => {
                     discountPrice: 0,
                     chargedDeposit: 0,
                     isDepositCharged: false,
-                    returnedToStoreQty: existing?.returnedToStoreQty || 0,
-                    wastageQuantity: existing?.wastageQuantity || 0,
                 };
             });
 
