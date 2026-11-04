@@ -86,13 +86,29 @@ export function ProductRecipeSection({
                                 return (
                                     <div key={field.id} className="flex items-start gap-2">
                                         <div className="flex-1">
-                                            <FormSelect
+                                  <FormSelect
                                                 name={`recipeIngredients.${index}.childItemId`}
                                                 label=""
                                                 options={availableOptions}
                                                 placeholder="Search material..."
                                                 isSearchable={true}
                                                 isLoading={isProductsLoading}
+                                                formatOptionLabel={(opt: any) => (
+                                                    <div className="flex items-center justify-between w-full pr-1">
+                                                        <span className="font-medium truncate mr-2">
+                                                            {opt.name}
+                                                        </span>
+                                                        <span
+                                                            className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm ${
+                                                                opt.trackingType === "RETURNABLE"
+                                                                    ? "bg-purple-500"
+                                                                    : "bg-indigo-500"
+                                                            }`}
+                                                        >
+                                                            {opt.trackingType}
+                                                        </span>
+                                                    </div>
+                                                )}
                                             />
                                             {materialInfo && (
                                                 <div className="flex items-center gap-4 mt-1.5 ml-1 flex-wrap">

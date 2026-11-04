@@ -22,17 +22,22 @@ export const sendCustomerCreatedMessage = (customer: CustomerDetails, settings?:
         : null;
 
     // Build the formatted details list
-    let message = `Hi *${customer.name}*, your ledger account has been created in *${branchName}*.
+    let message = `Hi *${customer.name}*, your ledger account has been created in *${branchName}*.\n\n` +
+        `Here are your account details:\n` +
+        `- *Phone:* ${formatPhoneNumber(customer.phone) || customer.phone}\n` +
+        `${customer.email ? `- *Email:* ${customer.email}\n` : ''}` +
+        `- *Customer Credit:* Rs. ${customer.customerCredit || 0}\n` +
+        `- *Advance:* Rs. ${customer.customerAdvance > 0 ? customer.customerAdvance : 0}\n` +
+        `- *Security Deposit:* Rs. ${customer.securityDeposit > 0 ? customer.securityDeposit : 0}\n` +
+        `- *Returnable Items:* ${customer.returnablesLength > 0 ? customer.returnablesLength : 0}\n` +
+        `${customer.zone?.name ? `- *Zone:* ${customer.zone.name}\n` : ''}` +
+        `- *Address:* ${customer.address || "No Address Provided"}`;
 
-Here are your account details:
-- *Phone:* ${formatPhoneNumber(customer.phone) || customer.phone}
-${customer.email ? `- *Email:* ${customer.email}\n` : ''}- *Customer Credit:* Rs. ${customer.customerCredit || 0}
-- *Advance:* Rs. ${customer.customerAdvance > 0 ? customer.customerAdvance : 0}
-- *Security Deposit:* Rs. ${customer.securityDeposit > 0 ? customer.securityDeposit : 0}
-- *Returnable Items:* ${customer.returnablesLength > 0 ? customer.returnablesLength : 0}
-${customer.zone?.name ? `- *Zone:* ${customer.zone.name}\n` : ''}- *Address:* ${customer.address || "No Address Provided"}`;
     if (portalUrl) {
-        message += `\n\n *Your Personal Branch Ordering Link:*\nYou can use this secure link anytime to place orders directly with ${branchName} without needing a password:\n${portalUrl}\n\n *Please do not share this link with anyone*, as it gives direct access to place orders by your account.`;
+        message += `\n\n*Your Personal Branch Ordering Link:*\n` +
+            `You can use this secure link anytime to place orders directly with ${branchName} without needing a password:\n` +
+            `${portalUrl}\n\n` +
+            `*Please do not share this link with anyone*, as it gives direct access to place orders by your account.`;
     }
     sendWhatsAppMessage(customer.phone, message);
 };

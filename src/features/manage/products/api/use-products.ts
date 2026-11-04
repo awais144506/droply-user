@@ -90,6 +90,7 @@ export function useProducts(branchId?: string) {
                     salePrice,
                     unitCost,
                     category: p.category,
+                    trackingType:p.trackingType,
                     unit: unitOfMeasure,
                     unitOfMeasure,
                 });
