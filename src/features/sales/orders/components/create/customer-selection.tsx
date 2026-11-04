@@ -10,11 +10,12 @@ import { formatPhoneNumber } from "react-phone-number-input";
 
 type Props = {
     branchId: string;
+    disabled?: boolean;
 };
 
-const CustomerSelection = ({ branchId }: Props) => {
+const CustomerSelection = ({ branchId, disabled }: Props) => {
     const { control } = useFormContext<OrderFormValues>();
-    
+
     const selectedCustomerId = useWatch({ control, name: "customerId" });
 
     // 1. Fetch the lightweight list for the dropdown
@@ -29,11 +30,12 @@ const CustomerSelection = ({ branchId }: Props) => {
             <div className="flex items-center gap-2 mb-4">
                 <User className="h-5 w-5 text-slate-400" />
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
-                    Customer & Khata
+                    Customer & Ledger
                 </h3>
             </div>
 
             <FormSelect
+                disabled={disabled}
                 name="customerId"
                 label="Search Customers"
                 isSearchable={true}
@@ -89,13 +91,13 @@ const CustomerSelection = ({ branchId }: Props) => {
                                     Zone: {selectedCustomerLight.zoneName}
                                 </p>
                             )}
-                            
+
                             {detailedCustomer?.lastVisitDate && (
                                 <p className="text-[10px] font-semibold text-emerald-600/80 mt-2 flex items-center gap-1.5">
                                     <CalendarClock className="h-3.5 w-3.5" />
                                     Last Order: {new Intl.DateTimeFormat('en-PK', {
-                                        month: 'short', 
-                                        day: 'numeric', 
+                                        month: 'short',
+                                        day: 'numeric',
                                         year: 'numeric',
                                         hour: 'numeric',
                                         minute: 'numeric',
@@ -129,7 +131,7 @@ const CustomerSelection = ({ branchId }: Props) => {
                             <span className="text-lg font-black text-sky-700">
                                 {selectedCustomerLight.assetsHeld} <span className="text-xs font-bold text-sky-600/70">items</span>
                             </span>
-                            
+
                             {/* Always show detailed breakdown if they hold returnables */}
                             {detailedCustomer?.returnables && detailedCustomer.returnables.length > 0 && (
                                 <div className="mt-2 pt-2 border-t border-sky-200/60 flex flex-col gap-1">

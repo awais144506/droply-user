@@ -1,4 +1,4 @@
-import { useQuery,keepPreviousData } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { orderService } from "./order.service";
 import { orderKeys } from "./order-keys";
 
@@ -7,6 +7,7 @@ export interface OrderFilterParams {
   category?: string;
   status?: string;
   date?: string;
+  page?: number;
 }
 
 export const useOrders = (branchId: string, filters?: OrderFilterParams) => {

@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import PageHeader from "@/lib/utils/components/MainPageHeader";
 import { useOrders } from "@/features/sales/orders/api/use-order";
@@ -8,6 +9,8 @@ import { useRole } from "@/lib/hooks/use-role";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
 import OrderTable from "@/features/sales/orders/components/OrderTable";
+import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
+import OrderStats from "@/features/sales/orders/components/OrderStats";
 
 const Orders = () => {
   const { branchId } = useRole();
@@ -18,15 +21,23 @@ const Orders = () => {
   const status = searchParams.get("status") || undefined;
   const date = searchParams.get("date") || undefined;
 
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, category, status, date]);
+
   const {
-    data: orders = [],
+    data,
     isLoading,
     isFetching,
     isError,
     error,
     refetch,
     isRefetching,
-  } = useOrders(branchId, { search, category, status, date });
+  } = useOrders(branchId, { search, category, status, date, page });
+
+  const logs = data?.logs;
 
   // Only shows full-page loader on the initial cold load
   if (isLoading) return <Loading text="Loading orders..." />;
@@ -47,7 +58,21 @@ const Orders = () => {
         onRefresh={() => refetch()}
         isRefreshing={isRefetching}
       />
-      <OrderTable orders={orders} isFetching={isFetching} />
+      <OrderStats
+        orders={data?.orders}
+      />
+      {/* Pass full `data` object so OrderTable can access pagination metadata & orders */}
+      <OrderTable
+        data={data}
+        isFetching={isFetching}
+        currentPage={page}
+        onPageChange={(newPage) => setPage(newPage)}
+      />
+
+      <ActivityLogsCard
+        title="Orders Management Activity"
+        logs={logs}
+      />
     </div>
   );
 };

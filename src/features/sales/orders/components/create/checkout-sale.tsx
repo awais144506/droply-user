@@ -1,17 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+import { useEffect } from "react";
 import { Banknote, Receipt, TrendingDown, BadgeDollarSign, Truck, ShoppingCart, CreditCard } from "lucide-react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useCustomers } from "@/features/manage/customers/api/use-customer";
-import { useProducts } from "@/features/manage/products/api/use-products"; // 🔥 Import to look up FOC product names
+import { useProducts } from "@/features/manage/products/api/use-products";
 import { OrderFormValues } from "../../schema/create-order-schema";
 import { useOrderCalculations } from "@/features/sales/orders/utils/useOrderCalculations";
 import { FormInput } from "@/components/ui/form-input";
 import { FormSelect } from "@/components/ui/form-select";
 import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
 
-const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: boolean }) => {
-    const { control, formState: { isSubmitting, isDirty } } = useFormContext<OrderFormValues>();
+type Props = {
+    branchId: string;
+    isDelivery: boolean;
+    initialData?: any;
+    isEditing?: boolean;
+};
+
+const CheckoutSale = ({ branchId, isDelivery, initialData, isEditing = false }: Props) => {
+    const { control, setValue, formState: { isSubmitting, isDirty } } = useFormContext<OrderFormValues>();
 
     // Fetch Customers and Products
     const { data: customerData } = useCustomers(branchId);
@@ -30,15 +38,42 @@ const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: 
         totalSecurityDeposit,
         totalDue,
         remainingBalance,
-        discountBreakdown, // Contains the raw FOC items from the calculation hook
+        discountBreakdown,
         scale,
     } = useOrderCalculations(branchId, previousBalance);
+
+    // 🔥 Pre-fill checkout financial fields (discount, delivery charges, payment method, amount paid) on initial load for editing
+    useEffect(() => {
+        if (initialData && isEditing) {
+            if (initialData.discount !== undefined) {
+                setValue("discount", initialData.discount);
+            }
+            if (initialData.deliveryCharges !== undefined) {
+                setValue("deliveryCharges", initialData.deliveryCharges);
+            }
+            if (initialData.paymentMethod) {
+                setValue("paymentMethod", initialData.paymentMethod);
+            }
+            if (initialData.amountPaid !== undefined || initialData.receivedAmount !== undefined) {
+                setValue("amountPaid", initialData.amountPaid ?? initialData.receivedAmount ?? 0);
+            }
+        }
+    }, [initialData, isEditing, setValue]);
+
+    const getCtaText = () => {
+        if (isEditing) {
+            return "Save Adjustments";
+        }
+        return isDelivery ? "Dispatch Order" : "Complete Walk-In";
+    };
 
     return (
         <div className="bg-white border rounded-2xl p-6 text-gray-600 flex flex-col h-fit sticky top-6 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
                 <Banknote className="h-5 w-5 text-emerald-400" />
-                <h3 className="text-sm font-bold uppercase tracking-wide">Checkout</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wide">
+                    {isEditing ? "Adjust Checkout" : "Checkout"}
+                </h3>
             </div>
 
             <div className="space-y-4 flex-1">
@@ -179,8 +214,8 @@ const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: 
                 isPending={isSubmitting}
                 isValid={true}
                 isDirty={isDirty}
-                isEditMode={false}
-                ctaText={isDelivery ? "Dispatch Order" : "Complete Walk-In"}
+                isEditMode={isEditing}
+                ctaText={getCtaText()}
                 icon={isDelivery ? Truck : ShoppingCart}
                 isCancel={true}
                 href="/sales/orders"

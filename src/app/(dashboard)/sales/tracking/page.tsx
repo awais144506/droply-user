@@ -1,64 +1,52 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState } from "react";
-import dynamic from "next/dynamic";
+import React, { useState } from "react";
 import { useRole } from "@/lib/hooks/use-role";
-import { useTracking, Rider } from "@/features/sales/tracking/api/use-tracking";
-import { TrackingStats } from "@/features/sales/tracking/components/tracking-stats";
-import { RiderSidebar } from "@/features/sales/tracking/components/rider-sidebar";
-import { ShiftManifest } from "@/features/sales/tracking/components/shift-manifest";
-import TrackingHeader from "@/features/sales/tracking/components/tracking-header";
-import Loading from "@/app/loading";
-import { getLocalTodayString } from "@/lib/utils/functions/date-utils";
+import { useBranchSettings } from "@/features/admin/settings/api/use-branch-settings";
+import { LiveTrackingMap } from "@/features/sales/tracking/components/LiveTrackingMap";
+import { LiveTrackingSidebar } from "@/features/sales/tracking/components/LiveTrackingSidebar";
 
-const TrackingMap = dynamic(() => import("@/features/sales/tracking/components/tracking-map"), {
-  ssr: false,
-  loading: () => <div className="flex-1 bg-slate-100 rounded-2xl border border-slate-200 animate-pulse h-full" />
-});
-
-export default function TrackingPage() {
+const LiveTracking = () => {
   const { branchId, isLoading: isTenantLoading } = useRole();
-  const todayStr = getLocalTodayString();
-  const [selectedDate, setSelectedDate] = useState(todayStr);
-  const [selectedRider, setSelectedRider] = useState<Rider | null>(null);
+  const { data: branchData, isLoading: isBranchLoading } = useBranchSettings(branchId);
 
-  const { data, isLoading } = useTracking(branchId, selectedDate);
-  const isHistoryMode = selectedDate !== todayStr;
+  const [selectedRider, setSelectedRider] = useState<any | null>(null);
 
-  if (isTenantLoading || isLoading || !data) return <Loading />
-
-  if (!selectedRider && data.riders.length > 0) {
-    setSelectedRider(data.riders[0]);
+  if (isTenantLoading || isBranchLoading) {
+    return (
+      <div className="w-full h-[calc(100vh-5rem)] rounded-3xl border border-slate-200 bg-slate-50 flex items-center justify-center animate-pulse text-slate-400">
+        Loading Live Tracking...
+      </div>
+    );
   }
 
+  const branchLat = branchData?.branch?.latitude ?? 30.6750;
+  const branchLng = branchData?.branch?.longitude ?? 73.1025;
+  const branchName = branchData?.name || "Branch Headquarters";
+  const branchAddress = branchData?.address || "Main Distribution Hub";
+  const imageUrl = branchData?.logoUrl || "";
+
   return (
-    <div className="space-y-6 max-w-350 mx-auto p-6">
-
-      {/* Dynamic Header: Color shifts completely based on Live vs History mode */}
-      <TrackingHeader
-        isHistoryMode={isHistoryMode}
-        todayStr={todayStr}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-        setSelectedRider={setSelectedRider}
-        isFetching={isLoading}
+    <div className="relative w-full h-[calc(100vh-5rem)]">
+      {/* Floating Sidebar Overlay */}
+      <LiveTrackingSidebar
+        selectedRider={selectedRider}
+        onSelect={setSelectedRider}
       />
 
-      <TrackingStats
-        data={data}
+      {/* Full-Screen Map Component */}
+      <LiveTrackingMap
+        branchLat={branchLat}
+        branchLng={branchLng}
+        branchName={branchName}
+        branchAddress={branchAddress}
+        imageUrl={imageUrl}
+        selectedRider={selectedRider}
+        onSelectRider={setSelectedRider}
       />
-
-      <div className="flex flex-col lg:flex-row gap-6 h-112.5">
-        <TrackingMap rider={selectedRider} isHistoryMode={isHistoryMode} />
-        <RiderSidebar
-          branchId={branchId}
-          riders={data.riders}
-          selectedRider={selectedRider}
-          onSelect={setSelectedRider}
-        />
-      </div>
-
-      <ShiftManifest rider={selectedRider} />
     </div>
   );
-}
+};
+
+export default LiveTracking;

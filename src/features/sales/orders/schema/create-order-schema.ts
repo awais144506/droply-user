@@ -5,6 +5,7 @@ export const orderItemSchema = yup.object({
   id: yup.string().required(),
   productId: yup.string().required("Product is required"),
   priceTierId: yup.string().nullable().optional(),
+  returnableProductId: yup.string().nullable().optional(),
   paidQty: yup
     .number()
     .transform((value) => (isNaN(value) ? undefined : value))
@@ -15,6 +16,12 @@ export const orderItemSchema = yup.object({
     .transform((value) => (isNaN(value) ? undefined : value))
     .min(0, "Cannot be negative")
     .required(),
+  emptiesOut: yup
+    .number()
+    .transform((value) => (isNaN(value) ? undefined : value))
+    .min(0, "Cannot be negative")
+    .required()
+    .default(0),
   hasOffer: yup.boolean().default(false),
   offerQty: yup
     .number()

@@ -1,3 +1,4 @@
+import { ActivityLog } from "@/types/ActivityLog";
 export type OrderCategory = "WALK_IN" | "DELIVERY";
 export type OrderStatus = "PENDING" | "ASSIGNED" | "ON_ROUTE" | "ARRIVED" | "COMPLETED" | "CANCELLED"
 export type OrderType = "WALK_IN" | "DELIVERY";
@@ -32,9 +33,23 @@ export interface OrderResponse {
     riderId: string | null;
     type: OrderType;
     status: string;
+    category: OrderCategory;
     paymentMethod: PaymentMethod;
     totalAmount: number;
     amountPaid: number;
     discount: number;
     createdAt: string;
+}
+
+export interface PaginationMetadata {
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+    totalPages: number;
+}
+
+export interface ApiResponse {
+    orders: OrderResponse[];
+    logs: ActivityLog[];
+    pagination: PaginationMetadata;
 }

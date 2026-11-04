@@ -8,4 +8,8 @@ export interface BranchSettingData {
   ntn?: string;
   strn?: string;
   branchId?: string;
+  branch?: {
+    latitude: number;
+    longitude: number;
+  }
 }

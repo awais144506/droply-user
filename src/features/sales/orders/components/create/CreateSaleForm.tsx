@@ -11,7 +11,7 @@ import DeliveryRider from "./delivery-rider";
 import SelectProduct from "./select-product";
 import CheckoutSale from "./checkout-sale";
 import { useProducts } from "@/features/manage/products/api/use-products";
-import { useCreateOrder } from "../../api/use-mutate-order";
+import { useCreateOrder, useUpdateOrder } from "../../api/use-mutate-order";
 import { useAppForm } from "@/lib/hooks/use-app-form";
 import { OrderCategory, OrderType } from "../../types/order";
 
@@ -20,56 +20,118 @@ interface Props {
   category: OrderCategory;
   orderType: OrderType;
   onBack: () => void;
+  initialData?: any;
+  isEditing?: boolean;
 }
+
+const getSafeLocalDate = (dateInput?: string | Date) => {
+  const d = dateInput ? new Date(dateInput) : new Date();
+  if (isNaN(d.getTime())) return new Date().toISOString().split('T')[0];
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export default function CreateSaleForm({
   branchId,
   category,
   orderType,
-  onBack
+  onBack,
+  initialData,
+  isEditing = false,
 }: Props) {
   const { data: productData } = useProducts(branchId);
-  const { mutateAsync } = useCreateOrder();
+  const { mutateAsync: createOrder } = useCreateOrder();
+  const { mutateAsync: updateOrder } = useUpdateOrder();
 
-  const methods = useAppForm(orderSchema, {
-    category: category,
-    orderType: orderType,
-    customerId: "",
-    items: [{
+  const usedExchangeIds = new Set<string>();
+  const initialItems = initialData?.lineItems?.length
+    ? initialData.lineItems.map((item: any, idx: number) => {
+      let matchingAssetExchange = initialData.assetExchanges?.find(
+        (ae: any) =>
+          !usedExchangeIds.has(ae.id) &&
+          (ae.productId === item.containerId || ae.productId === item.returnableProductId)
+      );
+
+      if (!matchingAssetExchange && initialData.assetExchanges?.[idx]) {
+        const candidate = initialData.assetExchanges[idx];
+        if (!usedExchangeIds.has(candidate.id)) {
+          matchingAssetExchange = candidate;
+        }
+      }
+
+      if (matchingAssetExchange?.id) {
+        usedExchangeIds.add(matchingAssetExchange.id);
+      }
+
+      const freeQty = Number(item.freeQuantity || item.offerQty || 0);
+
+      return {
+        id: item.id || crypto.randomUUID(),
+        productId: item.productId || item.product?.id || "",
+        paidQty: item.paidQuantity ?? item.quantity ?? 1,
+        priceTierId: item.priceTierId || "",
+        emptiesIn: matchingAssetExchange
+          ? Number(matchingAssetExchange.inboundQuantity ?? 0)
+          : Number(item.emptiesIn ?? 0),
+        emptiesOut: matchingAssetExchange
+          ? Number(matchingAssetExchange.outboundQuantity ?? 0)
+          : Number(item.emptiesOut ?? 0),
+        hasOffer: freeQty > 0 || Boolean(item.hasOffer),
+        offerQty: freeQty,
+        chargedDeposit: Number(matchingAssetExchange?.depositCharged ?? item.depositCharged ?? item.chargedDeposit ?? 0),
+        isDepositCharged: Boolean(matchingAssetExchange?.depositCharged || item.depositCharged || item.isDepositCharged),
+        unitPrice: item.unitPrice || 0,
+        returnableProductId: item.returnableProductId || matchingAssetExchange?.productId || "",
+      };
+    })
+    : [{
       id: crypto.randomUUID(),
       productId: "",
       paidQty: 1,
       priceTierId: "",
       emptiesIn: 0,
+      emptiesOut: 0,
       hasOffer: false,
       offerQty: 0,
       chargedDeposit: 0,
       isDepositCharged: false,
       unitPrice: 0,
-    }],
-    discount: 0,
-    paymentMethod: "CASH",
-    amountPaid: 0,
-    deliveryCharges: 0,
+      returnableProductId: "",
+    }];
+
+  const methods = useAppForm(orderSchema, {
+    category: initialData?.category || category,
+    orderType: initialData?.orderType || orderType,
+    customerId: initialData?.customerId || initialData?.customer?.id || "",
+    items: initialItems,
+    discount: initialData?.discount || 0,
+    paymentMethod: initialData?.paymentMethod || "CASH",
+    amountPaid: initialData?.amountPaid ?? initialData?.receivedAmount ?? 0,
+    scheduledDate: getSafeLocalDate(initialData?.scheduledDate || initialData?.scheduleDate),
+    deliveryCharges: initialData?.deliveryCharges || 0,
+    ...(initialData?.riderId ? { riderId: initialData.riderId } : {}),
   });
 
   useEffect(() => {
-    methods.setValue("category", category, { shouldValidate: true });
-    methods.setValue("orderType", orderType, { shouldValidate: true });
-  }, [category, orderType, methods]);
+    if (!isEditing) {
+      methods.setValue("category", category, { shouldValidate: true });
+      methods.setValue("orderType", orderType, { shouldValidate: true });
+    }
+  }, [category, orderType, methods, isEditing]);
 
   const products = productData?.products.filter(p => p.isActive === true) || [];
-  const onSubmit = async (data: OrderFormValues) => {
 
+  const onSubmit = async (data: OrderFormValues) => {
     const filteredItems = data.items.filter(item => item.paidQty > 0);
 
-    // Block submission if cart/return bucket is empty
     if (filteredItems.length === 0) {
       toast.error(`Please add at least one item to process this ${data.category.replace("_", " ").toLowerCase()}.`);
       return;
     }
 
-    // Block standard sales if cart is completely empty
     if ((category === "WALK_IN" || category === "DELIVERY") && filteredItems.length === 0) {
       toast.error("Please add at least one item to the order.");
       return;
@@ -91,24 +153,29 @@ export default function CreateSaleForm({
         ...data,
         items: filteredItems,
       };
-      await mutateAsync(payload);
+
+      if (isEditing && initialData?.id) {
+        await updateOrder({ id: initialData.id, ...payload });
+        toast.success(`Order #${initialData.orderCode || initialData.id} adjusted successfully!`);
+      } else {
+        await createOrder(payload);
+        toast.success("Order created successfully!");
+      }
+
       methods.reset();
       onBack();
     } catch (error) {
       console.error("Order submission failed", error);
+      toast.error("Failed to save order changes.");
     }
   };
 
   const isDelivery = orderType === "DELIVERY";
 
-  const onError = (errors: any) => {
-    console.error("❌ RAW FORM ERRORS:", errors);
-  };
-
   return (
     <FormProvider {...methods}>
       <form
-        onSubmit={methods.handleSubmit(onSubmit, onError)}
+        onSubmit={methods.handleSubmit(onSubmit)}
         className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden"
       >
         <input type="hidden" {...methods.register("category")} />
@@ -122,16 +189,16 @@ export default function CreateSaleForm({
 
         <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <CustomerSelection branchId={branchId} />
-            {isDelivery && <DeliveryRider branchId={branchId} />}
-            <SelectProduct branchId={branchId} />
+            <CustomerSelection
+              branchId={branchId}
+              disabled={isEditing}
+            />
+            {isDelivery && <DeliveryRider branchId={branchId} initialData={initialData} isEditing={isEditing} />}
+            <SelectProduct branchId={branchId} initialData={initialData} />
           </div>
           <div className="lg:col-span-1 h-full">
-
-            <CheckoutSale branchId={branchId} isDelivery={isDelivery} />
-
+            <CheckoutSale branchId={branchId} isDelivery={isDelivery} initialData={initialData} isEditing={isEditing} />
           </div>
-
         </div>
       </form>
     </FormProvider>

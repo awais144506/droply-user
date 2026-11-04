@@ -7,7 +7,6 @@ export const useOrderCalculations = (branchId: string, previousKhataBalance: num
     const { control } = useFormContext<OrderFormValues>();
     const { data: productData } = useProducts(branchId);
 
-    // 🔥 Capture raw watched items without creating a new array reference
     const watchedItems = useWatch({ control, name: "items" });
     
     const globalDiscount = Number(useWatch({ control, name: "discount" })) || 0;
@@ -20,7 +19,6 @@ export const useOrderCalculations = (branchId: string, previousKhataBalance: num
         const discountBreakdown: { freeProductId: string; name: string; offerQty: number; }[] = [];
         let scale = "";
 
-        // 🔥 Apply the fallback inside the useMemo so it doesn't trigger re-renders
         const items = watchedItems || [];
 
         items.forEach((item) => {
@@ -30,13 +28,22 @@ export const useOrderCalculations = (branchId: string, previousKhataBalance: num
             scale = product.unitOfMeasure || "piece";
             
             const price = Number(item.unitPrice) || 0;
-            const depositRate = Number(product.securityDeposit) || 0;
             const qty = Number(item.paidQty) || 0;
             const offerQty = Number(item.offerQty) || 0;
             const emptiesIn = Number(item.emptiesIn) || 0;
             
-            const deficit = Math.max(0, qty - emptiesIn);
-            const deposit = item.isDepositCharged ? (deficit * depositRate) : 0;
+            // 🔥 Respect explicit 0 values for emptiesOut
+            const emptiesOut = item.emptiesOut !== undefined && item.emptiesOut !== null 
+                ? Number(item.emptiesOut) 
+                : qty;
+    
+            const containerAsset = productData?.products.find(p => p.id === item.returnableProductId);
+            const containerDepositRate = Number(containerAsset?.securityDeposit) || 0;
+            const deficit = Math.max(0, emptiesOut - emptiesIn);
+    
+            const deposit = item.isDepositCharged 
+                ? Number(item.chargedDeposit || (deficit * containerDepositRate)) 
+                : 0;
             
             grossTotal += (qty * price);
             totalSecurityDeposit += deposit;

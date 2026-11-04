@@ -21,6 +21,7 @@ export const useCustomerRequests = (branchId?: string, search?: string, status?:
             });
         },
         enabled: !!branchId,
+        refetchInterval: 1000 * 60 * 2,
     });
 };
 

@@ -17,7 +17,7 @@ export default function TablePagination({
     onPageChange,
     itemsPerPage
 }: TablePaginationProps) {
-    if (totalPages <= 1) return null;
+    if (!totalItems || totalItems <= itemsPerPage) return null;
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, (totalItems || 0));
