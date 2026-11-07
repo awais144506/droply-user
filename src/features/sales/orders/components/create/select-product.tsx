@@ -421,7 +421,7 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                         <div className="p-3 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-3">
                                             <FormSelect
                                                 name={`items.${index}.returnableProductId`}
-                                                label="Container Asset"
+                                                label="Exchange Items"
                                                 isSearchable={true}
                                                 options={returnableProductOptions}
                                                 excludeFromList={watchedItems}
@@ -441,7 +441,6 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                                 )}
                                             />
 
-                                            {/* 🔥 FIX 4: Proper HTML strong tag instead of Markdown asterisks */}
                                             {initialData && Boolean(selectedReturnableId) && (
                                                 <div className="text-[10px] text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200 leading-tight font-medium">
                                                     <strong>Adjustment Note:</strong> Empties Out/In reflect the original transaction. Changing these will re-sync the customer&apos;s held container balance.
@@ -452,14 +451,14 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                                 <div className="grid grid-cols-2 gap-2">
                                                     <div className="relative">
                                                         <FormNumberStepper
-                                                            label="Empties Out"
+                                                            label="Items Out"
                                                             name={`items.${index}.emptiesOut`}
                                                             min={0}
                                                         />
                                                     </div>
                                                     <div className="relative">
                                                         <FormNumberStepper
-                                                            label="Empties In"
+                                                            label="Items In"
                                                             name={`items.${index}.emptiesIn`}
                                                             min={0}
                                                             max={maxCustomerEmpties}

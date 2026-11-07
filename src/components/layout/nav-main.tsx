@@ -1,4 +1,5 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, ChevronDown } from "lucide-react";
@@ -6,8 +7,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Badge } from "@/components/ui/badge";
 import { BRANCH_NAV_CONFIG, UserRole, SubscriptionTier } from "@/config/navigation.config";
 import { useRole } from "@/lib/hooks/use-role";
-
-// 🔥 Import your existing hook for fetching requests
 import { useCustomerRequests } from "@/features/sales/requests/api/use-customerRequests";
 
 export function NavMain() {
@@ -25,26 +24,28 @@ export function NavMain() {
 
   return (
     <div className="space-y-3 px-3 py-2 select-none">
-      {/* 1. Operations Desk */}
-      <Link
-        href="/app"
-        className={`flex items-center gap-3 w-full p-2.5 rounded-2xl border transition-all duration-200 ${isDashboardActive
-          ? "bg-sky-600 text-white border-sky-600 shadow-sm"
-          : "bg-card text-foreground border-border/70 hover:bg-muted/60"
-          }`}
-      >
-        <div
-          className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isDashboardActive
-            ? "bg-white/20 text-white"
-            : "bg-sky-500/10 text-sky-600 dark:text-sky-400"
+      {/* 1. Quick Sale - STRICTLY PLATINUM ONLY */}
+      {currentTier === "PLATINUM" && (
+        <Link
+          href="/app"
+          className={`flex items-center gap-3 w-full p-2.5 rounded-2xl border transition-all duration-200 ${isDashboardActive
+            ? "bg-sky-600 text-white border-sky-600 shadow-sm"
+            : "bg-card text-foreground border-border/70 hover:bg-muted/60"
             }`}
         >
-          <LayoutDashboard className="h-5 w-5" />
-        </div>
-        <div className="flex flex-col text-left min-w-0">
-          <span className="font-bold text-xs leading-none">Quick Sale</span>
-        </div>
-      </Link>
+          <div
+            className={`h-9 w-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isDashboardActive
+              ? "bg-white/20 text-white"
+              : "bg-sky-500/10 text-sky-600 dark:text-sky-400"
+              }`}
+          >
+            <LayoutDashboard className="h-5 w-5" />
+          </div>
+          <div className="flex flex-col text-left min-w-0">
+            <span className="font-bold text-xs leading-none">Quick Sale</span>
+          </div>
+        </Link>
+      )}
 
       {/* 2. Grouped Category Cards */}
       {BRANCH_NAV_CONFIG.map((group) => {
@@ -55,8 +56,6 @@ export function NavMain() {
         );
 
         if (visibleItems.length === 0) return null;
-
-        // 🔥 Extract base path to determine if the group is active
         const isGroupActive = visibleItems.some((item) => {
           const basePath = item.url.split('?')[0];
           return pathname === basePath || pathname.startsWith(`${basePath}/`);
@@ -86,7 +85,7 @@ export function NavMain() {
               <CollapsibleContent className="space-y-1 mt-1">
                 {visibleItems.map((item) => {
                   
-                  // 🔥 Extract base path to determine if the specific item is active
+                  {/* 🔥 Extract base path to determine if the specific item is active */}
                   const basePath = item.url.split('?')[0];
                   const isActive = pathname === basePath || pathname.startsWith(`${basePath}/`);
                   const Icon = item.icon;

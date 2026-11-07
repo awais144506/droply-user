@@ -31,8 +31,6 @@ export const useOrderCalculations = (branchId: string, previousKhataBalance: num
             const qty = Number(item.paidQty) || 0;
             const offerQty = Number(item.offerQty) || 0;
             const emptiesIn = Number(item.emptiesIn) || 0;
-            
-            // 🔥 Respect explicit 0 values for emptiesOut
             const emptiesOut = item.emptiesOut !== undefined && item.emptiesOut !== null 
                 ? Number(item.emptiesOut) 
                 : qty;
@@ -60,7 +58,7 @@ export const useOrderCalculations = (branchId: string, previousKhataBalance: num
             }
         });
 
-        const totalDue = (grossTotal - globalDiscount) + previousKhataBalance + totalSecurityDeposit + deliveryCharges;
+        const totalDue = (grossTotal - globalDiscount) + previousKhataBalance + deliveryCharges;
         const remainingBalance = totalDue - amountPaid;
 
         return { 

@@ -156,10 +156,8 @@ export default function CreateSaleForm({
 
       if (isEditing && initialData?.id) {
         await updateOrder({ id: initialData.id, ...payload });
-        toast.success(`Order #${initialData.orderCode || initialData.id} adjusted successfully!`);
       } else {
         await createOrder(payload);
-        toast.success("Order created successfully!");
       }
 
       methods.reset();

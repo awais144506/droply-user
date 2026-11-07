@@ -42,7 +42,6 @@ const CheckoutSale = ({ branchId, isDelivery, initialData, isEditing = false }: 
         scale,
     } = useOrderCalculations(branchId, previousBalance);
 
-    // 🔥 Pre-fill checkout financial fields (discount, delivery charges, payment method, amount paid) on initial load for editing
     useEffect(() => {
         if (initialData && isEditing) {
             if (initialData.discount !== undefined) {

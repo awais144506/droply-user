@@ -44,7 +44,7 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
     headerColor: { text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500", border: "border-emerald-500/20", bgHover: "hover:bg-emerald-500/5" },
     items: [
       { title: "Deliveries & Sales", url: "/sales/orders", icon: Truck, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
-      { title: "Live Tracking", url: "/sales/tracking", icon: Navigation, badge: "GPS", allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "PARTIAL" },
+      { title: "Live Tracking", url: "/sales/tracking", icon: Navigation, badge: "GPS", allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "DONE" },
       { title: "Recovery & Return", url: "/sales/recovery", icon: Undo2, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Order Requests", url: '/sales/requests?status=ALL', icon: Bike, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Daily Sales", url: "/sales/daily", icon: Receipt, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },

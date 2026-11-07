@@ -3,15 +3,15 @@
 
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Trash2, Edit, ShieldBan, ShieldCheck, Link2 } from "lucide-react";
+import { Trash2, Edit, ShieldBan, ShieldCheck, Link2, RefreshCw } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useCustomer } from "@/features/manage/customers/api/use-customer";
-import { 
-  useDeleteCustomer, 
-  useToggleCustomerStatus, 
-  useUpdateCustomerToken 
+import {
+  useDeleteCustomer,
+  useToggleCustomerStatus,
+  useUpdateCustomerToken
 } from "@/features/manage/customers/api/use-mutate-customer";
 import PageDetailHeader from "@/lib/utils/components/PageDetailHeader";
 import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
@@ -27,11 +27,11 @@ export default function CustomerDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const customerId = params.customerId as string;
-  const { data: customer, isLoading } = useCustomer(customerId);
+  const { data: customer, isLoading, isFetching, refetch } = useCustomer(customerId);
   const { mutate: deleteCustomer, isPending: isDeleting } = useDeleteCustomer();
   const { mutate: toggleStatus, isPending: isTogglingStatus } = useToggleCustomerStatus();
   const { mutate: updateToken, isPending: isUpdatingToken } = useUpdateCustomerToken();
-  
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [isTokenDialogOpen, setIsTokenDialogOpen] = useState(false);
@@ -116,13 +116,25 @@ export default function CustomerDetailsPage() {
         <PageDetailHeader
           breadcrumbs={[
             { label: "Customers", href: "/manage/customers" },
-            { label: `${customer.name} Details` }
+            { label: `${customer?.name || "Customer"} Details` }
           ]}
-          heading={customer.name}
-          description={`Customer Code: ${customer.customerCode}`}
-          createdAt={customer.createdAt}
-          updatedAt={customer.updatedAt}
+          heading={customer?.name}
+          description={`Customer Code: ${customer?.customerCode}`}
+          createdAt={customer?.createdAt}
+          updatedAt={customer?.updatedAt}
         >
+          {/* Refresh Button */}
+          <Button
+            type="button"
+            onClick={() => refetch()}
+            disabled={isLoading || isFetching}
+            variant="outline"
+            className="border-slate-200 bg-slate-50/50 text-slate-700 hover:bg-slate-100 hover:text-slate-800 hover:border-slate-300 gap-2"
+          >
+            <RefreshCw className={`h-4 w-4 text-slate-600 ${isLoading || isFetching ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+
           {/* WhatsApp Button */}
           <Button
             type="button"
@@ -227,7 +239,7 @@ export default function CustomerDetailsPage() {
         title={`Regenerate Magic Link for "${customer.name}"?`}
         description={
           <span>
-            Are you sure you want to regenerate the magic link token for <span className="font-bold text-slate-900">{customer.name}</span>? 
+            Are you sure you want to regenerate the magic link token for <span className="font-bold text-slate-900">{customer.name}</span>?
             Any previously shared links will immediately stop working.
           </span>
         }
@@ -244,7 +256,7 @@ export default function CustomerDetailsPage() {
         title={`${isActive ? "Block" : "Activate"} "${customer.name}"?`}
         description={
           <span>
-            Are you sure you want to {isActive ? "block" : "activate"} <span className="font-bold text-slate-900">{customer.name}</span>? 
+            Are you sure you want to {isActive ? "block" : "activate"} <span className="font-bold text-slate-900">{customer.name}</span>?
             {isActive ? " They will be temporarily restricted from new orders." : " They will be restored to active status."}
           </span>
         }

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState } from "react";
@@ -6,33 +5,66 @@ import { useRole } from "@/lib/hooks/use-role";
 import { useBranchSettings } from "@/features/admin/settings/api/use-branch-settings";
 import { LiveTrackingMap } from "@/features/sales/tracking/components/LiveTrackingMap";
 import { LiveTrackingSidebar } from "@/features/sales/tracking/components/LiveTrackingSidebar";
+import {
+  useFleetOverview,
+  useLiveRiderSocket,
+  useRiderHistory,
+} from "@/features/sales/tracking/api/user-riderTracking"; // Ensure filename matches your hook file
+import { FleetRiderOverview } from "@/features/sales/tracking/types/tracking";
+import Loading from "@/app/loading";
 
 const LiveTracking = () => {
-  const { branchId, isLoading: isTenantLoading } = useRole();
+  const { branchId, userTier, isLoading: isTenantLoading } = useRole();
   const { data: branchData, isLoading: isBranchLoading } = useBranchSettings(branchId);
 
-  const [selectedRider, setSelectedRider] = useState<any | null>(null);
+  // Strictly use "en-CA" so format is YYYY-MM-DD (required for <input type="date"> & backend)
+  const todayStr = new Date().toLocaleDateString("en-CA");
+  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
+  const [selectedRider, setSelectedRider] = useState<FleetRiderOverview | null>(null);
 
-  if (isTenantLoading || isBranchLoading) {
-    return (
-      <div className="w-full h-[calc(100vh-5rem)] rounded-3xl border border-slate-200 bg-slate-50 flex items-center justify-center animate-pulse text-slate-400">
-        Loading Live Tracking...
-      </div>
-    );
-  }
+  const isHistoryMode = selectedDate !== todayStr;
 
-  const branchLat = branchData?.branch?.latitude ?? 30.6750;
+  // 1. Fetch Fleet Overview (Riders, Presence, Active Orders, Today's Stats)
+  const { data: riders = [], isLoading: isFleetLoading } = useFleetOverview(
+    branchId,
+    userTier
+  );
+
+  // 2. Connect Live WebSocket
+  const { liveLocations, isSocketConnected } = useLiveRiderSocket(
+    branchId,
+    userTier
+  );
+
+  // 3. Fetch Rider History (Only triggers when a rider is selected & date is set)
+  const { data: riderHistory, isLoading: isHistoryLoading } = useRiderHistory(
+    selectedRider?.id,
+    selectedDate,
+    userTier
+  );
+
+  // Keep selectedRider synced with fresh polling data from riders array
+  const activeSelectedRider =
+    riders.find((r) => r.id === selectedRider?.id) || selectedRider;
+
+  if (isTenantLoading || isBranchLoading || isFleetLoading) return <Loading text="Loading Live Tracking..."/>
+
+  const branchLat = branchData?.branch?.latitude ?? 30.675;
   const branchLng = branchData?.branch?.longitude ?? 73.1025;
   const branchName = branchData?.name || "Branch Headquarters";
   const branchAddress = branchData?.address || "Main Distribution Hub";
   const imageUrl = branchData?.logoUrl || "";
 
   return (
-    <div className="relative w-full h-[calc(100vh-5rem)]">
-      {/* Floating Sidebar Overlay */}
+    <div className="relative w-full h-[calc(100vh-5rem)] overflow-hidden rounded-3xl">
+      {/* Top Horizontal Rider & Stats Bar */}
       <LiveTrackingSidebar
-        selectedRider={selectedRider}
+        riders={riders}
+        selectedRider={activeSelectedRider}
         onSelect={setSelectedRider}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+        isSocketConnected={isSocketConnected}
       />
 
       {/* Full-Screen Map Component */}
@@ -42,8 +74,13 @@ const LiveTracking = () => {
         branchName={branchName}
         branchAddress={branchAddress}
         imageUrl={imageUrl}
-        selectedRider={selectedRider}
+        riders={riders}
+        liveLocations={liveLocations}
+        selectedRider={activeSelectedRider}
         onSelectRider={setSelectedRider}
+        isHistoryMode={isHistoryMode}
+        riderHistory={riderHistory}
+        isHistoryLoading={isHistoryLoading}
       />
     </div>
   );
