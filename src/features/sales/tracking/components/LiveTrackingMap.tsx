@@ -117,9 +117,9 @@ function calculateDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRad(lat1)) *
-    Math.cos(toRad(lat2)) *
-    Math.sin(dLon / 2) *
-    Math.sin(dLon / 2);
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const meters = Math.round(R * c);
 
@@ -182,7 +182,7 @@ export const LiveTrackingMap = ({
 
   const targetZoom = selectedRider ? 16 : 13;
 
-  // Find active ON_ROUTE order for selected rider (to draw road-snapped polyline + distance)
+  // Find active ON_ROUTE order for selected rider
   const onRouteOrder = useMemo(() => {
     if (!selectedRider || isHistoryMode) return null;
     return (
@@ -247,10 +247,10 @@ export const LiveTrackingMap = ({
       isStopped: boolean
     ) => {
       const bgColor = isStopped
-        ? "#e11d48" // Rose-600 if stopped > 5 mins
+        ? "#e11d48"
         : isSelected
-          ? "#0284c7" // Sky-600 if selected
-          : "#10b981"; // Emerald-500 moving
+          ? "#0284c7"
+          : "#10b981";
 
       return L.divIcon({
         html: `
@@ -315,21 +315,44 @@ export const LiveTrackingMap = ({
         popupAnchor: [0, -32],
       });
 
+    // 🔥 Professional Start / End markers for History Mode
+    const startPointIcon = L.divIcon({
+      html: `<div style="background: #10b981; color: white; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900;">START</div>`,
+      className: "",
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+      popupAnchor: [0, -16],
+    });
+
+    const endPointIcon = L.divIcon({
+      html: `<div style="background: #6366f1; color: white; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900;">END</div>`,
+      className: "",
+      iconSize: [28, 28],
+      iconAnchor: [14, 14],
+      popupAnchor: [0, -16],
+    });
+
     return {
       branchIcon,
       createRiderIcon,
       createOrderIcon,
       createStopLogIcon,
+      startPointIcon,
+      endPointIcon,
     };
   }, [imageUrl]);
 
-  // Historical Polyline coordinates array
+  // Historical Polyline coordinates array & start/end points
   const historyPolylineCoords = useMemo(() => {
     if (!isHistoryMode || !riderHistory?.locationPings) return [];
+    // Note: pings come ordered ascending by timestamp
     return riderHistory.locationPings.map(
       (ping) => [ping.latitude, ping.longitude] as [number, number]
     );
   }, [isHistoryMode, riderHistory]);
+
+  const historyStartPoint = historyPolylineCoords.length > 0 ? historyPolylineCoords[0] : null;
+  const historyEndPoint = historyPolylineCoords.length > 0 ? historyPolylineCoords[historyPolylineCoords.length - 1] : null;
 
   return (
     <div className="relative w-full h-full overflow-hidden rounded-3xl border border-slate-200 shadow-sm">
@@ -522,19 +545,58 @@ export const LiveTrackingMap = ({
         )}
 
         {/* ================================================================= */}
-        {/* 3. HISTORY MODE: RENDER GPS TRAIL & STOP LOG PINS                 */}
+        {/* 3. HISTORY MODE: RENDER SMOOTH GPS TRAIL & MARKERS                 */}
         {/* ================================================================= */}
         {isHistoryMode && selectedRider && historyPolylineCoords.length > 0 && (
-          <Polyline
-            positions={historyPolylineCoords}
-            pathOptions={{
-              color: "#6366f1", // Indigo trail for history
-              weight: 4,
-              opacity: 0.85,
-            }}
-          />
+          <>
+            {/* Outer Glow Polyline for depth */}
+            <Polyline
+              positions={historyPolylineCoords}
+              pathOptions={{
+                color: "#38bdf8",
+                weight: 6,
+                opacity: 0.4,
+                lineCap: "round",
+                lineJoin: "round",
+              }}
+            />
+            {/* Main Rich Indigo/Violet Trail */}
+            <Polyline
+              positions={historyPolylineCoords}
+              pathOptions={{
+                color: "#4f46e5",
+                weight: 4,
+                opacity: 0.95,
+                lineCap: "round",
+                lineJoin: "round",
+              }}
+            />
+          </>
         )}
 
+        {/* Start Point Marker */}
+        {isHistoryMode && historyStartPoint && icons && (
+          <Marker position={historyStartPoint} icon={icons.startPointIcon}>
+            <Popup>
+              <div className="p-1 text-xs font-bold text-slate-800">
+                🚀 Trip Started Here
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {/* End Point Marker */}
+        {isHistoryMode && historyEndPoint && icons && (
+          <Marker position={historyEndPoint} icon={icons.endPointIcon}>
+            <Popup>
+              <div className="p-1 text-xs font-bold text-slate-800">
+                🏁 Trip Ended / Latest Position
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {/* Stop Log Markers */}
         {isHistoryMode &&
           selectedRider &&
           riderHistory?.stopLogs?.map((stop) => {
