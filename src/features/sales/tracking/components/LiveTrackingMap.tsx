@@ -32,7 +32,7 @@ const Polyline = dynamic(
   { ssr: false }
 );
 
-// Helper component to smoothly fly/zoom map camera when a rider is clicked
+// Helper component to smoothly fly/zoom map camera or fit bounds in history mode
 const MapCameraController = dynamic(
   () =>
     import("react-leaflet").then((mod) => {
@@ -41,20 +41,31 @@ const MapCameraController = dynamic(
         targetLat,
         targetLng,
         zoom,
+        boundsPoints,
+        isHistoryMode,
       }: {
         targetLat: number;
         targetLng: number;
         zoom: number;
+        boundsPoints?: [number, number][];
+        isHistoryMode?: boolean;
       }) {
         const map = useMap();
         useEffect(() => {
-          if (targetLat && targetLng) {
+          if (isHistoryMode && boundsPoints && boundsPoints.length > 1) {
+            map.fitBounds(boundsPoints, {
+              padding: [90, 90],
+              maxZoom: 17,
+              animate: true,
+              duration: 1.0,
+            });
+          } else if (targetLat && targetLng) {
             map.flyTo([targetLat, targetLng], zoom, {
               animate: true,
               duration: 1.2,
             });
           }
-        }, [map, targetLat, targetLng, zoom]);
+        }, [map, targetLat, targetLng, zoom, isHistoryMode, boundsPoints]);
         return null;
       };
     }),
@@ -103,7 +114,7 @@ function useRoadRoute(
   return routeCoords;
 }
 
-// Haversine formula to calculate live distance between rider and customer
+// Haversine formula to calculate distance in meters
 function calculateDistance(
   lat1: number,
   lon1: number,
@@ -127,6 +138,68 @@ function calculateDistance(
     return { meters, formatted: `${(meters / 1000).toFixed(2)} km` };
   }
   return { meters, formatted: `${meters} m` };
+}
+
+/**
+ * Cleans noisy GPS history by:
+ * 1. Filtering out jitter points closer than `minDistanceMeters` (25m)
+ * 2. Eliminating sharp back-and-forth spikes
+ * 3. Applying a gentle 3-point moving average to smooth jagged corners
+ */
+function cleanAndSmoothHistoryCoords(
+  pings: Array<{ latitude: number; longitude: number }>,
+  minDistanceMeters = 25
+): [number, number][] {
+  if (!pings || pings.length === 0) return [];
+  if (pings.length === 1) return [[pings[0].latitude, pings[0].longitude]];
+
+  // Step 1: Spatial decimation (remove stationary clusters / micro-jitter)
+  const filtered: [number, number][] = [[pings[0].latitude, pings[0].longitude]];
+
+  for (let i = 1; i < pings.length; i++) {
+    const prev = filtered[filtered.length - 1];
+    const curr = pings[i];
+    const dist = calculateDistance(prev[0], prev[1], curr.latitude, curr.longitude).meters;
+
+    if (dist >= minDistanceMeters) {
+      filtered.push([curr.latitude, curr.longitude]);
+    }
+  }
+
+  // Always preserve the very last point
+  const lastPing = pings[pings.length - 1];
+  const lastFiltered = filtered[filtered.length - 1];
+  if (
+    lastFiltered[0] !== lastPing.latitude ||
+    lastFiltered[1] !== lastPing.longitude
+  ) {
+    const distToLast = calculateDistance(
+      lastFiltered[0],
+      lastFiltered[1],
+      lastPing.latitude,
+      lastPing.longitude
+    ).meters;
+    if (distToLast > 5) {
+      filtered.push([lastPing.latitude, lastPing.longitude]);
+    }
+  }
+
+  if (filtered.length <= 2) return filtered;
+
+  // Step 2: Gentle 3-point weighted moving average to soften jagged GPS corners
+  const smoothed: [number, number][] = [filtered[0]];
+  for (let i = 1; i < filtered.length - 1; i++) {
+    const prev = filtered[i - 1];
+    const curr = filtered[i];
+    const next = filtered[i + 1];
+
+    const lat = prev[0] * 0.2 + curr[0] * 0.6 + next[0] * 0.2;
+    const lng = prev[1] * 0.2 + curr[1] * 0.6 + next[1] * 0.2;
+    smoothed.push([lat, lng]);
+  }
+  smoothed.push(filtered[filtered.length - 1]);
+
+  return smoothed;
 }
 
 type Props = {
@@ -221,6 +294,56 @@ export const LiveTrackingMap = ({
     );
   }, [onRouteOrder, selectedRiderLiveLoc]);
 
+  // Clean & smooth historical Polyline coordinates so it never looks like a messy spiderweb
+  const historyPolylineCoords = useMemo(() => {
+    if (!isHistoryMode || !riderHistory?.locationPings) return [];
+    return cleanAndSmoothHistoryCoords(riderHistory.locationPings, 25);
+  }, [isHistoryMode, riderHistory]);
+
+  // Deduplicate overlapping stop logs that are within 20m of each other so pins don't stack ugly
+  const cleanedStopLogs = useMemo(() => {
+    if (!isHistoryMode || !riderHistory?.stopLogs) return [];
+    const grouped: typeof riderHistory.stopLogs = [];
+
+    for (const stop of riderHistory.stopLogs) {
+      const existing = grouped.find(
+        (g) =>
+          calculateDistance(g.latitude, g.longitude, stop.latitude, stop.longitude)
+            .meters < 20
+      );
+      if (existing) {
+        // Keep the longer duration or merge
+        if (stop.durationMinutes > existing.durationMinutes) {
+          existing.durationMinutes = stop.durationMinutes;
+          existing.endedAt = stop.endedAt;
+        }
+      } else {
+        grouped.push({ ...stop });
+      }
+    }
+    return grouped;
+  }, [isHistoryMode, riderHistory]);
+
+  const historyStartPoint =
+    historyPolylineCoords.length > 0 ? historyPolylineCoords[0] : null;
+  const historyEndPoint =
+    historyPolylineCoords.length > 0
+      ? historyPolylineCoords[historyPolylineCoords.length - 1]
+      : null;
+
+  // Check if Start and End points are right on top of each other (< 25m apart)
+  const isRoundTripSameSpot = useMemo(() => {
+    if (!historyStartPoint || !historyEndPoint) return false;
+    return (
+      calculateDistance(
+        historyStartPoint[0],
+        historyStartPoint[1],
+        historyEndPoint[0],
+        historyEndPoint[1]
+      ).meters < 25
+    );
+  }, [historyStartPoint, historyEndPoint]);
+
   // Create custom Leaflet icons safely on client side
   const icons = useMemo(() => {
     if (typeof window === "undefined") return null;
@@ -301,58 +424,58 @@ export const LiveTrackingMap = ({
       L.divIcon({
         html: `
           <div style="display: flex; flex-direction: column; align-items: center;">
-            <div style="background: #dc2626; color: white; font-size: 9px; font-weight: 800; padding: 1px 5px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-              Stopped ${durationMinutes}m
+            <div style="background: #e11d48; color: white; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 9999px; margin-bottom: 3px; white-space: nowrap; box-shadow: 0 3px 6px rgba(225,29,72,0.35); border: 1.5px solid white;">
+              ⏸ ${durationMinutes}m stop
             </div>
-            <div style="width: 26px; height: 26px; border-radius: 50%; background: #fef2f2; border: 2px solid #dc2626; box-shadow: 0 2px 6px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center; font-size: 12px;">
-              🛑
+            <div style="width: 14px; height: 14px; border-radius: 50%; background: #e11d48; border: 2.5px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+          </div>
+        `,
+        className: "",
+        iconSize: [80, 42],
+        iconAnchor: [40, 35],
+        popupAnchor: [0, -32],
+      });
+
+    // Sleek Start & End pill badges with offset anchors so they don't collide
+    const createStartPointIcon = (offsetLeft: boolean) =>
+      L.divIcon({
+        html: `
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <div style="background: #10b981; color: white; font-size: 9px; font-weight: 900; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 9999px; border: 1.5px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.25); white-space: nowrap;">
+              ● START
             </div>
           </div>
         `,
         className: "",
-        iconSize: [64, 42],
-        iconAnchor: [32, 36],
-        popupAnchor: [0, -32],
+        iconSize: [60, 24],
+        iconAnchor: offsetLeft ? [64, 12] : [30, 12],
+        popupAnchor: [0, -12],
       });
 
-    // 🔥 Professional Start / End markers for History Mode
-    const startPointIcon = L.divIcon({
-      html: `<div style="background: #10b981; color: white; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900;">START</div>`,
-      className: "",
-      iconSize: [28, 28],
-      iconAnchor: [14, 14],
-      popupAnchor: [0, -16],
-    });
-
-    const endPointIcon = L.divIcon({
-      html: `<div style="background: #6366f1; color: white; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 900;">END</div>`,
-      className: "",
-      iconSize: [28, 28],
-      iconAnchor: [14, 14],
-      popupAnchor: [0, -16],
-    });
+    const createEndPointIcon = (offsetRight: boolean) =>
+      L.divIcon({
+        html: `
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <div style="background: #0f172a; color: white; font-size: 9px; font-weight: 900; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 9999px; border: 1.5px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.3); white-space: nowrap;">
+              🏁 END
+            </div>
+          </div>
+        `,
+        className: "",
+        iconSize: [54, 24],
+        iconAnchor: offsetRight ? [-4, 12] : [27, 12],
+        popupAnchor: [0, -12],
+      });
 
     return {
       branchIcon,
       createRiderIcon,
       createOrderIcon,
       createStopLogIcon,
-      startPointIcon,
-      endPointIcon,
+      createStartPointIcon,
+      createEndPointIcon,
     };
   }, [imageUrl]);
-
-  // Historical Polyline coordinates array & start/end points
-  const historyPolylineCoords = useMemo(() => {
-    if (!isHistoryMode || !riderHistory?.locationPings) return [];
-    // Note: pings come ordered ascending by timestamp
-    return riderHistory.locationPings.map(
-      (ping) => [ping.latitude, ping.longitude] as [number, number]
-    );
-  }, [isHistoryMode, riderHistory]);
-
-  const historyStartPoint = historyPolylineCoords.length > 0 ? historyPolylineCoords[0] : null;
-  const historyEndPoint = historyPolylineCoords.length > 0 ? historyPolylineCoords[historyPolylineCoords.length - 1] : null;
 
   return (
     <div className="relative w-full h-full overflow-hidden rounded-3xl border border-slate-200 shadow-sm">
@@ -365,7 +488,7 @@ export const LiveTrackingMap = ({
 
       {/* Bottom Floating Live Route / History Info Pill */}
       {selectedRider && !isHistoryMode && onRouteOrder && liveRouteMetrics && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-999 bg-slate-900/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-4 pointer-events-auto">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[999] bg-slate-900/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-4 pointer-events-auto">
           <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
             <Route className="w-5 h-5" />
           </div>
@@ -395,7 +518,7 @@ export const LiveTrackingMap = ({
 
       {/* History Mode Banner */}
       {isHistoryMode && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-999 bg-white/95 backdrop-blur-md text-slate-900 px-5 py-2.5 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3 pointer-events-auto">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[999] bg-white/95 backdrop-blur-md text-slate-900 px-5 py-2.5 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3 pointer-events-auto">
           <Clock className="w-4 h-4 text-sky-600" />
           {!selectedRider ? (
             <span className="text-xs font-bold text-slate-600">
@@ -410,12 +533,12 @@ export const LiveTrackingMap = ({
               <span>
                 {selectedRider.name} •{" "}
                 <span className="text-sky-600">
-                  {riderHistory?.locationPings?.length || 0} GPS Points
+                  {historyPolylineCoords.length} Waypoints
                 </span>
               </span>
               <span className="text-rose-600 flex items-center gap-1">
                 <AlertTriangle className="w-3.5 h-3.5" />
-                {riderHistory?.stopLogs?.length || 0} Stops Recorded
+                {cleanedStopLogs.length} Stops Recorded
               </span>
             </div>
           )}
@@ -434,11 +557,13 @@ export const LiveTrackingMap = ({
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        {/* Smooth Camera Fly-To Controller */}
+        {/* Smooth Camera Fly-To & History Bounds Controller */}
         <MapCameraController
           targetLat={focusLat}
           targetLng={focusLng}
           zoom={targetZoom}
+          boundsPoints={historyPolylineCoords}
+          isHistoryMode={isHistoryMode}
         />
 
         {/* 1. Branch Headquarters Marker */}
@@ -483,7 +608,7 @@ export const LiveTrackingMap = ({
                 }}
               >
                 <Popup>
-                  <div className="p-1 space-y-1 min-w-37.5">
+                  <div className="p-1 space-y-1 min-w-[150px]">
                     <p className="font-black text-slate-900 text-xs">
                       {rider.name}
                     </p>
@@ -545,27 +670,27 @@ export const LiveTrackingMap = ({
         )}
 
         {/* ================================================================= */}
-        {/* 3. HISTORY MODE: RENDER SMOOTH GPS TRAIL & MARKERS                 */}
+        {/* 3. HISTORY MODE: RENDER CLEANED GPS TRAIL & NON-OVERLAPPING PINS  */}
         {/* ================================================================= */}
         {isHistoryMode && selectedRider && historyPolylineCoords.length > 0 && (
           <>
-            {/* Outer Glow Polyline for depth */}
+            {/* Subtle White Casing / Border so the route pops cleanly against gray streets */}
             <Polyline
               positions={historyPolylineCoords}
               pathOptions={{
-                color: "#38bdf8",
-                weight: 6,
-                opacity: 0.4,
+                color: "#ffffff",
+                weight: 8,
+                opacity: 0.9,
                 lineCap: "round",
                 lineJoin: "round",
               }}
             />
-            {/* Main Rich Indigo/Violet Trail */}
+            {/* Clean Navigation Blue Core Line */}
             <Polyline
               positions={historyPolylineCoords}
               pathOptions={{
-                color: "#4f46e5",
-                weight: 4,
+                color: "#2563eb",
+                weight: 4.5,
                 opacity: 0.95,
                 lineCap: "round",
                 lineJoin: "round",
@@ -576,7 +701,11 @@ export const LiveTrackingMap = ({
 
         {/* Start Point Marker */}
         {isHistoryMode && historyStartPoint && icons && (
-          <Marker position={historyStartPoint} icon={icons.startPointIcon}>
+          <Marker
+            position={historyStartPoint}
+            icon={icons.createStartPointIcon(isRoundTripSameSpot)}
+            zIndexOffset={800}
+          >
             <Popup>
               <div className="p-1 text-xs font-bold text-slate-800">
                 🚀 Trip Started Here
@@ -587,7 +716,11 @@ export const LiveTrackingMap = ({
 
         {/* End Point Marker */}
         {isHistoryMode && historyEndPoint && icons && (
-          <Marker position={historyEndPoint} icon={icons.endPointIcon}>
+          <Marker
+            position={historyEndPoint}
+            icon={icons.createEndPointIcon(isRoundTripSameSpot)}
+            zIndexOffset={900}
+          >
             <Popup>
               <div className="p-1 text-xs font-bold text-slate-800">
                 🏁 Trip Ended / Latest Position
@@ -596,16 +729,17 @@ export const LiveTrackingMap = ({
           </Marker>
         )}
 
-        {/* Stop Log Markers */}
+        {/* Deduplicated Stop Log Markers */}
         {isHistoryMode &&
           selectedRider &&
-          riderHistory?.stopLogs?.map((stop) => {
+          cleanedStopLogs.map((stop) => {
             if (!icons) return null;
             return (
               <Marker
                 key={stop.id}
                 position={[stop.latitude, stop.longitude]}
                 icon={icons.createStopLogIcon(stop.durationMinutes)}
+                zIndexOffset={1000}
               >
                 <Popup>
                   <div className="p-1 space-y-1">
