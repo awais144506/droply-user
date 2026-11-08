@@ -72,7 +72,7 @@ const MapCameraController = dynamic(
   { ssr: false }
 );
 
-// Hook to fetch road-snapped coordinates from public OSRM router
+// Hook to fetch road-snapped coordinates from public OSRM router (Live Mode)
 function useRoadRoute(
   startLat?: number | null,
   startLng?: number | null,
@@ -141,65 +141,175 @@ function calculateDistance(
 }
 
 /**
- * Cleans noisy GPS history by:
- * 1. Filtering out jitter points closer than `minDistanceMeters` (25m)
- * 2. Eliminating sharp back-and-forth spikes
- * 3. Applying a gentle 3-point moving average to smooth jagged corners
+ * Extracts clean checkpoints from raw GPS pings (spaced >= 40m apart)
+ * and removes stationary back-and-forth jitter spikes.
  */
-function cleanAndSmoothHistoryCoords(
+function extractKeyWaypoints(
   pings: Array<{ latitude: number; longitude: number }>,
-  minDistanceMeters = 25
+  minDistanceMeters = 40
 ): [number, number][] {
   if (!pings || pings.length === 0) return [];
   if (pings.length === 1) return [[pings[0].latitude, pings[0].longitude]];
 
-  // Step 1: Spatial decimation (remove stationary clusters / micro-jitter)
-  const filtered: [number, number][] = [[pings[0].latitude, pings[0].longitude]];
+  const waypoints: [number, number][] = [[pings[0].latitude, pings[0].longitude]];
 
   for (let i = 1; i < pings.length; i++) {
-    const prev = filtered[filtered.length - 1];
+    const prev = waypoints[waypoints.length - 1];
     const curr = pings[i];
     const dist = calculateDistance(prev[0], prev[1], curr.latitude, curr.longitude).meters;
 
     if (dist >= minDistanceMeters) {
-      filtered.push([curr.latitude, curr.longitude]);
+      // Spike filter: if the new point jumps right back to the point before `prev`, skip `prev`
+      if (waypoints.length >= 2) {
+        const prevPrev = waypoints[waypoints.length - 2];
+        const distToPrevPrev = calculateDistance(
+          prevPrev[0],
+          prevPrev[1],
+          curr.latitude,
+          curr.longitude
+        ).meters;
+        if (distToPrevPrev < minDistanceMeters * 0.6) {
+          waypoints.pop(); // Remove the outlier spike
+        }
+      }
+      waypoints.push([curr.latitude, curr.longitude]);
     }
   }
 
-  // Always preserve the very last point
+  // Always preserve the final destination point
   const lastPing = pings[pings.length - 1];
-  const lastFiltered = filtered[filtered.length - 1];
+  const lastWp = waypoints[waypoints.length - 1];
   if (
-    lastFiltered[0] !== lastPing.latitude ||
-    lastFiltered[1] !== lastPing.longitude
+    calculateDistance(lastWp[0], lastWp[1], lastPing.latitude, lastPing.longitude).meters > 10
   ) {
-    const distToLast = calculateDistance(
-      lastFiltered[0],
-      lastFiltered[1],
-      lastPing.latitude,
-      lastPing.longitude
-    ).meters;
-    if (distToLast > 5) {
-      filtered.push([lastPing.latitude, lastPing.longitude]);
+    waypoints.push([lastPing.latitude, lastPing.longitude]);
+  }
+
+  return waypoints;
+}
+
+/**
+ * Hook that takes raw historical GPS pings and snaps them strictly onto actual
+ * OpenStreetMap roads using OSRM's routing engine in chunks so lines NEVER cut across houses.
+ */
+function useRoadSnappedHistory(
+  isHistoryMode: boolean,
+  pings?: Array<{ latitude: number; longitude: number }>
+) {
+  const [snappedCoords, setSnappedCoords] = useState<[number, number][]>([]);
+  const [isSnapping, setIsSnapping] = useState(false);
+
+  const waypoints = useMemo(() => {
+    if (!isHistoryMode || !pings || pings.length === 0) return [];
+    return extractKeyWaypoints(pings, 40);
+  }, [isHistoryMode, pings]);
+
+  useEffect(() => {
+    if (!isHistoryMode || waypoints.length === 0) {
+      setSnappedCoords([]);
+      return;
     }
-  }
 
-  if (filtered.length <= 2) return filtered;
+    if (waypoints.length === 1) {
+      setSnappedCoords(waypoints);
+      return;
+    }
 
-  // Step 2: Gentle 3-point weighted moving average to soften jagged GPS corners
-  const smoothed: [number, number][] = [filtered[0]];
-  for (let i = 1; i < filtered.length - 1; i++) {
-    const prev = filtered[i - 1];
-    const curr = filtered[i];
-    const next = filtered[i + 1];
+    let isCancelled = false;
 
-    const lat = prev[0] * 0.2 + curr[0] * 0.6 + next[0] * 0.2;
-    const lng = prev[1] * 0.2 + curr[1] * 0.6 + next[1] * 0.2;
-    smoothed.push([lat, lng]);
-  }
-  smoothed.push(filtered[filtered.length - 1]);
+    const snapToRoads = async () => {
+      setIsSnapping(true);
+      try {
+        // Chunk into groups of max 25 waypoints per OSRM request ( overlapping by 1 point )
+        const CHUNK_SIZE = 25;
+        const allRoadCoords: [number, number][] = [];
 
-  return smoothed;
+        for (let i = 0; i < waypoints.length - 1; i += CHUNK_SIZE - 1) {
+          const chunk = waypoints.slice(i, i + CHUNK_SIZE);
+          if (chunk.length < 2) break;
+
+          const coordString = chunk
+            .map(([lat, lng]) => `${lng},${lat}`)
+            .join(";");
+
+          // First try OSRM Map Matching (match/v1) with 35m GPS radius tolerance
+          const radiuses = chunk.map(() => "35").join(";");
+          const matchUrl = `https://router.project-osrm.org/match/v1/driving/${coordString}?overview=full&geometries=geojson&radiuses=${radiuses}&gaps=ignore`;
+
+          let chunkCoords: [number, number][] = [];
+
+          try {
+            const matchRes = await fetch(matchUrl);
+            const matchData = await matchRes.json();
+
+            if (
+              matchData.code === "Ok" &&
+              matchData.matchings &&
+              matchData.matchings.length > 0
+            ) {
+              for (const matching of matchData.matchings) {
+                const coords = matching.geometry.coordinates.map(
+                  (c: [number, number]) => [c[1], c[0]] as [number, number]
+                );
+                chunkCoords.push(...coords);
+              }
+            }
+          } catch {
+            // Fallback to route/v1 below if match fails
+          }
+
+          // Fallback to OSRM multi-waypoint routing (route/v1) if match/v1 didn't return a full trace
+          if (chunkCoords.length < 2) {
+            const routeUrl = `https://router.project-osrm.org/route/v1/driving/${coordString}?overview=full&geometries=geojson`;
+            const routeRes = await fetch(routeUrl);
+            const routeData = await routeRes.json();
+
+            if (
+              routeData.code === "Ok" &&
+              routeData.routes &&
+              routeData.routes.length > 0
+            ) {
+              chunkCoords = routeData.routes[0].geometry.coordinates.map(
+                (c: [number, number]) => [c[1], c[0]] as [number, number]
+              );
+            } else {
+              chunkCoords = chunk;
+            }
+          }
+
+          if (allRoadCoords.length > 0 && chunkCoords.length > 0) {
+            allRoadCoords.push(...chunkCoords.slice(1));
+          } else {
+            allRoadCoords.push(...chunkCoords);
+          }
+        }
+
+        if (!isCancelled) {
+          setSnappedCoords(allRoadCoords.length > 0 ? allRoadCoords : waypoints);
+        }
+      } catch (err) {
+        console.error("OSRM history road-snapping failed, using clean waypoints:", err);
+        if (!isCancelled) {
+          setSnappedCoords(waypoints);
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsSnapping(false);
+        }
+      }
+    };
+
+    snapToRoads();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isHistoryMode, waypoints]);
+
+  return {
+    historyPolylineCoords: snappedCoords.length > 0 ? snappedCoords : waypoints,
+    isSnapping,
+  };
 }
 
 type Props = {
@@ -268,7 +378,7 @@ export const LiveTrackingMap = ({
     );
   }, [selectedRider, isHistoryMode]);
 
-  // Fetch road-snapped route coordinates via OSRM
+  // Fetch road-snapped route coordinates via OSRM (Live Mode)
   const roadRouteCoords = useRoadRoute(
     selectedRiderLiveLoc?.latitude,
     selectedRiderLiveLoc?.longitude,
@@ -294,13 +404,13 @@ export const LiveTrackingMap = ({
     );
   }, [onRouteOrder, selectedRiderLiveLoc]);
 
-  // Clean & smooth historical Polyline coordinates so it never looks like a messy spiderweb
-  const historyPolylineCoords = useMemo(() => {
-    if (!isHistoryMode || !riderHistory?.locationPings) return [];
-    return cleanAndSmoothHistoryCoords(riderHistory.locationPings, 25);
-  }, [isHistoryMode, riderHistory]);
+  // 🔥 Snap historical GPS trail strictly onto actual roads via OSRM
+  const { historyPolylineCoords, isSnapping } = useRoadSnappedHistory(
+    isHistoryMode,
+    riderHistory?.locationPings
+  );
 
-  // Deduplicate overlapping stop logs that are within 20m of each other so pins don't stack ugly
+  // Deduplicate overlapping stop logs that are within 25m of each other
   const cleanedStopLogs = useMemo(() => {
     if (!isHistoryMode || !riderHistory?.stopLogs) return [];
     const grouped: typeof riderHistory.stopLogs = [];
@@ -309,10 +419,9 @@ export const LiveTrackingMap = ({
       const existing = grouped.find(
         (g) =>
           calculateDistance(g.latitude, g.longitude, stop.latitude, stop.longitude)
-            .meters < 20
+            .meters < 25
       );
       if (existing) {
-        // Keep the longer duration or merge
         if (stop.durationMinutes > existing.durationMinutes) {
           existing.durationMinutes = stop.durationMinutes;
           existing.endedAt = stop.endedAt;
@@ -331,7 +440,7 @@ export const LiveTrackingMap = ({
       ? historyPolylineCoords[historyPolylineCoords.length - 1]
       : null;
 
-  // Check if Start and End points are right on top of each other (< 25m apart)
+  // Check if Start and End points are close to each other (< 45m apart)
   const isRoundTripSameSpot = useMemo(() => {
     if (!historyStartPoint || !historyEndPoint) return false;
     return (
@@ -340,7 +449,7 @@ export const LiveTrackingMap = ({
         historyStartPoint[1],
         historyEndPoint[0],
         historyEndPoint[1]
-      ).meters < 25
+      ).meters < 45
     );
   }, [historyStartPoint, historyEndPoint]);
 
@@ -420,35 +529,37 @@ export const LiveTrackingMap = ({
       });
     };
 
+    // Stop badge floats cleanly ABOVE the coordinate with a stem so it never covers START/END
     const createStopLogIcon = (durationMinutes: number) =>
       L.divIcon({
         html: `
           <div style="display: flex; flex-direction: column; align-items: center;">
-            <div style="background: #e11d48; color: white; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 9999px; margin-bottom: 3px; white-space: nowrap; box-shadow: 0 3px 6px rgba(225,29,72,0.35); border: 1.5px solid white;">
+            <div style="background: #e11d48; color: white; font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 9999px; white-space: nowrap; box-shadow: 0 4px 8px rgba(225,29,72,0.4); border: 1.5px solid white;">
               ⏸ ${durationMinutes}m stop
             </div>
-            <div style="width: 14px; height: 14px; border-radius: 50%; background: #e11d48; border: 2.5px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
+            <div style="width: 2px; height: 10px; background: #e11d48;"></div>
+            <div style="width: 12px; height: 12px; border-radius: 50%; background: #e11d48; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"></div>
           </div>
         `,
         className: "",
-        iconSize: [80, 42],
-        iconAnchor: [40, 35],
-        popupAnchor: [0, -32],
+        iconSize: [84, 48],
+        iconAnchor: [42, 44],
+        popupAnchor: [0, -42],
       });
 
-    // Sleek Start & End pill badges with offset anchors so they don't collide
+    // Sleek Start & End pill badges pushed to bottom-left and bottom-right when close
     const createStartPointIcon = (offsetLeft: boolean) =>
       L.divIcon({
         html: `
           <div style="display: flex; flex-direction: column; align-items: center;">
-            <div style="background: #10b981; color: white; font-size: 9px; font-weight: 900; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 9999px; border: 1.5px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.25); white-space: nowrap;">
+            <div style="background: #10b981; color: white; font-size: 9px; font-weight: 900; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 9999px; border: 1.5px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.25); white-space: nowrap;">
               ● START
             </div>
           </div>
         `,
         className: "",
-        iconSize: [60, 24],
-        iconAnchor: offsetLeft ? [64, 12] : [30, 12],
+        iconSize: [64, 24],
+        iconAnchor: offsetLeft ? [72, -6] : [32, 12],
         popupAnchor: [0, -12],
       });
 
@@ -456,14 +567,14 @@ export const LiveTrackingMap = ({
       L.divIcon({
         html: `
           <div style="display: flex; flex-direction: column; align-items: center;">
-            <div style="background: #0f172a; color: white; font-size: 9px; font-weight: 900; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 9999px; border: 1.5px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.3); white-space: nowrap;">
+            <div style="background: #0f172a; color: white; font-size: 9px; font-weight: 900; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 9999px; border: 1.5px solid white; box-shadow: 0 3px 6px rgba(0,0,0,0.3); white-space: nowrap;">
               🏁 END
             </div>
           </div>
         `,
         className: "",
-        iconSize: [54, 24],
-        iconAnchor: offsetRight ? [-4, 12] : [27, 12],
+        iconSize: [58, 24],
+        iconAnchor: offsetRight ? [-8, -6] : [29, 12],
         popupAnchor: [0, -12],
       });
 
@@ -524,16 +635,16 @@ export const LiveTrackingMap = ({
             <span className="text-xs font-bold text-slate-600">
               Select a rider from the top bar to view their historical route & stops.
             </span>
-          ) : isHistoryLoading ? (
+          ) : isHistoryLoading || isSnapping ? (
             <span className="text-xs font-bold text-slate-500 animate-pulse">
-              Loading route history for {selectedRider.name}...
+              Snapping route to roads for {selectedRider.name}...
             </span>
           ) : (
             <div className="flex items-center gap-4 text-xs font-bold">
               <span>
                 {selectedRider.name} •{" "}
                 <span className="text-sky-600">
-                  {historyPolylineCoords.length} Waypoints
+                  Road-Snapped Route
                 </span>
               </span>
               <span className="text-rose-600 flex items-center gap-1">
@@ -670,28 +781,28 @@ export const LiveTrackingMap = ({
         )}
 
         {/* ================================================================= */}
-        {/* 3. HISTORY MODE: RENDER CLEANED GPS TRAIL & NON-OVERLAPPING PINS  */}
+        {/* 3. HISTORY MODE: OSRM ROAD-SNAPPED GPS TRAIL & CLEAN PINS         */}
         {/* ================================================================= */}
         {isHistoryMode && selectedRider && historyPolylineCoords.length > 0 && (
           <>
-            {/* Subtle White Casing / Border so the route pops cleanly against gray streets */}
+            {/* Crisp White Road Casing */}
             <Polyline
               positions={historyPolylineCoords}
               pathOptions={{
                 color: "#ffffff",
-                weight: 8,
-                opacity: 0.9,
+                weight: 9,
+                opacity: 0.95,
                 lineCap: "round",
                 lineJoin: "round",
               }}
             />
-            {/* Clean Navigation Blue Core Line */}
+            {/* Royal Blue Road-Snapped Core */}
             <Polyline
               positions={historyPolylineCoords}
               pathOptions={{
                 color: "#2563eb",
-                weight: 4.5,
-                opacity: 0.95,
+                weight: 5,
+                opacity: 1,
                 lineCap: "round",
                 lineJoin: "round",
               }}
