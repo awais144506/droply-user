@@ -164,7 +164,6 @@ export default function CreateSaleForm({
       onBack();
     } catch (error) {
       console.error("Order submission failed", error);
-      toast.error("Failed to save order changes.");
     }
   };
 

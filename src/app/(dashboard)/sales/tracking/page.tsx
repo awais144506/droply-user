@@ -9,7 +9,7 @@ import {
   useFleetOverview,
   useLiveRiderSocket,
   useRiderHistory,
-} from "@/features/sales/tracking/api/user-riderTracking"; // Ensure filename matches your hook file
+} from "@/features/sales/tracking/api/user-riderTracking";
 import { FleetRiderOverview } from "@/features/sales/tracking/types/tracking";
 import Loading from "@/app/loading";
 
@@ -17,15 +17,14 @@ const LiveTracking = () => {
   const { branchId, userTier, isLoading: isTenantLoading } = useRole();
   const { data: branchData, isLoading: isBranchLoading } = useBranchSettings(branchId);
 
-  // Strictly use "en-CA" so format is YYYY-MM-DD (required for <input type="date"> & backend)
-  const todayStr = new Date().toLocaleDateString("en-CA");
-  const [selectedDate, setSelectedDate] = useState<string>(todayStr);
+  // Null means Live Mode by default. A selected YYYY-MM-DD string triggers History Mode.
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedRider, setSelectedRider] = useState<FleetRiderOverview | null>(null);
 
-  const isHistoryMode = selectedDate !== todayStr;
+  const isHistoryMode = Boolean(selectedDate);
 
-  // 1. Fetch Fleet Overview (Riders, Presence, Active Orders, Today's Stats)
-  const { data: riders = [], isLoading: isFleetLoading } = useFleetOverview(
+  // 1. Fetch Fleet Overview
+  const { data: riders = [], isLoading: isFleetLoading, refetch, isRefetching } = useFleetOverview(
     branchId,
     userTier
   );
@@ -36,10 +35,10 @@ const LiveTracking = () => {
     userTier
   );
 
-  // 3. Fetch Rider History (Only triggers when a rider is selected & date is set)
+  // 3. Fetch Rider History (Only runs when a date & rider are selected)
   const { data: riderHistory, isLoading: isHistoryLoading } = useRiderHistory(
     selectedRider?.id,
-    selectedDate,
+    selectedDate || undefined,
     userTier
   );
 
@@ -65,10 +64,13 @@ const LiveTracking = () => {
         selectedDate={selectedDate}
         onDateChange={setSelectedDate}
         isSocketConnected={isSocketConnected}
+        onRefetch={refetch}
+        isRefetching={isRefetching}
       />
 
       {/* Full-Screen Map Component */}
       <LiveTrackingMap
+        key={`${branchLat}-${branchLng}`}
         branchLat={branchLat}
         branchLng={branchLng}
         branchName={branchName}

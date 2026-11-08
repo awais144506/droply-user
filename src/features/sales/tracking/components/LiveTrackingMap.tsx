@@ -1,5 +1,4 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -118,9 +117,9 @@ function calculateDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const meters = Math.round(R * c);
 
@@ -172,14 +171,14 @@ export const LiveTrackingMap = ({
   const focusLat = firstHistoryPing
     ? firstHistoryPing.latitude
     : selectedRiderLiveLoc
-    ? selectedRiderLiveLoc.latitude
-    : branchLat;
+      ? selectedRiderLiveLoc.latitude
+      : branchLat;
 
   const focusLng = firstHistoryPing
     ? firstHistoryPing.longitude
     : selectedRiderLiveLoc
-    ? selectedRiderLiveLoc.longitude
-    : branchLng;
+      ? selectedRiderLiveLoc.longitude
+      : branchLng;
 
   const targetZoom = selectedRider ? 16 : 13;
 
@@ -250,8 +249,8 @@ export const LiveTrackingMap = ({
       const bgColor = isStopped
         ? "#e11d48" // Rose-600 if stopped > 5 mins
         : isSelected
-        ? "#0284c7" // Sky-600 if selected
-        : "#10b981"; // Emerald-500 moving
+          ? "#0284c7" // Sky-600 if selected
+          : "#10b981"; // Emerald-500 moving
 
       return L.divIcon({
         html: `
@@ -277,8 +276,8 @@ export const LiveTrackingMap = ({
       const bg = isArrived
         ? "#10b981"
         : isOnRoute
-        ? "#f59e0b"
-        : "#64748b";
+          ? "#f59e0b"
+          : "#64748b";
 
       return L.divIcon({
         html: `
@@ -343,7 +342,7 @@ export const LiveTrackingMap = ({
 
       {/* Bottom Floating Live Route / History Info Pill */}
       {selectedRider && !isHistoryMode && onRouteOrder && liveRouteMetrics && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[999] bg-slate-900/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-4 pointer-events-auto">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-999 bg-slate-900/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-4 pointer-events-auto">
           <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
             <Route className="w-5 h-5" />
           </div>
@@ -373,7 +372,7 @@ export const LiveTrackingMap = ({
 
       {/* History Mode Banner */}
       {isHistoryMode && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[999] bg-white/95 backdrop-blur-md text-slate-900 px-5 py-2.5 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3 pointer-events-auto">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-999 bg-white/95 backdrop-blur-md text-slate-900 px-5 py-2.5 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3 pointer-events-auto">
           <Clock className="w-4 h-4 text-sky-600" />
           {!selectedRider ? (
             <span className="text-xs font-bold text-slate-600">
@@ -401,6 +400,7 @@ export const LiveTrackingMap = ({
       )}
 
       <MapContainer
+        key={`${branchLat}-${branchLng}`}
         center={[branchLat, branchLng]}
         zoom={13}
         style={{ height: "100%", width: "100%" }}
@@ -454,12 +454,13 @@ export const LiveTrackingMap = ({
                   isSelected,
                   loc.isStopped
                 )}
+                zIndexOffset={isSelected ? 1000 : 1}
                 eventHandlers={{
                   click: () => onSelectRider(rider),
                 }}
               >
                 <Popup>
-                  <div className="p-1 space-y-1 min-w-[150px]">
+                  <div className="p-1 space-y-1 min-w-37.5">
                     <p className="font-black text-slate-900 text-xs">
                       {rider.name}
                     </p>
