@@ -8,9 +8,10 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
   const { maxUsersLimit } = useRole();
   return useQuery({
     queryKey: staffKeys.branchList(branchId || ""),
-    queryFn: () => staffApi.getAllStaff(branchId),
+    queryFn: () => staffApi.getAllStaff(),
 
     select: (payload) => {
+      const logs = payload.logs;
 
       const isLimitReached = payload.stats.activeStaffCount >= maxUsersLimit;
 
@@ -19,7 +20,7 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
           ? (st.name.toLowerCase() || "").includes(searchFilter.toLowerCase())
           : true;
         const matchesRole = roleFilter
-          ? st.designation === roleFilter
+          ? st.role === roleFilter
           : true;
 
         const matchesStatus = statusFilter
@@ -27,19 +28,38 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
           : true;
         return matchesSearch && matchesRole && matchesStatus;
       });
-      const riderOptions = payload.staff
-        .filter((member: { designation: string }) => member.designation === "RIDER")
-        .map((rider: { name: string; phone: string; id: string }) => ({
-          label: `${rider.name} (${rider.phone})`,
-          value: rider.id,
+  const riderOptions = payload.staff
+    .filter((member: { role: string; status: string }) => 
+        member.role === "RIDER" && member.status === "ACTIVE"
+    )
+    .map((rider: { name: string; phone: string; id: string }) => ({
+        label: `${rider.name} (${rider.phone})`,
+        value: rider.id,
+    }));
+
+      const staffOptions = payload.staff
+        .map((staff: { name: string; phone: string; id: string }) => ({
+          label: `${staff.name} (${staff.phone})`,
+          value: staff.id,
+        }));
+
+      const taskStaffOptions = payload.staff
+        .map((staff: { name: string; phone: string; id: string, role: string }) => ({
+          label: `${staff.name}`,
+          value: staff.id,
+          role: staff.role,
+          phone: staff.phone
         }));
 
       // 4. Return everything cleanly
       return {
+        logs,
         staff: filterStaff,
         stats: payload.stats,
         riderOptions,
-        isLimitReached
+        staffOptions,
+        isLimitReached,
+        taskStaffOptions
       };
     },
     enabled: !!branchId,
@@ -47,20 +67,11 @@ export function useStaffList(branchId: string, searchFilter?: string, roleFilter
 }
 
 // 3. Fetch Single Staff (for Edit/Details Page)
-export function useStaffDetail(id: string) {
+export function useStaffDetail(branchId: string, id: string) {
   return useQuery({
     queryKey: staffKeys.detail(id || ""),
     queryFn: () => staffApi.getStaff(id),
-    enabled: !!id,
-  });
-}
-
-// 4. Fetch Staff Activity Logs
-export function useStaffLogs(branchId: string) {
-  return useQuery({
-    queryKey: staffKeys.logs(branchId || ""),
-    queryFn: () => staffApi.getStaffLogs(branchId),
-    enabled: !!branchId,
+    enabled: !!id && !!branchId,
   });
 }
 

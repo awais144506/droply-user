@@ -2,9 +2,10 @@
 "use client";
 
 import { ReactNode, useId } from "react";
-import { useFormContext, Controller } from "react-hook-form";
-import Select from "react-select";
-import { Loader } from "lucide-react";
+import { useFormContext, Controller, get } from "react-hook-form";
+import Select, { components, MenuListProps } from "react-select";
+import { Loader, LucideIcon, Plus, Truck } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export interface SelectOption {
     label: string;
@@ -14,16 +15,39 @@ export interface SelectOption {
 
 interface FormSelectProps {
     name: string;
-    label: string | ReactNode;
+    label?: string | ReactNode;
     options: SelectOption[];
     placeholder?: string;
     disabled?: boolean;
     required?: boolean;
     isMulti?: boolean;
     isSearchable?: boolean;
+    isClearable?: boolean;
     helperText?: ReactNode;
     isLoading?: boolean;
     formatOptionLabel?: (data: any) => ReactNode;
+    onValueChange?: (selectedOption: any) => void;
+    lableTextColor?: string;
+    labelIcon?: LucideIcon;
+    iconColor?: string;
+    
+    // 🔥 Smart Array Filtering Props
+    excludeValues?: (string | number)[]; // Direct array of values to hide
+    excludeFromList?: any[];             // The watched array (e.g., watchedItems)
+    excludeKey?: string;                 // The object key to check (e.g., "productId")
+    currentIndex?: number;               // The current row index to ignore
+    
+    // Primary Add Button (e.g., Create Customer link)
+    showAddButton?: boolean;
+    addButtonLabel?: string;
+    onAddButtonClick?: () => void;
+    addButtonHref?: string; 
+    
+    // Secondary Action Button (e.g., Use 3rd Party Driver toggle)
+    showSecondaryAction?: boolean;
+    secondaryActionLabel?: string;
+    onSecondaryActionClick?: () => void;
+    secondaryActionIcon?: LucideIcon;
 }
 
 export function FormSelect({
@@ -34,23 +58,54 @@ export function FormSelect({
     disabled = false,
     required = false,
     isMulti = false,
-    isSearchable = false,
+    isSearchable = true,
+    isClearable = false,
     helperText,
     isLoading,
-    formatOptionLabel
+    formatOptionLabel,
+    onValueChange,
+    lableTextColor = "text-slate-700",
+    labelIcon: Icon,
+    iconColor = "text-sky-500",
+    excludeValues = [],
+    excludeFromList,
+    excludeKey,
+    currentIndex,
+    showAddButton = false,
+    addButtonLabel = "Add New",
+    onAddButtonClick,
+    addButtonHref,
+    showSecondaryAction = false,
+    secondaryActionLabel = "Alternative Action",
+    onSecondaryActionClick,
+    secondaryActionIcon: SecondaryIcon = Truck,
 }: FormSelectProps) {
     const { control, formState: { errors } } = useFormContext();
-    const error = errors[name]?.message as string;
+    const error = get(errors, name)?.message as string;
     const inputId = useId();
+    const router = useRouter();
+
+    // 🔥 Smart Filtering Logic: Automatically extracts excluded values if the list props are provided
+    const dynamicallyExcluded = excludeFromList && excludeKey && currentIndex !== undefined
+        ? excludeFromList
+            .filter((_, idx) => idx !== currentIndex)
+            .map((item) => item[excludeKey])
+        : excludeValues;
+
+    const filteredOptions = options.filter(
+        (opt) => !dynamicallyExcluded.includes(opt.value)
+    );
 
     return (
-        <div className="space-y-1.5">
-            <label htmlFor={inputId} className="flex items-center text-xs font-bold text-slate-700 uppercase tracking-wide cursor-pointer">
-                {label}
-                {required && <span className="text-rose-500 ml-1">*</span>}
-            </label>
+        <div className="space-y-1.5 w-full">
+            {label && (
+                <label htmlFor={inputId} className={`flex items-center text-xs font-bold ${lableTextColor} uppercase tracking-wide cursor-pointer`}>
+                    {Icon && <Icon className={`h-3.5 w-3.5 mr-1.5 ${iconColor}`} />}
+                    {label}
+                    {required && <span className="text-rose-500 ml-1">*</span>}
+                </label>
+            )}
 
-            {/* 🔥 Controller is the bridge between RHF and react-select */}
             <Controller
                 control={control}
                 name={name}
@@ -64,12 +119,13 @@ export function FormSelect({
                             formatOptionLabel={formatOptionLabel}
                             ref={ref}
                             inputId={inputId}
-                            options={options}
+                            options={filteredOptions} // 🔥 Filtered options passed here
                             value={selectedValue}
                             isDisabled={disabled}
                             isMulti={isMulti}
                             isSearchable={isSearchable}
-                            placeholder={isLoading ? <Loader className="animate-spin" /> : placeholder}
+                            isClearable={isClearable}
+                            placeholder={isLoading ? <Loader className="animate-spin h-4 w-4" /> : placeholder}
                             onBlur={onBlur}
                             onChange={(selectedOption: any) => {
                                 if (isMulti) {
@@ -77,31 +133,81 @@ export function FormSelect({
                                 } else {
                                     onChange(selectedOption ? selectedOption.value : null);
                                 }
+                                if (onValueChange) {
+                                    onValueChange(selectedOption);
+                                }
                             }}
                             menuPortalTarget={typeof window !== "undefined" ? document.body : null}
                             menuPosition="fixed"
                             styles={{ menuPortal: (base) => ({ ...base, zIndex: 9999 }) }}
+                            components={{
+                                MenuList: (props: MenuListProps<any>) => (
+                                    <components.MenuList {...props}>
+                                        {props.children}
+                                        {(showAddButton || showSecondaryAction) && (
+                                            <div className="sticky bottom-0 bg-white border-t border-slate-100 p-2 z-10 mt-1 flex flex-col gap-1.5 shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)]">
+                                                {showAddButton && (
+                                                    <button
+                                                        type="button"
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            if (addButtonHref) {
+                                                                router.push(addButtonHref);
+                                                            } else if (onAddButtonClick) {
+                                                                onAddButtonClick();
+                                                            }
+                                                        }}
+                                                        className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                                                    >
+                                                        <Plus className="h-4 w-4" />
+                                                        {addButtonLabel}
+                                                    </button>
+                                                )}
+
+                                                {showSecondaryAction && (
+                                                    <button
+                                                        type="button"
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            onSecondaryActionClick?.();
+                                                        }}
+                                                        className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-slate-50 text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-lg text-xs font-bold transition-colors cursor-pointer border border-slate-200"
+                                                    >
+                                                        <SecondaryIcon className="h-4 w-4" />
+                                                        {secondaryActionLabel}
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </components.MenuList>
+                                )
+                            }}
                             unstyled
                             classNames={{
-                                control: (state) => ` min-h-[40px] rounded-xl border text-sm transition-all px-3 ${error
-                                    ? "border-rose-300 bg-rose-50/20"
-                                    : state.isFocused
-                                        ? "border-sky-500 ring-1 ring-sky-500 bg-white"
-                                        : "bg-slate-50 border-slate-200"
-                                    } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`,
-                                placeholder: () => "text-slate-400",
-                                singleValue: () => "text-slate-900",
-                                multiValue: () => "bg-sky-100 text-sky-700 rounded-md px-2 py-0.5 mr-1 mt-1 text-xs font-semibold flex items-center",
-                                multiValueRemove: () => "ml-1 hover:text-sky-900 hover:bg-sky-200 rounded px-0.5",
+                                control: (state) => `min-h-[40px] rounded-xl border text-sm transition-all px-3 cursor-pointer hover:border-sky-400 ${
+                                    error
+                                        ? "border-rose-300 bg-rose-50/20"
+                                        : state.isFocused
+                                            ? "border-sky-500 ring-1 ring-sky-500 bg-white"
+                                            : "bg-slate-50 border-slate-200"
+                                } ${disabled ? "opacity-50 !cursor-not-allowed" : ""}`,
+                                placeholder: () => "text-slate-400 cursor-pointer",
+                                singleValue: () => "text-slate-900 cursor-pointer",
+                                multiValue: () => "bg-sky-100 text-sky-700 rounded-md px-2 py-0.5 mr-1 mt-1 text-xs font-semibold flex items-center cursor-default",
+                                multiValueRemove: () => "ml-1 hover:text-sky-900 hover:bg-sky-200 rounded px-0.5 cursor-pointer",
                                 menu: () => "mt-1.5 rounded-xl border border-slate-200 bg-white shadow-lg overflow-hidden text-sm z-50",
-                                option: (state) => `px-3 py-2 cursor-pointer transition-colors ${state.isSelected
-                                    ? "bg-sky-600 text-white font-medium"
-                                    : state.isFocused
-                                        ? "bg-slate-100 text-slate-900"
-                                        : "text-slate-700 hover:bg-slate-50"
-                                    }`,
+                                option: (state) => `px-3 py-2 cursor-pointer transition-colors ${
+                                    state.isSelected
+                                        ? "bg-sky-600 text-white font-medium"
+                                        : state.isFocused
+                                            ? "bg-slate-100 text-slate-900"
+                                            : "text-slate-700 hover:bg-slate-50"
+                                }`,
                                 noOptionsMessage: () => "p-3 text-slate-500 text-sm",
-                                valueContainer: () => "gap-1 py-1",
+                                valueContainer: () => "gap-1 py-1 cursor-pointer",
+                                input: () => "cursor-text",
                             }}
                         />
                     );

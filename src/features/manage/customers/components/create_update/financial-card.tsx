@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-// 🔥 1. Import useWatch
 import { useFieldArray, useWatch } from "react-hook-form";
 import { Wallet, Trash2, PlusCircle, Package } from "lucide-react";
 import { FormInput } from "@/components/ui/form-input";
@@ -11,12 +9,12 @@ import { FormSelect } from "@/components/ui/form-select";
 export default function FinancialsCard({ control, productOptions = [], isLoadingProducts }: any) {
     const { fields, append, remove } = useFieldArray({
         control,
-        name: "openingReturnables",
+        name: "returnables",
     });
 
     const currentReturnables = useWatch({
         control,
-        name: "openingReturnables",
+        name: "returnables",
         defaultValue: []
     }) || [];
     const canAddNew = productOptions.length > fields.length;
@@ -33,7 +31,7 @@ export default function FinancialsCard({ control, productOptions = [], isLoading
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                         <FormInput
-                            label="Khata (Credit)"
+                            label="Outstanding"
                             type="number"
                             prefix="Rs"
                             name="customerCredit"
@@ -62,7 +60,7 @@ export default function FinancialsCard({ control, productOptions = [], isLoading
                         <div className="flex items-center mr-2">
                             <Package className="h-4 w-4 text-sky-600 mr-2" />
                             <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">
-                                Opening Returnables
+                                Opening Returnables (Only Returnables)
                             </label>
                         </div>
                         <Button
@@ -97,7 +95,7 @@ export default function FinancialsCard({ control, productOptions = [], isLoading
                                     <div key={field.id} className="flex items-start gap-2">
                                         <div className="flex-1">
                                             <FormSelect
-                                                name={`openingReturnables.${index}.productId`}
+                                                name={`returnables.${index}.productId`}
                                                 label=""
                                                 options={availableOptions}
                                                 placeholder="Search item..."
@@ -108,7 +106,7 @@ export default function FinancialsCard({ control, productOptions = [], isLoading
 
                                         <div className="w-28">
                                             <FormInput
-                                                name={`openingReturnables.${index}.quantity`}
+                                                name={`returnables.${index}.quantity`}
                                                 type="number"
                                                 label=""
                                                 placeholder="Qty"

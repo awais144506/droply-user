@@ -2,70 +2,87 @@
 
 import { ArrowLeft, RefreshCw, Store, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { OrderCategory, OrderType } from "../../types/order";
 
-type SaleType = "WALK_IN" | "DELIVERY";
 type Props = {
-    saleType: SaleType;
-    setSaleType: React.Dispatch<React.SetStateAction<SaleType>>;
+    category: OrderCategory;
+    orderType: OrderType;
+    onBack: () => void;
 }
 
-const FormHeader = ({ saleType, setSaleType }: Props) => {
-    const router = useRouter();
-    const onBack = () => {
-        router.back();
-    };
-    const toggleSaleType = () => {
-        setSaleType((prev) => (prev === "WALK_IN" ? "DELIVERY" : "WALK_IN"));
-    };
+const FormHeader = ({ category, orderType, onBack }: Props) => {
 
-    const isWalkIn = saleType === "WALK_IN";
+    // Dynamically map colors, icons, and text based on the selected category
+    const getHeaderConfig = () => {
+        switch (category) {
+            case "WALK_IN":
+                return {
+                    bg: "bg-sky-50/40",
+                    border: "border-b-sky-500",
+                    iconBg: "bg-sky-100",
+                    iconText: "text-sky-600",
+                    Icon: Store,
+                    title: "Plant Gate POS (Walk-In)",
+                    desc: "Immediate counter billing and asset exchange",
+                    btnBorder: "border-sky-200",
+                    btnHoverBg: "hover:bg-sky-50",
+                    btnHoverBorder: "hover:border-sky-300",
+                    btnText: "text-sky-700"
+                };
+            case "DELIVERY":
+                return {
+                    bg: "bg-indigo-50/40",
+                    border: "border-b-indigo-500",
+                    iconBg: "bg-indigo-100",
+                    iconText: "text-indigo-600",
+                    Icon: Truck,
+                    title: "Route Delivery Order",
+                    desc: "Schedule a drop-off and assign a route rider",
+                    btnBorder: "border-indigo-200",
+                    btnHoverBg: "hover:bg-indigo-50",
+                    btnHoverBorder: "hover:border-indigo-300",
+                    btnText: "text-indigo-700"
+                };
+    };}
+
+    const config = getHeaderConfig();
+    const { Icon } = config;
 
     return (
-        <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b-4 transition-colors duration-300 gap-4 ${
-            isWalkIn 
-                ? "border-b-sky-500 bg-sky-50/40" 
-                : "border-b-indigo-500 bg-indigo-50/40"
-        }`}>
+        <div className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 border-b-4 transition-colors duration-300 gap-4 ${config.border} ${config.bg}`}>
             <div className="flex items-center gap-4">
-                <button
+                <Button
+                    type="button"
+                    variant="outline"
                     onClick={onBack}
-                    className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer shadow-sm shrink-0"
+                    className="p-2.5 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer shadow-sm shrink-0 h-auto"
                 >
                     <ArrowLeft className="h-4 w-4 text-slate-600" />
-                </button>
-                
+                </Button>
+
                 <div className="flex items-center gap-3">
-                    <div className={`p-2.5 rounded-xl shrink-0 transition-colors ${
-                        isWalkIn ? "bg-sky-100 text-sky-600" : "bg-indigo-100 text-indigo-600"
-                    }`}>
-                        {isWalkIn ? <Store className="h-6 w-6" /> : <Truck className="h-6 w-6" />}
+                    <div className={`p-2.5 rounded-xl shrink-0 transition-colors ${config.iconBg} ${config.iconText}`}>
+                        <Icon className="h-6 w-6" />
                     </div>
                     <div>
                         <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                            {isWalkIn ? "Walk-In Gate Sale" : "Route Delivery Order"}
+                            {config.title}
                         </h2>
                         <p className="text-xs text-slate-500 font-medium mt-0.5">
-                            {isWalkIn
-                                ? "Immediate counter billing and asset exchange"
-                                : "Schedule a drop-off and assign a route rider"
-                            }
+                            {config.desc}
                         </p>
                     </div>
                 </div>
             </div>
 
             <Button
+                type="button"
                 variant="outline"
-                onClick={toggleSaleType}
-                className={`h-11 rounded-xl text-xs font-bold border-2 cursor-pointer transition-all shadow-sm ${
-                    isWalkIn 
-                        ? "border-sky-200 hover:border-sky-300 hover:bg-sky-50 text-sky-700" 
-                        : "border-indigo-200 hover:border-indigo-300 hover:bg-indigo-50 text-indigo-700"
-                }`}
+                onClick={onBack}
+                className={`h-11 bg-white rounded-xl text-xs font-bold border-2 cursor-pointer transition-all shadow-sm ${config.btnBorder} ${config.btnHoverBorder} ${config.btnHoverBg} ${config.btnText}`}
             >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Switch to {isWalkIn ? "Delivery" : "Walk-In"}
+                Change Category
             </Button>
         </div>
     );

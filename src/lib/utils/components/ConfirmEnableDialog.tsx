@@ -33,7 +33,7 @@ export default function ConfirmEnableDialog({
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel disabled={isEnabling}>Cancel</AlertDialogCancel>
-                    <Button variant="create" onClick={onConfirm} disabled={isEnabling}>
+                    <Button variant="success" onClick={onConfirm} disabled={isEnabling}>
                         {isEnabling ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Enabling...</> : btnText}
                     </Button>
                 </AlertDialogFooter>

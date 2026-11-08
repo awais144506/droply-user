@@ -14,6 +14,6 @@ export const vehicleFuelTypeOption = [
 
 export const vehicleStatusOption = [
     { label: "Active", value: "ACTIVE" },
-    { label: "In Maintenance", value: "MAINTENANCE" },
+    { label: "Maintenance", value: "MAINTENANCE" },
     { label: "Retired/Sold", value: "RETIRED" },
 ]

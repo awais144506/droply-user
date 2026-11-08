@@ -1,19 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { formatCurrency, formatDate } from "@/lib/utils/functions/setFormat";
 import { User, Briefcase, ShieldAlert } from "lucide-react";
+import { Staff } from "../../types/staff";
 
-// Safe helper to render fields
-const InfoRow = ({ label, value }: { label: string, value: string | number | undefined }) => (
+// Safe helper to render fields (allowing null as well)
+const InfoRow = ({ label, value }: { label: string, value: string | number | null | undefined }) => (
   <div className="flex flex-col">
     <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-0.5">{label}</span>
     <span className="text-sm font-medium text-slate-900">{value || "—"}</span>
   </div>
 );
 
-export default function PersonalInfoCard({ user }: { user: any }) {
+export default function PersonalInfoCard({ user }: { user: Staff }) {
   return (
     <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-6">
-      
+
       {/* Section 1: Core Identity */}
       <div>
         <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2 mb-4">
@@ -23,10 +23,10 @@ export default function PersonalInfoCard({ user }: { user: any }) {
           <InfoRow label="Staff Code" value={user.staffCode} />
           <InfoRow label="CNIC" value={user.cnic} />
           <div className="col-span-2">
-            <InfoRow label="Blood Group" value={user.bloodGroup} />
+            <InfoRow label="Blood Group" value={user.hrProfile?.bloodGroup} />
           </div>
           <div className="col-span-2">
-            <InfoRow label="Address" value={user.currentAddress} />
+            <InfoRow label="Address" value={user.address} />
           </div>
         </div>
       </div>
@@ -37,7 +37,7 @@ export default function PersonalInfoCard({ user }: { user: any }) {
           <Briefcase className="h-4 w-4 text-indigo-600" /> Employment Details
         </h3>
         <div className="grid grid-cols-2 gap-y-4 gap-x-4">
-          <InfoRow label="Joining Date" value={formatDate(user.joiningDate)} />
+          <InfoRow label="Joining Date" value={formatDate(user.joiningDate || "")} />
           <InfoRow label="Basic Salary" value={formatCurrency(user.basicSalary)} />
         </div>
       </div>
@@ -48,12 +48,12 @@ export default function PersonalInfoCard({ user }: { user: any }) {
           <ShieldAlert className="h-4 w-4 text-amber-600" /> Family & Guarantor
         </h3>
         <div className="grid grid-cols-2 gap-y-4 gap-x-4">
-          <InfoRow label="Father Name" value={user.fatherName} />
-          <InfoRow label="Father CNIC" value={user.fatherCnic} />
-          <InfoRow label="Guarantor Name" value={user.guarantorName} />
-          <InfoRow label="Guarantor CNIC" value={user.guarantorCnic} />
+          <InfoRow label="Father Name" value={user.hrProfile?.fatherName} />
+          <InfoRow label="Father CNIC" value={user.hrProfile?.fatherCnic} />
+          <InfoRow label="Guarantor Name" value={user.hrProfile?.guarantorName} />
+          <InfoRow label="Guarantor CNIC" value={user.hrProfile?.guarantorCnic} /> {/* 👈 Fixed typo here */}
           <div className="col-span-2">
-            <InfoRow label="Guarantor Phone" value={user.guarantorPhone} />
+            <InfoRow label="Guarantor Phone" value={user.hrProfile?.guarantorPhone} />
           </div>
         </div>
       </div>

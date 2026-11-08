@@ -1,16 +1,18 @@
 "use client";
 import { useRole } from "@/lib/hooks/use-role";
 import { useBranchSettings } from "@/features/admin/settings/api/use-branch-settings";
+import { useUpdateBranchSettings } from "@/features/admin/settings/api/use-update-branch-settings";
 import { BranchSettingsForm } from "@/features/admin/settings/components/branch-settings-form";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
 
 export default function BranchSettingsPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
-  const { fetchBranchSettings, updateBranchSettings } = useBranchSettings(branchId);
+  const { data: branchData, isLoading, isError, error } = useBranchSettings(branchId);
+  const { mutate: updateBranch, isPending } = useUpdateBranchSettings(branchId);
 
-  if (isTenantLoading || fetchBranchSettings.isLoading) return <Loading />
-  if (fetchBranchSettings.isError || !fetchBranchSettings.data) return <ErrorBoundary error="Error Loading Data" />
+  if (isTenantLoading || isLoading) return <Loading text="Loadig Branch Details..." />
+  if (isError || !branchData) return <ErrorBoundary error={error?.message} />
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -22,9 +24,9 @@ export default function BranchSettingsPage() {
       </div>
 
       <BranchSettingsForm
-        initialData={fetchBranchSettings.data}
-        onSubmit={(data) => updateBranchSettings.mutate(data)}
-        isPending={updateBranchSettings.isPending}
+        initialData={branchData}
+        onSubmit={(data) => updateBranch(data)}
+        isPending={isPending}
       />
     </div>
   );

@@ -1,11 +1,12 @@
 import { apiClient } from "@/lib/api-client"
 import { BranchSettingData } from "../types/settings"
 
+const API= '/settings/user'
 export const branchSettingApi = {
-    getBranchSettings: async (branchId: string): Promise<BranchSettingData> => {
-        return apiClient.get(`/settings/${branchId}`);
+    getBranchSettings: async (): Promise<BranchSettingData> => {
+        return apiClient.get(`${API}`);
     },
-    updateBranchSettings: async (branchId: string, updateSettings: BranchSettingData): Promise<BranchSettingData> => {
-        return apiClient.patch(`settings/${branchId}`, updateSettings);
+    updateBranchSettings: async (updateSettings: BranchSettingData): Promise<BranchSettingData> => {
+        return apiClient.patch(`${API}`, updateSettings);
     }
 }

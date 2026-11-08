@@ -20,7 +20,7 @@ const CustomerVisitMapDetails = ({ lastVisitDate, latitude, longitude, name }: P
             <div className=" space-y-6">
 
                 {/* Last Activity Card */}
-                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+                <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm max-w-100">
                     <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
                         <CalendarClock className="h-4 w-4 text-emerald-600" />
                         Last Visit / Order
@@ -41,7 +41,7 @@ const CustomerVisitMapDetails = ({ lastVisitDate, latitude, longitude, name }: P
                             </p>
                         </div>
                     ) : (
-                        <div className="text-slate-400 text-sm italic">
+                        <div className="text-slate-400 text-sm">
                             No previous visits recorded.
                         </div>
                     )}

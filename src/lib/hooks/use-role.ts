@@ -9,16 +9,18 @@ export function useRole() {
   const role = (user?.publicMetadata?.role as "OWNER" | "MANAGER") || "MANAGER";
   const userTier = (user?.publicMetadata.tier as string) || "SILVER";
   const tierCycle = (user?.publicMetadata.cycle as string) || "TRIAL";
-  const userStatus = (user?.publicMetadata.status as string) || "SUSPENDED";
-  const maxUsersLimit = (user?.publicMetadata.maxUsersLimit as number) || 5;
+  const userStatus = (user?.publicMetadata.branchStatus as string) || "SUSPENDED";
+  const maxUsersLimit = (user?.publicMetadata.userLimit as number) || 5;
   const renewDate = user?.publicMetadata.renewDate;
   const userName = String(user?.fullName) || "XYZ";
   const userEmail = String(user?.emailAddresses);
   const userProfilePicture = user?.imageUrl;
+  const userId = user?.id;
 
   return {
     branchId,
     role,
+    userId,
     userTier,
     tierCycle,
     renewDate,

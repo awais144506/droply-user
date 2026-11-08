@@ -1,7 +1,7 @@
 "use client";
 
 import { useRole } from "@/lib/hooks/use-role";
-import { useProducts, useProductLogs } from "@/features/manage/products/api/use-products";
+import { useProducts } from "@/features/manage/products/api/use-products";
 import { ProductStats } from "@/features/manage/products/components/main/product-stats";
 import { ProductsTable } from "@/features/manage/products/components/main/products-table";
 import PageHeader from "@/lib/utils/components/MainPageHeader";
@@ -10,15 +10,15 @@ import ErrorBoundary from "@/app/error";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 
 export default function ProductsPage() {
-  const { branchId, isLoading: isTenantLoading } = useRole();
-  const { data, isLoading, isError, error } = useProducts(branchId);
-  const { data: logs = [] } = useProductLogs(branchId);
+  const { branchId } = useRole();
+  const { data, isLoading, isError, error, refetch, isRefetching } = useProducts(branchId);
 
   const products = data?.products;
-  const stats = data?.stats || { totalItems: 0, lowStockCount: 0, returnablesCount: 0, recipeItemsCount: 0 };
+  const logs = data?.logs;
+  const stats = data?.stats || { totalItems: 0, activeItemsCount: 0, inactiveItemsCount: 0, lowStockCount: 0, returnablesCount: 0, recipeItemsCount: 0 };
 
   //LOADING & ERROR
-  if (isTenantLoading || isLoading) return <Loading />
+  if (isLoading) return <Loading text="Loading Products..." />
   if (isError) return <ErrorBoundary error={error.message} />
 
   //JSX COMPONENT
@@ -29,9 +29,13 @@ export default function ProductsPage() {
         description="Manage your finished goods, raw materials, returnables, and pricing."
         href="/manage/products/create-item"
         btnText="Add New Item"
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
       />
       <ProductStats
         totalItems={stats?.totalItems}
+        activeItemsCount={stats.activeItemsCount}
+        inactiveItemsCount={stats.inactiveItemsCount}
         lowStockCount={stats?.lowStockCount}
         returnablesCount={stats?.returnablesCount}
         recipeItemsCount={stats.recipeItemsCount}

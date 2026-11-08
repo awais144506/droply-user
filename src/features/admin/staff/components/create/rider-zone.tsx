@@ -30,26 +30,23 @@ const RiderZoneCard = ({
                             options={zoneOptions}
                             isSearchable={true}
                             isLoading={isZoneLoading}
-                            required
 
                         />
                     </div>
 
                     <div className="space-y-1.5">
                         <FormSelect
-                            isMulti={true}
-                            name="vehicleIds"
+                            name="vehicleId"
                             label="Assign Vehicle"
                             options={vehicleOptions}
                             isSearchable={true}
                             isLoading={isVehiclesLoading}
-                            required
                             formatOptionLabel={(opt) => (
                                 <div className="flex items-center justify-between w-full pr-1">
                                     <span className="font-medium truncate mr-2">
                                         {opt.label}
                                     </span>
-                                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm ${opt.status === "ACTIVE"
+                                    <span className={`shrink-0 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider text-white shadow-sm ${opt.status === "ACTIVE"
                                         ? "bg-emerald-500"
                                         : "bg-amber-500"
                                         }`}>

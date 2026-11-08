@@ -1,37 +1,43 @@
 "use client";
-
-import { Loader2 } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
 import { useSubscription } from "@/features/admin/subscription/api/use-subscription";
-import { PlanOverview } from "@/features/admin/subscription/components/plan-overview";
-import { PaymentChannels } from "@/features/admin/subscription/components/payment-channels";
-import { BillingLedger } from "@/features/admin/subscription/components/billing-ledger";
+import { PlanOverview } from "@/features/admin/subscription/components/main/plan-overview";
+import ErrorBoundary from "@/app/error";
+import Loading from "@/app/loading";
+import BillingTable from "@/features/admin/subscription/components/main/billing-table";
+import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 
 export default function SubscriptionPage() {
-  const { branchId, isLoading: isTenantLoading } = useRole();
-  const { data, isLoading } = useSubscription(branchId);
+  const { branchId } = useRole();
+  const { data, isLoading, isError, error, refetch, isRefetching } = useSubscription(branchId);
+  const currentPlan = data?.currentPlan
+  const paymentHistory = data?.paymentHistory;
 
-  if (isTenantLoading || isLoading || !data) {
+  if (isLoading || !data) return <Loading text="Loading Subscription..." />
+  if (isError) return <ErrorBoundary error={error.message} />
+
+  if (!currentPlan) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
-        <Loader2 className="h-8 w-8 animate-spin mb-4 text-sky-600" />
-        <p className="text-sm font-medium">Loading subscription profile...</p>
+      <div className="p-6 text-center text-slate-500">
+        No active subscription plan found for this branch.
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 max-w-300 mx-auto p-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Billing & Subscription</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Manage your workspace plan, clear pending invoices, and track billing history.
-        </p>
-      </div>
+    <div className="space-y-8 p-6">
+      <MainPageHeader
+        heading="Billing & Subscription"
+        description="Manage your workspace plan, clear pending invoices, and track billing history."
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
+      />
 
-      <PlanOverview plan={data.plan} />
-      <PaymentChannels />
-      <BillingLedger ledger={data.ledger} />
+      {/* FIXED: Changed 'plan' to 'currentPlan' */}
+      <PlanOverview currentPlan={currentPlan} />
+      <BillingTable
+        ledger={paymentHistory}
+      />
     </div>
   );
 }

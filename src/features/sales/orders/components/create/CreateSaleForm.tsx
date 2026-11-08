@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useEffect } from "react";
-import { useForm, FormProvider } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { FormProvider } from "react-hook-form";
 import { toast } from "sonner";
 import FormHeader from "./form-header";
 import { orderSchema, OrderFormValues } from "../../schema/create-order-schema";
@@ -11,113 +11,191 @@ import DeliveryRider from "./delivery-rider";
 import SelectProduct from "./select-product";
 import CheckoutSale from "./checkout-sale";
 import { useProducts } from "@/features/manage/products/api/use-products";
-import { useCreateOrder } from "../../api/use-mutate-order"; // Adjust path based on your folder structure
-
-type SaleType = "WALK_IN" | "DELIVERY";
+import { useCreateOrder, useUpdateOrder } from "../../api/use-mutate-order";
+import { useAppForm } from "@/lib/hooks/use-app-form";
+import { OrderCategory, OrderType } from "../../types/order";
 
 interface Props {
-  saleType: SaleType;
-  setSaleType: React.Dispatch<React.SetStateAction<SaleType>>;
   branchId: string;
+  category: OrderCategory;
+  orderType: OrderType;
+  onBack: () => void;
+  initialData?: any;
+  isEditing?: boolean;
 }
 
-export default function CreateSaleForm({ saleType, setSaleType, branchId }: Props) {
-  const { data: productData } = useProducts(branchId);
-  const { mutateAsync } = useCreateOrder();
+const getSafeLocalDate = (dateInput?: string | Date) => {
+  const d = dateInput ? new Date(dateInput) : new Date();
+  if (isNaN(d.getTime())) return new Date().toISOString().split('T')[0];
 
-  const methods = useForm<OrderFormValues>({
-    resolver: yupResolver(orderSchema),
-    mode: "onChange",
-    defaultValues: {
-      saleType: saleType,
-      customerId: "",
-      items: [{
-        id: crypto.randomUUID(),
-        productId: "",
-        paidQty: 1,
-        emptiesIn: 0,
-        hasOffer: false,
-        offerQty: 0,
-        chargedDeposit: 0,
-        isDepositCharged: false
-      }],
-      discount: 0,
-      paymentMethod: "CASH",
-      amountPaid: 0,
-      remarks: "",
-    },
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+export default function CreateSaleForm({
+  branchId,
+  category,
+  orderType,
+  onBack,
+  initialData,
+  isEditing = false,
+}: Props) {
+  const { data: productData } = useProducts(branchId);
+  const { mutateAsync: createOrder } = useCreateOrder();
+  const { mutateAsync: updateOrder } = useUpdateOrder();
+
+  const usedExchangeIds = new Set<string>();
+  const initialItems = initialData?.lineItems?.length
+    ? initialData.lineItems.map((item: any, idx: number) => {
+      let matchingAssetExchange = initialData.assetExchanges?.find(
+        (ae: any) =>
+          !usedExchangeIds.has(ae.id) &&
+          (ae.productId === item.containerId || ae.productId === item.returnableProductId)
+      );
+
+      if (!matchingAssetExchange && initialData.assetExchanges?.[idx]) {
+        const candidate = initialData.assetExchanges[idx];
+        if (!usedExchangeIds.has(candidate.id)) {
+          matchingAssetExchange = candidate;
+        }
+      }
+
+      if (matchingAssetExchange?.id) {
+        usedExchangeIds.add(matchingAssetExchange.id);
+      }
+
+      const freeQty = Number(item.freeQuantity || item.offerQty || 0);
+
+      return {
+        id: item.id || crypto.randomUUID(),
+        productId: item.productId || item.product?.id || "",
+        paidQty: item.paidQuantity ?? item.quantity ?? 1,
+        priceTierId: item.priceTierId || "",
+        emptiesIn: matchingAssetExchange
+          ? Number(matchingAssetExchange.inboundQuantity ?? 0)
+          : Number(item.emptiesIn ?? 0),
+        emptiesOut: matchingAssetExchange
+          ? Number(matchingAssetExchange.outboundQuantity ?? 0)
+          : Number(item.emptiesOut ?? 0),
+        hasOffer: freeQty > 0 || Boolean(item.hasOffer),
+        offerQty: freeQty,
+        chargedDeposit: Number(matchingAssetExchange?.depositCharged ?? item.depositCharged ?? item.chargedDeposit ?? 0),
+        isDepositCharged: Boolean(matchingAssetExchange?.depositCharged || item.depositCharged || item.isDepositCharged),
+        unitPrice: item.unitPrice || 0,
+        returnableProductId: item.returnableProductId || matchingAssetExchange?.productId || "",
+      };
+    })
+    : [{
+      id: crypto.randomUUID(),
+      productId: "",
+      paidQty: 1,
+      priceTierId: "",
+      emptiesIn: 0,
+      emptiesOut: 0,
+      hasOffer: false,
+      offerQty: 0,
+      chargedDeposit: 0,
+      isDepositCharged: false,
+      unitPrice: 0,
+      returnableProductId: "",
+    }];
+
+  const methods = useAppForm(orderSchema, {
+    category: initialData?.category || category,
+    orderType: initialData?.orderType || orderType,
+    customerId: initialData?.customerId || initialData?.customer?.id || "",
+    items: initialItems,
+    discount: initialData?.discount || 0,
+    paymentMethod: initialData?.paymentMethod || "CASH",
+    amountPaid: initialData?.amountPaid ?? initialData?.receivedAmount ?? 0,
+    scheduledDate: getSafeLocalDate(initialData?.scheduledDate || initialData?.scheduleDate),
+    deliveryCharges: initialData?.deliveryCharges || 0,
+    ...(initialData?.riderId ? { riderId: initialData.riderId } : {}),
   });
 
   useEffect(() => {
-    methods.setValue("saleType", saleType);
-  }, [saleType, methods]);
+    if (!isEditing) {
+      methods.setValue("category", category, { shouldValidate: true });
+      methods.setValue("orderType", orderType, { shouldValidate: true });
+    }
+  }, [category, orderType, methods, isEditing]);
+
+  const products = productData?.products.filter(p => p.isActive === true) || [];
 
   const onSubmit = async (data: OrderFormValues) => {
-    const products = productData?.products || [];
+    const filteredItems = data.items.filter(item => item.paidQty > 0);
 
-    // 1. Pre-flight Live Stock Check
-    for (const item of data.items) {
-      const product = products.find(p => p.id === item.productId);
-      const requestedQty = Number(item.paidQty) + Number(item.offerQty);
+    if (filteredItems.length === 0) {
+      toast.error(`Please add at least one item to process this ${data.category.replace("_", " ").toLowerCase()}.`);
+      return;
+    }
 
-      if (product && requestedQty > product.currentStock) {
-        toast.error(`Not enough stock for ${product.name}. Only ${product.currentStock} left.`);
-        return;
+    if ((category === "WALK_IN" || category === "DELIVERY") && filteredItems.length === 0) {
+      toast.error("Please add at least one item to the order.");
+      return;
+    }
+
+    if (category === "WALK_IN" || category === "DELIVERY") {
+      for (const item of filteredItems) {
+        const product = products.find(p => p.id === item.productId);
+        const requestedQty = Number(item.paidQty) + Number(item.offerQty);
+        if (product && requestedQty > product.currentStock) {
+          toast.error(`Not enough stock for ${product.name}. Only ${product.currentStock} left.`);
+          return;
+        }
       }
     }
 
     try {
-      // 2. Clean the payload to match EXACTLY what NestJS CreateOrderDto expects
       const payload = {
-        branchId,
-        saleType: data.saleType,
-        customerId: data.customerId,
-        riderId: data.riderId,
-        scheduledDate: data.scheduledDate,
-        discount: data.discount,
-        paymentMethod: data.paymentMethod,
-        amountPaid: data.amountPaid,
-        remarks: data.remarks,
-        // 🔥 Strip out `id` and `discountPrice` by mapping only the required fields
-        items: data.items.map((item) => ({
-          productId: item.productId,
-          paidQty: item.paidQty,
-          emptiesIn: item.emptiesIn,
-          hasOffer: item.hasOffer,
-          offerQty: item.offerQty,
-          chargedDeposit: item.chargedDeposit,
-          isDepositCharged: item.isDepositCharged,
-        })),
+        ...data,
+        items: filteredItems,
       };
 
-      // 3. Await the mutation
-      await mutateAsync(payload);
+      if (isEditing && initialData?.id) {
+        await updateOrder({ id: initialData.id, ...payload });
+      } else {
+        await createOrder(payload);
+      }
 
-      // 4. Reset the form back to initial state upon success
       methods.reset();
-
+      onBack();
     } catch (error) {
       console.error("Order submission failed", error);
     }
   };
 
-  const isDelivery = methods.watch("saleType");
+  const isDelivery = orderType === "DELIVERY";
 
   return (
     <FormProvider {...methods}>
       <form
         onSubmit={methods.handleSubmit(onSubmit)}
-        className="max-w-5xl mx-auto bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden"
+        className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden"
       >
-        <FormHeader saleType={saleType} setSaleType={setSaleType} />
+        <input type="hidden" {...methods.register("category")} />
+        <input type="hidden" {...methods.register("orderType")} />
+
+        <FormHeader
+          category={category}
+          orderType={orderType}
+          onBack={onBack}
+        />
 
         <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <CustomerSelection branchId={branchId} />
-            <DeliveryRider branchId={branchId} />
-            <SelectProduct branchId={branchId} />
+            <CustomerSelection
+              branchId={branchId}
+              disabled={isEditing}
+            />
+            {isDelivery && <DeliveryRider branchId={branchId} initialData={initialData} isEditing={isEditing} />}
+            <SelectProduct branchId={branchId} initialData={initialData} />
           </div>
-          <CheckoutSale branchId={branchId} isDelivery={isDelivery} />
+          <div className="lg:col-span-1 h-full">
+            <CheckoutSale branchId={branchId} isDelivery={isDelivery} initialData={initialData} isEditing={isEditing} />
+          </div>
         </div>
       </form>
     </FormProvider>

@@ -1,33 +1,36 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-
-import React from "react";
-import { Banknote, CreditCard, Receipt, TrendingDown } from "lucide-react";
-import { useFormContext, useWatch, Controller } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
+import { useEffect } from "react";
+import { Banknote, Receipt, TrendingDown, BadgeDollarSign, Truck, ShoppingCart, CreditCard } from "lucide-react";
+import { useFormContext, useWatch } from "react-hook-form";
 import { useCustomers } from "@/features/manage/customers/api/use-customer";
+import { useProducts } from "@/features/manage/products/api/use-products";
 import { OrderFormValues } from "../../schema/create-order-schema";
 import { useOrderCalculations } from "@/features/sales/orders/utils/useOrderCalculations";
 import { FormInput } from "@/components/ui/form-input";
+import { FormSelect } from "@/components/ui/form-select";
+import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
 
+type Props = {
+    branchId: string;
+    isDelivery: boolean;
+    initialData?: any;
+    isEditing?: boolean;
+};
 
+const CheckoutSale = ({ branchId, isDelivery, initialData, isEditing = false }: Props) => {
+    const { control, setValue, formState: { isSubmitting, isDirty } } = useFormContext<OrderFormValues>();
 
-const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: "WALK_IN" | "DELIVERY" }) => {
-    const { control, register, formState: { isValid, isSubmitting } } = useFormContext<OrderFormValues>();
+    // Fetch Customers and Products
     const { data: customerData } = useCustomers(branchId);
+    const { data: productData } = useProducts(branchId);
+
     const customerOptions = customerData?.customerOptions || [];
+    const products = productData?.products || [];
 
     const customerId = useWatch({ control, name: "customerId" });
-    const saleType = useWatch({ control, name: "saleType" });
 
-    const customer = customerOptions.find(c => c.id === customerId);
+    const customer = customerOptions.find(c => c.value === customerId);
     const previousBalance = Number(customer?.customerCredit || 0);
 
     const {
@@ -35,43 +38,79 @@ const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: 
         totalSecurityDeposit,
         totalDue,
         remainingBalance,
-        discountBreakdown
+        discountBreakdown,
+        scale,
     } = useOrderCalculations(branchId, previousBalance);
 
+    useEffect(() => {
+        if (initialData && isEditing) {
+            if (initialData.discount !== undefined) {
+                setValue("discount", initialData.discount);
+            }
+            if (initialData.deliveryCharges !== undefined) {
+                setValue("deliveryCharges", initialData.deliveryCharges);
+            }
+            if (initialData.paymentMethod) {
+                setValue("paymentMethod", initialData.paymentMethod);
+            }
+            if (initialData.amountPaid !== undefined || initialData.receivedAmount !== undefined) {
+                setValue("amountPaid", initialData.amountPaid ?? initialData.receivedAmount ?? 0);
+            }
+        }
+    }, [initialData, isEditing, setValue]);
+
+    const getCtaText = () => {
+        if (isEditing) {
+            return "Save Adjustments";
+        }
+        return isDelivery ? "Dispatch Order" : "Complete Walk-In";
+    };
+
     return (
-        <div className="bg-slate-900 rounded-2xl p-6 text-white flex flex-col h-fit sticky top-6 shadow-xl">
+        <div className="bg-white border rounded-2xl p-6 text-gray-600 flex flex-col h-fit sticky top-6 shadow-sm">
             <div className="flex items-center gap-2 mb-6">
                 <Banknote className="h-5 w-5 text-emerald-400" />
-                <h3 className="text-sm font-bold uppercase tracking-wide">Checkout</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wide">
+                    {isEditing ? "Adjust Checkout" : "Checkout"}
+                </h3>
             </div>
 
             <div className="space-y-4 flex-1">
                 {/* Gross Total */}
-                <div className="flex justify-between items-center text-sm text-slate-400">
+                <div className="flex justify-between items-center text-sm text-gray-600">
                     <span>Products Total</span>
-                    <span className="font-semibold text-white">
+                    <span className="font-semibold text-gray-600">
                         Rs {grossTotal.toLocaleString()}
                     </span>
                 </div>
 
                 {/* Applied FOC Offers */}
                 {discountBreakdown.length > 0 && (
-                    <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/50 space-y-2">
-                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-2">
+                    <div className="bg-slate-100 rounded-lg p-3 border border-slate-700/50 space-y-2">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-500 uppercase tracking-wider mb-2">
                             <Receipt className="h-3 w-3" /> Free Goods
                         </div>
-                        {discountBreakdown.map((disc, idx) => (
-                            <div key={idx} className="flex justify-between items-start text-xs">
-                                <span className="text-slate-300 pr-2">{disc.name}</span>
-                                <span className="text-emerald-400 font-bold">{disc.offerQty}x Free</span>
-                            </div>
-                        ))}
+                        {discountBreakdown.map((disc, idx) => {
+                            const freeProduct = products.find((p: any) => p.id === disc.freeProductId)
+                            const freeProductName = freeProduct?.name || "Unknown Product";
+                            const freeProductScale = freeProduct?.unitOfMeasure || scale;
+                            return (
+                                <div key={idx} className="flex justify-between items-start text-xs">
+                                    <span className="text-gray-600 pr-2 truncate max-w-37.5" title={freeProductName}>
+                                        {freeProductName}
+                                    </span>
+                                    <span className="text-emerald-500 font-bold shrink-0">
+                                        {disc.offerQty} ({freeProductScale?.toLowerCase()}) Free
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
                 )}
 
                 {/* Security Deposit Tally */}
                 {totalSecurityDeposit > 0 && (
-                    <div className="flex justify-between items-center text-sm text-slate-400 border-t border-slate-800 pt-3">
+                    <div className="flex justify-between items-center text-sm text-gray-600 border-t border-slate-800 pt-3">
                         <span>Security Deposits</span>
                         <span className="font-semibold text-amber-400">
                             + Rs {totalSecurityDeposit.toLocaleString()}
@@ -80,29 +119,37 @@ const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: 
                 )}
 
                 {/* Global Discount */}
-                <div className="flex justify-between items-center text-sm text-slate-400 border-t border-slate-800 pt-3">
+                <div className="flex justify-between items-center text-sm text-gray-600 border-t border-slate-800 pt-3">
                     <FormInput
                         label="Discount Bill"
                         type="number"
                         name="discount"
                         min={0}
                         prefix="Rs"
-                        lableTextColor="text-slate-400"
-                    />
-                </div>
-                <div className="flex justify-between items-center text-sm text-slate-400 border-t border-slate-800 pt-3">
-                    <FormInput
-                        label="Delivery Charges"
-                        type="number"
-                        name="deliveryCharges"
-                        min={0}
-                        prefix="Rs"
-                        lableTextColor="text-slate-400"
+                        lableTextColor="text-gray-600"
+                        labelIcon={BadgeDollarSign}
+                        iconColor="text-emerald-400"
                     />
                 </div>
 
+                {/* Conditionally hide delivery charges if it's a WALK_IN sale */}
+                {isDelivery && (
+                    <div className="flex justify-between items-center text-sm text-gray-600 border-t border-slate-800 pt-3">
+                        <FormInput
+                            label="Delivery Charges"
+                            type="number"
+                            name="deliveryCharges"
+                            min={0}
+                            prefix="Rs"
+                            lableTextColor="text-gray-600"
+                            labelIcon={Truck}
+                            iconColor="text-emerald-400"
+                        />
+                    </div>
+                )}
+
                 {/* Previous Khata Balance */}
-                <div className="flex justify-between items-center text-sm text-slate-400 border-t border-slate-800 pt-3">
+                <div className="flex justify-between items-center text-sm text-gray-600 border-t border-slate-800 pt-3">
                     <span>Previous Balance</span>
                     <span className={`font-semibold ${previousBalance > 0 ? "text-rose-400" : "text-emerald-400"}`}>
                         Rs {previousBalance.toLocaleString()}
@@ -112,8 +159,8 @@ const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: 
                 <div className="pt-4 border-t border-slate-700">
                     {/* Total Due */}
                     <div className="flex justify-between items-end mb-6">
-                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Due</span>
-                        <span className="text-3xl font-extrabold text-white">
+                        <span className="text-xs font-bold text-gray-600 uppercase tracking-wider">Total Due</span>
+                        <span className="text-3xl font-extrabold text-gray-600">
                             Rs {totalDue.toLocaleString()}
                         </span>
                     </div>
@@ -121,26 +168,17 @@ const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: 
                     <div className="space-y-4">
                         {/* Payment Method */}
                         <div>
-                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 block">
-                                Payment Method
-                            </label>
-                            <Controller
-                                control={control}
+                            <FormSelect
+                                label="Payment Method"
                                 name="paymentMethod"
-                                render={({ field }) => (
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <SelectTrigger className="w-full h-10 rounded-xl bg-slate-800 border-slate-700 text-white focus:ring-emerald-500">
-                                            <div className="flex items-center gap-2">
-                                                <CreditCard className="h-4 w-4" />
-                                                <SelectValue />
-                                            </div>
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="CASH">Cash</SelectItem>
-                                            <SelectItem value="BANK">Online</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                )}
+                                options={[
+                                    { label: "Cash", value: "CASH" },
+                                    { label: "Bank/Online", value: "BANK" },
+                                ]}
+                                placeholder="Select method..."
+                                lableTextColor="text-gray-600"
+                                labelIcon={CreditCard}
+                                iconColor="text-emerald-400"
                             />
                         </div>
 
@@ -148,17 +186,20 @@ const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: 
                         <div className="relative">
                             <FormInput
                                 name="amountPaid"
-                                label="Received Now"
-                                lableTextColor="text-slate-400"
+                                label="Amount Received Now"
+                                lableTextColor="text-gray-600"
+                                type="number"
                                 prefix="Rs"
                                 required
+                                labelIcon={BadgeDollarSign}
+                                iconColor="text-emerald-400"
                             />
                         </div>
 
                         {/* Live Remaining Balance */}
                         <div className="flex items-center justify-between bg-slate-950 rounded-lg p-3 border border-slate-800">
-                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase">
-                                <TrendingDown className="h-3.5 w-3.5" /> Remaining to Khata
+                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-200 uppercase">
+                                <TrendingDown className="h-3.5 w-3.5" />Outstanding
                             </div>
                             <span className={`text-sm font-black ${remainingBalance > 0 ? "text-rose-500" : "text-emerald-500"}`}>
                                 Rs {remainingBalance.toLocaleString()}
@@ -168,13 +209,18 @@ const CheckoutSale = ({ branchId, isDelivery }: { branchId: string, isDelivery: 
                 </div>
             </div>
 
-            <Button
-                type="submit"
-                disabled={!isValid || isSubmitting}
-                className="w-full h-12 mt-6 bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed..."
-            >
-                {isSubmitting ? "Processing..." : (saleType === "WALK_IN" ? "Finalize Sale" : "Dispatch Order")}
-            </Button>
+            <FormCTAFooter
+                isPending={isSubmitting}
+                isValid={true}
+                isDirty={isDirty}
+                isEditMode={isEditing}
+                ctaText={getCtaText()}
+                icon={isDelivery ? Truck : ShoppingCart}
+                isCancel={true}
+                href="/sales/orders"
+                varient="success"
+                cancelVarient="secondary"
+            />
         </div>
     );
 };

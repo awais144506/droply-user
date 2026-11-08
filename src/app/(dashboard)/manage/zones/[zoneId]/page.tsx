@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Trash2, Edit} from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { useZone } from "@/features/manage/zones/api/use-zones";
 import { useDeleteZone, } from "@/features/manage/zones/api/use-mutate-zone";
@@ -10,8 +10,8 @@ import PageDetailHeader from "@/lib/utils/components/PageDetailHeader";
 import Loading from "@/app/loading";
 import NotFoundPage from "@/app/not-found";
 import { Button } from "@/components/ui/button";
-import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDeleteItemDialog";
-import EditZoneDialog from "@/features/manage/zones/components/zone_details/edit-zone";
+import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
+import EditZoneDialog from "@/features/manage/zones/components/zone_details/EditZone";
 import { ZoneDetailStats } from "@/features/manage/zones/components/zone_details/zone-detail-stats";
 import ZoneDetailMap from "@/features/manage/zones/components/zone_details/zone-detail-map";
 import { useSearchParams } from "next/navigation";
@@ -22,15 +22,14 @@ export default function ZoneDetailsPage() {
   const zoneId = params.zoneId as string;
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || undefined;
-
   const { data, isLoading } = useZone(zoneId, search);
 
   const { mutate: deleteZone, isPending: isDeleting } = useDeleteZone();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-  if (isLoading) return <Loading />
-  if (!data || !data.zone) return <NotFoundPage />
+  if (isLoading || !data?.zone) return <Loading text="Loading zone details..." />
+  if (!data) return <NotFoundPage />
 
   const { zone, filterCustomer, stats, hasCustomers, hasLedger, hasReturnables, hasRiders } = data;
 
@@ -58,14 +57,17 @@ export default function ZoneDetailsPage() {
 
   return (
     <>
-      <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
 
         {/* Header Section */}
         <div className="flex flex-col gap-3">
           <PageDetailHeader
+            breadcrumbs={[
+              { label: "Zones", href: '/manage/zones' },
+              { label: `${zone.name} Zone Details` }
+            ]}
             heading={zone.name}
             description="Zone Overview & Customer Directory"
-            href="/manage/zones"
             createdAt={zone.createdAt}
             updatedAt={zone.updatedAt}
           >
@@ -96,21 +98,25 @@ export default function ZoneDetailsPage() {
           totalLedger={stats?.calculatedLedger}
           totalReturnables={stats?.calculatedReturnables}
         />
-
-        {/* Map and Riders Grid */}
         <ZoneDetailMap
           zone={zone}
         />
-
         <ZoneCustomersTable customers={filterCustomer} />
       </div>
 
       <ConfirmDeleteDialog
-        itemName={`Zone "${zone.name}"`}
+        title={`Delete "${zone.name}" Zone?`}
+        description={
+          <span>
+            Are you sure you want to delete <span className="font-bold text-slate-900">{zone.name}</span>?
+          </span>
+        }
+        isLoading={isDeleting}
+        confirmText="Delete Zone"
+        confirmButtonClass="bg-rose-600 hover:bg-rose-700 text-white"
         isOpen={isDeleteDialogOpen}
         onClose={() => setIsDeleteDialogOpen(false)}
         onConfirm={handleConfirmDelete}
-        isDeleting={isDeleting}
       />
       <EditZoneDialog
         zone={zone}

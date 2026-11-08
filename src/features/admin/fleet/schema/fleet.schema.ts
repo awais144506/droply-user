@@ -1,5 +1,11 @@
 import * as yup from "yup";
 
+// Helper to safely transform empty/NaN number inputs to null or undefined
+const numberOrNull = yup
+  .mixed()
+  .transform((val, originalVal) => (originalVal === "" || isNaN(originalVal) ? null : val))
+  .nullable();
+
 export const vehicleSchema = yup.object({
   registration: yup.string()
     .trim()
@@ -24,24 +30,20 @@ export const vehicleSchema = yup.object({
     .typeError("Odometer must be a number")
     .min(0, "Odometer cannot be negative")
     .required("Current odometer reading is required"),
+  assignedStaffId: yup.string().nullable().optional(),
 });
 
 export type VehicleFormValues = yup.InferType<typeof vehicleSchema>;
 
-export const fuelExpenseSchema = yup.object({
+export const vehicleExpenseSchema = yup.object({
   vehicleId: yup.string().required("Please select a vehicle"),
+  category: yup.string()
+    .oneOf(["FUEL", "MAINTENANCE"], "Invalid category")
+    .required("Expense category is required"),
   date: yup.date()
     .typeError("Please enter a valid date")
     .default(() => new Date())
     .required("Date is required"),
-  liters: yup.number()
-    .typeError("Liters must be a number")
-    .positive("Liters must be greater than zero")
-    .required("Liters are required"),
-  costPerLiter: yup.number()
-    .typeError("Cost per liter must be a number")
-    .positive("Cost must be greater than zero")
-    .required("Cost per liter is required"),
   totalCost: yup.number()
     .typeError("Total cost must be a number")
     .positive("Total cost must be greater than zero")
@@ -50,6 +52,25 @@ export const fuelExpenseSchema = yup.object({
     .typeError("Odometer reading must be a number")
     .min(0, "Odometer cannot be negative")
     .required("Odometer reading is required"),
+  notes: yup.string().nullable().optional(),
+
+  // --- Fuel Specific (Conditionally Required) ---
+  liters: numberOrNull
+    .when("category", {
+      is: "FUEL",
+      then: () => yup.number().typeError("Liters must be a number").positive("Must be greater than zero").required("Liters are required"),
+      otherwise: () => yup.number().nullable().notRequired(),
+    }),
+  costPerLiter: numberOrNull
+    .when("category", {
+      is: "FUEL",
+      then: () => yup.number().typeError("Cost must be a number").positive("Must be greater than zero").required("Cost per liter is required"),
+      otherwise: () => yup.number().nullable().notRequired(),
+    }),
+
+  // --- Maintenance Specific ---
+  serviceProvider: yup.string().nullable().optional(),
+  invoiceNumber: yup.string().nullable().optional(),
 });
 
-export type FuelExpenseFormValues = yup.InferType<typeof fuelExpenseSchema>;
+export type VehicleExpenseFormValues = yup.InferType<typeof vehicleExpenseSchema>;

@@ -9,7 +9,8 @@ const isPublicRoute = createRouteMatcher([
   "/sign-up(.*)",
   "/unauthorized(.*)",
   "/api/webhooks(.*)",
-  "/api/uploadthing(.*)"
+  "/api/uploadthing(.*)",
+  "/order(.*)"
 ]);
 const isAuthRoute = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/"]);
 const isUnauthorizedRoute = createRouteMatcher(["/unauthorized(.*)"]);
@@ -17,13 +18,13 @@ const isUnauthorizedRoute = createRouteMatcher(["/unauthorized(.*)"]);
 // 2. Safe routes for suspended users
 const isBillingRoute = createRouteMatcher([
   "/admin/subscription(.*)",
-  "/sign-out(.*)"
+  "/sign-out(.*)",
+  "/api/uploadthing(.*)"
 ]);
 
-const isOwnerOnlyRoute = createRouteMatcher(["/admin/staff(.*)"]);
+const isOwnerOnlyRoute = createRouteMatcher(["/admin/staff(.*)","/admin/subscription(.*)"]);
 const isGoldPlusRoute = createRouteMatcher([
-  "/sales/recovery(.*)", "/stock/assets(.*)", "/stock/wastage(.*)",
-  "/supply/(.*)", "/admin/fleet(.*)", "/admin/reports(.*)"
+  "/sales/recovery(.*)", "/stock/assets(.*)", "/admin/fleet(.*)", "/admin/reports(.*)"
 ]);
 const isPlatinumRoute = createRouteMatcher([
   "/sales/tracking(.*)", "/stock/production(.*)", "/admin/tasks(.*)"
@@ -35,16 +36,32 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   if (req.nextUrl.pathname.startsWith("/_next") || req.nextUrl.pathname.includes(".")) {
     return NextResponse.next();
   }
+
+  // 🔥 FIX 2: Always let UploadThing & Webhooks bypass tenant/suspension checks immediately
+  if (
+    req.nextUrl.pathname.startsWith("/api/uploadthing") ||
+    req.nextUrl.pathname.startsWith("/api/webhooks")
+  ) {
+    return NextResponse.next();
+  }
+  
   const { userId, sessionClaims } = await auth();
   const metadata = (sessionClaims?.metadata || sessionClaims?.public_metadata || {}) as {
-    role?: string; branchId?: string; tier?: string; status?: string; renewDate?: string;
+    role?: string; 
+    branchId?: string; 
+    tier?: string; 
+    branchStatus?: string; 
+    userStatus?: string; 
+    status?: string; // Fallback for legacy
   };
 
   const userRole = metadata.role;
   const branchId = metadata.branchId;
   const tier = (metadata.tier || "SILVER").toUpperCase();
-  const status = (metadata.status || "ACTIVE").toUpperCase();
-  const renewDate = metadata.renewDate;
+  
+  // Use the new keys, default to ACTIVE if missing
+  const branchStatus = (metadata.branchStatus || metadata.status || "ACTIVE").toUpperCase();
+  const userStatus = (metadata.userStatus || "ACTIVE").toUpperCase();
 
   const isAllowedTenantUser = Boolean(userRole) && ALLOWED_TENANT_ROLES.includes(userRole!) && Boolean(branchId);
 
@@ -54,8 +71,10 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
     return NextResponse.redirect(new URL("/sign-in", req.url));
   }
 
-  // --- B. AUTHENTICATED BUT UNAUTHORIZED ---
-  if (!isAllowedTenantUser) {
+const isBranchInactiveOrSuspended = branchStatus === "INACTIVE" || branchStatus === "SUSPENDED";
+  const isUserInactiveOrSuspended = userStatus === "INACTIVE" || userStatus === "SUSPENDED";
+
+  if (!isAllowedTenantUser || isUserInactiveOrSuspended || isBranchInactiveOrSuspended) {
     if (isUnauthorizedRoute(req)) return NextResponse.next();
     return NextResponse.redirect(new URL("/unauthorized", req.url));
   }
@@ -63,27 +82,6 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   // --- C. VALID USERS HITTING PUBLIC ROUTES ---
   if (isAuthRoute(req) || isUnauthorizedRoute(req)) {
     return NextResponse.redirect(new URL("/app", req.url));
-  }
-
-  const gracePeriod = parseInt(process.env.NEXT_PUBLIC_GRACE_PERIOD || "3", 10);
-  let isDateSuspended = false;
-  if (renewDate) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const expiration = new Date(renewDate);
-    expiration.setHours(0, 0, 0, 0);
-    const diffTime = today.getTime() - expiration.getTime();
-    const daysPastDue = Math.round(diffTime / (1000 * 60 * 60 * 24));
-    if (daysPastDue >= gracePeriod) isDateSuspended = true;
-  }
-
-  const isStrictlySuspended = status === "SUSPENDED" || isDateSuspended;
-
-  if (isStrictlySuspended && !isBillingRoute(req)) {
-    if (req.nextUrl.pathname.startsWith("/api")) {
-      return NextResponse.json({ error: "Account Suspended" }, { status: 403 });
-    }
-    return NextResponse.redirect(new URL("/admin/subscription", req.url));
   }
 
   // --- E. ROLE & TIER-BASED ROUTE PROTECTION ---
@@ -95,17 +93,16 @@ export default clerkMiddleware(async (auth, req: NextRequest) => {
   const hasPlatinum = tier === "PLATINUM";
 
   if (isPlatinumRoute(req) && !hasPlatinum) {
-    return NextResponse.redirect(new URL("/admin/subscription?upgrade=platinum", req.url));
+    return NextResponse.redirect(new URL("/admin/subscription", req.url));
   }
 
   if (isGoldPlusRoute(req) && !hasGoldPlus) {
-    return NextResponse.redirect(new URL("/admin/subscription?upgrade=gold", req.url));
+    return NextResponse.redirect(new URL("/admin/subscription", req.url));
   }
 
   return NextResponse.next();
 });
 
-// 🔥 Double check this is perfectly formatted at the very bottom!
 export const config = {
   matcher: [
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",

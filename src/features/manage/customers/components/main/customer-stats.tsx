@@ -20,7 +20,7 @@ export function CustomerStats({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <PageStatsCard
-        title="Total Accounts"
+        title="Total Customers"
         value={totalCustomers}
         icon={Users}
         postfix={`(${activeCount} Active)`}

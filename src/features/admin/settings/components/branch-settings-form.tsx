@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/incompatible-library */
 "use client";
@@ -5,15 +6,16 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Building2, Upload, Loader2, Save, X } from "lucide-react";
+import { Building2, Upload, Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { BranchSettingData } from "../types/settings";
 import { InvoicePreview } from "./invoice-preview";
 import { useUploadThing } from "@/lib/uploadthing";
 import { branchSettingsSchema, BranchSettingsFormValues } from "../schema/update-branch-settings.schema";
-import { formatPakistaniPhone } from "@/lib/utils/functions/setFormat";
 import { FormInput } from "@/components/ui/form-input";
+import { FormPhoneInput } from "@/components/ui/form-phone-input";
+import { compressImageFile } from "@/lib/utils/functions/compress-image";
 
 interface BranchSettingsFormProps {
   initialData: BranchSettingData;
@@ -35,10 +37,12 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
     resolver: yupResolver(branchSettingsSchema),
     mode: "onChange",
     defaultValues: {
-      displayName: initialData?.displayName || "",
-      displayPhone: initialData?.displayPhone || "",
-      displayEmail: initialData?.displayEmail || "",
-      displayAddress: initialData?.displayAddress || "",
+      name: initialData?.name || "",
+      phone: initialData?.phone || "",
+      email: initialData?.email || "",
+      address: initialData?.address || "",
+      ntn: initialData?.ntn || "",
+      strn: initialData?.strn || "",
     },
   });
 
@@ -47,36 +51,37 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
 
   const { startUpload, isUploading } = useUploadThing("branchLogo");
 
+  // 🔥 Strict tracking of whether the logo has actually been modified or removed
   const hasLogoChanged = !!selectedFile || (isLogoRemoved && safeInitialLogo !== null);
   const isFormDirty = isDirty || hasLogoChanged;
 
   const handleUploadClick = () => { fileInputRef.current?.click(); };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 4 * 1024 * 1024) {
-      toast.error("File size exceeds 4MB limit.");
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("File size exceeds 5MB limit.");
       e.target.value = "";
       return;
     }
 
-    const previewUrl = URL.createObjectURL(file);
-    setLogoPreview(previewUrl);
-    setSelectedFile(file);
-    setIsLogoRemoved(false);
-  };
+    try {
+      // 🔥 Compress the image file using our utility function
+      const compressedFile = await compressImageFile(file);
+      const previewUrl = URL.createObjectURL(compressedFile);
 
-  const removeLogo = () => {
-    setLogoPreview(null);
-    setSelectedFile(null);
-    setIsLogoRemoved(true);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+      setLogoPreview(previewUrl);
+      setSelectedFile(compressedFile);
+      setIsLogoRemoved(false);
+    } catch (error) {
+      toast.error("Failed to process and compress image.");
+    }
   };
 
   const handleFormSubmit = async (data: Partial<BranchSettingData>) => {
-    let finalLogoUrl = isLogoRemoved ? undefined : safeInitialLogo;
+    let logoUrl = isLogoRemoved ? undefined : safeInitialLogo;
 
     if (selectedFile) {
       try {
@@ -88,7 +93,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
         });
 
         if (res && res.length > 0) {
-          finalLogoUrl = res[0].ufsUrl;
+          logoUrl = res[0].ufsUrl;
         } else {
           toast.error("Failed to upload logo.");
           return;
@@ -98,7 +103,18 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
         return;
       }
     }
-    onSubmit({ ...data, logoUrl: finalLogoUrl || "", displayPhone: formatPakistaniPhone(data.displayPhone) });
+    const finalPayload = { ...data, logoUrl: logoUrl || "" };
+    await onSubmit(finalPayload);
+    methods.reset({
+      name: data.name || "",
+      phone: data.phone || "",
+      email: data.email || "",
+      address: data.address || "",
+      ntn: data.ntn || "",
+      strn: data.strn || "",
+    });
+    setSelectedFile(null);
+    setIsLogoRemoved(false);
   };
 
   return (
@@ -110,7 +126,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
               <Button
                 type="submit"
                 disabled={!isFormDirty || !isValid || isPending || isUploading}
-                variant="create"
+                variant="default"
               >
                 {isPending || isUploading ? (
                   <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {isUploading ? "Uploading Logo..." : "Saving..."}</>
@@ -121,7 +137,7 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
             </div>
 
             {/* Logo Upload Section */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
               <h3 className="text-sm font-bold text-slate-900 mb-1">Invoice Logo</h3>
               <p className="text-xs text-slate-500 mb-6">This logo will appear on your printed invoices and PDFs.</p>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
@@ -129,9 +145,6 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
                   {typeof logoPreview === 'string' && (logoPreview.startsWith('http') || logoPreview.startsWith('blob')) ? (
                     <>
                       <Image src={logoPreview} alt="Branch Logo" fill sizes="(max-width: 768px) 100vw, 33vw" className="object-contain p-2" />
-                      <button type="button" onClick={removeLogo} className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <X className="h-6 w-6 text-white" />
-                      </button>
                     </>
                   ) : (
                     <Building2 className="h-8 w-8 opacity-20" />
@@ -148,13 +161,13 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
                   >
                     <Upload className="h-3.5 w-3.5 mr-2 text-sky-600" /> {logoPreview ? "Change Logo" : "Upload New Logo"}
                   </Button>
-                  <p className="text-[10px] text-slate-400 font-medium">PNG, JPG or SVG. Max size 4MB.</p>
+                  <p className="text-[10px] text-slate-600 font-medium">PNG, JPG or SVG. Compressed automatically.</p>
                 </div>
               </div>
             </div>
 
             {/* Branch Details Section */}
-            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+            <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-6">
               <div>
                 <h3 className="text-sm font-bold text-slate-900 mb-1">Branch Details</h3>
                 <p className="text-xs text-slate-500">Update the contact information displayed to your customers and suppliers.</p>
@@ -163,16 +176,16 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-1.5">
                   <FormInput
-                    name="displayName"
-                    label="Display Name"
+                    name="name"
+                    label="Name"
                     required
                     placeholder="e.g. Droply - Main Branch"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <FormInput
-                    name="displayPhone"
+                  <FormPhoneInput
+                    name="phone"
                     label="Contact No"
                     required
                     placeholder="e.g. 03001234567"
@@ -181,9 +194,25 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
 
                 <div className="space-y-1.5">
                   <FormInput
-                    name="displayEmail"
+                    name="email"
                     label="Email"
                     placeholder="e.g. branch@droply.com"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <FormInput
+                    name="ntn"
+                    label="NTN"
+                    placeholder="e.g. 2532465134"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <FormInput
+                    name="strn"
+                    label="STRN"
+                    placeholder="e.g. 55-12254"
                   />
                 </div>
               </div>
@@ -191,12 +220,11 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
               <div className="space-y-1.5">
                 <FormInput
                   label="Branch Address"
-                  name="displayAddress"
+                  name="address"
                   placeholder="e.g. Droply Main Branch, Lahore."
                 />
               </div>
             </div>
-
           </form>
         </FormProvider>
       </div>

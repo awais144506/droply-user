@@ -1,42 +1,114 @@
-export type CategoryType = "FINISHED_GOOD" | "RAW_MATERIAL" | "TRADE" | "EQUIPMENT" | "PACKAGING"
+import { ActivityLog } from "@/types/ActivityLog";
+
+export type CategoryType = 
+    | "FINISHED_GOOD" 
+    | "RAW_MATERIAL" 
+    | "TRADE" 
+    | "PACKAGING" 
+    | "EQUIPMENT" 
+    | "SERVICE";
+
 export type TrackingType = "OUTRIGHT" | "RETURNABLE";
-export interface ProductItem {
-    securityDeposit: number | null;
+
+export type UnitOfMeasureType = 
+    | "PIECE" 
+    | "KG" 
+    | "GRAM" 
+    | "LITER" 
+    | "MILLILITER" 
+    | "PACK" 
+    | "CARTON";
+
+export interface ProductPriceTier {
     id: string;
-    name: string;
-    sku: string;
-    category: CategoryType;
-    trackingType: TrackingType;
+    productId: string;
+    title: string | null;
     unitCost: number;
     salePrice: number;
-    stockOnHand: number;
+    profitMargin: number;
+    isDefault: boolean;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface RecipeIngredientItem {
+    id: string;
+    parentItemId: string;
+    childItemId: string;
+    quantity: number;
+    childItem: {
+        id?: string;
+        name: string;
+        productCode?: string;
+        unitOfMeasure?: UnitOfMeasureType;
+        currentStock?: number;
+    };
+}
+
+export interface ProductItem {
+    isPublic: boolean;
+    id: string;
+    branchId: string;
+    productCode: string;
+    name: string;
+    category: CategoryType;
+    trackingType: TrackingType;
+    unitOfMeasure: UnitOfMeasureType;
+    securityDeposit: number;
+    openingStock: number;
+    currentStock: number;
     lowStockThreshold: number;
     hasRecipe: boolean;
     isActive: boolean;
-    isUsedInRecipes?: boolean;
-    recipeIngredients?: {
+    createdAt: string;
+    updatedAt: string;
+    unitCost?: number;
+    salePrice?: number;
+    profitMargin?: number;
+    priceTiers: ProductPriceTier[];
+    recipeIngredients?: RecipeIngredientItem[];
+    usedInRecipes?: {
         id: string;
-        quantity: number;
-        childItemId: string;
-        childItem: {
+        parentItem: {
+            id: string;
             name: string;
-            sku: string;
+            productCode: string;
         };
     }[];
 }
 
 export interface ProductList {
-    securityDeposit: number;
+    isPublic: import("react").JSX.Element;
+    isUsedInRecipes: boolean | undefined;
     id: string;
+    productCode: string;
     name: string;
-    sku: string;
     category: CategoryType;
     trackingType: TrackingType;
-    unitCost: number;
+    unitOfMeasure: UnitOfMeasureType;
+    securityDeposit: number;
+    openingStock: number;
     currentStock: number;
-    profirMargin: number;
     lowStockThreshold: number;
-    salePrice: number;
     hasRecipe: boolean;
-    isUsedInRecipes?: boolean;
+    isActive: boolean;
+    unitCost: number;
+    salePrice: number;
+    profitMargin: number;
+    priceTiers: ProductPriceTier[];
+    recipeIngredients?: {
+        childItemId: string;
+        quantity: number;
+        childItem: {
+            name: string;
+            currentStock: number;
+            unitOfMeasure: UnitOfMeasureType;
+        };
+    }[];
+}
+
+export interface ProductListResponse {
+    products: ProductList[];
+    logs: ActivityLog[];
 }

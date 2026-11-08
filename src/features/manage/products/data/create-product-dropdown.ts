@@ -4,9 +4,20 @@ export const categoryOptions = [
     { value: "TRADE", label: "Trade Item" },
     { value: "PACKAGING", label: "Packaging" },
     { value: "EQUIPMENT", label: "Equipment" },
+    { value: "SERVICE", label: "Service" },
 ];
 
 export const trackingOptions = [
     { value: "OUTRIGHT", label: "Outright (Sold)" },
     { value: "RETURNABLE", label: "Returnable (Trackable)" },
+];
+
+export const scaleOptions = [
+    { value: "PIECE", label: "Piece" },
+    { value: "KG", label: "KG" },
+    { value: "GRAM", label: "Gram" },
+    { value: "LITER", label: "Liter" },
+    { value: "MILLILITER", label: "Milli Liter" },
+    { value: "PACK", label: "Pack" },
+    { value: "CARTON", label: "Carton" },
 ];

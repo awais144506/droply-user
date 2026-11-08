@@ -7,9 +7,8 @@ import { useCreateStaff } from "@/features/admin/staff/api/use-mutate-staff";
 import { CreateStaffFormData } from "@/features/admin/staff/schema/create-staff-schema";
 import ChooseStaff from "@/features/admin/staff/components/create/choose-user";
 import CreateFormHeader from "@/lib/utils/components/FormHeaderNavigation";
-import { formatStaffPayload, StaffRole } from "@/features/admin/staff/utils/formatStaffPayload";
 import { useVehicles } from "@/features/admin/fleet/api/use-fleet";
-import CreateStaffForm from "@/features/admin/staff/components/create/CreateStaffForm";
+import { CreateStaffForm } from "@/features/admin/staff/components/create/StaffForm";
 import { useStaffList } from "@/features/admin/staff/api/use-staff";
 
 export default function CreateStaffPage() {
@@ -20,17 +19,16 @@ export default function CreateStaffPage() {
   const { data: zoneData, isLoading: isZoneLoading } = useZones(branchId);
   const { data: vehiclesData, isLoading: isVehiclesLoading } = useVehicles(branchId);
   const { data: activeStaff } = useStaffList(branchId);
-  const isLimitReached = activeStaff?.isLimitReached
 
   const zoneOptions = zoneData?.zoneOptions;
   const vehicleOptions = vehiclesData?.vehicleOptions;
+  const isLimitReached = activeStaff?.isLimitReached
 
-  const { mutate: createStaff, isPending } = useCreateStaff(branchId);
+  const { mutate: createStaff, isPending } = useCreateStaff();
 
   // Wizard State
   const [step, setStep] = useState<"SELECT_ROLE" | "FORM">("SELECT_ROLE");
-  const [selectedRole, setSelectedRole] = useState<"MANAGER" | "RIDER">("RIDER");
-
+  const [selectedRole, setSelectedRole] = useState<"MANAGER" | "RIDER" | "STAFF">("STAFF");
 
   const handleRoleSelect = (role: "MANAGER" | "RIDER") => {
     setSelectedRole(role);
@@ -38,8 +36,7 @@ export default function CreateStaffPage() {
   };
 
   const onSubmit = (data: CreateStaffFormData) => {
-    const payload = formatStaffPayload(data, branchId, selectedRole as StaffRole);
-    createStaff(payload, {
+    createStaff(data, {
       onSuccess: () => router.back(),
     });
   };
@@ -47,8 +44,17 @@ export default function CreateStaffPage() {
   return (
     <div className="max-w-8xl mx-auto space-y-6 p-4 sm:p-6 lg:p-8">
 
-      <CreateFormHeader text={`Create Staff (${selectedRole})`} href="/admin/staff" />
-      <ChooseStaff step={step} handleRoleSelect={handleRoleSelect} />
+      <CreateFormHeader
+        title={`Create New Staff`}
+        breadcrumbs={[
+          { label: "Staff", href: "/admin/staff" },
+          { label: `Create Staff` }
+        ]}
+      />
+      <ChooseStaff
+        step={step}
+        handleRoleSelect={handleRoleSelect}
+      />
 
       {step === "FORM" && (
         <CreateStaffForm

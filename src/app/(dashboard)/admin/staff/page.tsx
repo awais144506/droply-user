@@ -3,14 +3,13 @@ import { useRole } from "@/lib/hooks/use-role";
 import PageHeader from "@/lib/utils/components/MainPageHeader";
 import TierLimitCard from "@/features/admin/staff/components/main/tier-limit-card";
 import Loading from "@/app/loading";
-import { useStaffList, useStaffLogs } from "@/features/admin/staff/api/use-staff";
+import { useStaffList } from "@/features/admin/staff/api/use-staff";
 import ErrorBoundary from "@/app/error";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 import { StaffStats } from "@/features/admin/staff/components/main/staff-stats";
 import { StaffTable } from "@/features/admin/staff/components/main/staff-table";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
-// You may no longer need getTierConfig here unless you use it for UI colors!
 
 export default function StaffPage() {
   const { branchId, maxUsersLimit } = useRole();
@@ -19,14 +18,14 @@ export default function StaffPage() {
   const role = searchParams.get("role") || undefined;
   const status = searchParams.get("status") || undefined;
 
-  const { data, isLoading, isError, error } = useStaffList(branchId, search, role, status);
-  const { data: logs = [] } = useStaffLogs(branchId);
+  const { data, isLoading, isError, error, refetch, isRefetching } = useStaffList(branchId, search, role, status);
 
   const staffData = data?.staff || [];
   const stats = data?.stats || { totalStaff: 0, activeStaffCount: 0, activeManagers: 0, activeRiders: 0, disableStaff: 0 };
+  const logs = data?.logs;
   const isLimitReached = data?.isLimitReached
-  
-  if (isLoading) return <Loading />;
+
+  if (isLoading || !data) return <Loading text="Loading Staff..." />;
   if (isError) return <ErrorBoundary error={error.message} />;
 
   return (
@@ -38,6 +37,8 @@ export default function StaffPage() {
         href="/admin/staff/create-staff"
         btnText="Add Staff"
         isDisabled={isLimitReached}
+        onRefresh={refetch}
+        isRefreshing={isRefetching}
       />
 
       <TierLimitCard
@@ -69,7 +70,7 @@ export default function StaffPage() {
             dropdownPlaceholder="All Statuses"
             dropdownOptions={[
               { label: "Active", value: "ACTIVE" },
-              { label: "Disabled", value: "DISABLE" },
+              { label: "Suspend", value: "SUSPENDED" },
             ]}
           />
           <StaffTable staff={staffData} />

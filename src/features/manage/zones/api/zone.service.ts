@@ -1,28 +1,26 @@
 import { apiClient } from "@/lib/api-client";
-import { ZoneDetails } from "../types";
-import { ActivityLog } from "@/types/ActivityLog";
+import { ZoneDetails, ZoneResponsePayload } from "../types";
 import { ZoneFormValues } from "../schema/create-zone-schema";
 import { EditZoneFormValues } from "../schema/edit-zone-schema";
 
+const API = '/zone/user'
+
 export const zoneApi = {
-    //Fetching Data
-    getAllZone: async (branchId: string): Promise<ZoneDetails[]> => {
-        return await apiClient.get(`/zone/branches/${branchId}`)
+    // Fetching Data
+    getAllZone: async (): Promise<ZoneResponsePayload> => {
+        return await apiClient.get(`${API}/branches`);
     },
     getZone: async (zoneId: string): Promise<ZoneDetails> => {
-        return await apiClient.get(`/zone/${zoneId}`)
+        return await apiClient.get(`${API}/${zoneId}`);
     },
-    getZonelogs: async (branchId: string): Promise<ActivityLog[]> => {
-        return await apiClient.get(`/zone/logs/${branchId}`);
-    },
-    //Mutation
+    // Mutation
     createNewZone: async (newZone: ZoneFormValues): Promise<ZoneDetails> => {
-        return await apiClient.post('zone', newZone);
+        return await apiClient.post(`${API}`, newZone);
     },
     updateZone: async (id: string, updateZone: EditZoneFormValues): Promise<ZoneDetails> => {
-        return await apiClient.patch(`/zone/${id}`, updateZone);
+        return await apiClient.patch(`${API}/${id}`, updateZone);
     },
     deletZone: async (id: string): Promise<ZoneDetails> => {
-        return await apiClient.delete(`/zone/${id}`);
+        return await apiClient.delete(`${API}/${id}`);
     }
-}
+};

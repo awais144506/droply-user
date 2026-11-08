@@ -1,18 +1,13 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form'
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Loader2, Plus, Save } from "lucide-react";
-import { Button, buttonVariants } from "@/components/ui/button";
 import { createCustomerSchema, CreateCustomerFormData } from "@/features/manage/customers/schema/create-customer.schema";
 import FinancialsCard from "@/features/manage/customers/components/create_update/financial-card";
 import AddressCard from "@/features/manage/customers/components/create_update/address-card";
 import IdentityCard from "@/features/manage/customers/components/create_update/identity-card";
-import { formatCustomerPayload } from "@/features/manage/customers/utils/formatCustomerPayload";
 import { useCreateCustomer, useUpdateCustomer } from "@/features/manage/customers/api/use-mutate-customer";
-import { useRouter } from 'next/navigation';
+import FormCTAFooter from '@/lib/utils/components/FormCTAFooter';
+import { useAppForm } from '@/lib/hooks/use-app-form';
+import { UserPlus } from 'lucide-react';
 
 export const CustomerForm = ({
     branchId,
@@ -31,57 +26,63 @@ export const CustomerForm = ({
     initialData?: Partial<CreateCustomerFormData>
     customerId?: string
 }) => {
-
-    const router = useRouter();
-    const isEditMode = !!customerId;
-
-    const { mutate: createNewCustomer, isPending: isCreating } = useCreateCustomer();
+    const isEditMode = Boolean(customerId);
+    const { mutate: createNewCustomer, isPending: isCreating } = useCreateCustomer(branchId);
     const { mutate: updateCustomer, isPending: isUpdating } = useUpdateCustomer();
     const isPending = isCreating || isUpdating;
 
-    const form = useForm<CreateCustomerFormData>({
-        resolver: yupResolver(createCustomerSchema),
-        mode: "onChange",
-        defaultValues: {
-            partyType: "CUSTOMER",
-            customerCategory: "DOMESTIC",
-            name: "",
-            phone: "",
-            zoneId: "",
-            address: "",
-            latitude: 31.5411,
-            longitude: 74.3591,
-            customerCredit: 0,
-            customerAdvance: 0,
-            securityDeposit: 0,
-            openingReturnables: [],
-            ...initialData,
-        },
+    const form = useAppForm(createCustomerSchema, {
+        partyType: "CUSTOMER",
+        category: "DOMESTIC",
+        status: "ACTIVE",
+        name: "",
+        phone: "",
+        zoneId: null,
+        address: "",
+        email: "",
+        ntn: "",
+        strn: "",
+        deliveryScheduleType: "ON_DEMAND",
+        deliveryDays: [],
+        latitude: 30.5411,
+        longitude: 74.3591,
+        customerCredit: 0,
+        customerAdvance: 0,
+        securityDeposit: 0,
+        returnables: [],
+        ...initialData,
     });
 
     useEffect(() => {
         if (initialData) {
-            form.reset({ ...form.getValues(), ...initialData });
+            form.reset({
+                ...form.getValues(),
+                ...initialData,
+                zoneId: initialData.zoneId ?? null,
+            });
         }
     }, [initialData, form]);
 
     const onSubmit = (data: CreateCustomerFormData) => {
-        const payload = formatCustomerPayload(data, branchId);
+        const payload = {
+            ...data,
+            zoneId: data.zoneId || null,
+            branchId
+        } as Parameters<typeof createNewCustomer>[0];
+
         if (isEditMode) {
-            const { branchId: _b, ...safeUpdatePayload } = payload;
-            updateCustomer({ id: customerId!, data: safeUpdatePayload }, {
-                onSuccess: () => router.back(),
-            });
+            updateCustomer({ id: customerId!, data: payload });
         } else {
-            createNewCustomer(payload, {
-                onSuccess: () => router.back(),
-            });
+            createNewCustomer(payload);
         }
     };
 
+    const { formState, handleSubmit } = form;
+    const { isDirty, isValid } = formState;
+
     return (
         <FormProvider {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <IdentityCard
                         zoneOptions={zoneOptions}
@@ -96,21 +97,15 @@ export const CustomerForm = ({
                         />
                     </div>
                 </div>
-
-                <div className="flex items-center justify-end gap-3 border-t pt-4">
-                    <Link href="/manage/customers" className={buttonVariants({ variant: "outline", size: "sm" })}>
-                        Cancel
-                    </Link>
-                    <Button type="submit" disabled={isPending || !form.formState.isValid || !form.formState.isDirty} className="min-w-36 bg-emerald-600 hover:bg-emerald-700 rounded-xl h-10 text-white shadow-sm">
-                        {isPending ? (
-                            <><Loader2 className="h-4 w-4 animate-spin mr-1.5" /> {isEditMode ? 'Saving...' : 'Creating...'}</>
-                        ) : (
-                            <>{isEditMode ? <Save className="h-4 w-4 mr-1.5" /> : <Plus className="h-4 w-4 mr-1.5" />}
-                                {isEditMode ? 'Save Changes' : 'Create Customer'}
-                            </>
-                        )}
-                    </Button>
-                </div>
+                <FormCTAFooter
+                    ctaText="Create Customer"
+                    href="/manage/customers"
+                    isPending={isPending}
+                    isDirty={isDirty}
+                    isValid={isValid}
+                    isEditMode={isEditMode}
+                    icon={UserPlus}
+                />
             </form>
         </FormProvider>
     )
