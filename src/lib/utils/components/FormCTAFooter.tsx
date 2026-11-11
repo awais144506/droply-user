@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 type Props = {
     isPending: boolean;
-    isValid: boolean;
+    isValid?: boolean;
     isDirty: boolean;
     isEditMode?: boolean;
     href?: string;
@@ -19,7 +19,6 @@ type Props = {
 
 export default function FormCTAFooter({
     isPending,
-    isValid,
     isDirty,
     isEditMode = false,
     href = "",
@@ -57,7 +56,7 @@ export default function FormCTAFooter({
                 <Button
                     type="submit"
                     variant={varient}
-                    disabled={isPending || (!isDirty && isEditMode) || !isValid}
+                    disabled={isPending || (!isDirty && isEditMode)}
                 >
                     {isPending ? (
                         <>

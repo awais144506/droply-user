@@ -9,6 +9,7 @@ import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 import ErrorBoundary from "@/app/error";
+import { Receipt } from "lucide-react";
 
 export default function PurchaseOrdersPage() {
   const { branchId } = useRole();
@@ -33,6 +34,7 @@ export default function PurchaseOrdersPage() {
         btnText="Create PO"
         onRefresh={refetch}
         isRefreshing={isRefetching}
+        icon={Receipt}
       />
 
       <POStats stats={stats} />

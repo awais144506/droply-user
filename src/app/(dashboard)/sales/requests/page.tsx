@@ -5,9 +5,9 @@ import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 import { useRole } from "@/lib/hooks/use-role";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
-
 import OrderTable from "@/features/sales/requests/components/OrderTable";
 import { useCustomerRequests } from "@/features/sales/requests/api/use-customerRequests";
+import { ShoppingCart } from "lucide-react";
 
 export default function NewOrderRequests() {
     const { branchId } = useRole();
@@ -35,6 +35,7 @@ export default function NewOrderRequests() {
                 description="Review, approve, or reject incoming magic-link orders from your customers."
                 onRefresh={refetch}
                 isRefreshing={isRefetching}
+                icon={ShoppingCart}
             />
 
             <OrderTable requests={requests} />

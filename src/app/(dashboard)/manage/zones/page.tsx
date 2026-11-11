@@ -9,6 +9,7 @@ import { ZoneStats } from "@/features/manage/zones/components/main/zone-stats"
 import { ZoneCard } from "@/features/manage/zones/components/main/zone-card"
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar"
 import { useSearchParams } from "next/navigation"
+import { MapPin } from "lucide-react"
 
 
 const ZonePage = () => {
@@ -31,6 +32,7 @@ const ZonePage = () => {
         btnText="Create Zone"
         onRefresh={refetch}
         isRefreshing={isRefetching}
+        icon={MapPin}
       />
 
       <ZoneStats

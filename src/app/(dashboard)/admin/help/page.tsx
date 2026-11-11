@@ -3,6 +3,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { FaWhatsapp, FaInstagram, FaEnvelope, FaFacebookF, FaLinkedinIn } from "react-icons/fa6";
+import MainPageHeader from "@/lib/utils/components/MainPageHeader";
+import { Headphones } from "lucide-react";
 
 const phoneNumber = process.env.NEXT_PUBLIC_WHATSAPP;
 const handleOpenWhatsApp = () => {
@@ -32,18 +34,12 @@ const handleOpenLinkedIn = () => {
 export default function UserHelpPage() {
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-6">
-      {/* Top Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900">
-            Help & Support Tickets
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Reach out via our official support channels or track your active tickets.
-          </p>
-        </div>
-      </div>
+    <div className=" p-6 space-y-6">
+      <MainPageHeader
+        heading="Help & Support"
+        description="Reach out via our official support channels or track your active tickets."
+        icon={Headphones}
+      />
 
       {/* PROMINENT DIRECT SUPPORT CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -8,6 +8,7 @@ import PageHeader from "@/lib/utils/components/MainPageHeader";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
+import { Package } from "lucide-react";
 
 export default function ProductsPage() {
   const { branchId } = useRole();
@@ -31,6 +32,7 @@ export default function ProductsPage() {
         btnText="Add New Item"
         onRefresh={refetch}
         isRefreshing={isRefetching}
+        icon={Package}
       />
       <ProductStats
         totalItems={stats?.totalItems}

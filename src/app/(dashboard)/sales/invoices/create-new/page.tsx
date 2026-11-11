@@ -8,12 +8,12 @@ const CreateNewQuotaion = () => {
         <div className="space-y-6">
             <MainPageHeader
                 heading="Create Quotation"
-                description="Draft a standalone B2B quotation or official tax invoice. Auto-fill from your customer & product catalog or enter custom details without affecting warehouse stock."
+                description="Draft a standalone B2B quotation or official tax invoice."
                 icon={FilePlus2}
                 badge="Zero Stock Impact"
                 breadcrumbs={[
                     { label: "Invoices & Quotaions", href: "/sales/invoices" },
-                    { label: "Create New" },
+                    { label: "Create Quotation" },
                 ]}
             />
 

@@ -77,7 +77,7 @@ export function SiteHeader() {
   const branchImageUrl = branchData?.logoUrl
 
   return (
-    <header className="relative flex z-50 h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 top-0 shadow-sm">
+    <header className="relative z-[2000] flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 top-0 shadow-sm">
       {/* Left side: Env mode & Subscription Indicator */}
       <div className="flex items-center gap-3 z-10">
         {envMode !== 'production' && (

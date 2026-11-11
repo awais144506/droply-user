@@ -15,7 +15,7 @@ export function ProductsTable({ products }: { products: ProductList[] | undefine
     const router = useRouter();
     const { isOwner } = useRole();
     const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
-    const { mutate: toggleStatus } = useToggleProductStatus();
+    const { mutate: toggleStatus, isPending } = useToggleProductStatus();
 
     // States
     const [searchQuery, setSearchQuery] = useState("");
@@ -33,21 +33,19 @@ export function ProductsTable({ products }: { products: ProductList[] | undefine
         const matchesLowStock = showLowStockOnly ? p.currentStock <= p.lowStockThreshold : true;
         const matchesCategory = categoryFilter !== "ALL" ? p.category === categoryFilter : true;
         const matchesTracking = trackingFilter !== "ALL" ? p.trackingType === trackingFilter : true;
-        const matchesStatus = 
+        const matchesStatus =
             statusFilter === "ACTIVE" ? p.isActive === true :
-            statusFilter === "INACTIVE" ? p.isActive === false : true;
-        
-        // 🔥 Simplified boolean check
+                statusFilter === "INACTIVE" ? p.isActive === false : true;
         const matchesPublic = showPublicOnly ? !!p.isPublic : true;
 
         return matchesSearch && matchesLowStock && matchesCategory && matchesTracking && matchesStatus && matchesPublic;
     });
 
-    const activeFiltersCount = 
-        (showLowStockOnly ? 1 : 0) + 
+    const activeFiltersCount =
+        (showLowStockOnly ? 1 : 0) +
         (showPublicOnly ? 1 : 0) + // 🔥 Boolean check
-        (categoryFilter !== "ALL" ? 1 : 0) + 
-        (trackingFilter !== "ALL" ? 1 : 0) + 
+        (categoryFilter !== "ALL" ? 1 : 0) +
+        (trackingFilter !== "ALL" ? 1 : 0) +
         (statusFilter !== "ALL" ? 1 : 0);
 
     const clearFilters = () => {
@@ -64,12 +62,13 @@ export function ProductsTable({ products }: { products: ProductList[] | undefine
 
     const columns = useMemo(() =>
         getProductColumns(
-            router, 
-            isOwner, 
-            setProductToDelete, 
-            (id) => toggleStatus(id)
+            router,
+            isOwner,
+            setProductToDelete,
+            (id) => toggleStatus(id),
+            isPending
         ),
-        [router, isOwner, toggleStatus]);
+        [router, isOwner, isPending, toggleStatus]);
 
     const confirmDelete = () => {
         if (!productToDelete) return;

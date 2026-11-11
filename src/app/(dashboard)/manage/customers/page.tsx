@@ -10,6 +10,7 @@ import { CustomersTable } from "@/features/manage/customers/components/main/cust
 import { useSearchParams } from "next/navigation";
 import { CustomerRequestsList } from "@/features/manage/customers/components/main/customer-requests-list";
 import { useBranchSettings } from "@/features/admin/settings/api/use-branch-settings";
+import { UserPlus2 } from "lucide-react";
 
 export default function CustomersPage() {
   const { branchId } = useRole();
@@ -38,6 +39,7 @@ export default function CustomersPage() {
         btnText="Add Customer"
         onRefresh={refetch}
         isRefreshing={isRefetching}
+        icon={UserPlus2}
       />
 
       <CustomerStats

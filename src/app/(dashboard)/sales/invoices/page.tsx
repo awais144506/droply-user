@@ -6,6 +6,7 @@ import { useRole } from "@/lib/hooks/use-role";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
 import { useSearchParams } from "next/navigation";
+import { FileText } from "lucide-react";
 
 export default function InvoicesPage() {
     const { branchId } = useRole();
@@ -29,6 +30,7 @@ export default function InvoicesPage() {
                 onRefresh={refetch}
                 isRefreshing={isRefetching}
                 description="Manage B2B quotations, convert them to invoices, and download official PDF statements."
+                icon={FileText}
             />
 
             <InvoiceTable

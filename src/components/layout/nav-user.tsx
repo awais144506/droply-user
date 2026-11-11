@@ -83,41 +83,41 @@ export function NavUser() {
         </Avatar>
       </button>
 
-      {/* Custom Dropdown Menu Content */}
-      {showDropdown && (
-        <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-white p-1.5 shadow-xl border border-slate-200 z-40 animate-in fade-in zoom-in-95 duration-100">
-          <div className="px-2 py-1.5 mb-1 text-left">
-            <p className="text-xs font-bold text-slate-900 truncate">{userName}</p>
-            <p className="text-[10px] text-slate-500 truncate">{userEmail}</p>
-          </div>
-
-          <div className="h-px bg-slate-100 my-1" />
-
-          <button
-            onClick={() => {
-              setShowDropdown(false);
-              openUserProfile();
-            }}
-            className="w-full cursor-pointer flex items-center gap-2 p-2 rounded-lg font-medium text-xs text-slate-700 hover:bg-slate-100 transition-colors text-left"
-          >
-            <UserIcon className="h-4 w-4 shrink-0 text-slate-400" />
-            <span>Account Profile</span>
-          </button>
-
-          <div className="h-px bg-slate-100 my-1" />
-
-          <button
-            onClick={() => {
-              setShowDropdown(false);
-              setShowConfirm(true);
-            }}
-            className="w-full text-rose-600 hover:bg-rose-50 hover:text-rose-700 cursor-pointer flex items-center gap-2 p-2 rounded-lg font-medium text-xs transition-colors text-left"
-          >
-            <LogOut className="h-4 w-4 shrink-0" />
-            <span>Log out</span>
-          </button>
+  {/* Custom Dropdown Menu Content */}
+    {showDropdown && (
+      <div className="absolute right-0 top-full mt-2 w-56 rounded-xl bg-white p-1.5 shadow-2xl border border-slate-200 z-[9999] animate-in fade-in zoom-in-95 duration-100">
+        <div className="px-2 py-1.5 mb-1 text-left">
+          <p className="text-xs font-bold text-slate-900 truncate">{userName}</p>
+          <p className="text-[10px] text-slate-500 truncate">{userEmail}</p>
         </div>
-      )}
+
+        <div className="h-px bg-slate-100 my-1" />
+
+        <button
+          onClick={() => {
+            setShowDropdown(false);
+            openUserProfile();
+          }}
+          className="w-full cursor-pointer flex items-center gap-2 p-2 rounded-lg font-medium text-xs text-slate-700 hover:bg-slate-100 transition-colors text-left"
+        >
+          <UserIcon className="h-4 w-4 shrink-0 text-slate-400" />
+          <span>Account Profile</span>
+        </button>
+
+        <div className="h-px bg-slate-100 my-1" />
+
+        <button
+          onClick={() => {
+            setShowDropdown(false);
+            setShowConfirm(true);
+          }}
+          className="w-full text-rose-600 hover:bg-rose-50 hover:text-rose-700 cursor-pointer flex items-center gap-2 p-2 rounded-lg font-medium text-xs transition-colors text-left"
+        >
+          <LogOut className="h-4 w-4 shrink-0" />
+          <span>Log out</span>
+        </button>
+      </div>
+    )}
 
       {/* Custom Tailwind Logout Confirmation Modal */}
       {showConfirm && (

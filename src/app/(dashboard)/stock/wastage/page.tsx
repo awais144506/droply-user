@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { useWastage } from "@/features/stock/wastage/api/use-wastage";
 import { useRole } from "@/lib/hooks/use-role";
 import Loading from "@/app/loading";
+import { ArchiveX } from "lucide-react";
 
 export default function WastageDashboard() {
 
@@ -29,6 +30,7 @@ export default function WastageDashboard() {
         btnText="Add Wastage"
         onRefresh={refetch}
         isRefreshing={isRefetching}
+        icon={ArchiveX}
       />
       <WastageStats
         totalItemsDamaged={stats.totalItemsDamaged}

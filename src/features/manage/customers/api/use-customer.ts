@@ -65,9 +65,29 @@ export function useCustomers(
 
         if (!matchesTab) continue;
 
-        // 2. Schedule Filter (Everyday, Custom Days, On-Demand)
+        // 2. Schedule Filter (Everyday, Individual Days, On-Demand)
         if (scheduleFilter && scheduleFilter !== "all") {
-          if (customer.deliveryScheduleType !== scheduleFilter) continue;
+          const scheduleType = (customer.deliveryScheduleType || "").toUpperCase();
+          const customerDays = customer.deliveryDays|| []; // Adjust based on your Prisma schema field name
+
+          if (scheduleFilter === "EVERYDAY") {
+            if (scheduleType !== "EVERYDAY") continue;
+          } else if (scheduleFilter === "ON_DEMAND") {
+            if (scheduleType !== "ON_DEMAND") continue;
+          } else {
+            // It's an individual day filter (e.g., "MONDAY", "TUESDAY")
+            // Ensure everyday customers don't bleed through unless desired, and check if the day matches
+            const targetDay = scheduleFilter.toLowerCase();
+
+            // If they are strictly everyday, skip individual day filters
+            if (scheduleType === "EVERYDAY") continue;
+
+            const hasDayMatch = Array.isArray(customerDays)
+              ? customerDays.some((d: string) => d.toLowerCase() === targetDay)
+              : String(customerDays).toLowerCase().includes(targetDay);
+
+            if (!hasDayMatch) continue;
+          }
         }
 
         // 3. Search Filter (Name, Code, Phone)

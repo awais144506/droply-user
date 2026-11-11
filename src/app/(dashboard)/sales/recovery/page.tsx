@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import MainPageHeader from "@/lib/utils/components/MainPageHeader";
@@ -9,6 +8,7 @@ import { useRole } from "@/lib/hooks/use-role";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
 import { useSearchParams } from "next/navigation";
+import { Undo2 } from "lucide-react";
 
 export default function AssetRecoveryPage() {
     const { branchId } = useRole();
@@ -38,6 +38,7 @@ export default function AssetRecoveryPage() {
                 btnText="Create Recovery"
                 onRefresh={refetch}
                 isRefreshing={isRefetching}
+                icon={Undo2}
             />
 
             <RecoveryTable

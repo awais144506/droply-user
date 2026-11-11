@@ -14,6 +14,7 @@ import { SupplierPayment } from "../../types/payments";
 import { useSuppliers } from "@/features/supply/suppliers/api/use-suppliers";
 import { usePurchaseOrders } from "@/features/supply/order/api/use-po";
 import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
+import { ReceiptText } from "lucide-react";
 
 interface PaymentFormProps {
     initialData?: SupplierPayment;
@@ -188,6 +189,7 @@ export default function PaymentForm({ initialData }: PaymentFormProps) {
                         isValid={methods.formState.isValid}
                         isEditMode={isEditing}
                         href="/supply/payments"
+                        icon={ReceiptText}
                     />
                 </form>
             </FormProvider>

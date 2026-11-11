@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import PageHeader from "@/lib/utils/components/MainPageHeader";
 import { useOrders } from "@/features/sales/orders/api/use-order";
@@ -11,6 +11,7 @@ import ErrorBoundary from "@/app/error";
 import OrderTable from "@/features/sales/orders/components/OrderTable";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 import OrderStats from "@/features/sales/orders/components/OrderStats";
+import { Truck } from "lucide-react";
 
 const Orders = () => {
   const { branchId } = useRole();
@@ -57,6 +58,7 @@ const Orders = () => {
         btnText="Create New Sale"
         onRefresh={() => refetch()}
         isRefreshing={isRefetching}
+        icon={Truck}
       />
       <OrderStats
         orders={data?.orders}

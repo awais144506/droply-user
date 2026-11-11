@@ -30,7 +30,6 @@ export function TaskDialog({ isOpen, onClose, branchId, staffList = [], initialD
 
     const form = useForm<CreateTaskFormValues>({
         resolver: yupResolver(createTaskSchema),
-        mode: "onChange",
         defaultValues: {
             description: "",
             assignedToId: "",
@@ -96,10 +95,10 @@ export function TaskDialog({ isOpen, onClose, branchId, staffList = [], initialD
                             formatOptionLabel={(opt) => (
                                 <div className="flex items-center justify-between w-full pr-1 py-0.5">
                                     <div className="flex flex-col">
-                                        <span className="font-medium text-slate-900 text-sm leading-tight">
+                                        <span className="font-medium text-sm leading-tight">
                                             {opt.label}
                                         </span>
-                                        <span className="text-[10px] font-medium text-slate-500 mt-0.5">
+                                        <span className="text-[10px] font-medium mt-0.5">
                                             {opt.phone}
                                         </span>
                                     </div>
@@ -130,10 +129,10 @@ export function TaskDialog({ isOpen, onClose, branchId, staffList = [], initialD
                             </Button>
                             <Button
                                 type="submit"
-                                disabled={isPending || (!form.formState.isDirty && !isEditing)}
+                                disabled={isPending}
                                 className="bg-sky-600 hover:bg-sky-700 text-white rounded-xl shadow-sm"
                             >
-                                {isPending ? "Saving..." : isEditing ? "Update Task" : "Assign Task"}
+                                {isPending ? "Saving..." : "Assign Task"}
                             </Button>
                         </div>
                     </form>

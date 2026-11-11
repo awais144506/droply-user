@@ -1,7 +1,7 @@
 import {
   MapPin, Package, Truck, FileText, Navigation, Factory, Building,
   Receipt, UserCog, LucideIcon, UserPlus, Settings, ArchiveX, TruckIcon,
-  BadgeDollarSign, Undo2, Headphones, CreditCard,Bike
+  BadgeDollarSign, Undo2, Headphones, CreditCard,ShoppingCart
 } from "lucide-react";
 
 export type UserRole = "OWNER" | "MANAGER";
@@ -46,9 +46,9 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
       { title: "Deliveries & Sales", url: "/sales/orders", icon: Truck, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Live Tracking", url: "/sales/tracking", icon: Navigation, badge: "GPS", allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "DONE" },
       { title: "Recovery & Return", url: "/sales/recovery", icon: Undo2, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
-      { title: "Order Requests", url: '/sales/requests?status=ALL', icon: Bike, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
-      { title: "Daily Sales", url: "/sales/daily", icon: Receipt, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
+      { title: "Order Requests", url: '/sales/requests?status=ALL', icon: ShoppingCart, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Invoices/Quotations", url: "/sales/invoices", icon: FileText, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "DONE" },
+      { title: "Daily Sales", url: "/sales/daily", icon: Receipt, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
     ],
   },
   {

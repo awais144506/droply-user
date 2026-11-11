@@ -7,6 +7,7 @@ import Loading from "@/app/loading";
 import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
+import { Building } from "lucide-react";
 
 
 export default function SuppliersPage() {
@@ -22,12 +23,13 @@ export default function SuppliersPage() {
   return (
     <div className="space-y-6 p-6">
       <MainPageHeader
-        heading="Suppliers & Vendor Accounts"
-        description="Vendors you purchase inventory, raw materials, and plant equipment from."
+        heading="Suppliers Accounts"
+        description="Suppliers you purchase inventory, raw materials, and plant equipment from."
         href="/supply/suppliers/create-supplier"
         btnText="Create Supplier"
         onRefresh={refetch}
         isRefreshing={isRefetching}
+        icon={Building}
       />
       <SupplierStats
         totalDueAmount={totalDueAmount}

@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Bike } from "lucide-react";
+import { Bike, MapPin } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormInput } from "@/components/ui/form-input";
 import { FormSelect } from "@/components/ui/form-select";
+import { useRouter } from "next/navigation";
 
 
 const RiderZoneCard = ({
@@ -12,6 +13,7 @@ const RiderZoneCard = ({
     vehicleOptions,
     isVehiclesLoading
 }: any) => {
+    const router = useRouter();
     return (
         <div>  {selectedRole === "RIDER" && (
             <Card>
@@ -30,7 +32,10 @@ const RiderZoneCard = ({
                             options={zoneOptions}
                             isSearchable={true}
                             isLoading={isZoneLoading}
-
+                            secondaryActionLabel="Create New Zone"
+                            showSecondaryAction={true}
+                            secondaryActionIcon={MapPin}
+                            onSecondaryActionClick={() => router.push("/manage/zones/create-zone")}
                         />
                     </div>
 
@@ -54,6 +59,10 @@ const RiderZoneCard = ({
                                     </span>
                                 </div>
                             )}
+                            secondaryActionLabel="Create New Vehicle"
+                            showSecondaryAction={true}
+                            secondaryActionIcon={Bike}
+                            onSecondaryActionClick={() => router.push("/admin/fleet/create-fleet")}
                         />
                     </div>
 

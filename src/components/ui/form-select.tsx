@@ -119,7 +119,7 @@ export function FormSelect({
                             formatOptionLabel={formatOptionLabel}
                             ref={ref}
                             inputId={inputId}
-                            options={filteredOptions} // 🔥 Filtered options passed here
+                            options={filteredOptions}
                             value={selectedValue}
                             isDisabled={disabled}
                             isMulti={isMulti}
