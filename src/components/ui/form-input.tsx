@@ -1,14 +1,13 @@
 "use client";
 
-import { ReactNode, useId } from "react";
-import { useFormContext, Controller } from "react-hook-form";
+import React, { ReactNode, useId } from "react";
+import { useFormContext, Controller, get } from "react-hook-form";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, LucideIcon } from "lucide-react";
 
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { LucideIcon } from "lucide-react";
 
 interface FormInputProps {
     name: string;
@@ -26,7 +25,7 @@ interface FormInputProps {
     lableTextColor?: string;
     disablePastDates?: boolean;
     disableFutureDates?: boolean;
-    labelIcon?: LucideIcon,
+    labelIcon?: LucideIcon;
     iconColor?: string;
 }
 
@@ -50,7 +49,7 @@ export function FormInput({
     iconColor = "text-sky-600",
 }: FormInputProps) {
     const { register, control, formState: { errors } } = useFormContext();
-    const error = errors[name]?.message as string;
+    const error = get(errors, name)?.message as string;
     const inputId = useId();
 
     return (
@@ -76,9 +75,7 @@ export function FormInput({
                         control={control}
                         render={({ field }) => (
                             <Popover>
-                                {/* Removed asChild to prevent button-in-button hydration errors */}
                                 <PopoverTrigger>
-                                    {/* Changed from <Button> to <div> so PopoverTrigger handles the button mechanics natively */}
                                     <div
                                         id={inputId}
                                         className={cn(

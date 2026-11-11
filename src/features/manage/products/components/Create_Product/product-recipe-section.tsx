@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useFormContext, useFieldArray } from "react-hook-form";
+import { useEffect } from "react";
 import { Settings2, PlusCircle, Trash2, AlertCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,16 +24,21 @@ export function ProductRecipeSection({
     dynamicRawMaterialOptions,
     isProductsLoading
 }: RecipeSectionProps) {
-    const { register, control, watch, formState: { errors } } = useFormContext();
-    
-    // 🔥 Fixed: Changed from "recipeItems" to "recipeIngredients" to match Yup schema & DTO
+    const { register, control, watch, setValue, formState: { errors } } = useFormContext();
     const { fields, append, remove } = useFieldArray({ control, name: "recipeIngredients" });
-    
     const recipeErrors = errors.recipeIngredients as any;
     const currentRecipeItems = watch("recipeIngredients") || [];
     const selectedMaterialIds = currentRecipeItems
         .map((item: any) => item?.childItemId)
         .filter(Boolean);
+
+    useEffect(() => {
+        if (hasRecipe && fields.length === 0) {
+            append({ childItemId: "", quantity: 1 });
+        } else if (!hasRecipe && fields.length > 0) {
+            setValue("recipeIngredients", []);
+        }
+    }, [hasRecipe, fields.length, append, setValue]);
 
     return (
         <Card className="overflow-hidden border-slate-200">
@@ -86,7 +92,7 @@ export function ProductRecipeSection({
                                 return (
                                     <div key={field.id} className="flex items-start gap-2">
                                         <div className="flex-1">
-                                  <FormSelect
+                                            <FormSelect
                                                 name={`recipeIngredients.${index}.childItemId`}
                                                 label=""
                                                 options={availableOptions}

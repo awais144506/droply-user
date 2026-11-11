@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { User } from "lucide-react";
+import { User, MapPin } from "lucide-react";
 import { FormInput } from "@/components/ui/form-input";
 import { FormSelect } from "@/components/ui/form-select";
 import { FormPhoneInput } from "@/components/ui/form-phone-input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { partyOptions, categoryOptions } from "@/features/manage/customers/components/data/dropdownOptions";
+import { useRouter } from "next/navigation";
 
 export default function IdentityCard({ zoneOptions, isLoading }: any) {
+    const router = useRouter();
     return (
         <Card>
             <CardHeader className="pb-3 border-b border-slate-100 dark:border-slate-800">
@@ -16,7 +18,7 @@ export default function IdentityCard({ zoneOptions, isLoading }: any) {
                 </CardTitle>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
-                
+
                 {/* Row 1: Party Type & Category */}
                 <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1.5">
@@ -90,6 +92,10 @@ export default function IdentityCard({ zoneOptions, isLoading }: any) {
                         isLoading={isLoading}
                         isSearchable={true}
                         isClearable={true}
+                        secondaryActionLabel="Create New Zone"
+                        showSecondaryAction={true}
+                        secondaryActionIcon={MapPin}
+                        onSecondaryActionClick={() => router.push("/manage/zones/create-zone")}
                     />
                 </div>
             </CardContent>

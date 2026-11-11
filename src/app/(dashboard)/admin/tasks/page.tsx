@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Plus, ClipboardList, CheckCircle2, RefreshCw } from "lucide-react";
+import { ClipboardList, CheckCircle2, CheckSquare } from "lucide-react";
 import { useRole } from "@/lib/hooks/use-role";
 import { TaskStats } from "@/features/admin/tasks/components/main/task-stats";
 import { TaskTable } from "@/features/admin/tasks/components/main/task-table";
@@ -15,6 +15,7 @@ import { Task } from "@/features/admin/tasks/types/task";
 import { useUpdateTask } from "@/features/admin/tasks/api/use-mutate-tasks";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
+import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 
 export default function AdminTasksPage() {
   const searchParams = useSearchParams();
@@ -54,32 +55,16 @@ export default function AdminTasksPage() {
   };
 
   return (
-    <div className="space-y-6 min-w-7xl mx-auto p-6 relative">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Task Delegation</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Assign and track daily operations for managers and riders.
-          </p>
-        </div>
-        <div className="flex flex-row gap-3">
-          <Button
-            onClick={() => refetch()}
-            disabled={isRefetching}
-            className={`flex items-center justify-center h-10 w-10 rounded-md border border-slate-200 bg-white hover:bg-slate-100 transition-colors ${isRefetching ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
-              }`}
-            title="Refresh Data"
-          >
-            <RefreshCw className={`h-4 w-4 text-slate-700 ${isRefetching ? "animate-spin" : ""}`} />
-          </Button>
-          <Button
-            onClick={() => { setEditingTask(null); setIsModalOpen(true); }}
-            className="bg-sky-600 hover:bg-sky-700 text-white h-10 px-4 rounded-xl shadow-sm cursor-pointer"
-          >
-            <Plus className="h-4 w-4 mr-2" /> New Task
-          </Button>
-        </div>
-      </div>
+    <div className="space-y-6 p-6 relative">
+      <MainPageHeader
+        heading="Task Delegation"
+        description="Assign and track daily operations for managers and riders."
+        icon={CheckSquare}
+        btnText="New Task"
+        onActionClick={() => { setEditingTask(null); setIsModalOpen(true); }}
+        onRefresh={() => refetch()}
+        isRefreshing={isRefetching}
+      />
 
       <TaskStats pending={stats.pending} completed={stats.completed} />
 
@@ -94,7 +79,7 @@ export default function AdminTasksPage() {
         ]}
       />
 
-      <TaskTable tasks={tasks}/>
+      <TaskTable tasks={tasks} />
 
       <TaskDialog
         isOpen={isModalOpen}

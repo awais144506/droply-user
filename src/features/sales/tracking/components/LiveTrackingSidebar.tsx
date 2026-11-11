@@ -14,10 +14,14 @@ import {
   WifiOff,
   RefreshCw,
   Radio,
+  PowerOff,
+  Loader2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { FleetRiderOverview } from "../types/tracking";
 import { formatDistanceToNowStrict, isBefore, subDays } from "date-fns";
+import { useRole } from "@/lib/hooks/use-role";
+import { useSetRiderOffline } from "../api/use-riderStatus-mutate";
 
 type Props = {
   riders?: FleetRiderOverview[];
@@ -40,6 +44,13 @@ export const LiveTrackingSidebar = ({
   onRefetch,
   isRefetching = false,
 }: Props) => {
+  const { branchId } = useRole();
+  const {
+    mutate: setRiderOffline,
+    isPending: isSettingOffline,
+    variables: offlineTargetId,
+  } = useSetRiderOffline(branchId);
+
   const todayStr = new Date().toLocaleDateString("en-CA");
 
   const onlineCount = riders.filter(
@@ -47,7 +58,7 @@ export const LiveTrackingSidebar = ({
   ).length;
 
   return (
-    <div className="absolute top-4 left-4 right-4 z-[999] flex flex-col gap-2.5 pointer-events-none">
+    <div className="absolute top-4 left-4 right-4 z-900 flex flex-col gap-2.5 pointer-events-none">
       <div className="bg-white/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-200/85 shadow-xl pointer-events-auto flex flex-col gap-3">
 
         {/* Top Control Row */}
@@ -143,6 +154,7 @@ export const LiveTrackingSidebar = ({
             riders.map((rider) => {
               const isSelected = selectedRider?.id === rider.id;
               const isOnline = rider.presence?.status === "ONLINE";
+              const isThisRiderLoading = isSettingOffline && offlineTargetId === rider.id;
 
               const rawLastActive = rider.presence?.lastActive;
               const lastActiveDate = rawLastActive ? new Date(rawLastActive) : null;
@@ -157,8 +169,10 @@ export const LiveTrackingSidebar = ({
                 }
               }
               return (
-                <button
+                <div
                   key={rider.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => onSelect(isSelected ? null : rider)}
                   className={`min-w-72.5 max-w-77.5 shrink-0 flex flex-col justify-between p-3 rounded-xl text-left transition-all cursor-pointer border ${
                     isSelected
@@ -166,7 +180,7 @@ export const LiveTrackingSidebar = ({
                       : "bg-slate-50/80 hover:bg-slate-100/90 text-slate-800 border-slate-200/80"
                   }`}
                 >
-                  {/* Top Line: Rider Identity + Presence Badge */}
+                  {/* Top Line: Rider Identity + Presence Badge & Force Offline Action */}
                   <div className="flex items-start justify-between gap-2 w-full mb-2.5">
                     <div className="flex items-center gap-2.5 truncate">
                       <div
@@ -200,23 +214,48 @@ export const LiveTrackingSidebar = ({
                       </div>
                     </div>
 
-                    {/* Presence Pill */}
-                    <span
-                      className={`shrink-0 flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
-                        isOnline
-                          ? isSelected
-                            ? "bg-emerald-500 text-white"
-                            : "bg-emerald-100 text-emerald-700"
-                          : isSelected
-                            ? "bg-slate-800 text-slate-400"
-                            : "bg-slate-200 text-slate-600"
-                      }`}
-                    >
+                    {/* Presence Pill + Conditional Set Offline Button */}
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span
+                        className={`shrink-0 flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full font-extrabold ${
+                          isOnline
+                            ? isSelected
+                              ? "bg-emerald-500 text-white"
+                              : "bg-emerald-100 text-emerald-700"
+                            : isSelected
+                              ? "bg-slate-800 text-slate-400"
+                              : "bg-slate-200 text-slate-600"
+                        }`}
+                      >
+                        {isOnline && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                        )}
+                        {rider.presence?.status || "OFFLINE"}
+                      </span>
+
                       {isOnline && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                        <button
+                          type="button"
+                          disabled={isThisRiderLoading}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setRiderOffline(rider.id);
+                          }}
+                          title="Set Rider Offline"
+                          className={`p-1 rounded-full border transition-colors cursor-pointer flex items-center justify-center ${
+                            isSelected
+                              ? "bg-rose-500/20 border-rose-500/40 text-rose-300 hover:bg-rose-500 hover:text-white"
+                              : "bg-rose-50 border-rose-200 text-rose-600 hover:bg-rose-100"
+                          } ${isThisRiderLoading ? "opacity-60 cursor-not-allowed" : ""}`}
+                        >
+                          {isThisRiderLoading ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <PowerOff className="w-3 h-3" />
+                          )}
+                        </button>
                       )}
-                      {rider.presence?.status || "OFFLINE"}
-                    </span>
+                    </div>
                   </div>
 
                   {/* Today's Stats Strip */}
@@ -284,7 +323,7 @@ export const LiveTrackingSidebar = ({
                       </span>
                     </div>
                   </div>
-                </button>
+                </div>
               );
             })
           )}

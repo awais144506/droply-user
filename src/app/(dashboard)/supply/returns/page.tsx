@@ -9,6 +9,7 @@ import Loading from "@/app/loading";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
+import { Undo2 } from "lucide-react";
 
 export default function PurchaseReturnsPage() {
   const searchParams = useSearchParams();
@@ -29,6 +30,7 @@ export default function PurchaseReturnsPage() {
         btnText="New Return"
         onRefresh={refetch}
         isRefreshing={isRefetching}
+        icon={Undo2}
       />
 
       <ReturnStats stats={data.stats} />

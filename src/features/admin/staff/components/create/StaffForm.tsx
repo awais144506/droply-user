@@ -120,6 +120,7 @@ export function CreateStaffForm({
                                 name="role"
                                 label="Designation / Role"
                                 required={true}
+                                isSearchable={false}
                                 options={[
                                     { label: "Rider", value: "RIDER" },
                                     { label: "Manager", value: "MANAGER" },
@@ -146,12 +147,11 @@ export function CreateStaffForm({
                 </div>
 
                 <FormCTAFooter
-                    ctaText={isEditMode ? "Update Staff" : "Create Staff"}
+                    ctaText="Create Staff"
                     icon={UserPlus}
                     isPending={isPending}
                     isEditMode={isEditMode}
                     isDirty={methods.formState.isDirty}
-                    isValid={methods.formState.isValid}
                 />
             </form>
         </FormProvider>

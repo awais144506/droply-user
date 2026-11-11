@@ -1,13 +1,14 @@
 "use client";
 import { useForm, useFieldArray, useWatch, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Plus, Trash2, Info, FileText } from "lucide-react";
+import { Plus, Trash2, Info, FileText, UserPlus } from "lucide-react";
 
 import { createPOSchema, CreatePOFormData } from "../../schema/create-po-schema";
 import { Button } from "@/components/ui/button";
 import { FormSelect, SelectOption } from "@/components/ui/form-select";
 import { FormInput } from "@/components/ui/form-input";
 import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
+import { useRouter } from "next/navigation";
 
 type POFormProps = {
     supplierOptions: SelectOption[];
@@ -22,6 +23,7 @@ type POFormProps = {
 };
 
 export default function POForm({ supplierOptions, productOptions, onSubmit, isPending, isLoadingProducts, isLoadingSuppliers, initalValues, isEditing, isLocked = false }: POFormProps) {
+    const router = useRouter();
     const form = useForm<CreatePOFormData>({
         resolver: yupResolver(createPOSchema),
         mode: "onChange",
@@ -59,7 +61,7 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
                         label="Select Supplier"
                         options={supplierOptions}
                         isLoading={isLoadingSuppliers}
-                        placeholder="-- Choose Supplier --"
+                        placeholder="Select Supplier..."
                         isSearchable
                         required
                         disabled={isLocked}
@@ -72,6 +74,10 @@ export default function POForm({ supplierOptions, productOptions, onSubmit, isPe
 
                             </div>
                         )}
+                        showSecondaryAction
+                        secondaryActionIcon={UserPlus}
+                        secondaryActionLabel="Add New Supplier"
+                        onSecondaryActionClick={() => router.push('/supply/suppliers/create-supplier')}
                     />
                     <div className="space-y-1">
                         <FormInput

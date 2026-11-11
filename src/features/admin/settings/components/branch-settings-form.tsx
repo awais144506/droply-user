@@ -127,11 +127,12 @@ export function BranchSettingsForm({ initialData, onSubmit, isPending }: BranchS
                 type="submit"
                 disabled={!isFormDirty || !isValid || isPending || isUploading}
                 variant="default"
+                size="lg"
               >
                 {isPending || isUploading ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> {isUploading ? "Uploading Logo..." : "Saving..."}</>
+                  <><Loader2 className="h-4 w-6 mr-2 animate-spin" /> {isUploading ? "Uploading Logo..." : "Saving..."}</>
                 ) : (
-                  <><Save className="h-4 w-4 mr-2" /> Save Settings</>
+                  <><Save className="h-4 w-6 mr-2" /> Save Settings</>
                 )}
               </Button>
             </div>

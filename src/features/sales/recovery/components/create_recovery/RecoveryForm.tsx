@@ -232,10 +232,10 @@ const RecoveryForm = ({ branchId }: Props) => {
                             formatOptionLabel={(opt: any) => (
                                 <div className="flex items-center justify-between w-full py-0.5 pr-1">
                                     <div className="flex flex-col truncate mr-3">
-                                        <span className="text-sm font-bold text-slate-900 truncate">
+                                        <span className="text-sm font-bold truncate">
                                             {opt.label}
                                         </span>
-                                        <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
+                                        <div className="flex items-center gap-2 text-[11px] mt-0.5">
                                             <span>{opt.phone}</span>
                                             {opt.address && (
                                                 <span className="truncate">• {opt.address}</span>

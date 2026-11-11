@@ -7,6 +7,7 @@ import { ExpenseTable } from "@/features/admin/expenses/components/expense-table
 import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
+import { BadgeDollarSign } from "lucide-react";
 
 export default function ExpensesPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
@@ -20,7 +21,7 @@ export default function ExpensesPage() {
   if (isError) return <ErrorBoundary error={error.message} />
 
   return (
-    <div className="space-y-6 min-w-300 mx-auto p-6">
+    <div className="space-y-6 p-6">
       <MainPageHeader
         heading="Petty Expenses"
         description="Log and categorize daily operational costs, bills, and office supplies."
@@ -28,6 +29,7 @@ export default function ExpensesPage() {
         btnText="Log Expense"
         onRefresh={refetch}
         isRefreshing={isRefetching}
+        icon={BadgeDollarSign}
       />
 
       <ExpenseStats totalExpenses={stats?.totalAmount} />

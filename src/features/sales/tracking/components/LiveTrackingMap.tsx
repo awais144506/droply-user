@@ -629,7 +629,7 @@ export const LiveTrackingMap = ({
 
       {/* History Mode Banner */}
       {isHistoryMode && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[999] bg-white/95 backdrop-blur-md text-slate-900 px-5 py-2.5 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3 pointer-events-auto">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-999 bg-white/95 backdrop-blur-md text-slate-900 px-5 py-2.5 rounded-2xl shadow-xl border border-slate-200 flex items-center gap-3 pointer-events-auto">
           <Clock className="w-4 h-4 text-sky-600" />
           {!selectedRider ? (
             <span className="text-xs font-bold text-slate-600">

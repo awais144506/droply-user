@@ -1,5 +1,5 @@
 import { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
-import { Package, Network, Pen, Trash2, TrendingUp, AlertCircle, ShieldAlert, Layers, Power, PowerOff } from "lucide-react";
+import { Package, Network, Pen, Trash2, TrendingUp, AlertCircle, ShieldAlert, Layers, Power, PowerOff,Loader } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ColumnDef } from "@/lib/utils/components/TableCreateMachine";
 import { ProductList } from "../../types/product";
@@ -9,7 +9,8 @@ export const getProductColumns = (
     router: AppRouterInstance,
     isOwner: boolean,
     setProductToDelete: (product: ProductList) => void,
-    onToggleStatus?: (id: string) => void
+    onToggleStatus?: (id: string) => void,
+    isPending?: boolean
 ): ColumnDef<ProductList>[] => [
         {
             header: "Code",
@@ -55,7 +56,6 @@ export const getProductColumns = (
                     <span className="px-2.5 py-1 rounded-full bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider border border-slate-200">
                         {product.category?.replace(/_/g, " ")}
                     </span>
-                    {/* 🔥 New Public Flag added here */}
                     {product.isPublic && (
                         <span className="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider border border-emerald-100">
                             Public
@@ -156,14 +156,21 @@ export const getProductColumns = (
                             type="button"
                             variant="ghost"
                             size="sm"
+                            disabled={isPending}
                             onClick={() => onToggleStatus && onToggleStatus(product.id)}
                             className={`cursor-pointer ${product.isActive
                                 ? "text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
                                 : "text-slate-400 hover:text-emerald-600 hover:bg-emerald-50"
-                                }`}
+                                } ${isPending ? "opacity-70 cursor-not-allowed" : ""}`}
                             title={product.isActive ? "Deactivate product" : "Activate product"}
                         >
-                            {product.isActive ? <Power className="h-4 w-4" /> : <PowerOff className="h-4 w-4" />}
+                            {isPending ? (
+                                <Loader className="h-4 w-4 animate-spin text-sky-600" />
+                            ) : product.isActive ? (
+                                <Power className="h-4 w-4" />
+                            ) : (
+                                <PowerOff className="h-4 w-4" />
+                            )}
                         </Button>
 
                         <Button

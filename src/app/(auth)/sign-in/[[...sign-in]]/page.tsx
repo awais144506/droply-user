@@ -1,7 +1,7 @@
 "use client";
 
 import { SignIn } from "@clerk/nextjs";
-import { ShieldCheck, Activity, Truck, CheckCircle2, MapPin } from "lucide-react";
+import { ShieldCheck, Activity, Truck, CheckCircle2, MailWarning } from "lucide-react";
 import Image from "next/image";
 
 export default function SignInPage() {
@@ -96,18 +96,6 @@ export default function SignInPage() {
               </div>
             </div>
           </div>
-
-          {/* Bottom Highlights */}
-          <div className="flex items-center gap-8 text-xs font-medium text-slate-500 pt-4 border-t border-slate-200/60">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-sky-600" />
-              <span>Zone-Based Routing</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-emerald-600" />
-              <span>Real-Time Branch Metrics</span>
-            </div>
-          </div>
         </div>
 
         {/* Right Side: Clean White Authentication Portal (Takes exact 50% width on desktop) */}
@@ -161,10 +149,19 @@ export default function SignInPage() {
               />
             </div>
 
-            {/* Security Notice */}
-            <div className="flex items-center justify-center gap-2 text-[11px] font-medium text-slate-500 bg-slate-50 border border-slate-200/70 py-2.5 px-4 rounded-xl">
-              <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
-              <span>Restricted session • OTP required</span>
+            {/* OTP Notice & Security Notice Group */}
+            <div className="space-y-2">
+              {/* OTP Spam Folder Notice */}
+              <div className="flex items-center justify-center gap-2 text-[11px] font-medium text-amber-700 bg-amber-50/70 border border-amber-200/60 py-2.5 px-4 rounded-xl">
+                <MailWarning className="h-4 w-4 text-amber-600 shrink-0" />
+                <span>Didn&apos;t find the OTP in your mailbox? Check your spam folder.</span>
+              </div>
+
+              {/* Security Notice */}
+              <div className="flex items-center justify-center gap-2 text-[11px] font-medium text-slate-500 bg-slate-50 border border-slate-200/70 py-2.5 px-4 rounded-xl">
+                <ShieldCheck className="h-4 w-4 text-emerald-600 shrink-0" />
+                <span>Restricted session • OTP required</span>
+              </div>
             </div>
 
           </div>

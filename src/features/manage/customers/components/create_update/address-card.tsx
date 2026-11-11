@@ -68,7 +68,7 @@ export default function AddressCard() {
                     <div className="space-y-1.5">
                         <FormInput
                             label="Latitude"
-                            placeholder="31.5189"
+                            placeholder="e.g. 31.5189"
                             type="number"
                             name="latitude"
                             required
@@ -77,7 +77,7 @@ export default function AddressCard() {
                     <div className="space-y-1.5">
                         <FormInput
                             label="Longitude"
-                            placeholder="74.3680"
+                            placeholder="e.g. 74.3680"
                             type="number"
                             name="longitude"
                             required

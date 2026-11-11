@@ -9,6 +9,7 @@ import MainPageHeader from "@/lib/utils/components/MainPageHeader";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
+import { Factory } from "lucide-react";
 
 export default function ProductionPage() {
   const { branchId } = useRole();
@@ -30,6 +31,7 @@ export default function ProductionPage() {
         btnText="Log New Batch"
         onRefresh={refetch}
         isRefreshing={isRefetching}
+        icon={Factory}
       />
 
       <ProductionStats

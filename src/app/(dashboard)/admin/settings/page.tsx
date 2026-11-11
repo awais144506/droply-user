@@ -5,6 +5,8 @@ import { useUpdateBranchSettings } from "@/features/admin/settings/api/use-updat
 import { BranchSettingsForm } from "@/features/admin/settings/components/branch-settings-form";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
+import MainPageHeader from "@/lib/utils/components/MainPageHeader";
+import { Settings } from "lucide-react";
 
 export default function BranchSettingsPage() {
   const { branchId, isLoading: isTenantLoading } = useRole();
@@ -15,13 +17,12 @@ export default function BranchSettingsPage() {
   if (isError || !branchData) return <ErrorBoundary error={error?.message} />
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Branch Settings</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          Manage your localized branch identity for customer-facing documents and invoices.
-        </p>
-      </div>
+    <div className="p-6 space-y-6">
+      <MainPageHeader
+        heading="Branch Settings"
+        description="Manage your localized branch identity for customer-facing documents and invoices."
+        icon={Settings}
+      />
 
       <BranchSettingsForm
         initialData={branchData}

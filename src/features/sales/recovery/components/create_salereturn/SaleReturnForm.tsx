@@ -386,10 +386,10 @@ const SaleReturnForm = ({ branchId }: Props) => {
                                 formatOptionLabel={(opt: any) => (
                                     <div className="flex items-center justify-between w-full py-0.5 pr-1">
                                         <div className="flex flex-col truncate mr-2">
-                                            <span className="text-sm font-bold text-slate-900 truncate">
+                                            <span className="text-sm font-bold truncate">
                                                 {opt.label}
                                             </span>
-                                            <span className="text-[11px] text-slate-500">
+                                            <span className="text-[11px]">
                                                 {opt.phone}
                                             </span>
                                         </div>
@@ -421,10 +421,10 @@ const SaleReturnForm = ({ branchId }: Props) => {
                                 formatOptionLabel={(opt: any) => (
                                     <div className="flex items-center justify-between w-full py-0.5 pr-1">
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-extrabold text-slate-900">
+                                            <span className="text-sm font-extrabold ">
                                                 #{opt.orderCode}
                                             </span>
-                                            <span className="text-[11px] text-slate-500">
+                                            <span className="text-[11px] ">
                                                 {opt.dateStr} • {opt.totalUnitsLeft} returnable unit(s)
                                             </span>
                                         </div>

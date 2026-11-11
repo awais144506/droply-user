@@ -92,7 +92,6 @@ export function QuotationCustomerSection({
                         />
                     </div>
 
-                    {/* 🔥 Live Customer History / Standing Card when a customer is selected */}
                     {selectedCustomer && (
                         <div className="rounded-xl bg-sky-50/60 border border-sky-200/80 p-3.5 space-y-2.5 animate-in fade-in duration-200">
                             <div className="flex items-center justify-between">

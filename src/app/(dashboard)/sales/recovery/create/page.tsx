@@ -6,8 +6,6 @@ import { useRole } from "@/lib/hooks/use-role";
 import ChooseType from "@/features/sales/recovery/components/create_recovery/choose-type";
 import RecoveryForm from "@/features/sales/recovery/components/create_recovery/RecoveryForm";
 import SaleReturnForm from "@/features/sales/recovery/components/create_salereturn/SaleReturnForm";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 
 const CreateNewRecovery = () => {
     const { branchId } = useRole();

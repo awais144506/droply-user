@@ -44,29 +44,26 @@ export default function MainPageHeader({
         <div className="flex flex-col gap-3.5 pb-6">
             {/* 1. Optional Shadcn Breadcrumbs (Sleek top bar) */}
             {breadcrumbs && breadcrumbs.length > 0 && (
-                <Breadcrumb className="px-1">
-                    <BreadcrumbList className="text-xs font-medium text-slate-500">
-                        {breadcrumbs.map((crumb, index) => {
+                <Breadcrumb>
+                    <BreadcrumbList>
+                        {breadcrumbs.map((item, index) => {
                             const isLast = index === breadcrumbs.length - 1;
                             return (
-                                <React.Fragment key={crumb.label}>
+                                <React.Fragment key={index}>
                                     <BreadcrumbItem>
-                                        {isLast || !crumb.href ? (
-                                            <BreadcrumbPage className="font-bold text-slate-900">
-                                                {crumb.label}
-                                            </BreadcrumbPage>
-                                        ) : (
-                                            <BreadcrumbLink
-                                                
-                                                className="hover:text-sky-600 transition-colors"
-                                            >
-                                                <Link href={crumb.href}>{crumb.label}</Link>
+                                        {!isLast && item.href ? (
+                                            <BreadcrumbLink>
+                                                <Link href={item.href} className="text-slate-500 hover:text-slate-900 transition-colors">
+                                                    {item.label}
+                                                </Link>
                                             </BreadcrumbLink>
+                                        ) : (
+                                            <BreadcrumbPage className="text-sky-600 font-semibold">
+                                                {item.label}
+                                            </BreadcrumbPage>
                                         )}
                                     </BreadcrumbItem>
-                                    {!isLast && (
-                                        <BreadcrumbSeparator className="text-slate-300" />
-                                    )}
+                                    {!isLast && <BreadcrumbSeparator className="text-slate-400" />}
                                 </React.Fragment>
                             );
                         })}
@@ -115,19 +112,17 @@ export default function MainPageHeader({
                                 type="button"
                                 onClick={onRefresh}
                                 disabled={isRefreshing}
-                                className={`group flex items-center justify-center h-10 w-10 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300 text-slate-700 shadow-2xs transition-all duration-150 ${
-                                    isRefreshing
+                                className={`group flex items-center justify-center h-10 w-10 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300 text-slate-700 shadow-2xs transition-all duration-150 ${isRefreshing
                                         ? "opacity-60 cursor-not-allowed"
                                         : "cursor-pointer active:scale-95"
-                                }`}
+                                    }`}
                                 title="Refresh Data"
                             >
                                 <RefreshCw
-                                    className={`h-4 w-4 text-slate-600 transition-transform duration-300 ${
-                                        isRefreshing
+                                    className={`h-4 w-4 text-slate-600 transition-transform duration-300 ${isRefreshing
                                             ? "animate-spin text-sky-600"
                                             : "group-hover:rotate-45"
-                                    }`}
+                                        }`}
                                 />
                             </button>
                         )}
@@ -137,11 +132,10 @@ export default function MainPageHeader({
                             href ? (
                                 <Link
                                     href={isDisabled ? "#" : href}
-                                    className={`${buttonVariants({ variant: "default" })}  ${
-                                        isDisabled
+                                    className={`${buttonVariants({ variant: "default" })}  ${isDisabled
                                             ? "opacity-50 pointer-events-none cursor-not-allowed"
                                             : "active:scale-[0.98]"
-                                    }`}
+                                        }`}
                                     aria-disabled={isDisabled}
                                     tabIndex={isDisabled ? -1 : undefined}
                                 >
@@ -153,11 +147,10 @@ export default function MainPageHeader({
                                     type="button"
                                     onClick={onActionClick}
                                     disabled={isDisabled}
-                                    className={`${buttonVariants({ variant: "default" })} h-10 px-4 rounded-xl font-bold text-xs sm:text-sm bg-sky-600 hover:bg-sky-700 text-white shadow-sm shadow-sky-600/15 transition-all duration-150 cursor-pointer ${
-                                        isDisabled
+                                    className={`${buttonVariants({ variant: "default" })} h-10 px-4 rounded-xl font-bold text-xs sm:text-sm bg-sky-600 hover:bg-sky-700 text-white shadow-sm shadow-sky-600/15 transition-all duration-150 cursor-pointer ${isDisabled
                                             ? "opacity-50 pointer-events-none cursor-not-allowed"
                                             : "active:scale-[0.98]"
-                                    }`}
+                                        }`}
                                 >
                                     <Plus className="h-4 w-4 mr-1.5 shrink-0 stroke-[2.5]" />
                                     {btnText}

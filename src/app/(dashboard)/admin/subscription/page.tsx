@@ -6,6 +6,7 @@ import ErrorBoundary from "@/app/error";
 import Loading from "@/app/loading";
 import BillingTable from "@/features/admin/subscription/components/main/billing-table";
 import MainPageHeader from "@/lib/utils/components/MainPageHeader";
+import { CreditCard } from "lucide-react";
 
 export default function SubscriptionPage() {
   const { branchId } = useRole();
@@ -31,6 +32,7 @@ export default function SubscriptionPage() {
         description="Manage your workspace plan, clear pending invoices, and track billing history."
         onRefresh={refetch}
         isRefreshing={isRefetching}
+        icon={CreditCard}
       />
 
       {/* FIXED: Changed 'plan' to 'currentPlan' */}

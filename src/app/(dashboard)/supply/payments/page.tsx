@@ -8,6 +8,7 @@ import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
 import ErrorBoundary from "@/app/error";
 import ActivityLogsCard from "@/lib/utils/components/ActivityLogsMainPage";
+import { CreditCard } from "lucide-react";
 
 export default function SupplierPaymentsPage() {
   const searchParamas = useSearchParams();
@@ -30,12 +31,13 @@ export default function SupplierPaymentsPage() {
   return (
     <div className="space-y-6 p-6">
       <MainPageHeader
-        heading="Supplier Payments Out"
+        heading="Supplier Payments"
         description="Record bank transfers, cash vouchers, and cheques issued to vendors."
         href="/supply/payments/create-payment"
         btnText="New Payment"
         onRefresh={refetch}
         isRefreshing={isRefetching}
+        icon={CreditCard}
       />
 
       <DataTableFilterBar

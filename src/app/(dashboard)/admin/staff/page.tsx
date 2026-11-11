@@ -10,6 +10,7 @@ import { StaffStats } from "@/features/admin/staff/components/main/staff-stats";
 import { StaffTable } from "@/features/admin/staff/components/main/staff-table";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { useSearchParams } from "next/navigation";
+import { UserCog } from "lucide-react";
 
 export default function StaffPage() {
   const { branchId, maxUsersLimit } = useRole();
@@ -39,6 +40,7 @@ export default function StaffPage() {
         isDisabled={isLimitReached}
         onRefresh={refetch}
         isRefreshing={isRefetching}
+        icon={UserCog}
       />
 
       <TierLimitCard

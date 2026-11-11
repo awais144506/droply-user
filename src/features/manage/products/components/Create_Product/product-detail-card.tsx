@@ -29,8 +29,8 @@ const ProductDetailCard = () => {
                                 />
                             )}
                         />
-                        <Label htmlFor="isPublic" className="text-xs font-semibold text-slate-700 cursor-pointer">
-                            Show in Customer Portal
+                        <Label htmlFor="isPublic" className="text-xs font-semibold text-emerald-600 cursor-pointer">
+                            Public Product
                         </Label>
                     </div>
                 </CardHeader>

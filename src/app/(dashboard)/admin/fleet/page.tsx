@@ -9,6 +9,7 @@ import ErrorBoundary from "@/app/error";
 import { DataTableFilterBar } from "@/components/ui/data-table-filter-bar";
 import { FleetTable } from "@/features/admin/fleet/components/fleet-table";
 import { FleetExpenseLogs } from "@/features/admin/fleet/components/fleet-expense-logs";
+import { TruckIcon } from "lucide-react";
 
 export default function FleetManagementPage() {
   const searchParams = useSearchParams();
@@ -31,6 +32,7 @@ export default function FleetManagementPage() {
         btnText="Add Vehicle"
         isRefreshing={isRefetching}
         onRefresh={refetch}
+        icon={TruckIcon}
       />
       
       <FleetStats
