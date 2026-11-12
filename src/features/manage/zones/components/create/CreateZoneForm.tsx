@@ -7,6 +7,7 @@ import { useCreateZone } from "../../api/use-mutate-zone";
 import { useRouter } from "next/navigation";
 import { useAppForm } from "@/lib/hooks/use-app-form";
 import FormCTAFooter from "@/lib/utils/components/FormCTAFooter";
+import { FormCoordinatesInput } from "@/components/ui/FormCoordinatesInput";
 
 const ZoneCreateForm = ({ branchId }: { branchId: string }) => {
   const router = useRouter();
@@ -37,31 +38,24 @@ const ZoneCreateForm = ({ branchId }: { branchId: string }) => {
             placeholder='e.g. Johar Town Lahore'
             name="name"
           />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormInput
-              label="Latitude"
-              type="number"
-              placeholder='e.g. 31.5152'
-              name="latitude"
-            />
-            <FormInput
-              label="Longitude"
-              type="number"
-              placeholder='e.g. 74.2882'
-              name="longitude"
+          <div >
+            <FormCoordinatesInput
+              latName="latitude"
+              lngName="longitude"
+              required
             />
           </div>
         </div>
-        <FormCTAFooter
-          ctaText="Create Zone"
-          href="/manage/zones"
-          isPending={isPending}
-          isDirty={isDirty}
-          isValid={isValid}
-          icon={MapPin}
-        />
-      </form>
-    </FormProvider>
+      <FormCTAFooter
+        ctaText="Create Zone"
+        href="/manage/zones"
+        isPending={isPending}
+        isDirty={isDirty}
+        isValid={isValid}
+        icon={MapPin}
+      />
+    </form>
+    </FormProvider >
   )
 }
 
