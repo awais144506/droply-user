@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { Zap, Clock, CalendarDays, AlertTriangle, Crown } from "lucide-react";
 import Link from "next/link";
@@ -32,16 +31,25 @@ export function SubscriptionIndicator({ branchId }: { branchId: string }) {
   const endDate = renewDate ? new Date(renewDate) : new Date();
   endDate.setHours(0, 0, 0, 0);
 
-  const daysLeft = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  // Calculate the exact Grace Period End Date (+2 days after endDate, e.g., Nov 11 -> Nov 13)
+  const graceEndDate = new Date(endDate);
+  graceEndDate.setDate(graceEndDate.getDate() + 2);
+
+  const daysLeft = Math.ceil(
+    (endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+  );
   const isTrial = cycle === "TRIAL";
 
-  // Map strictly to our database states
-  const isPastDue = daysLeft < 0 && daysLeft >= -2;
-  const isSuspended = daysLeft < -2;
+  // Map strictly to our database states (2-day grace window applies to ALL plans including TRIAL)
+  const isPastDue = daysLeft < 0 && daysLeft >= -2; // -1 (Nov 12) and -2 (Nov 13)
+  const isSuspended = daysLeft < -2; // -3 onwards (After Nov 13)
+
+  // Remaining grace days (Day -1 = 2 days left, Day -2 = 1 day left)
+  const graceDaysRemaining = 3 + daysLeft;
 
   // UI styling flags
-  const isCritical = isSuspended || (isTrial && daysLeft < 0);
-  const isWarning = isPastDue && !isTrial;
+  const isCritical = isSuspended;
+  const isWarning = isPastDue;
 
   const formattedDate = endDate.toLocaleDateString("en-US", {
     month: "short",
@@ -49,8 +57,14 @@ export function SubscriptionIndicator({ branchId }: { branchId: string }) {
     year: "numeric",
   });
 
+  const formattedGraceDate = graceEndDate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
   const getTierTheme = () => {
-    // 1. Critical Danger State (Red)
+    // 1. Critical Danger State (Red - After Grace Period Ends)
     if (isCritical) {
       return {
         wrapper: "bg-white border-rose-200 hover:border-rose-300",
@@ -62,19 +76,19 @@ export function SubscriptionIndicator({ branchId }: { branchId: string }) {
       };
     }
 
-    // 2. Warning / Past Due State (Amber)
+    // 2. Warning / 2-Day Grace Period State (Amber - Applies to Trial & Paid)
     if (isWarning) {
       return {
         wrapper: "bg-white border-amber-300 hover:border-amber-400",
         iconBox: "bg-amber-50 text-amber-600",
         icon: <AlertTriangle className="h-4 w-4 text-amber-600" />,
         tierText: "text-slate-900",
-        pill: "bg-amber-100 text-amber-700 animate-pulse border border-amber-200",
-        dateText: "text-amber-600 font-semibold",
+        pill: "bg-amber-100 text-amber-800 animate-pulse border border-amber-300",
+        dateText: "text-amber-700 font-semibold",
       };
     }
 
-    // 3. Trial State
+    // 3. Active Trial State
     if (isTrial) {
       return {
         wrapper: "bg-white border-sky-200 hover:border-sky-300",
@@ -90,18 +104,27 @@ export function SubscriptionIndicator({ branchId }: { branchId: string }) {
     switch (tier.toUpperCase()) {
       case "PLATINUM":
         return {
-          wrapper: "bg-slate-900 border-slate-800 hover:border-indigo-500 shadow-md shadow-indigo-500/10",
-          iconBox: "bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-inner",
-          icon: <Crown className="h-4 w-4 group-hover:scale-110 transition-transform" />,
-          tierText: "bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400",
+          wrapper:
+            "bg-slate-900 border-slate-800 hover:border-indigo-500 shadow-md shadow-indigo-500/10",
+          iconBox:
+            "bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-inner",
+          icon: (
+            <Crown className="h-4 w-4 group-hover:scale-110 transition-transform" />
+          ),
+          tierText:
+            "bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-purple-400",
           pill: "bg-white/10 text-indigo-100 border border-white/10 backdrop-blur-sm",
           dateText: "text-slate-400",
         };
       case "GOLD":
         return {
-          wrapper: "bg-gradient-to-b from-amber-50/50 to-white border-amber-200 hover:border-amber-400 shadow-sm shadow-amber-500/5",
-          iconBox: "bg-gradient-to-br from-amber-400 to-orange-400 text-white shadow-inner",
-          icon: <Zap className="h-4 w-4 fill-white group-hover:scale-110 transition-transform" />,
+          wrapper:
+            "bg-gradient-to-b from-amber-50/50 to-white border-amber-200 hover:border-amber-400 shadow-sm shadow-amber-500/5",
+          iconBox:
+            "bg-gradient-to-br from-amber-400 to-orange-400 text-white shadow-inner",
+          icon: (
+            <Zap className="h-4 w-4 fill-white group-hover:scale-110 transition-transform" />
+          ),
           tierText: "text-amber-700",
           pill: "bg-amber-100/80 text-amber-800 border border-amber-200/50",
           dateText: "text-slate-500",
@@ -110,7 +133,9 @@ export function SubscriptionIndicator({ branchId }: { branchId: string }) {
         return {
           wrapper: "bg-white border-slate-200 hover:border-slate-300",
           iconBox: "bg-slate-100 text-slate-500",
-          icon: <Zap className="h-4 w-4 fill-slate-400 group-hover:scale-110 transition-transform" />,
+          icon: (
+            <Zap className="h-4 w-4 fill-slate-400 group-hover:scale-110 transition-transform" />
+          ),
           tierText: "text-slate-700",
           pill: "bg-slate-100 text-slate-600 border border-slate-200",
           dateText: "text-slate-500",
@@ -127,31 +152,53 @@ export function SubscriptionIndicator({ branchId }: { branchId: string }) {
         href="/admin/subscription"
         className={`hidden sm:flex items-center gap-3 px-3.5 py-2 rounded-xl transition-all duration-300 cursor-pointer group border ${theme.wrapper}`}
       >
-        <div className={`p-1.5 rounded-lg transition-all duration-300 ${theme.iconBox}`}>
+        <div
+          className={`p-1.5 rounded-lg transition-all duration-300 ${theme.iconBox}`}
+        >
           {theme.icon}
         </div>
 
         <div className="flex flex-col justify-center">
           <div className="flex items-center gap-2">
-            <span className={`text-xs font-extrabold tracking-wide uppercase ${theme.tierText}`}>
-              {tier} <span className="opacity-40 mx-0.5 font-normal">|</span> {cycle}
+            <span
+              className={`text-xs font-extrabold tracking-wide uppercase ${theme.tierText}`}
+            >
+              {tier} <span className="opacity-40 mx-0.5 font-normal">|</span>{" "}
+              {cycle}
             </span>
 
-            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md tracking-wide uppercase ${theme.pill}`}>
-              {isSuspended ? "Suspended"
-                : (isTrial && daysLeft < 0) ? "Expired"
-                : isPastDue ? "Past Due"
-                : daysLeft === 0 ? "Due Today"
-                : `${daysLeft} Days Left`
-              }
+            <span
+              className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md tracking-wide uppercase ${theme.pill}`}
+            >
+              {isSuspended
+                ? "Suspended"
+                : isPastDue
+                ? `Grace Period (${graceDaysRemaining}d Left)`
+                : daysLeft === 0
+                ? "Due Today"
+                : `${daysLeft} Days Left`}
             </span>
           </div>
 
-          <span className={`text-[10px] flex items-center gap-1 mt-0.5 ${theme.dateText}`}>
+          <span
+            className={`text-[10px] flex items-center gap-1 mt-0.5 ${theme.dateText}`}
+          >
             <CalendarDays className="h-3 w-3 opacity-70" />
-            {isTrial ? "Trial ends:" : "Renew Date:"}
-            <span className={tier.toUpperCase() === "PLATINUM" && !isCritical && !isWarning ? "text-slate-500" : "font-semibold"}>
-              {formattedDate}
+            {isPastDue
+              ? "Grace ends:"
+              : isSuspended
+              ? "Expired on:"
+              : isTrial
+              ? "Trial ends:"
+              : "Renew Date:"}
+            <span
+              className={
+                tier.toUpperCase() === "PLATINUM" && !isCritical && !isWarning
+                  ? "text-slate-500"
+                  : "font-semibold"
+              }
+            >
+              {isPastDue ? formattedGraceDate : formattedDate}
             </span>
           </span>
         </div>
@@ -159,18 +206,36 @@ export function SubscriptionIndicator({ branchId }: { branchId: string }) {
 
       {/* Urgent Action Banner */}
       {(isCritical || isWarning) && (
-        <div className={`hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl shadow-sm animate-pulse border ${isCritical ? "bg-rose-50 border-rose-200" : "bg-amber-50 border-amber-200"
-          }`}>
-          <AlertTriangle className={`h-4 w-4 ${isCritical ? "text-rose-600" : "text-amber-600"}`} />
+        <div
+          className={`hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl shadow-sm animate-pulse border ${
+            isCritical
+              ? "bg-rose-50 border-rose-200"
+              : "bg-amber-50 border-amber-200"
+          }`}
+        >
+          <AlertTriangle
+            className={`h-4 w-4 shrink-0 ${
+              isCritical ? "text-rose-600" : "text-amber-600"
+            }`}
+          />
           <div className="flex flex-col">
-            <span className={`text-[10px] font-bold uppercase leading-none ${isCritical ? "text-rose-700" : "text-amber-700"}`}>
-              {isSuspended ? "Account Suspended"
-                : (isTrial && daysLeft < 0) ? "Trial Expired"
-                : isPastDue ? "Payment Overdue"
-                : "Action Required"}
+            <span
+              className={`text-[10px] font-bold uppercase leading-none ${
+                isCritical ? "text-rose-700" : "text-amber-800"
+              }`}
+            >
+              {isSuspended
+                ? "Account Suspended"
+                : `${isTrial ? "Trial" : "Plan"} Expired • 2-Day Grace Period`}
             </span>
-            <span className={`text-[9px] font-medium mt-0.5 ${isCritical ? "text-rose-600" : "text-amber-600"}`}>
-              {isCritical ? "Update billing to restore access" : "Update billing to avoid disruption"}
+            <span
+              className={`text-[9px] font-medium mt-0.5 ${
+                isCritical ? "text-rose-600" : "text-amber-700"
+              }`}
+            >
+              {isCritical
+                ? "Update billing to restore access"
+                : `Access restricts after ${formattedGraceDate} — update billing`}
             </span>
           </div>
         </div>

@@ -1,11 +1,10 @@
-"use client"
+"use client";
 import React from "react";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import {
     Breadcrumb,
     BreadcrumbItem,
-    BreadcrumbLink,
     BreadcrumbList,
     BreadcrumbPage,
     BreadcrumbSeparator,
@@ -41,11 +40,13 @@ export default function CreateFormHeader({
                                 <React.Fragment key={index}>
                                     <BreadcrumbItem>
                                         {!isLast && item.href ? (
-                                            <BreadcrumbLink>
-                                                <Link href={item.href} className="text-slate-500 hover:text-slate-900 transition-colors">
-                                                    {item.label}
-                                                </Link>
-                                            </BreadcrumbLink>
+                                            <Link
+                                                href={item.href}
+                                                data-slot="breadcrumb-link"
+                                                className="text-slate-500 hover:text-slate-900 transition-colors"
+                                            >
+                                                {item.label}
+                                            </Link>
                                         ) : (
                                             <BreadcrumbPage className="text-sky-600 font-semibold">
                                                 {item.label}

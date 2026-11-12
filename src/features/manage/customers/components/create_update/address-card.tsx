@@ -6,6 +6,7 @@ import { FormInput } from "@/components/ui/form-input";
 import { FormSelect } from "@/components/ui/form-select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DayOfWeek } from "../../schema/create-customer.schema";
+import { FormCoordinatesInput } from "@/components/ui/FormCoordinatesInput";
 
 const SCHEDULE_OPTIONS = [
     { label: "On-Demand (Order by Call)", value: "ON_DEMAND" },
@@ -64,25 +65,12 @@ export default function AddressCard() {
                     />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                        <FormInput
-                            label="Latitude"
-                            placeholder="e.g. 31.5189"
-                            type="number"
-                            name="latitude"
-                            required
-                        />
-                    </div>
-                    <div className="space-y-1.5">
-                        <FormInput
-                            label="Longitude"
-                            placeholder="e.g. 74.3680"
-                            type="number"
-                            name="longitude"
-                            required
-                        />
-                    </div>
+                <div >
+                    <FormCoordinatesInput
+                        latName="latitude"
+                        lngName="longitude"
+                        required
+                    />
                 </div>
 
                 {/* Delivery Schedule Section */}
@@ -131,11 +119,10 @@ export default function AddressCard() {
                                             type="button"
                                             onClick={() => toggleDay(day.value)}
                                             title={day.label}
-                                            className={`py-2 px-1 rounded-xl text-xs font-bold transition-all cursor-pointer border text-center ${
-                                                isSelected
+                                            className={`py-2 px-1 rounded-xl text-xs font-bold transition-all cursor-pointer border text-center ${isSelected
                                                     ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
                                                     : "bg-slate-50 text-slate-600 border-slate-200 hover:border-emerald-400 hover:bg-white"
-                                            }`}
+                                                }`}
                                         >
                                             {day.short}
                                         </button>
