@@ -7,13 +7,17 @@ export function useRole() {
 
   const branchId = (user?.publicMetadata?.branchId as string) || "";
   const role = (user?.publicMetadata?.role as "OWNER" | "MANAGER") || "MANAGER";
-  const userTier = (user?.publicMetadata.tier as string) || "SILVER";
-  const tierCycle = (user?.publicMetadata.cycle as string) || "TRIAL";
-  const userStatus = (user?.publicMetadata.branchStatus as string) || "SUSPENDED";
-  const maxUsersLimit = (user?.publicMetadata.userLimit as number) || 5;
-  const renewDate = user?.publicMetadata.renewDate;
-  const userName = String(user?.fullName) || "XYZ";
-  const userEmail = String(user?.emailAddresses);
+  const userTier = (user?.publicMetadata?.tier as string) || "SILVER";
+  const tierCycle = (user?.publicMetadata?.cycle as string) || "TRIAL";
+  const userStatus =
+    role === "OWNER"
+      ? "ACTIVE"
+      : (user?.publicMetadata?.userStatus as string) || "ACTIVE";
+  const branchStatus = (user?.publicMetadata?.branchStatus as string) || "SUSPENDED";
+  const maxUsersLimit = (user?.publicMetadata?.userLimit as number) || 4;
+  const renewDate = user?.publicMetadata?.renewDate as string | undefined;
+  const userName = user?.fullName || "User";
+  const userEmail = user?.primaryEmailAddress?.emailAddress || "";
   const userProfilePicture = user?.imageUrl;
   const userId = user?.id;
 
@@ -29,6 +33,7 @@ export function useRole() {
     userEmail,
     userProfilePicture,
     maxUsersLimit,
+    branchStatus,
     isOwner: role === "OWNER",
     isManager: role === "MANAGER",
     isLoading: !isLoaded,
