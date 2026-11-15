@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, ReactNode } from "react";
 import { Search, SlidersHorizontal, Check, CalendarIcon, X } from "lucide-react";
 import { format } from "date-fns";
 import { useDebounce } from "@/lib/hooks/use-debounce";
@@ -35,6 +35,8 @@ interface DataTableFilterBarProps {
     showDateFilter?: boolean;
     dateParamName?: string;
     datePlaceholder?: string;
+    // 🔥 Optional Right Action Slot (e.g. PDF Export Button) — Safe for all other tables
+    rightSlot?: ReactNode;
 }
 
 export function DataTableFilterBar({
@@ -48,6 +50,7 @@ export function DataTableFilterBar({
     showDateFilter = false,
     dateParamName = "date",
     datePlaceholder = "Filter by Date",
+    rightSlot,
 }: DataTableFilterBarProps) {
     const router = useRouter();
     const pathName = usePathname();
@@ -105,7 +108,7 @@ export function DataTableFilterBar({
                 />
             </div>
 
-            {/* Right: Tabs, Date Picker & Dropdown Container */}
+            {/* Right: Tabs, Date Picker, Dropdown & Optional Action Slot */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto overflow-hidden">
 
                 {/* 1. Shadcn Tabs */}
@@ -128,25 +131,24 @@ export function DataTableFilterBar({
                         </TabsList>
                     </Tabs>
                 )}
+
+                {/* 2. Optional Date Filter */}
                 {showDateFilter && (
                     <div className="relative flex items-center w-full sm:w-auto">
                         <Popover>
-                            <PopoverTrigger>
-                                <button
-                                    type="button"
-                                    className={`w-full sm:w-48 h-11 px-3.5 bg-white border rounded-xl flex items-center justify-between text-xs font-semibold shadow-xs transition-all cursor-pointer ${
-                                        selectedDate
-                                            ? "border-sky-400 bg-sky-50/40 text-sky-900 ring-1 ring-sky-400/30 pr-8"
-                                            : "border-slate-200 text-slate-700 hover:border-slate-300"
-                                    }`}
-                                >
-                                    <div className="flex items-center gap-2 truncate">
-                                        <CalendarIcon className={`h-3.5 w-3.5 shrink-0 ${selectedDate ? "text-sky-600" : "text-slate-400"}`} />
-                                        <span className="truncate">
-                                            {selectedDate ? format(selectedDate, "dd MMM yyyy") : datePlaceholder}
-                                        </span>
-                                    </div>
-                                </button>
+                            <PopoverTrigger
+                                className={`w-full sm:w-48 h-11 px-3.5 bg-white border rounded-xl flex items-center justify-between text-xs font-semibold shadow-xs transition-all cursor-pointer ${
+                                    selectedDate
+                                        ? "border-sky-400 bg-sky-50/40 text-sky-900 ring-1 ring-sky-400/30 pr-8"
+                                        : "border-slate-200 text-slate-700 hover:border-slate-300"
+                                }`}
+                            >
+                                <div className="flex items-center gap-2 truncate">
+                                    <CalendarIcon className={`h-3.5 w-3.5 shrink-0 ${selectedDate ? "text-sky-600" : "text-slate-400"}`} />
+                                    <span className="truncate">
+                                        {selectedDate ? format(selectedDate, "dd MMM yyyy") : datePlaceholder}
+                                    </span>
+                                </div>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0 rounded-xl border-slate-200 shadow-xl bg-white" align="end">
                                 <Calendar
@@ -155,7 +157,6 @@ export function DataTableFilterBar({
                                     onSelect={(date) => {
                                         setQueryString(dateParamName, date ? format(date, "yyyy-MM-dd") : "");
                                     }}
-                                    
                                 />
                             </PopoverContent>
                         </Popover>
@@ -225,6 +226,9 @@ export function DataTableFilterBar({
                         </SelectContent>
                     </Select>
                 )}
+
+                {/* 4. Optional Right Action Slot (PDF Button, etc.) */}
+                {rightSlot && <div className="shrink-0 flex items-center">{rightSlot}</div>}
             </div>
         </div>
     );
