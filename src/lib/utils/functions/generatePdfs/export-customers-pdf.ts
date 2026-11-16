@@ -33,6 +33,41 @@ function formatSchedule(customer: any): string {
   return type;
 }
 
+function formatLastVisit(dateString?: string | null): {
+  dateText: string;
+  agoText: string;
+} {
+  if (!dateString) return { dateText: "Never", agoText: "" };
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return { dateText: "Never", agoText: "" };
+
+  const dateText = date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const visitDay = new Date(date);
+  visitDay.setHours(0, 0, 0, 0);
+
+  const diffDays = Math.floor(
+    (today.getTime() - visitDay.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  const agoText =
+    diffDays === 0
+      ? "Today"
+      : diffDays === 1
+      ? "Yesterday"
+      : diffDays > 1
+      ? `${diffDays}d ago`
+      : "";
+
+  return { dateText, agoText };
+}
+
 export function exportCustomersToBwPdf({
   customers,
   branchSettings,
@@ -90,6 +125,7 @@ export function exportCustomersToBwPdf({
       const code = c.customerCode ? c.customerCode.replace("CUS-", "#") : "-";
       const zoneName = c.zone?.name || "Unassigned Zone";
       const schedule = formatSchedule(c);
+      const { dateText, agoText } = formatLastVisit(c.lastVisitDate);
       const credit = Number(c.customerCredit) || 0;
       const advance = Number(c.customerAdvance) || 0;
       const deposit = Number(c.securityDeposit) || 0;
@@ -108,6 +144,10 @@ export function exportCustomersToBwPdf({
             <div class="sub">Zone: <b>${escapeHtml(zoneName)}</b></div>
           </td>
           <td>${escapeHtml(schedule)}</td>
+          <td>
+            <div class="bold">${escapeHtml(dateText)}</div>
+            ${agoText ? `<div class="sub">${escapeHtml(agoText)}</div>` : ""}
+          </td>
           <td class="center bold">${bottles}</td>
           <td class="right">
             ${credit > 0 ? `<div class="bold">Due: ${currency} ${credit.toLocaleString()}</div>` : ""}
@@ -127,7 +167,6 @@ export function exportCustomersToBwPdf({
         <meta charset="utf-8" />
         <title>${escapeHtml(branchName)} - Customers List</title>
         <style>
-          /* 🔥 Force A4 Landscape with generous outer margin on all 4 sides */
           @page {
             size: A4 landscape;
             margin: 14mm 15mm;
@@ -145,7 +184,6 @@ export function exportCustomersToBwPdf({
             padding: 0;
             color: #000;
           }
-          /* 🔥 Outer wrapper gives clean padding on all 4 sides in both browser preview & print */
           .page-container {
             padding: 28px 36px;
             width: 100%;
@@ -312,12 +350,13 @@ export function exportCustomersToBwPdf({
             <thead>
               <tr>
                 <th style="width: 4%; text-align: center;">#</th>
-                <th style="width: 18%;">Customer</th>
+                <th style="width: 17%;">Customer</th>
                 <th style="width: 12%;">Phone</th>
-                <th style="width: 34%;">Address & Zone</th>
-                <th style="width: 11%;">Schedule</th>
-                <th style="width: 7%; text-align: center;">Bottles</th>
-                <th style="width: 14%; text-align: right;">Balance / Deposit</th>
+                <th style="width: 28%;">Address & Zone</th>
+                <th style="width: 10%;">Schedule</th>
+                <th style="width: 10%;">Last Visit</th>
+                <th style="width: 6%; text-align: center;">Bottles</th>
+                <th style="width: 13%; text-align: right;">Balance / Deposit</th>
               </tr>
             </thead>
             <tbody>
