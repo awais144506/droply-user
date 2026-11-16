@@ -115,27 +115,26 @@ export default function MainPageHeader({
           <div className="flex flex-wrap items-center gap-2.5 shrink-0 pt-2 lg:pt-0 border-t border-slate-100 lg:border-t-0">
             {children}
 
-            {/* 🔥 Optional WhatsApp Request Button */}
-            {/* Optional Refresh Button */}
             {onRefresh && (
               <button
                 type="button"
                 onClick={onRefresh}
                 disabled={isRefreshing}
-                className={`group flex items-center justify-center h-10 w-10 rounded-xl border border-slate-200 bg-slate-50/70 hover:bg-slate-100 hover:border-slate-300 text-slate-700 shadow-2xs transition-all duration-150 ${
-                  isRefreshing
-                    ? "opacity-60 cursor-not-allowed"
+                className={`group flex items-center gap-2 h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700 shadow-2xs transition-all duration-150 ${isRefreshing
+                    ? "opacity-60 cursor-not-allowed bg-slate-50"
                     : "cursor-pointer active:scale-95"
-                }`}
-                title="Refresh Data"
+                  }`}
+                title="Bypass cache and fetch fresh data"
               >
                 <RefreshCw
-                  className={`h-4 w-4 text-slate-600 transition-transform duration-300 ${
-                    isRefreshing
+                  className={`h-3.5 w-3.5 text-slate-500 group-hover:text-sky-600 transition-transform duration-300 ${isRefreshing
                       ? "animate-spin text-sky-600"
                       : "group-hover:rotate-45"
-                  }`}
+                    }`}
                 />
+                <span className="text-xs font-bold tracking-tight">
+                  {isRefreshing ? "Syncing..." : "Refresh Data"}
+                </span>
               </button>
             )}
             {showWhatsAppTemplate && (
@@ -149,11 +148,10 @@ export default function MainPageHeader({
               (href ? (
                 <Link
                   href={isDisabled ? "#" : href}
-                  className={`${buttonVariants({ variant: "default" })} ${
-                    isDisabled
+                  className={`${buttonVariants({ variant: "default" })} ${isDisabled
                       ? "opacity-50 pointer-events-none cursor-not-allowed"
                       : "active:scale-[0.98]"
-                  }`}
+                    }`}
                   aria-disabled={isDisabled}
                   tabIndex={isDisabled ? -1 : undefined}
                 >
@@ -165,11 +163,10 @@ export default function MainPageHeader({
                   type="button"
                   onClick={onActionClick}
                   disabled={isDisabled}
-                  className={`${buttonVariants({ variant: "default" })} h-10 px-4 rounded-xl font-bold text-xs sm:text-sm bg-sky-600 hover:bg-sky-700 text-white shadow-sm shadow-sky-600/15 transition-all duration-150 cursor-pointer ${
-                    isDisabled
+                  className={`${buttonVariants({ variant: "default" })} h-10 px-4 rounded-xl font-bold text-xs sm:text-sm bg-sky-600 hover:bg-sky-700 text-white shadow-sm shadow-sky-600/15 transition-all duration-150 cursor-pointer ${isDisabled
                       ? "opacity-50 pointer-events-none cursor-not-allowed"
                       : "active:scale-[0.98]"
-                  }`}
+                    }`}
                 >
                   <Plus className="h-4 w-4 mr-1.5 shrink-0 stroke-[2.5]" />
                   {btnText}

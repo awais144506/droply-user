@@ -29,16 +29,42 @@ const formatScheduleBadge = (dateStr: string) => {
     return { label: format(d, "MMM dd, yyyy"), color: "bg-slate-100 text-slate-700 border-slate-200" };
 };
 
-// Helper function to generate the WhatsApp link
-const getWhatsAppLink = (phone: string, customerName: string, orderId: string) => {
+// 🔥 Extended Helper Function to Generate Detailed WhatsApp Message
+const getWhatsAppLink = (req: any) => {
+    const phone = req.customer?.phone;
     if (!phone || !isPossiblePhoneNumber(phone)) return null;
 
-    // Remove all non-numeric characters for the wa.me link
     const cleanPhone = phone.replace(/\D/g, "");
+    const customerName = req.customer?.name || "Customer";
+    const orderId = req.orderId || "N/A";
+    const status = req.status || "PENDING";
+    
+    // Format items list cleanly
+    const itemsList = req.items
+        ?.map((item: any) => `• ${item.quantity}x ${item.product?.name || "Item"}`)
+        .join("\n") || "No items";
 
-    const message = `Hi ${customerName}, we received your order request (${orderId}). `;
+    const scheduleDateStr = req.scheduleDate 
+        ? format(new Date(req.scheduleDate), "MMM dd, yyyy") 
+        : "As requested";
+
+    // Structured message template
+    const message = 
+`Hello ${customerName},
+
+Here are the details for your order update:
+
+*Status:* ${status}
+
+*Order ID:* ${orderId}
+*Scheduled For:* ${scheduleDateStr}
+
+*Order Items:*
+${itemsList}
+
+Thank you for choosing us!`;
+
     const encodedMessage = encodeURIComponent(message);
-
     return `https://wa.me/${cleanPhone}?text=${encodedMessage}`;
 };
 
@@ -140,7 +166,7 @@ export const getOrderColumns = ({
             header: "Actions",
             className: "text-right",
             render: (req) => {
-                const waLink = getWhatsAppLink(req.customer.phone, req.customer.name, req.orderId);
+                const waLink = getWhatsAppLink(req);
 
                 if (req.status !== "PENDING") {
                     return (
@@ -166,8 +192,6 @@ export const getOrderColumns = ({
 
                 return (
                     <div className="flex items-center justify-end gap-2">
-
-
                         <Button
                             size="sm"
                             className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl px-3 text-xs shadow-sm"
