@@ -11,6 +11,7 @@ import ConfirmActionDialog from "@/lib/utils/components/ConfirmDialog";
 import { getOrderColumns } from "./orderColumns";
 import { CustomerOrderRequest } from "../types/requests";
 import { useApproveCustomerRequest, useRejectCustomerRequest } from "../api/use-customerRequests";
+import { useRouter } from "next/navigation";
 
 type Props = {
     requests: CustomerOrderRequest[] | undefined;
@@ -20,6 +21,7 @@ const OrderTable = ({ requests = [] }: Props) => {
     // 1. Mutations (Toasts are handled inside the hooks)
     const { mutate: approveOrder, isPending: isApproving } = useApproveCustomerRequest();
     const { mutate: rejectOrder, isPending: isRejecting } = useRejectCustomerRequest();
+    const router = useRouter();
 
     // 2. Dialog States
     const [selectedToApprove, setSelectedToApprove] = useState<CustomerOrderRequest | null>(null);
@@ -36,6 +38,11 @@ const OrderTable = ({ requests = [] }: Props) => {
         });
     };
 
+    const handleCreateOrderFromRequest = (req: any) => {
+        sessionStorage.setItem("prefill_order_request", JSON.stringify(req));
+        router.push("/sales/orders/create-sale?fromRequest=true");
+    };
+
     const handleConfirmReject = () => {
         if (!selectedToReject) return;
         rejectOrder(selectedToReject.id, {
@@ -49,6 +56,7 @@ const OrderTable = ({ requests = [] }: Props) => {
             getOrderColumns({
                 onApprove: (req) => setSelectedToApprove(req),
                 onReject: (req) => setSelectedToReject(req),
+                onCreateOrder: handleCreateOrderFromRequest,
             }),
         []
     );
@@ -103,7 +111,7 @@ const OrderTable = ({ requests = [] }: Props) => {
                         <span className="font-bold text-slate-900">
                             {selectedToApprove?.orderId}
                         </span>{" "}
-                        for <span className="font-bold text-slate-900">{selectedToApprove?.customer?.name}</span>? 
+                        for <span className="font-bold text-slate-900">{selectedToApprove?.customer?.name}</span>?
                         This will move the order into your active delivery queue.
                     </span>
                 }

@@ -1,7 +1,7 @@
 import {
   MapPin, Package, Truck, FileText, Navigation, Factory, Building,
   Receipt, UserCog, LucideIcon, UserPlus, Settings, ArchiveX, TruckIcon,
-  BadgeDollarSign, Undo2, Headphones, CreditCard,ShoppingCart
+  BadgeDollarSign, Undo2, Headphones, CreditCard, ShoppingCart, BarChart3
 } from "lucide-react";
 
 export type UserRole = "OWNER" | "MANAGER";
@@ -77,11 +77,11 @@ export const BRANCH_NAV_CONFIG: NavGroup[] = [
       { title: "Vehicles & Fuel", url: "/admin/fleet", icon: TruckIcon, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Assigned Tasks", url: "/admin/tasks", icon: FileText, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: PLATINUM_ONLY, devStatus: "DONE" },
       { title: "Expenses & Accounts", url: "/admin/expenses", icon: BadgeDollarSign, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
-      // { title: "Reports", url: "/admin/reports", icon: BarChart3, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS,devStatus: "PARTIAL" },
+      //{ title: "Reports", url: "/admin/reports", icon: BarChart3, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: GOLD_PLUS, devStatus: "PARTIAL" },
 
       // Admin/Settings are always available to manage their account
       { title: "Subscription", url: "/admin/subscription", icon: CreditCard, badge: "Owner", allowedRoles: ["OWNER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
-      { title: "Branch Settings", url: "/admin/settings", icon: Settings, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
+      { title: "Branch Settings", url: "/admin/settings", icon: Settings, badge: "Owner", allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
       { title: "Help", url: "/admin/help", icon: Headphones, allowedRoles: ["OWNER", "MANAGER"], allowedTiers: ALL_TIERS, devStatus: "DONE" },
     ],
   },

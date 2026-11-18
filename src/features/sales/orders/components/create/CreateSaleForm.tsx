@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { FormProvider } from "react-hook-form";
 import { toast } from "sonner";
 import FormHeader from "./form-header";
@@ -26,11 +26,11 @@ interface Props {
 
 const getSafeLocalDate = (dateInput?: string | Date) => {
   const d = dateInput ? new Date(dateInput) : new Date();
-  if (isNaN(d.getTime())) return new Date().toISOString().split('T')[0];
+  if (isNaN(d.getTime())) return new Date().toISOString().split("T")[0];
 
   const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
 
@@ -47,15 +47,24 @@ export default function CreateSaleForm({
   const { mutateAsync: updateOrder } = useUpdateOrder();
 
   const usedExchangeIds = new Set<string>();
-  const initialItems = initialData?.lineItems?.length
-    ? initialData.lineItems.map((item: any, idx: number) => {
-      let matchingAssetExchange = initialData.assetExchanges?.find(
+
+  // 🔥 Supports BOTH existing order `lineItems` AND Customer Request `items`
+  const sourceItems = initialData?.lineItems?.length
+    ? initialData.lineItems
+    : initialData?.items?.length
+      ? initialData.items
+      : null;
+
+  const initialItems = sourceItems
+    ? sourceItems.map((item: any, idx: number) => {
+      let matchingAssetExchange = initialData?.assetExchanges?.find(
         (ae: any) =>
           !usedExchangeIds.has(ae.id) &&
-          (ae.productId === item.containerId || ae.productId === item.returnableProductId)
+          (ae.productId === item.containerId ||
+            ae.productId === item.returnableProductId)
       );
 
-      if (!matchingAssetExchange && initialData.assetExchanges?.[idx]) {
+      if (!matchingAssetExchange && initialData?.assetExchanges?.[idx]) {
         const candidate = initialData.assetExchanges[idx];
         if (!usedExchangeIds.has(candidate.id)) {
           matchingAssetExchange = candidate;
@@ -67,11 +76,12 @@ export default function CreateSaleForm({
       }
 
       const freeQty = Number(item.freeQuantity || item.offerQty || 0);
+      const qty = Number(item.paidQuantity ?? item.quantity ?? 1);
 
       return {
         id: item.id || crypto.randomUUID(),
         productId: item.productId || item.product?.id || "",
-        paidQty: item.paidQuantity ?? item.quantity ?? 1,
+        paidQty: qty,
         priceTierId: item.priceTierId || "",
         emptiesIn: matchingAssetExchange
           ? Number(matchingAssetExchange.inboundQuantity ?? 0)
@@ -81,36 +91,52 @@ export default function CreateSaleForm({
           : Number(item.emptiesOut ?? 0),
         hasOffer: freeQty > 0 || Boolean(item.hasOffer),
         offerQty: freeQty,
-        chargedDeposit: Number(matchingAssetExchange?.depositCharged ?? item.depositCharged ?? item.chargedDeposit ?? 0),
-        isDepositCharged: Boolean(matchingAssetExchange?.depositCharged || item.depositCharged || item.isDepositCharged),
-        unitPrice: item.unitPrice || 0,
-        returnableProductId: item.returnableProductId || matchingAssetExchange?.productId || "",
+        chargedDeposit: Number(
+          matchingAssetExchange?.depositCharged ??
+          item.depositCharged ??
+          item.chargedDeposit ??
+          0
+        ),
+        isDepositCharged: Boolean(
+          matchingAssetExchange?.depositCharged ||
+          item.depositCharged ||
+          item.isDepositCharged
+        ),
+        // 🔥 Maps `item.price` from Request JSON or `item.unitPrice` from Order JSON
+        unitPrice: Number(item.unitPrice ?? item.price ?? 0),
+        returnableProductId:
+          item.returnableProductId || matchingAssetExchange?.productId || "",
       };
     })
-    : [{
-      id: crypto.randomUUID(),
-      productId: "",
-      paidQty: 1,
-      priceTierId: "",
-      emptiesIn: 0,
-      emptiesOut: 0,
-      hasOffer: false,
-      offerQty: 0,
-      chargedDeposit: 0,
-      isDepositCharged: false,
-      unitPrice: 0,
-      returnableProductId: "",
-    }];
+    : [
+      {
+        id: crypto.randomUUID(),
+        productId: "",
+        paidQty: 1,
+        priceTierId: "",
+        emptiesIn: 0,
+        emptiesOut: 0,
+        hasOffer: false,
+        offerQty: 0,
+        chargedDeposit: 0,
+        isDepositCharged: false,
+        unitPrice: 0,
+        returnableProductId: "",
+      },
+    ];
 
   const methods = useAppForm(orderSchema, {
     category: initialData?.category || category,
     orderType: initialData?.orderType || orderType,
+    // 🔥 Prefills "5d682517-1010-4016-85a9-7c38f9ab275d" (Bona G) automatically!
     customerId: initialData?.customerId || initialData?.customer?.id || "",
     items: initialItems,
     discount: initialData?.discount || 0,
     paymentMethod: initialData?.paymentMethod || "CASH",
     amountPaid: initialData?.amountPaid ?? initialData?.receivedAmount ?? 0,
-    scheduledDate: getSafeLocalDate(initialData?.scheduledDate || initialData?.scheduleDate),
+    scheduledDate: getSafeLocalDate(
+      initialData?.scheduledDate || initialData?.scheduleDate
+    ),
     deliveryCharges: initialData?.deliveryCharges || 0,
     ...(initialData?.riderId ? { riderId: initialData.riderId } : {}),
   });
@@ -122,27 +148,63 @@ export default function CreateSaleForm({
     }
   }, [category, orderType, methods, isEditing]);
 
-  const products = productData?.products.filter(p => p.isActive === true) || [];
+  const products = useMemo(
+    () => productData?.products.filter((p) => p.isActive === true) || [],
+    [productData?.products]
+  );
+
+  // 🔥 Enrich prefilled request items with returnable container info once products load
+  useEffect(() => {
+    if (!isEditing && initialData?.items?.length && products.length > 0) {
+      const currentItems = methods.getValues("items");
+      let updated = false;
+
+      const enriched = currentItems.map((formItem) => {
+        const matchedProd = products.find(
+          (p: any) => p.id === formItem.productId
+        ) as any;
+        if (!matchedProd) return formItem;
+
+        const containerId =
+          matchedProd.returnableProductId || matchedProd.containerId || "";
+
+        if (containerId && !formItem.returnableProductId) {
+          updated = true;
+          return {
+            ...formItem,
+            returnableProductId: containerId,
+            emptiesOut: formItem.emptiesOut || formItem.paidQty,
+          };
+        }
+        return formItem;
+      });
+
+      if (updated) {
+        methods.setValue("items", enriched, { shouldValidate: true });
+      }
+    }
+  }, [products.length, isEditing, initialData, methods, products]);
 
   const onSubmit = async (data: OrderFormValues) => {
-    const filteredItems = data.items.filter(item => item.paidQty > 0);
+    const filteredItems = data.items.filter((item) => item.paidQty > 0);
 
     if (filteredItems.length === 0) {
-      toast.error(`Please add at least one item to process this ${data.category.replace("_", " ").toLowerCase()}.`);
-      return;
-    }
-
-    if ((category === "WALK_IN" || category === "DELIVERY") && filteredItems.length === 0) {
-      toast.error("Please add at least one item to the order.");
+      toast.error(
+        `Please add at least one item to process this ${data.category
+          .replace("_", " ")
+          .toLowerCase()}.`
+      );
       return;
     }
 
     if (category === "WALK_IN" || category === "DELIVERY") {
       for (const item of filteredItems) {
-        const product = products.find(p => p.id === item.productId);
+        const product = products.find((p) => p.id === item.productId);
         const requestedQty = Number(item.paidQty) + Number(item.offerQty);
         if (product && requestedQty > product.currentStock) {
-          toast.error(`Not enough stock for ${product.name}. Only ${product.currentStock} left.`);
+          toast.error(
+            `Not enough stock for ${product.name}. Only ${product.currentStock} left.`
+          );
           return;
         }
       }
@@ -160,6 +222,7 @@ export default function CreateSaleForm({
         await createOrder(payload);
       }
 
+      sessionStorage.removeItem("prefill_order_request");
       methods.reset();
       onBack();
     } catch (error) {
@@ -184,17 +247,41 @@ export default function CreateSaleForm({
           onBack={onBack}
         />
 
+        {/* Optional Banner Showing Customer Request Note if Prefilled */}
+        {!isEditing && initialData?.orderId && (
+          <div className="mx-6 mt-6 rounded-2xl border border-sky-200 bg-sky-50/70 px-4 py-3 flex flex-wrap items-center justify-between gap-2 text-xs text-sky-900">
+            <div>
+              <span className="font-black uppercase tracking-wider text-sky-700 mr-2">
+                Prefilled from Request {initialData.orderId}
+              </span>
+              {initialData.notes && (
+                <span className="font-semibold text-amber-800 bg-amber-100/80 px-2 py-0.5 rounded-md">
+                  Customer Note: &ldquo;{initialData.notes}&rdquo;
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
         <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <CustomerSelection
-              branchId={branchId}
-              disabled={isEditing}
-            />
-            {isDelivery && <DeliveryRider branchId={branchId} initialData={initialData} isEditing={isEditing} />}
+            <CustomerSelection branchId={branchId} disabled={isEditing} />
+            {isDelivery && (
+              <DeliveryRider
+                branchId={branchId}
+                initialData={initialData}
+                isEditing={isEditing}
+              />
+            )}
             <SelectProduct branchId={branchId} initialData={initialData} />
           </div>
           <div className="lg:col-span-1 h-full">
-            <CheckoutSale branchId={branchId} isDelivery={isDelivery} initialData={initialData} isEditing={isEditing} />
+            <CheckoutSale
+              branchId={branchId}
+              isDelivery={isDelivery}
+              initialData={initialData}
+              isEditing={isEditing}
+            />
           </div>
         </div>
       </form>

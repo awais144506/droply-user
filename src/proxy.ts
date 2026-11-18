@@ -25,6 +25,7 @@ const isBillingRoute = createRouteMatcher([
 const isOwnerOnlyRoute = createRouteMatcher([
   "/admin/staff(.*)",
   "/admin/subscription(.*)",
+  "/admin/settings(.*)",
 ]);
 const isGoldPlusRoute = createRouteMatcher([
   "/sales/recovery(.*)",
