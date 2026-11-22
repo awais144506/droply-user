@@ -6,8 +6,8 @@ export type SubscriptionPaymentStatus = "PENDING" | "APPROVED" | "REJECTED"
 export interface BankDetail {
   id: string;
   bankName: string;
-  title: string;
-  number: string;
+  accountTitle: string;
+  accountNumber: string;
   iban: string;
   qrCodeUrl: string;
   isActive: boolean;

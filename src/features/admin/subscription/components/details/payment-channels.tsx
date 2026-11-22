@@ -10,6 +10,7 @@ export function PaymentChannels() {
   const { data: banks, isLoading } = useBankDetails();
   const [selectedQr, setSelectedQr] = useState<string | null>(null);
 
+  const activeBanks = banks?.filter((bank) => bank.isActive) ?? [];
 
   const copyToClipboard = (text: string, label: string) => {
     if (!text) return;
@@ -19,18 +20,17 @@ export function PaymentChannels() {
 
   return (
     <div className="space-y-6">
-
       {isLoading ? (
         <div className="flex items-center justify-center p-12">
           <Loader2 className="w-8 h-8 animate-spin text-slate-400" />
         </div>
-      ) : banks?.length === 0 ? (
+      ) : activeBanks.length === 0 ? (
         <div className="text-center p-12 border-2 border-dashed border-slate-200 rounded-xl text-slate-500">
           No payment channels available at the moment.
         </div>
       ) : (
         <div className="grid grid-cols-3 gap-6">
-          {banks?.map((bank) => (
+          {activeBanks.map((bank) => (
             <div
               key={bank.id}
               className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden flex flex-col"
@@ -43,7 +43,7 @@ export function PaymentChannels() {
                 </h4>
                 <p className="text-sm font-medium text-slate-900 mt-1">
                   <span className="font-bold text-[11px] uppercase tracking-wider text-slate-500">Title: </span>
-                  {bank.title}
+                  {bank.accountTitle}
                 </p>
               </div>
 
@@ -68,18 +68,18 @@ export function PaymentChannels() {
               {/* Card Footer: Account Details */}
               <div className="p-5 space-y-3 border-t border-slate-100 bg-white">
                 {/* Account Number Field */}
-                {bank.number && (
+                {bank.accountNumber && (
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
                       Account Number
                     </label>
                     <div
-                      onClick={() => copyToClipboard(bank.number, "Account number")}
+                      onClick={() => copyToClipboard(bank.accountNumber, "Account number")}
                       className="flex items-center justify-between p-2.5 bg-slate-50 hover:bg-slate-100 active:bg-slate-200 border border-slate-200 rounded-lg cursor-pointer transition-colors group"
                       title="Click to copy"
                     >
                       <span className="font-mono text-sm font-medium text-slate-700 truncate">
-                        {bank.number}
+                        {bank.accountNumber}
                       </span>
                       <Copy className="w-4 h-4 text-slate-400 group-hover:text-slate-700 shrink-0 transition-colors" />
                     </div>
@@ -118,7 +118,7 @@ export function PaymentChannels() {
         >
           <div
             className="relative bg-white p-8 rounded-3xl max-w-md w-full flex flex-col items-center shadow-2xl animate-in zoom-in-95 duration-200"
-            onClick={(e) => e.stopPropagation()} // Prevents closing when clicking the modal body
+            onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setSelectedQr(null)}
@@ -131,7 +131,6 @@ export function PaymentChannels() {
               <QrCode className="w-6 h-6" /> Scan to Pay
             </h4>
 
-            {/* Using Next Image with 'fill' and 'object-contain' prevents uneven stretching */}
             <div className="relative w-64 h-64 sm:w-80 sm:h-80 bg-white rounded-xl border-2 border-slate-100 p-2">
               <Image
                 src={selectedQr}
