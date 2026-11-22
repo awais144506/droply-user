@@ -12,33 +12,49 @@ export const sendWhatsAppMessage = (phone: string, message: string) => {
     window.open(`https://wa.me/${cleanPhone}?text=${encodedMessage}`, '_blank');
 };
 
-export const sendCustomerCreatedMessage = (customer: CustomerDetails, settings?: BranchSettingData) => {
+export const sendCustomerCreatedMessage = (
+    customer: CustomerDetails,
+    settings?: BranchSettingData
+) => {
     if (!customer?.phone) return;
 
     const branchName = settings?.name || "Droply";
-    console.log(settings?.name)
     const portalUrl = customer.magicLink
         ? `${window.location.origin}/order/${customer.magicLink}`
         : null;
 
     // Build the formatted details list
-    let message = `Hi *${customer.name}*, your ledger account has been created in *${branchName}*.\n\n` +
+    let message =
+        `Hi *${customer.name}*, your ledger account has been created in *${branchName}*.\n\n` +
         `Here are your account details:\n` +
         `- *Phone:* ${formatPhoneNumber(customer.phone) || customer.phone}\n` +
-        `${customer.email ? `- *Email:* ${customer.email}\n` : ''}` +
+        `${customer.email ? `- *Email:* ${customer.email}\n` : ""}` +
         `- *Customer Credit:* Rs. ${customer.customerCredit || 0}\n` +
         `- *Advance:* Rs. ${customer.customerAdvance > 0 ? customer.customerAdvance : 0}\n` +
         `- *Security Deposit:* Rs. ${customer.securityDeposit > 0 ? customer.securityDeposit : 0}\n` +
         `- *Returnable Items:* ${customer.returnablesLength > 0 ? customer.returnablesLength : 0}\n` +
-        `${customer.zone?.name ? `- *Zone:* ${customer.zone.name}\n` : ''}` +
+        `${customer.zone?.name ? `- *Zone:* ${customer.zone.name}\n` : ""}` +
         `- *Address:* ${customer.address || "No Address Provided"}`;
 
     if (portalUrl) {
-        message += `\n\n*Your Personal Branch Ordering Link:*\n` +
+        message +=
+            `\n\n*Your Personal Branch Ordering Link:*\n` +
             `You can use this secure link anytime to place orders directly with ${branchName} without needing a password:\n` +
             `${portalUrl}\n\n` +
             `*Please do not share this link with anyone*, as it gives direct access to place orders by your account.`;
     }
+
+    // Append Branch Footer Details
+    const branchPhone = settings?.phone
+        ? formatPhoneNumber(settings.phone) || settings.phone
+        : null;
+
+    message +=
+        `\n\n---\n` +
+        `*${branchName}*` +
+        `${branchPhone ? `\n- *Complaints / Suggestions:* ${branchPhone}` : ""}` +
+        `${settings?.address ? `\n- *Address:* ${settings.address}` : ""}`;
+
     sendWhatsAppMessage(customer.phone, message);
 };
 
