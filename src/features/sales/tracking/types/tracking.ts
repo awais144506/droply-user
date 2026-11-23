@@ -72,6 +72,7 @@ export interface LiveRiderSocketLocation {
   latitude: number;
   longitude: number;
   isStopped: boolean;
+  isOnline?: boolean;
   stopStartTime?: number | null;
   lastUpdated: number;
 }

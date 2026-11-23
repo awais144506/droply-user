@@ -1,10 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Package, Plus, Minus, AlertCircle, CalendarClock, Loader2, StickyNote } from "lucide-react";
 import { format, addDays } from "date-fns";
-import { toast } from "sonner";
 
 import { useSubmitOrderRequest } from "../api/use-customerOrder";
 import { customerOrderSchema, CustomerOrderFormValues } from "../schema/order.schema";
@@ -22,13 +21,26 @@ export function NewOrderTab({ token, products, onSuccess }: NewOrderTabProps) {
     const [cart, setCart] = useState<Record<string, number>>({});
     const submitRequest = useSubmitOrderRequest(token);
 
+    // Memoize once so option values stay identical across re-renders
+    const dateOptions = useMemo(() => {
+        const today = new Date();
+        const tomorrow = addDays(today, 1);
+        const afterTomorrow = addDays(today, 2);
+
+        return [
+            { label: `Today: ${format(today, "MMM dd")}`, value: today.toISOString() },
+            { label: `Tomorrow: ${format(tomorrow, "MMM dd")}`, value: tomorrow.toISOString() },
+            { label: `${format(afterTomorrow, "MMM dd")}`, value: afterTomorrow.toISOString() },
+        ];
+    }, []);
+
     const methods = useForm<CustomerOrderFormValues>({
         resolver: yupResolver(customerOrderSchema),
         defaultValues: {
-            scheduleDate: new Date().toISOString(),
+            scheduleDate: dateOptions[0].value,
             notes: "",
-            items: []
-        }
+            items: [],
+        },
     });
 
     useEffect(() => {
@@ -40,30 +52,24 @@ export function NewOrderTab({ token, products, onSuccess }: NewOrderTabProps) {
     }, [cart, methods]);
 
     const updateQuantity = (productId: string, delta: number) => {
-        setCart(prev => ({ ...prev, [productId]: Math.max(0, (prev[productId] || 0) + delta) }));
+        setCart((prev) => ({ ...prev, [productId]: Math.max(0, (prev[productId] || 0) + delta) }));
     };
 
     const onSubmit = (data: CustomerOrderFormValues) => {
         submitRequest.mutate(data, {
             onSuccess: () => {
-                methods.reset();
+                methods.reset({
+                    scheduleDate: dateOptions[0].value,
+                    notes: "",
+                    items: [],
+                });
                 setCart({});
                 onSuccess();
-            }
+            },
         });
     };
 
     const totalItems = Object.values(cart).reduce((sum, qty) => sum + qty, 0);
-
-    const today = new Date();
-    const tomorrow = addDays(today, 1);
-    const afterTomorrow = addDays(today, 2);
-
-    const dateOptions = [
-        { label: `Today: ${format(today, 'MMM dd')}`, value: today.toISOString() },
-        { label: `Tomorrow: ${format(tomorrow, 'MMM dd')}`, value: tomorrow.toISOString() },
-        { label: `${format(afterTomorrow, 'MMM dd')}`, value: afterTomorrow.toISOString() },
-    ];
 
     return (
         <FormProvider {...methods}>

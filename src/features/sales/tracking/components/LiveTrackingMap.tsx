@@ -22,6 +22,24 @@ import {
   RiderHistoryResponse,
 } from "../types/tracking";
 
+function toCoord(val: unknown): number | null {
+  if (val === null || val === undefined || val === "") return null;
+  const num = Number(val);
+  return Number.isFinite(num) ? num : null;
+}
+
+function getValidCoords(
+  lat: unknown,
+  lng: unknown
+): [number, number] | null {
+  const nLat = toCoord(lat);
+  const nLng = toCoord(lng);
+  if (nLat === null || nLng === null || (nLat === 0 && nLng === 0)) {
+    return null;
+  }
+  return [nLat, nLng];
+}
+
 function MapCameraController({
   targetLat,
   targetLng,
@@ -66,7 +84,9 @@ function useRoadRoute(
   const [routeCoords, setRouteCoords] = useState<[number, number][]>([]);
 
   useEffect(() => {
-    if (!startLat || !startLng || !endLat || !endLng) {
+    const start = getValidCoords(startLat, startLng);
+    const end = getValidCoords(endLat, endLng);
+    if (!start || !end) {
       setRouteCoords([]);
       return;
     }
@@ -75,7 +95,7 @@ function useRoadRoute(
 
     const fetchRoute = async () => {
       try {
-        const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
+        const url = `https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${end[1]},${end[0]}?overview=full&geometries=geojson`;
         const res = await fetch(url);
         const data = await res.json();
 
@@ -91,10 +111,7 @@ function useRoadRoute(
           err
         );
         if (!isCancelled) {
-          setRouteCoords([
-            [startLat, startLng],
-            [endLat, endLng],
-          ]);
+          setRouteCoords([start, end]);
         }
       }
     };
@@ -135,29 +152,14 @@ function calculateDistance(
   return { meters, formatted: `${meters} m` };
 }
 
-// Safely check if a coordinate pair is valid (non-zero finite numbers)
-function isValidCoord(lat?: number | null, lng?: number | null): boolean {
-  return (
-    typeof lat === "number" &&
-    typeof lng === "number" &&
-    Number.isFinite(lat) &&
-    Number.isFinite(lng) &&
-    !(lat === 0 && lng === 0)
-  );
-}
-
-// Determine rider offline status from either WebSocket location payload or overview object
+// Determine rider offline status from socket presence or FleetRiderOverview.presence.status
 function isRiderOffline(
   rider: FleetRiderOverview,
-  loc?: LiveRiderSocketLocation | null
+  loc?: (LiveRiderSocketLocation & { isOnline?: boolean }) | null
 ): boolean {
-  const locAny = loc as Record<string, unknown> | null | undefined;
-  const riderAny = rider as unknown as Record<string, unknown>;
-
-  if (locAny?.isOnline === false || locAny?.isOffline === true) return true;
-  if (locAny?.isOnline === true) return false;
-  if (riderAny?.isOnline === false || riderAny?.status === "OFFLINE") return true;
-
+  if (loc?.isOnline === false) return true;
+  if (loc?.isOnline === true) return false;
+  if (rider.presence?.status === "OFFLINE") return true;
   return false;
 }
 
@@ -168,7 +170,7 @@ type Props = {
   branchAddress: string;
   imageUrl?: string;
   riders?: FleetRiderOverview[];
-  liveLocations?: Record<string, LiveRiderSocketLocation>;
+  liveLocations?: Record<string, LiveRiderSocketLocation & { isOnline?: boolean }>;
   selectedRider: FleetRiderOverview | null;
   onSelectRider: (rider: FleetRiderOverview | null) => void;
   isHistoryMode?: boolean;
@@ -190,7 +192,6 @@ export const LiveTrackingMap = ({
   riderHistory,
   isHistoryLoading = false,
 }: Props) => {
-  // Prevents Leaflet "Map container is being reused by another instance" under Strict Mode
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -201,14 +202,25 @@ export const LiveTrackingMap = ({
   const selectedRiderLiveLoc = selectedRider
     ? liveLocations[selectedRider.id]
     : null;
+  const selectedRiderCoords = selectedRiderLiveLoc
+    ? getValidCoords(
+        selectedRiderLiveLoc.latitude,
+        selectedRiderLiveLoc.longitude
+      )
+    : null;
 
-  // Clean historical GPS pings into exact dots (filters invalid coords & stacked <5m duplicates)
+  // Clean historical GPS pings into exact dots (handles both number and string coords)
   const historyDots = useMemo(() => {
     if (!isHistoryMode || !riderHistory?.locationPings?.length) return [];
 
-    const validPings = riderHistory.locationPings.filter((p) =>
-      isValidCoord(p.latitude, p.longitude)
-    );
+    const validPings = riderHistory.locationPings
+      .map((p) => {
+        const coords = getValidCoords(p.latitude, p.longitude);
+        if (!coords) return null;
+        return { ...p, latitude: coords[0], longitude: coords[1] };
+      })
+      .filter((p): p is NonNullable<typeof p> => p !== null);
+
     if (validPings.length === 0) return [];
 
     const filtered: typeof validPings = [validPings[0]];
@@ -252,14 +264,14 @@ export const LiveTrackingMap = ({
 
   const focusLat = historyEndPoint
     ? historyEndPoint[0]
-    : selectedRiderLiveLoc
-      ? selectedRiderLiveLoc.latitude
+    : selectedRiderCoords
+      ? selectedRiderCoords[0]
       : branchLat;
 
   const focusLng = historyEndPoint
     ? historyEndPoint[1]
-    : selectedRiderLiveLoc
-      ? selectedRiderLiveLoc.longitude
+    : selectedRiderCoords
+      ? selectedRiderCoords[1]
       : branchLng;
 
   const targetZoom = selectedRider ? 16 : 13;
@@ -270,58 +282,67 @@ export const LiveTrackingMap = ({
       selectedRider.activeOrders?.find(
         (o) =>
           o.status === "ON_ROUTE" &&
-          o.customer?.latitude != null &&
-          o.customer?.longitude != null
+          getValidCoords(o.customer?.latitude, o.customer?.longitude) !== null
       ) || null
     );
   }, [selectedRider, isHistoryMode]);
 
+  const onRouteCustomerCoords = onRouteOrder
+    ? getValidCoords(
+        onRouteOrder.customer.latitude,
+        onRouteOrder.customer.longitude
+      )
+    : null;
+
   const roadRouteCoords = useRoadRoute(
-    !isHistoryMode ? selectedRiderLiveLoc?.latitude : null,
-    !isHistoryMode ? selectedRiderLiveLoc?.longitude : null,
-    !isHistoryMode ? onRouteOrder?.customer.latitude : null,
-    !isHistoryMode ? onRouteOrder?.customer.longitude : null
+    !isHistoryMode ? selectedRiderCoords?.[0] : null,
+    !isHistoryMode ? selectedRiderCoords?.[1] : null,
+    !isHistoryMode ? onRouteCustomerCoords?.[0] : null,
+    !isHistoryMode ? onRouteCustomerCoords?.[1] : null
   );
 
   const liveRouteMetrics = useMemo(() => {
-    if (
-      !onRouteOrder ||
-      !selectedRiderLiveLoc ||
-      !onRouteOrder.customer.latitude ||
-      !onRouteOrder.customer.longitude
-    ) {
+    if (!selectedRiderCoords || !onRouteCustomerCoords) {
       return null;
     }
     return calculateDistance(
-      selectedRiderLiveLoc.latitude,
-      selectedRiderLiveLoc.longitude,
-      onRouteOrder.customer.latitude,
-      onRouteOrder.customer.longitude
+      selectedRiderCoords[0],
+      selectedRiderCoords[1],
+      onRouteCustomerCoords[0],
+      onRouteCustomerCoords[1]
     );
-  }, [onRouteOrder, selectedRiderLiveLoc]);
+  }, [selectedRiderCoords, onRouteCustomerCoords]);
 
   const cleanedStopLogs = useMemo(() => {
     if (!isHistoryMode || !riderHistory?.stopLogs) return [];
     const grouped: typeof riderHistory.stopLogs = [];
 
     for (const stop of riderHistory.stopLogs) {
-      if (!isValidCoord(stop.latitude, stop.longitude)) continue;
+      const coords = getValidCoords(stop.latitude, stop.longitude);
+      if (!coords) continue;
+
+      const normalizedStop = {
+        ...stop,
+        latitude: coords[0],
+        longitude: coords[1],
+      };
+
       const existing = grouped.find(
         (g) =>
           calculateDistance(
             g.latitude,
             g.longitude,
-            stop.latitude,
-            stop.longitude
+            normalizedStop.latitude,
+            normalizedStop.longitude
           ).meters < 25
       );
       if (existing) {
-        if (stop.durationMinutes > existing.durationMinutes) {
-          existing.durationMinutes = stop.durationMinutes;
-          existing.endedAt = stop.endedAt;
+        if (normalizedStop.durationMinutes > existing.durationMinutes) {
+          existing.durationMinutes = normalizedStop.durationMinutes;
+          existing.endedAt = normalizedStop.endedAt;
         }
       } else {
-        grouped.push({ ...stop });
+        grouped.push(normalizedStop);
       }
     }
     return grouped;
@@ -576,9 +597,10 @@ export const LiveTrackingMap = ({
           {!isHistoryMode &&
             riders.map((rider) => {
               const loc = liveLocations[rider.id];
-              if (!loc || !isValidCoord(loc.latitude, loc.longitude)) {
-                return null;
-              }
+              const coords = loc
+                ? getValidCoords(loc.latitude, loc.longitude)
+                : null;
+              if (!loc || !coords) return null;
 
               const isSelected = selectedRider?.id === rider.id;
               const offline = isRiderOffline(rider, loc);
@@ -586,7 +608,7 @@ export const LiveTrackingMap = ({
               return (
                 <Marker
                   key={rider.id}
-                  position={[loc.latitude, loc.longitude]}
+                  position={coords}
                   icon={icons.createRiderIcon(
                     rider.name,
                     isSelected,
@@ -641,14 +663,17 @@ export const LiveTrackingMap = ({
           {!isHistoryMode &&
             selectedRider &&
             selectedRider.activeOrders?.map((order) => {
-              const { latitude, longitude, name } = order.customer || {};
-              if (!isValidCoord(latitude, longitude)) return null;
+              const coords = getValidCoords(
+                order.customer?.latitude,
+                order.customer?.longitude
+              );
+              if (!coords) return null;
 
               return (
                 <Marker
                   key={order.id}
-                  position={[latitude!, longitude!]}
-                  icon={icons.createOrderIcon(order.status, name)}
+                  position={coords}
+                  icon={icons.createOrderIcon(order.status, order.customer.name)}
                 >
                   <Popup>
                     <div className="p-1 space-y-1">
@@ -656,7 +681,7 @@ export const LiveTrackingMap = ({
                         {order.status}
                       </span>
                       <p className="font-black text-slate-900 text-xs mt-1">
-                        {name}
+                        {order.customer.name}
                       </p>
                       <p className="text-[11px] text-slate-500 font-bold">
                         Order #{order.orderCode}
@@ -683,18 +708,13 @@ export const LiveTrackingMap = ({
           {isHistoryMode &&
             selectedRider &&
             historyDots.map((ping, idx) => {
-              const pingAny = ping as unknown as Record<string, unknown>;
-              const rawTime =
-                pingAny.recordedAt || pingAny.createdAt || pingAny.timestamp;
-              const formattedTime = rawTime
-                ? new Date(String(rawTime)).toLocaleTimeString()
+              const formattedTime = ping.timestamp
+                ? new Date(ping.timestamp).toLocaleTimeString()
                 : null;
 
               return (
                 <CircleMarker
-                  key={String(
-                    pingAny.id || `${ping.latitude}-${ping.longitude}-${idx}`
-                  )}
+                  key={`${ping.latitude}-${ping.longitude}-${ping.timestamp || idx}`}
                   center={[ping.latitude, ping.longitude]}
                   radius={4.5}
                   pathOptions={{

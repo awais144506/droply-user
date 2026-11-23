@@ -32,7 +32,13 @@ export function HistoryTab({ history, onRefresh }: HistoryTabProps) {
             <div className="space-y-4">
                 <div className="flex items-center justify-between px-1">
                     <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Recent Orders</h3>
-                    <button onClick={handleRefresh} className="p-1 text-slate-400 hover:text-sky-600 transition-colors">
+                    <button
+                        type="button"
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                        title="Refresh"
+                        className="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 shadow-xs hover:border-sky-300 hover:bg-sky-50 hover:text-sky-600 active:scale-95 transition-all cursor-pointer disabled:opacity-60"
+                    >
                         <RotateCw className={`h-4 w-4 ${isRefreshing ? "animate-spin text-sky-600" : ""}`} />
                     </button>
                 </div>
@@ -51,11 +57,17 @@ export function HistoryTab({ history, onRefresh }: HistoryTabProps) {
         <div className="space-y-4">
             <div className="flex items-center justify-between px-1">
                 <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider">Recent Orders</h3>
-                <button onClick={handleRefresh} className="p-1 text-slate-400 hover:text-sky-600 transition-colors">
-                    <RotateCw className={`h-4 w-4 ${isRefreshing ? "animate-spin text-sky-600" : ""}`} />
+                <button
+                    type="button"
+                    onClick={handleRefresh}
+                    disabled={isRefreshing}
+                    className="px-3 py-1.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-700 text-xs font-bold shadow-xs hover:bg-sky-100 hover:border-sky-300 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                >
+                    <RotateCw className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
+                    <span>Refresh</span>
                 </button>
             </div>
-            
+
             {history.map((order) => {
                 let badgeColor = "bg-sky-50 text-sky-700 border-sky-200";
                 if (order.status === "PENDING") badgeColor = "bg-amber-50 text-amber-700 border-amber-200";
@@ -75,7 +87,7 @@ export function HistoryTab({ history, onRefresh }: HistoryTabProps) {
                                 </Badge>
                             </div>
                             <div className="p-4 space-y-3">
-                                
+
                                 <div className="flex flex-col gap-2 border-b border-slate-100 pb-3">
                                     <div className="text-[11px] font-semibold text-slate-400">
                                         Requested on: {format(new Date(order.createdAt), 'MMM dd, yyyy - p')}

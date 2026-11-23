@@ -35,7 +35,7 @@ export function CustomerHeader({ customer }: { customer: CustomerData }) {
             {/* Customer Greeting */}
             <div>
                 <h1 className="text-2xl font-black mb-1 text-white">Hi, {customer.name}</h1>
-                <p className="text-xs text-slate-400 font-medium">Manage your branch orders and ledger below</p>
+                <p className="text-xs text-slate-400 font-medium">Manage your branch orders requests.</p>
             </div>
 
             {/* Financial Ledger & Deposits */}
@@ -64,7 +64,7 @@ export function CustomerHeader({ customer }: { customer: CustomerData }) {
                         <span className="text-xs font-bold uppercase tracking-wider">Returnable Assets Held</span>
                     </div>
                     <Badge variant="secondary" className="bg-sky-500/20 text-sky-300 hover:bg-sky-500/30 border-none font-bold">
-                        {customer.returnablesLength}x Empty Bottles
+                        {customer.returnablesLength}x Empty Items
                     </Badge>
                 </div>
             )}
