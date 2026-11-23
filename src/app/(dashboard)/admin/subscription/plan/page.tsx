@@ -7,6 +7,7 @@ import CheckoutArea from "@/features/admin/subscription/components/details/check
 import { useChangePlan } from "@/lib/hooks/use-change-plan";
 import Loading from "@/app/loading";
 import ErrorBoundary from "@/app/error";
+import PageDetailHeader from "@/lib/utils/components/PageDetailHeader";
 
 export default function ChangePlanPage() {
     const {
@@ -30,7 +31,7 @@ export default function ChangePlanPage() {
         targetLimit,
         amountDue,
         selectedPlanFullPrice,
-        isRenewal,           
+        isRenewal,
         requirePayment,
         buttonText,
         buttonClass,
@@ -47,6 +48,14 @@ export default function ChangePlanPage() {
 
     return (
         <div className="p-4 sm:p-6 space-y-6">
+            <PageDetailHeader
+                heading='Update Your Subscription Plan'
+                description='View and manage your subscription plan.'
+                breadcrumbs={[
+                    { label: "Subscription", href: "/admin/subscription" },
+                    { label: `Current Plan Details` }
+                ]}
+            />
             <SubscriptionHeader
                 currentUser={currentUser}
                 daysLeft={daysLeft}

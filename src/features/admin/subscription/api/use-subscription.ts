@@ -9,10 +9,3 @@ export function useSubscription(branchId: string) {
     enabled: Boolean(branchId),
   });
 }
-
-export function useBankDetails() {
-  return useQuery({
-    queryKey: ['Bank_Details'],
-    queryFn: () => subApi.getAllBanks(),
-  })
-}

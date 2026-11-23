@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api-client";
-import { BankDetail, SubscriptionResponse } from "../types/subscription";
+import { SubscriptionResponse } from "../types/subscription";
 import { CheckoutSubmitPayload } from "../schema/payment.schema";
 export interface SubmitPaymentApiPayload extends CheckoutSubmitPayload {
     tier: string;
@@ -8,9 +8,6 @@ export interface SubmitPaymentApiPayload extends CheckoutSubmitPayload {
 
 const API = '/subscription/user'
 export const subApi = {
-    getAllBanks: async (): Promise<BankDetail[]> => {
-        return apiClient.get('/bank')
-    },
     getSubscriptionDetails: async (): Promise<SubscriptionResponse> => {
         return apiClient.get(`${API}`)
     },

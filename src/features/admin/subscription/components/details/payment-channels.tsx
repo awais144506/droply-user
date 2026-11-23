@@ -3,14 +3,16 @@
 import { useState } from "react";
 import { Copy, QrCode, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
-import { useBankDetails } from "../../api/use-subscription";
+import { useSubscription } from "../../api/use-subscription";
 import Image from "next/image";
+import { useRole } from "@/lib/hooks/use-role";
 
 export function PaymentChannels() {
-  const { data: banks, isLoading } = useBankDetails();
+  const { branchId } = useRole();
+  const { data: subscription, isLoading } = useSubscription(branchId);
   const [selectedQr, setSelectedQr] = useState<string | null>(null);
 
-  const activeBanks = banks?.filter((bank) => bank.isActive) ?? [];
+  const activeBanks = subscription?.bankDetails?.filter((bank) => bank.isActive) ?? [];
 
   const copyToClipboard = (text: string, label: string) => {
     if (!text) return;

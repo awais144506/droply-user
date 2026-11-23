@@ -68,8 +68,6 @@ export function useLiveRiderSocket(branchId?: string | null, userTier?: string) 
       return;
     }
 
-    console.log(`🔌 Connecting Manager Dashboard socket to: ${BACKEND_URL}/rider for branch: ${branchId}`);
-
     const socket: Socket = io(`${BACKEND_URL}/rider`, {
       transports: ['websocket'],
       reconnection: true,
@@ -79,20 +77,17 @@ export function useLiveRiderSocket(branchId?: string | null, userTier?: string) 
     });
 
     socket.on('connect', () => {
-      console.log('🟢 Manager socket connected! Joining room:', `branch_${branchId}`);
       setIsSocketConnected(true);
       socket.emit('joinBranchMap', { branchId });
     });
 
-    socket.on('disconnect', (reason) => {
-      console.log('🔴 Manager socket disconnected:', reason);
+    socket.on('disconnect', () => {
       setIsSocketConnected(false);
     });
 
     socket.on(
       'initialRiderLocations',
       (initialList: LiveRiderSocketLocation[]) => {
-        console.log('📦 Received initial rider locations:', initialList);
         const nextMap: Record<string, LiveRiderSocketLocation> = {};
         initialList.forEach((loc) => {
           nextMap[loc.riderId] = loc;
@@ -102,7 +97,6 @@ export function useLiveRiderSocket(branchId?: string | null, userTier?: string) 
     );
 
     socket.on('riderLocationUpdated', (update: LiveRiderSocketLocation) => {
-      console.log('📍 Live rider GPS update received:', update);
       setLiveLocations((prev) => ({
         ...prev,
         [update.riderId]: update,
@@ -112,7 +106,7 @@ export function useLiveRiderSocket(branchId?: string | null, userTier?: string) 
     return () => {
       socket.disconnect();
     };
-  }, [branchId, isPlatinum]); // Only re-run if branchId or tier changes, avoiding render loops
+  }, [branchId, isPlatinum]);
 
   return {
     liveLocations,
