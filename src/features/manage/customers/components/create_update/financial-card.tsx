@@ -5,6 +5,7 @@ import { FormInput } from "@/components/ui/form-input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormSelect } from "@/components/ui/form-select";
+import { FormNumberStepper } from "@/components/ui/form-number-stepper";
 
 export default function FinancialsCard({ control, productOptions = [], isLoadingProducts }: any) {
     const { fields, append, remove } = useFieldArray({
@@ -104,12 +105,10 @@ export default function FinancialsCard({ control, productOptions = [], isLoading
                                             />
                                         </div>
 
-                                        <div className="w-28">
-                                            <FormInput
+                                        <div>
+                                            <FormNumberStepper
                                                 name={`returnables.${index}.quantity`}
-                                                type="number"
                                                 label=""
-                                                placeholder="Qty"
                                             />
                                         </div>
 

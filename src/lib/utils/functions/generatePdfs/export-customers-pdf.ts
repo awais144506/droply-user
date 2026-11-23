@@ -340,7 +340,7 @@ export function exportCustomersToBwPdf({
               <div class="summary-val">${currency} ${totalDeposit.toLocaleString()}</div>
             </div>
             <div class="summary-cell">
-              <div class="summary-label">Bottles Held</div>
+              <div class="summary-label">Items Held</div>
               <div class="summary-val">${totalBottles}</div>
             </div>
           </div>
@@ -355,7 +355,7 @@ export function exportCustomersToBwPdf({
                 <th style="width: 28%;">Address & Zone</th>
                 <th style="width: 10%;">Schedule</th>
                 <th style="width: 10%;">Last Visit</th>
-                <th style="width: 6%; text-align: center;">Bottles</th>
+                <th style="width: 6%; text-align: center;">Items Held</th>
                 <th style="width: 13%; text-align: right;">Balance / Deposit</th>
               </tr>
             </thead>

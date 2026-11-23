@@ -122,7 +122,7 @@ export default function MainPageHeader({
                 disabled={isRefreshing}
                 className={`group flex items-center gap-2 h-10 px-4 rounded-xl border border-amber-300 bg-amber-100 text-amber-700 shadow-sm shadow-amber-500/20 transition-all duration-200 ${isRefreshing
                     ? "opacity-70 cursor-not-allowed"
-                    : "cursor-pointer hover:bg-amber-500 hover:shadow-md hover:shadow-amber-500/30 active:scale-95"
+                    : "cursor-pointer hover:bg-amber-200 hover:shadow-md hover:shadow-amber-500/30 active:scale-95"
                   }`}
                 title="Bypass cache and fetch fresh data"
               >

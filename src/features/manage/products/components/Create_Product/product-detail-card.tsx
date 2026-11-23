@@ -26,10 +26,11 @@ const ProductDetailCard = () => {
                                     id="isPublic"
                                     checked={field.value}
                                     onCheckedChange={field.onChange}
+                                    className="cursor-pointer"
                                 />
                             )}
                         />
-                        <Label htmlFor="isPublic" className="text-xs font-semibold text-emerald-600 cursor-pointer">
+                        <Label htmlFor="isPublic" className="text-sm font-bold text-emerald-600 cursor-pointer">
                             Public Product
                         </Label>
                     </div>
