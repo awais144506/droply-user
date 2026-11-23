@@ -120,16 +120,14 @@ export default function MainPageHeader({
                 type="button"
                 onClick={onRefresh}
                 disabled={isRefreshing}
-                className={`group flex items-center gap-2 h-10 px-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 text-slate-700 shadow-2xs transition-all duration-150 ${isRefreshing
-                    ? "opacity-60 cursor-not-allowed bg-slate-50"
-                    : "cursor-pointer active:scale-95"
+                className={`group flex items-center gap-2 h-10 px-4 rounded-xl border border-amber-300 bg-amber-100 text-amber-700 shadow-sm shadow-amber-500/20 transition-all duration-200 ${isRefreshing
+                    ? "opacity-70 cursor-not-allowed"
+                    : "cursor-pointer hover:bg-amber-500 hover:shadow-md hover:shadow-amber-500/30 active:scale-95"
                   }`}
                 title="Bypass cache and fetch fresh data"
               >
                 <RefreshCw
-                  className={`h-3.5 w-3.5 text-slate-500 group-hover:text-sky-600 transition-transform duration-300 ${isRefreshing
-                      ? "animate-spin text-sky-600"
-                      : "group-hover:rotate-45"
+                  className={`h-3.5 w-3.5 text-amber-700 transition-transform duration-300 ${isRefreshing ? "animate-spin" : "group-hover:rotate-45"
                     }`}
                 />
                 <span className="text-xs font-bold tracking-tight">
@@ -149,8 +147,8 @@ export default function MainPageHeader({
                 <Link
                   href={isDisabled ? "#" : href}
                   className={`${buttonVariants({ variant: "default" })} ${isDisabled
-                      ? "opacity-50 pointer-events-none cursor-not-allowed"
-                      : "active:scale-[0.98]"
+                    ? "opacity-50 pointer-events-none cursor-not-allowed"
+                    : "active:scale-[0.98]"
                     }`}
                   aria-disabled={isDisabled}
                   tabIndex={isDisabled ? -1 : undefined}
@@ -164,8 +162,8 @@ export default function MainPageHeader({
                   onClick={onActionClick}
                   disabled={isDisabled}
                   className={`${buttonVariants({ variant: "default" })} h-10 px-4 rounded-xl font-bold text-xs sm:text-sm bg-sky-600 hover:bg-sky-700 text-white shadow-sm shadow-sky-600/15 transition-all duration-150 cursor-pointer ${isDisabled
-                      ? "opacity-50 pointer-events-none cursor-not-allowed"
-                      : "active:scale-[0.98]"
+                    ? "opacity-50 pointer-events-none cursor-not-allowed"
+                    : "active:scale-[0.98]"
                     }`}
                 >
                   <Plus className="h-4 w-4 mr-1.5 shrink-0 stroke-[2.5]" />

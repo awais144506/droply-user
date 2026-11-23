@@ -50,4 +50,5 @@ export interface SubscriptionResponse {
   plans: SubscriptionPlan[];
   currentPlan: Subscription;
   paymentHistory: SubscriptionPayment[];
+  bankDetails: BankDetail[];
 }

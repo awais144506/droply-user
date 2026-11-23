@@ -12,8 +12,6 @@ import {
   RotateCcw,
   ShoppingBag,
   Truck,
-  Banknote,
-  Undo2,
   Layers,
 } from "lucide-react";
 
@@ -127,7 +125,7 @@ export const OrdersFilterBar = () => {
     Boolean(currentSearch);
 
   return (
-    <div className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs space-y-4">
+    <div className="bg-white p-4 rounded-lg border border-slate-500 shadow-xs space-y-4">
       {/* TIER 1: Category Tabs */}
       <div className="flex items-center justify-between gap-2 overflow-x-auto pb-2 no-scrollbar border-b border-slate-100">
         <div className="flex items-center gap-1.5">

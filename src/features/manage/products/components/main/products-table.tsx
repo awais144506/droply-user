@@ -1,7 +1,9 @@
 "use client";
+
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useRole } from "@/lib/hooks/use-role";
+import { useBranchSettings } from "@/features/admin/settings/api/use-branch-settings";
 import { useDeleteProduct, useToggleProductStatus } from "../../api/use-mutate-product";
 import { usePagination } from "@/lib/utils/functions/pagination-calculation";
 import { ProductList } from "../../types/product";
@@ -10,110 +12,163 @@ import TablePagination from "@/lib/utils/components/TablePagination";
 import ConfirmDeleteDialog from "@/lib/utils/components/ConfirmDialog";
 import { ProductsFilterBar } from "./products-filter-bar";
 import { getProductColumns } from "./products-columns";
+import { exportProductsToBwPdf } from "@/lib/utils/functions/generatePdfs/export-products-pdf";
 
 export function ProductsTable({ products }: { products: ProductList[] | undefined }) {
-    const router = useRouter();
-    const { isOwner } = useRole();
-    const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
-    const { mutate: toggleStatus, isPending } = useToggleProductStatus();
+  const router = useRouter();
+  const { isOwner, branchId } = useRole();
+  const { data: branchSettings } = useBranchSettings(branchId);
+  const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
+  const { mutate: toggleStatus, isPending } = useToggleProductStatus();
 
-    // States
-    const [searchQuery, setSearchQuery] = useState("");
-    const [showLowStockOnly, setShowLowStockOnly] = useState(false);
-    const [showPublicOnly, setShowPublicOnly] = useState(false); // 🔥 Changed to boolean switch
-    const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
-    const [trackingFilter, setTrackingFilter] = useState<string>("ALL");
-    const [statusFilter, setStatusFilter] = useState<string>("ALL");
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
-    const [productToDelete, setProductToDelete] = useState<ProductList | null>(null);
+  // States
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showLowStockOnly, setShowLowStockOnly] = useState(false);
+  const [showPublicOnly, setShowPublicOnly] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
+  const [trackingFilter, setTrackingFilter] = useState<string>("ALL");
+  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<ProductList | null>(null);
 
-    // Filtering Logic
-    const filteredProducts = products?.filter((p) => {
-        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.productCode.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesLowStock = showLowStockOnly ? p.currentStock <= p.lowStockThreshold : true;
-        const matchesCategory = categoryFilter !== "ALL" ? p.category === categoryFilter : true;
-        const matchesTracking = trackingFilter !== "ALL" ? p.trackingType === trackingFilter : true;
-        const matchesStatus =
-            statusFilter === "ACTIVE" ? p.isActive === true :
-                statusFilter === "INACTIVE" ? p.isActive === false : true;
-        const matchesPublic = showPublicOnly ? !!p.isPublic : true;
+  // Filtering Logic
+  const filteredProducts =
+    products?.filter((p) => {
+      const matchesSearch =
+        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.productCode.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesLowStock = showLowStockOnly
+        ? p.currentStock <= p.lowStockThreshold
+        : true;
+      const matchesCategory =
+        categoryFilter !== "ALL" ? p.category === categoryFilter : true;
+      const matchesTracking =
+        trackingFilter !== "ALL" ? p.trackingType === trackingFilter : true;
+      const matchesStatus =
+        statusFilter === "ACTIVE"
+          ? p.isActive === true
+          : statusFilter === "INACTIVE"
+          ? p.isActive === false
+          : true;
+      const matchesPublic = showPublicOnly ? !!p.isPublic : true;
 
-        return matchesSearch && matchesLowStock && matchesCategory && matchesTracking && matchesStatus && matchesPublic;
+      return (
+        matchesSearch &&
+        matchesLowStock &&
+        matchesCategory &&
+        matchesTracking &&
+        matchesStatus &&
+        matchesPublic
+      );
+    }) ?? [];
+
+  const activeFiltersCount =
+    (showLowStockOnly ? 1 : 0) +
+    (showPublicOnly ? 1 : 0) +
+    (categoryFilter !== "ALL" ? 1 : 0) +
+    (trackingFilter !== "ALL" ? 1 : 0) +
+    (statusFilter !== "ALL" ? 1 : 0);
+
+  const clearFilters = () => {
+    setShowLowStockOnly(false);
+    setShowPublicOnly(false);
+    setCategoryFilter("ALL");
+    setTrackingFilter("ALL");
+    setStatusFilter("ALL");
+    setIsFilterOpen(false);
+  };
+
+  const handleDownloadPdf = () => {
+    exportProductsToBwPdf({
+      products: filteredProducts, // Exports ALL currently filtered products (not just current page)
+      branchSettings,
+      filters: {
+        searchQuery,
+        showLowStockOnly,
+        showPublicOnly,
+        categoryFilter,
+        trackingFilter,
+        statusFilter,
+      },
     });
+  };
 
-    const activeFiltersCount =
-        (showLowStockOnly ? 1 : 0) +
-        (showPublicOnly ? 1 : 0) + // 🔥 Boolean check
-        (categoryFilter !== "ALL" ? 1 : 0) +
-        (trackingFilter !== "ALL" ? 1 : 0) +
-        (statusFilter !== "ALL" ? 1 : 0);
+  // Pagination Hook
+  const {
+    currentPage,
+    setCurrentPage,
+    paginatedData,
+    totalPages,
+    totalItems,
+    itemsPerPage,
+  } = usePagination(filteredProducts);
 
-    const clearFilters = () => {
-        setShowLowStockOnly(false);
-        setShowPublicOnly(false); // 🔥 Reset switch
-        setCategoryFilter("ALL");
-        setTrackingFilter("ALL");
-        setStatusFilter("ALL");
-        setIsFilterOpen(false);
-    };
+  const columns = useMemo(
+    () =>
+      getProductColumns(
+        router,
+        isOwner,
+        setProductToDelete,
+        (id) => toggleStatus(id),
+        isPending
+      ),
+    [router, isOwner, isPending, toggleStatus]
+  );
 
-    // Pagination Hook
-    const { currentPage, setCurrentPage, paginatedData, totalPages, totalItems, itemsPerPage } = usePagination(filteredProducts);
+  const confirmDelete = () => {
+    if (!productToDelete) return;
+    deleteProduct(productToDelete.id, {
+      onSuccess: () => {
+        setProductToDelete(null);
+      },
+    });
+  };
 
-    const columns = useMemo(() =>
-        getProductColumns(
-            router,
-            isOwner,
-            setProductToDelete,
-            (id) => toggleStatus(id),
-            isPending
-        ),
-        [router, isOwner, isPending, toggleStatus]);
+  return (
+    <div className=" overflow-hidden flex flex-col">
+      <ProductsFilterBar
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        showLowStockOnly={showLowStockOnly}
+        setShowLowStockOnly={setShowLowStockOnly}
+        showPublicOnly={showPublicOnly}
+        setShowPublicOnly={setShowPublicOnly}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        trackingFilter={trackingFilter}
+        setTrackingFilter={setTrackingFilter}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        clearFilters={clearFilters}
+        activeFiltersCount={activeFiltersCount}
+        isFilterOpen={isFilterOpen}
+        setIsFilterOpen={setIsFilterOpen}
+        onDownloadPdf={handleDownloadPdf}
+        isPdfDisabled={filteredProducts.length === 0}
+      />
 
-    const confirmDelete = () => {
-        if (!productToDelete) return;
-        deleteProduct(productToDelete.id, {
-            onSuccess: () => {
-                setProductToDelete(null);
-            },
-        });
-    };
+      <DataTable
+        data={paginatedData}
+        columns={columns}
+        emptyMessage="No items match your filters."
+      />
 
-    return (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
-            <ProductsFilterBar
-                searchQuery={searchQuery} setSearchQuery={setSearchQuery}
-                showLowStockOnly={showLowStockOnly} setShowLowStockOnly={setShowLowStockOnly}
-                showPublicOnly={showPublicOnly} setShowPublicOnly={setShowPublicOnly} // 🔥 Pass new props
-                categoryFilter={categoryFilter} setCategoryFilter={setCategoryFilter}
-                trackingFilter={trackingFilter} setTrackingFilter={setTrackingFilter}
-                statusFilter={statusFilter} setStatusFilter={setStatusFilter}
-                clearFilters={clearFilters} activeFiltersCount={activeFiltersCount}
-                isFilterOpen={isFilterOpen} setIsFilterOpen={setIsFilterOpen}
-            />
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        itemsPerPage={itemsPerPage}
+        onPageChange={setCurrentPage}
+      />
 
-            <DataTable
-                data={paginatedData}
-                columns={columns}
-                emptyMessage="No items match your filters."
-            />
-
-            <TablePagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={totalItems}
-                itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
-            />
-
-            <ConfirmDeleteDialog
-                title="Are you sure?"
-                description={`You want to delete : ${productToDelete?.name}`}
-                isOpen={!!productToDelete}
-                onClose={() => setProductToDelete(null)}
-                onConfirm={confirmDelete}
-                isLoading={isDeleting}
-            />
-        </div>
-    );
+      <ConfirmDeleteDialog
+        title="Are you sure?"
+        description={`You want to delete : ${productToDelete?.name}`}
+        isOpen={!!productToDelete}
+        onClose={() => setProductToDelete(null)}
+        onConfirm={confirmDelete}
+        isLoading={isDeleting}
+      />
+    </div>
+  );
 }

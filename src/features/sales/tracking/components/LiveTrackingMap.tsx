@@ -1,8 +1,20 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable react-hooks/preserve-manual-memoization */
 /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import React, { useMemo, useEffect, useState } from "react";
-import dynamic from "next/dynamic";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  Polyline,
+  CircleMarker,
+  useMap,
+} from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { Navigation, Clock, MapPin, AlertTriangle, Route } from "lucide-react";
 import {
   FleetRiderOverview,
@@ -10,69 +22,41 @@ import {
   RiderHistoryResponse,
 } from "../types/tracking";
 
-// Dynamically import Leaflet components with SSR disabled
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false }
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false }
-);
-const Marker = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Marker),
-  { ssr: false }
-);
-const Popup = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Popup),
-  { ssr: false }
-);
-const Polyline = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Polyline),
-  { ssr: false }
-);
+function MapCameraController({
+  targetLat,
+  targetLng,
+  zoom,
+  boundsPoints,
+  isHistoryMode,
+}: {
+  targetLat: number;
+  targetLng: number;
+  zoom: number;
+  boundsPoints?: [number, number][];
+  isHistoryMode?: boolean;
+}) {
+  const map = useMap();
 
-// Helper component to smoothly fly/zoom map camera or fit bounds in history mode
-const MapCameraController = dynamic(
-  () =>
-    import("react-leaflet").then((mod) => {
-      const { useMap } = mod;
-      return function CameraUpdater({
-        targetLat,
-        targetLng,
-        zoom,
-        boundsPoints,
-        isHistoryMode,
-      }: {
-        targetLat: number;
-        targetLng: number;
-        zoom: number;
-        boundsPoints?: [number, number][];
-        isHistoryMode?: boolean;
-      }) {
-        const map = useMap();
-        useEffect(() => {
-          if (isHistoryMode && boundsPoints && boundsPoints.length > 1) {
-            map.fitBounds(boundsPoints, {
-              padding: [90, 90],
-              maxZoom: 17,
-              animate: true,
-              duration: 1.0,
-            });
-          } else if (targetLat && targetLng) {
-            map.flyTo([targetLat, targetLng], zoom, {
-              animate: true,
-              duration: 1.2,
-            });
-          }
-        }, [map, targetLat, targetLng, zoom, isHistoryMode, boundsPoints]);
-        return null;
-      };
-    }),
-  { ssr: false }
-);
+  useEffect(() => {
+    if (isHistoryMode && boundsPoints && boundsPoints.length > 1) {
+      map.fitBounds(boundsPoints, {
+        padding: [90, 90],
+        maxZoom: 17,
+        animate: true,
+        duration: 1.0,
+      });
+    } else if (targetLat && targetLng) {
+      map.flyTo([targetLat, targetLng], zoom, {
+        animate: true,
+        duration: 1.2,
+      });
+    }
+  }, [map, targetLat, targetLng, zoom, isHistoryMode, boundsPoints]);
 
-// Hook to fetch road-snapped coordinates from public OSRM router (Live Mode)
+  return null;
+}
+
+// Hook to fetch road-snapped coordinates from public OSRM router (Live Mode ONLY)
 function useRoadRoute(
   startLat?: number | null,
   startLng?: number | null,
@@ -87,28 +71,39 @@ function useRoadRoute(
       return;
     }
 
+    let isCancelled = false;
+
     const fetchRoute = async () => {
       try {
         const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
         const res = await fetch(url);
         const data = await res.json();
 
-        if (data.routes && data.routes.length > 0) {
+        if (!isCancelled && data.routes && data.routes.length > 0) {
           const coords = data.routes[0].geometry.coordinates.map(
             (coord: [number, number]) => [coord[1], coord[0]] as [number, number]
           );
           setRouteCoords(coords);
         }
       } catch (err) {
-        console.error("Failed to fetch road route, falling back to straight line", err);
-        setRouteCoords([
-          [startLat, startLng],
-          [endLat, endLng],
-        ]);
+        console.error(
+          "Failed to fetch road route, falling back to straight line",
+          err
+        );
+        if (!isCancelled) {
+          setRouteCoords([
+            [startLat, startLng],
+            [endLat, endLng],
+          ]);
+        }
       }
     };
 
     fetchRoute();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [startLat, startLng, endLat, endLng]);
 
   return routeCoords;
@@ -121,7 +116,7 @@ function calculateDistance(
   lat2: number,
   lon2: number
 ): { meters: number; formatted: string } {
-  const R = 6371e3; // Earth radius in meters
+  const R = 6371e3;
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
@@ -140,176 +135,30 @@ function calculateDistance(
   return { meters, formatted: `${meters} m` };
 }
 
-/**
- * Extracts clean checkpoints from raw GPS pings (spaced >= 40m apart)
- * and removes stationary back-and-forth jitter spikes.
- */
-function extractKeyWaypoints(
-  pings: Array<{ latitude: number; longitude: number }>,
-  minDistanceMeters = 40
-): [number, number][] {
-  if (!pings || pings.length === 0) return [];
-  if (pings.length === 1) return [[pings[0].latitude, pings[0].longitude]];
-
-  const waypoints: [number, number][] = [[pings[0].latitude, pings[0].longitude]];
-
-  for (let i = 1; i < pings.length; i++) {
-    const prev = waypoints[waypoints.length - 1];
-    const curr = pings[i];
-    const dist = calculateDistance(prev[0], prev[1], curr.latitude, curr.longitude).meters;
-
-    if (dist >= minDistanceMeters) {
-      // Spike filter: if the new point jumps right back to the point before `prev`, skip `prev`
-      if (waypoints.length >= 2) {
-        const prevPrev = waypoints[waypoints.length - 2];
-        const distToPrevPrev = calculateDistance(
-          prevPrev[0],
-          prevPrev[1],
-          curr.latitude,
-          curr.longitude
-        ).meters;
-        if (distToPrevPrev < minDistanceMeters * 0.6) {
-          waypoints.pop(); // Remove the outlier spike
-        }
-      }
-      waypoints.push([curr.latitude, curr.longitude]);
-    }
-  }
-
-  // Always preserve the final destination point
-  const lastPing = pings[pings.length - 1];
-  const lastWp = waypoints[waypoints.length - 1];
-  if (
-    calculateDistance(lastWp[0], lastWp[1], lastPing.latitude, lastPing.longitude).meters > 10
-  ) {
-    waypoints.push([lastPing.latitude, lastPing.longitude]);
-  }
-
-  return waypoints;
+// Safely check if a coordinate pair is valid (non-zero finite numbers)
+function isValidCoord(lat?: number | null, lng?: number | null): boolean {
+  return (
+    typeof lat === "number" &&
+    typeof lng === "number" &&
+    Number.isFinite(lat) &&
+    Number.isFinite(lng) &&
+    !(lat === 0 && lng === 0)
+  );
 }
 
-/**
- * Hook that takes raw historical GPS pings and snaps them strictly onto actual
- * OpenStreetMap roads using OSRM's routing engine in chunks so lines NEVER cut across houses.
- */
-function useRoadSnappedHistory(
-  isHistoryMode: boolean,
-  pings?: Array<{ latitude: number; longitude: number }>
-) {
-  const [snappedCoords, setSnappedCoords] = useState<[number, number][]>([]);
-  const [isSnapping, setIsSnapping] = useState(false);
+// Determine rider offline status from either WebSocket location payload or overview object
+function isRiderOffline(
+  rider: FleetRiderOverview,
+  loc?: LiveRiderSocketLocation | null
+): boolean {
+  const locAny = loc as Record<string, unknown> | null | undefined;
+  const riderAny = rider as unknown as Record<string, unknown>;
 
-  const waypoints = useMemo(() => {
-    if (!isHistoryMode || !pings || pings.length === 0) return [];
-    return extractKeyWaypoints(pings, 40);
-  }, [isHistoryMode, pings]);
+  if (locAny?.isOnline === false || locAny?.isOffline === true) return true;
+  if (locAny?.isOnline === true) return false;
+  if (riderAny?.isOnline === false || riderAny?.status === "OFFLINE") return true;
 
-  useEffect(() => {
-    if (!isHistoryMode || waypoints.length === 0) {
-      setSnappedCoords([]);
-      return;
-    }
-
-    if (waypoints.length === 1) {
-      setSnappedCoords(waypoints);
-      return;
-    }
-
-    let isCancelled = false;
-
-    const snapToRoads = async () => {
-      setIsSnapping(true);
-      try {
-        // Chunk into groups of max 25 waypoints per OSRM request ( overlapping by 1 point )
-        const CHUNK_SIZE = 25;
-        const allRoadCoords: [number, number][] = [];
-
-        for (let i = 0; i < waypoints.length - 1; i += CHUNK_SIZE - 1) {
-          const chunk = waypoints.slice(i, i + CHUNK_SIZE);
-          if (chunk.length < 2) break;
-
-          const coordString = chunk
-            .map(([lat, lng]) => `${lng},${lat}`)
-            .join(";");
-
-          // First try OSRM Map Matching (match/v1) with 35m GPS radius tolerance
-          const radiuses = chunk.map(() => "35").join(";");
-          const matchUrl = `https://router.project-osrm.org/match/v1/driving/${coordString}?overview=full&geometries=geojson&radiuses=${radiuses}&gaps=ignore`;
-
-          let chunkCoords: [number, number][] = [];
-
-          try {
-            const matchRes = await fetch(matchUrl);
-            const matchData = await matchRes.json();
-
-            if (
-              matchData.code === "Ok" &&
-              matchData.matchings &&
-              matchData.matchings.length > 0
-            ) {
-              for (const matching of matchData.matchings) {
-                const coords = matching.geometry.coordinates.map(
-                  (c: [number, number]) => [c[1], c[0]] as [number, number]
-                );
-                chunkCoords.push(...coords);
-              }
-            }
-          } catch {
-            // Fallback to route/v1 below if match fails
-          }
-
-          // Fallback to OSRM multi-waypoint routing (route/v1) if match/v1 didn't return a full trace
-          if (chunkCoords.length < 2) {
-            const routeUrl = `https://router.project-osrm.org/route/v1/driving/${coordString}?overview=full&geometries=geojson`;
-            const routeRes = await fetch(routeUrl);
-            const routeData = await routeRes.json();
-
-            if (
-              routeData.code === "Ok" &&
-              routeData.routes &&
-              routeData.routes.length > 0
-            ) {
-              chunkCoords = routeData.routes[0].geometry.coordinates.map(
-                (c: [number, number]) => [c[1], c[0]] as [number, number]
-              );
-            } else {
-              chunkCoords = chunk;
-            }
-          }
-
-          if (allRoadCoords.length > 0 && chunkCoords.length > 0) {
-            allRoadCoords.push(...chunkCoords.slice(1));
-          } else {
-            allRoadCoords.push(...chunkCoords);
-          }
-        }
-
-        if (!isCancelled) {
-          setSnappedCoords(allRoadCoords.length > 0 ? allRoadCoords : waypoints);
-        }
-      } catch (err) {
-        console.error("OSRM history road-snapping failed, using clean waypoints:", err);
-        if (!isCancelled) {
-          setSnappedCoords(waypoints);
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsSnapping(false);
-        }
-      }
-    };
-
-    snapToRoads();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [isHistoryMode, waypoints]);
-
-  return {
-    historyPolylineCoords: snappedCoords.length > 0 ? snappedCoords : waypoints,
-    isSnapping,
-  };
+  return false;
 }
 
 type Props = {
@@ -341,31 +190,80 @@ export const LiveTrackingMap = ({
   riderHistory,
   isHistoryLoading = false,
 }: Props) => {
-  // Determine camera focus coordinates
+  // Prevents Leaflet "Map container is being reused by another instance" under Strict Mode
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
   const selectedRiderLiveLoc = selectedRider
     ? liveLocations[selectedRider.id]
     : null;
 
-  const firstHistoryPing =
-    isHistoryMode && riderHistory?.locationPings?.length
-      ? riderHistory.locationPings[riderHistory.locationPings.length - 1]
+  // Clean historical GPS pings into exact dots (filters invalid coords & stacked <5m duplicates)
+  const historyDots = useMemo(() => {
+    if (!isHistoryMode || !riderHistory?.locationPings?.length) return [];
+
+    const validPings = riderHistory.locationPings.filter((p) =>
+      isValidCoord(p.latitude, p.longitude)
+    );
+    if (validPings.length === 0) return [];
+
+    const filtered: typeof validPings = [validPings[0]];
+
+    for (let i = 1; i < validPings.length; i++) {
+      const prev = filtered[filtered.length - 1];
+      const curr = validPings[i];
+      const isLast = i === validPings.length - 1;
+      const dist = calculateDistance(
+        prev.latitude,
+        prev.longitude,
+        curr.latitude,
+        curr.longitude
+      ).meters;
+
+      if (dist >= 5 || isLast) {
+        filtered.push(curr);
+      }
+    }
+
+    return filtered;
+  }, [isHistoryMode, riderHistory?.locationPings]);
+
+  const historyBoundsPoints = useMemo<[number, number][]>(
+    () => historyDots.map((p) => [p.latitude, p.longitude]),
+    [historyDots]
+  );
+
+  const historyStartPoint: [number, number] | null =
+    historyDots.length > 0
+      ? [historyDots[0].latitude, historyDots[0].longitude]
       : null;
 
-  const focusLat = firstHistoryPing
-    ? firstHistoryPing.latitude
+  const historyEndPoint: [number, number] | null =
+    historyDots.length > 0
+      ? [
+          historyDots[historyDots.length - 1].latitude,
+          historyDots[historyDots.length - 1].longitude,
+        ]
+      : null;
+
+  const focusLat = historyEndPoint
+    ? historyEndPoint[0]
     : selectedRiderLiveLoc
       ? selectedRiderLiveLoc.latitude
       : branchLat;
 
-  const focusLng = firstHistoryPing
-    ? firstHistoryPing.longitude
+  const focusLng = historyEndPoint
+    ? historyEndPoint[1]
     : selectedRiderLiveLoc
       ? selectedRiderLiveLoc.longitude
       : branchLng;
 
   const targetZoom = selectedRider ? 16 : 13;
 
-  // Find active ON_ROUTE order for selected rider
   const onRouteOrder = useMemo(() => {
     if (!selectedRider || isHistoryMode) return null;
     return (
@@ -378,15 +276,13 @@ export const LiveTrackingMap = ({
     );
   }, [selectedRider, isHistoryMode]);
 
-  // Fetch road-snapped route coordinates via OSRM (Live Mode)
   const roadRouteCoords = useRoadRoute(
-    selectedRiderLiveLoc?.latitude,
-    selectedRiderLiveLoc?.longitude,
-    onRouteOrder?.customer.latitude,
-    onRouteOrder?.customer.longitude
+    !isHistoryMode ? selectedRiderLiveLoc?.latitude : null,
+    !isHistoryMode ? selectedRiderLiveLoc?.longitude : null,
+    !isHistoryMode ? onRouteOrder?.customer.latitude : null,
+    !isHistoryMode ? onRouteOrder?.customer.longitude : null
   );
 
-  // Calculate live distance between selected rider and their ON_ROUTE customer
   const liveRouteMetrics = useMemo(() => {
     if (
       !onRouteOrder ||
@@ -404,22 +300,20 @@ export const LiveTrackingMap = ({
     );
   }, [onRouteOrder, selectedRiderLiveLoc]);
 
-  // 🔥 Snap historical GPS trail strictly onto actual roads via OSRM
-  const { historyPolylineCoords, isSnapping } = useRoadSnappedHistory(
-    isHistoryMode,
-    riderHistory?.locationPings
-  );
-
-  // Deduplicate overlapping stop logs that are within 25m of each other
   const cleanedStopLogs = useMemo(() => {
     if (!isHistoryMode || !riderHistory?.stopLogs) return [];
     const grouped: typeof riderHistory.stopLogs = [];
 
     for (const stop of riderHistory.stopLogs) {
+      if (!isValidCoord(stop.latitude, stop.longitude)) continue;
       const existing = grouped.find(
         (g) =>
-          calculateDistance(g.latitude, g.longitude, stop.latitude, stop.longitude)
-            .meters < 25
+          calculateDistance(
+            g.latitude,
+            g.longitude,
+            stop.latitude,
+            stop.longitude
+          ).meters < 25
       );
       if (existing) {
         if (stop.durationMinutes > existing.durationMinutes) {
@@ -433,14 +327,6 @@ export const LiveTrackingMap = ({
     return grouped;
   }, [isHistoryMode, riderHistory]);
 
-  const historyStartPoint =
-    historyPolylineCoords.length > 0 ? historyPolylineCoords[0] : null;
-  const historyEndPoint =
-    historyPolylineCoords.length > 0
-      ? historyPolylineCoords[historyPolylineCoords.length - 1]
-      : null;
-
-  // Check if Start and End points are close to each other (< 45m apart)
   const isRoundTripSameSpot = useMemo(() => {
     if (!historyStartPoint || !historyEndPoint) return false;
     return (
@@ -453,12 +339,7 @@ export const LiveTrackingMap = ({
     );
   }, [historyStartPoint, historyEndPoint]);
 
-  // Create custom Leaflet icons safely on client side
   const icons = useMemo(() => {
-    if (typeof window === "undefined") return null;
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const L = require("leaflet");
-
     const branchIcon = L.divIcon({
       html: imageUrl
         ? `<div style="width: 42px; height: 42px; border-radius: 50%; border: 3px solid #059669; overflow: hidden; background: white; box-shadow: 0 4px 10px rgba(0,0,0,0.25); display: flex; align-items: center; justify-content: center;">
@@ -476,40 +357,49 @@ export const LiveTrackingMap = ({
     const createRiderIcon = (
       name: string,
       isSelected: boolean,
-      isStopped: boolean
+      isStopped: boolean,
+      isOffline: boolean
     ) => {
-      const bgColor = isStopped
-        ? "#e11d48"
-        : isSelected
-          ? "#0284c7"
-          : "#10b981";
+      const bgColor = isOffline
+        ? "#64748b"
+        : isStopped
+          ? "#e11d48"
+          : isSelected
+            ? "#0284c7"
+            : "#10b981";
+
+      const statusDotColor = isOffline ? "#ef4444" : "#22c55e";
+      const borderColor = isOffline ? "#ef4444" : "#ffffff";
 
       return L.divIcon({
         html: `
-          <div style="display: flex; flex-direction: column; align-items: center;">
-            <div style="background: #0f172a; color: white; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; margin-bottom: 3px; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-              ${name} ${isStopped ? "⚠️" : ""}
+          <div style="display: flex; flex-direction: column; align-items: center; opacity: ${isOffline ? 0.85 : 1};">
+            <div style="display: flex; align-items: center; gap: 5px; background: #0f172a; color: white; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 9999px; margin-bottom: 3px; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.25); border: 1px solid ${isOffline ? "#ef4444" : "transparent"};">
+              <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusDotColor}; display: inline-block; flex-shrink: 0;"></span>
+              <span>${name}</span>
+              ${isOffline ? `<span style="color: #fca5a5; font-size: 9px; font-weight: 900;">OFFLINE</span>` : isStopped ? "⚠️" : ""}
             </div>
-            <div style="width: 36px; height: 36px; border-radius: 50%; background: ${bgColor}; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 16px;">
+            <div style="position: relative; width: 36px; height: 36px; border-radius: 50%; background: ${bgColor}; border: 3px solid ${borderColor}; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 16px;">
               🛵
+              ${
+                isOffline
+                  ? `<span style="position: absolute; top: -3px; right: -3px; width: 11px; height: 11px; border-radius: 50%; background: #ef4444; border: 2px solid white;"></span>`
+                  : ""
+              }
             </div>
           </div>
         `,
         className: "",
-        iconSize: [80, 56],
-        iconAnchor: [40, 48],
-        popupAnchor: [0, -45],
+        iconSize: [110, 58],
+        iconAnchor: [55, 50],
+        popupAnchor: [0, -46],
       });
     };
 
     const createOrderIcon = (status: string, customerName: string) => {
       const isOnRoute = status === "ON_ROUTE";
       const isArrived = status === "ARRIVED";
-      const bg = isArrived
-        ? "#10b981"
-        : isOnRoute
-          ? "#f59e0b"
-          : "#64748b";
+      const bg = isArrived ? "#10b981" : isOnRoute ? "#f59e0b" : "#64748b";
 
       return L.divIcon({
         html: `
@@ -529,7 +419,6 @@ export const LiveTrackingMap = ({
       });
     };
 
-    // Stop badge floats cleanly ABOVE the coordinate with a stem so it never covers START/END
     const createStopLogIcon = (durationMinutes: number) =>
       L.divIcon({
         html: `
@@ -547,7 +436,6 @@ export const LiveTrackingMap = ({
         popupAnchor: [0, -42],
       });
 
-    // Sleek Start & End pill badges pushed to bottom-left and bottom-right when close
     const createStartPointIcon = (offsetLeft: boolean) =>
       L.divIcon({
         html: `
@@ -590,16 +478,9 @@ export const LiveTrackingMap = ({
 
   return (
     <div className="relative w-full h-full overflow-hidden rounded-3xl border border-slate-200 shadow-sm">
-      <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-        crossOrigin=""
-      />
-
-      {/* Bottom Floating Live Route / History Info Pill */}
+      {/* Bottom Floating Live Route Info Pill */}
       {selectedRider && !isHistoryMode && onRouteOrder && liveRouteMetrics && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[999] bg-slate-900/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-4 pointer-events-auto">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-999 bg-slate-900/95 backdrop-blur-md text-white px-5 py-3 rounded-2xl shadow-2xl border border-slate-700 flex items-center gap-4 pointer-events-auto">
           <div className="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
             <Route className="w-5 h-5" />
           </div>
@@ -633,18 +514,18 @@ export const LiveTrackingMap = ({
           <Clock className="w-4 h-4 text-sky-600" />
           {!selectedRider ? (
             <span className="text-xs font-bold text-slate-600">
-              Select a rider from the top bar to view their historical route & stops.
+              Select a rider from the top bar to view their historical GPS points & stops.
             </span>
-          ) : isHistoryLoading || isSnapping ? (
+          ) : isHistoryLoading ? (
             <span className="text-xs font-bold text-slate-500 animate-pulse">
-              Snapping route to roads for {selectedRider.name}...
+              Loading GPS history for {selectedRider.name}...
             </span>
           ) : (
             <div className="flex items-center gap-4 text-xs font-bold">
               <span>
                 {selectedRider.name} •{" "}
-                <span className="text-sky-600">
-                  Road-Snapped Route
+                <span className="text-blue-600">
+                  {historyDots.length} GPS Points
                 </span>
               </span>
               <span className="text-rose-600 flex items-center gap-1">
@@ -656,29 +537,27 @@ export const LiveTrackingMap = ({
         </div>
       )}
 
-      <MapContainer
-        key={`${branchLat}-${branchLng}`}
-        center={[branchLat, branchLng]}
-        zoom={13}
-        style={{ height: "100%", width: "100%" }}
-        scrollWheelZoom={true}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
+      {isMounted && (
+        <MapContainer
+          center={[branchLat, branchLng]}
+          zoom={13}
+          style={{ height: "100%", width: "100%" }}
+          scrollWheelZoom={true}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
 
-        {/* Smooth Camera Fly-To & History Bounds Controller */}
-        <MapCameraController
-          targetLat={focusLat}
-          targetLng={focusLng}
-          zoom={targetZoom}
-          boundsPoints={historyPolylineCoords}
-          isHistoryMode={isHistoryMode}
-        />
+          <MapCameraController
+            targetLat={focusLat}
+            targetLng={focusLng}
+            zoom={targetZoom}
+            boundsPoints={historyBoundsPoints}
+            isHistoryMode={isHistoryMode}
+          />
 
-        {/* 1. Branch Headquarters Marker */}
-        {icons?.branchIcon && (
+          {/* 1. Branch Headquarters Marker */}
           <Marker position={[branchLat, branchLng]} icon={icons.branchIcon}>
             <Popup>
               <div className="p-1 space-y-1">
@@ -692,160 +571,189 @@ export const LiveTrackingMap = ({
               </div>
             </Popup>
           </Marker>
-        )}
 
-        {/* ================================================================= */}
-        {/* 2. LIVE MODE: RENDER RIDERS, ACTIVE ORDERS & ROAD ROUTE POLYLINE  */}
-        {/* ================================================================= */}
-        {!isHistoryMode &&
-          riders.map((rider) => {
-            const loc = liveLocations[rider.id];
-            if (!loc || !icons) return null;
+          {/* 2. LIVE MODE: RIDERS, ACTIVE ORDERS & ROAD ROUTE POLYLINE */}
+          {!isHistoryMode &&
+            riders.map((rider) => {
+              const loc = liveLocations[rider.id];
+              if (!loc || !isValidCoord(loc.latitude, loc.longitude)) {
+                return null;
+              }
 
-            const isSelected = selectedRider?.id === rider.id;
+              const isSelected = selectedRider?.id === rider.id;
+              const offline = isRiderOffline(rider, loc);
 
-            return (
-              <Marker
-                key={rider.id}
-                position={[loc.latitude, loc.longitude]}
-                icon={icons.createRiderIcon(
-                  rider.name,
-                  isSelected,
-                  loc.isStopped
-                )}
-                zIndexOffset={isSelected ? 1000 : 1}
-                eventHandlers={{
-                  click: () => onSelectRider(rider),
-                }}
-              >
-                <Popup>
-                  <div className="p-1 space-y-1 min-w-[150px]">
-                    <p className="font-black text-slate-900 text-xs">
-                      {rider.name}
-                    </p>
-                    <p className="text-[11px] text-slate-500 font-semibold">
-                      {rider.phone}
-                    </p>
-                    {loc.isStopped && (
-                      <p className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">
-                        ⚠️ Stopped at location
+              return (
+                <Marker
+                  key={rider.id}
+                  position={[loc.latitude, loc.longitude]}
+                  icon={icons.createRiderIcon(
+                    rider.name,
+                    isSelected,
+                    loc.isStopped,
+                    offline
+                  )}
+                  zIndexOffset={isSelected ? 1000 : offline ? 0 : 10}
+                  eventHandlers={{
+                    click: () => onSelectRider(rider),
+                  }}
+                >
+                  <Popup>
+                    <div className="p-1 space-y-1.5 min-w-38.75">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-black text-slate-900 text-xs">
+                          {rider.name}
+                        </p>
+                        <span
+                          className={`inline-flex items-center gap-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full ${
+                            offline
+                              ? "bg-rose-100 text-rose-700"
+                              : "bg-emerald-100 text-emerald-700"
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              offline ? "bg-rose-600" : "bg-emerald-600"
+                            }`}
+                          />
+                          {offline ? "Offline" : "Online"}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 font-semibold">
+                        {rider.phone}
                       </p>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            );
-          })}
+                      {offline && (
+                        <p className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">
+                          🔴 Connection lost — showing last known spot
+                        </p>
+                      )}
+                      {!offline && loc.isStopped && (
+                        <p className="text-[10px] font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded">
+                          ⚠️ Stopped at location
+                        </p>
+                      )}
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
 
-        {/* Selected Rider's Active Customer Order Pins */}
-        {!isHistoryMode &&
-          selectedRider &&
-          selectedRider.activeOrders?.map((order) => {
-            const { latitude, longitude, name } = order.customer || {};
-            if (latitude == null || longitude == null || !icons) return null;
+          {!isHistoryMode &&
+            selectedRider &&
+            selectedRider.activeOrders?.map((order) => {
+              const { latitude, longitude, name } = order.customer || {};
+              if (!isValidCoord(latitude, longitude)) return null;
 
-            return (
-              <Marker
-                key={order.id}
-                position={[latitude, longitude]}
-                icon={icons.createOrderIcon(order.status, name)}
-              >
-                <Popup>
-                  <div className="p-1 space-y-1">
-                    <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-sky-100 text-sky-800">
-                      {order.status}
-                    </span>
-                    <p className="font-black text-slate-900 text-xs mt-1">
-                      {name}
-                    </p>
-                    <p className="text-[11px] text-slate-500 font-bold">
-                      Order #{order.orderCode}
-                    </p>
-                  </div>
-                </Popup>
-              </Marker>
-            );
-          })}
+              return (
+                <Marker
+                  key={order.id}
+                  position={[latitude!, longitude!]}
+                  icon={icons.createOrderIcon(order.status, name)}
+                >
+                  <Popup>
+                    <div className="p-1 space-y-1">
+                      <span className="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-sky-100 text-sky-800">
+                        {order.status}
+                      </span>
+                      <p className="font-black text-slate-900 text-xs mt-1">
+                        {name}
+                      </p>
+                      <p className="text-[11px] text-slate-500 font-bold">
+                        Order #{order.orderCode}
+                      </p>
+                    </div>
+                  </Popup>
+                </Marker>
+              );
+            })}
 
-        {/* Road-Snapped Polyline (Following actual streets via OSRM) */}
-        {!isHistoryMode && roadRouteCoords.length > 0 && (
-          <Polyline
-            positions={roadRouteCoords}
-            pathOptions={{
-              color: "#0284c7",
-              weight: 5,
-              dashArray: "10, 10",
-              opacity: 0.9,
-            }}
-          />
-        )}
-
-        {/* ================================================================= */}
-        {/* 3. HISTORY MODE: OSRM ROAD-SNAPPED GPS TRAIL & CLEAN PINS         */}
-        {/* ================================================================= */}
-        {isHistoryMode && selectedRider && historyPolylineCoords.length > 0 && (
-          <>
-            {/* Crisp White Road Casing */}
+          {!isHistoryMode && roadRouteCoords.length > 0 && (
             <Polyline
-              positions={historyPolylineCoords}
+              positions={roadRouteCoords}
               pathOptions={{
-                color: "#ffffff",
-                weight: 9,
-                opacity: 0.95,
-                lineCap: "round",
-                lineJoin: "round",
-              }}
-            />
-            {/* Royal Blue Road-Snapped Core */}
-            <Polyline
-              positions={historyPolylineCoords}
-              pathOptions={{
-                color: "#2563eb",
+                color: "#0284c7",
                 weight: 5,
-                opacity: 1,
-                lineCap: "round",
-                lineJoin: "round",
+                dashArray: "10, 10",
+                opacity: 0.9,
               }}
             />
-          </>
-        )}
+          )}
 
-        {/* Start Point Marker */}
-        {isHistoryMode && historyStartPoint && icons && (
-          <Marker
-            position={historyStartPoint}
-            icon={icons.createStartPointIcon(isRoundTripSameSpot)}
-            zIndexOffset={800}
-          >
-            <Popup>
-              <div className="p-1 text-xs font-bold text-slate-800">
-                🚀 Trip Started Here
-              </div>
-            </Popup>
-          </Marker>
-        )}
+          {/* 3. HISTORY MODE: EXACT SMALL BLUE GPS DOTS (NO FAKE LINES) */}
+          {isHistoryMode &&
+            selectedRider &&
+            historyDots.map((ping, idx) => {
+              const pingAny = ping as unknown as Record<string, unknown>;
+              const rawTime =
+                pingAny.recordedAt || pingAny.createdAt || pingAny.timestamp;
+              const formattedTime = rawTime
+                ? new Date(String(rawTime)).toLocaleTimeString()
+                : null;
 
-        {/* End Point Marker */}
-        {isHistoryMode && historyEndPoint && icons && (
-          <Marker
-            position={historyEndPoint}
-            icon={icons.createEndPointIcon(isRoundTripSameSpot)}
-            zIndexOffset={900}
-          >
-            <Popup>
-              <div className="p-1 text-xs font-bold text-slate-800">
-                🏁 Trip Ended / Latest Position
-              </div>
-            </Popup>
-          </Marker>
-        )}
+              return (
+                <CircleMarker
+                  key={String(
+                    pingAny.id || `${ping.latitude}-${ping.longitude}-${idx}`
+                  )}
+                  center={[ping.latitude, ping.longitude]}
+                  radius={4.5}
+                  pathOptions={{
+                    color: "#ffffff",
+                    weight: 1.5,
+                    fillColor: "#2563eb",
+                    fillOpacity: 0.92,
+                  }}
+                >
+                  <Popup>
+                    <div className="p-1 space-y-0.5 text-[11px]">
+                      <p className="font-black text-slate-900">
+                        GPS Point #{idx + 1}
+                      </p>
+                      {formattedTime && (
+                        <p className="font-semibold text-blue-600">
+                          {formattedTime}
+                        </p>
+                      )}
+                      <p className="font-mono text-[10px] text-slate-500">
+                        {ping.latitude.toFixed(6)}, {ping.longitude.toFixed(6)}
+                      </p>
+                    </div>
+                  </Popup>
+                </CircleMarker>
+              );
+            })}
 
-        {/* Deduplicated Stop Log Markers */}
-        {isHistoryMode &&
-          selectedRider &&
-          cleanedStopLogs.map((stop) => {
-            if (!icons) return null;
-            return (
+          {isHistoryMode && historyStartPoint && (
+            <Marker
+              position={historyStartPoint}
+              icon={icons.createStartPointIcon(isRoundTripSameSpot)}
+              zIndexOffset={800}
+            >
+              <Popup>
+                <div className="p-1 text-xs font-bold text-slate-800">
+                  🚀 Trip Started Here
+                </div>
+              </Popup>
+            </Marker>
+          )}
+
+          {isHistoryMode && historyEndPoint && (
+            <Marker
+              position={historyEndPoint}
+              icon={icons.createEndPointIcon(isRoundTripSameSpot)}
+              zIndexOffset={900}
+            >
+              <Popup>
+                <div className="p-1 text-xs font-bold text-slate-800">
+                  🏁 Trip Ended / Latest Position
+                </div>
+              </Popup>
+            </Marker>
+          )}
+
+          {isHistoryMode &&
+            selectedRider &&
+            cleanedStopLogs.map((stop) => (
               <Marker
                 key={stop.id}
                 position={[stop.latitude, stop.longitude]}
@@ -867,9 +775,9 @@ export const LiveTrackingMap = ({
                   </div>
                 </Popup>
               </Marker>
-            );
-          })}
-      </MapContainer>
+            ))}
+        </MapContainer>
+      )}
     </div>
   );
 };

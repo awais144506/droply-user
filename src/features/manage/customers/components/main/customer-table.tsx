@@ -74,7 +74,7 @@ export function CustomersTable({ customers, branchSettings }: CustomersTableProp
             onClick={handleDownloadPdf}
             disabled={customers.length === 0}
             title="Download filtered customers as B&W PDF"
-            className="h-11 px-3.5 bg-white hover:bg-slate-900 text-slate-800 hover:text-white border border-slate-200 hover:border-slate-900 rounded-xl flex items-center gap-2 text-xs font-bold shadow-xs transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className="h-11 px-3.5 bg-slate-600 hover:bg-slate-900 text-white border border-slate-200 hover:border-slate-900 rounded-xl flex items-center gap-2 text-xs font-bold shadow-xs transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <FileDown className="h-4 w-4 shrink-0" />
             <span className="hidden sm:inline">PDF</span>

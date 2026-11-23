@@ -33,8 +33,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { sendWhatsAppMessage } from "@/lib/utils/functions/whatsapp/customerWhatsApp";
-
-// 🔥 Updated Action Types (Replaced EDIT_ORDER with ADJUST_ORDER, added GATE_PASS)
+import { formatPhoneNumber } from "react-phone-number-input";
 export type OrderActionType =
   | "VIEW_DETAILS"
   | "ADJUST_ORDER"
@@ -177,7 +176,7 @@ export const getOrderColumns = ({
             {customer.phone && (
               <div className="flex items-center gap-1 text-[11px] text-slate-500 font-medium">
                 <Phone className="w-3 h-3 text-slate-400" />
-                <span>{customer.phone}</span>
+                <span>{formatPhoneNumber(customer.phone)}</span>
               </div>
             )}
             <div className="flex items-center gap-2 pt-0.5 flex-wrap">
