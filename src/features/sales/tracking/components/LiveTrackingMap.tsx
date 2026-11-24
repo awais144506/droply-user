@@ -15,7 +15,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Navigation, Clock, MapPin, AlertTriangle, Route } from "lucide-react";
+import { Navigation, Clock, AlertTriangle, Route } from "lucide-react";
 import {
   FleetRiderOverview,
   LiveRiderSocketLocation,
@@ -140,9 +140,9 @@ function calculateDistance(
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
+    Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const meters = Math.round(R * c);
 
@@ -204,9 +204,9 @@ export const LiveTrackingMap = ({
     : null;
   const selectedRiderCoords = selectedRiderLiveLoc
     ? getValidCoords(
-        selectedRiderLiveLoc.latitude,
-        selectedRiderLiveLoc.longitude
-      )
+      selectedRiderLiveLoc.latitude,
+      selectedRiderLiveLoc.longitude
+    )
     : null;
 
   // Clean historical GPS pings into exact dots (handles both number and string coords)
@@ -257,9 +257,9 @@ export const LiveTrackingMap = ({
   const historyEndPoint: [number, number] | null =
     historyDots.length > 0
       ? [
-          historyDots[historyDots.length - 1].latitude,
-          historyDots[historyDots.length - 1].longitude,
-        ]
+        historyDots[historyDots.length - 1].latitude,
+        historyDots[historyDots.length - 1].longitude,
+      ]
       : null;
 
   const focusLat = historyEndPoint
@@ -289,9 +289,9 @@ export const LiveTrackingMap = ({
 
   const onRouteCustomerCoords = onRouteOrder
     ? getValidCoords(
-        onRouteOrder.customer.latitude,
-        onRouteOrder.customer.longitude
-      )
+      onRouteOrder.customer.latitude,
+      onRouteOrder.customer.longitude
+    )
     : null;
 
   const roadRouteCoords = useRoadRoute(
@@ -398,15 +398,14 @@ export const LiveTrackingMap = ({
             <div style="display: flex; align-items: center; gap: 5px; background: #0f172a; color: white; font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 9999px; margin-bottom: 3px; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.25); border: 1px solid ${isOffline ? "#ef4444" : "transparent"};">
               <span style="width: 7px; height: 7px; border-radius: 50%; background: ${statusDotColor}; display: inline-block; flex-shrink: 0;"></span>
               <span>${name}</span>
-              ${isOffline ? `<span style="color: #fca5a5; font-size: 9px; font-weight: 900;">OFFLINE</span>` : isStopped ? "⚠️" : ""}
+              ${isOffline ? `<span style="color: #fca5a5; font-size: 9px; font-weight: 900;">NETWORK OFFLINE</span>` : isStopped ? "⚠️" : ""}
             </div>
             <div style="position: relative; width: 36px; height: 36px; border-radius: 50%; background: ${bgColor}; border: 3px solid ${borderColor}; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; font-size: 16px;">
               🛵
-              ${
-                isOffline
-                  ? `<span style="position: absolute; top: -3px; right: -3px; width: 11px; height: 11px; border-radius: 50%; background: #ef4444; border: 2px solid white;"></span>`
-                  : ""
-              }
+              ${isOffline
+            ? `<span style="position: absolute; top: -3px; right: -3px; width: 11px; height: 11px; border-radius: 50%; background: #ef4444; border: 2px solid white;"></span>`
+            : ""
+          }
             </div>
           </div>
         `,
@@ -627,16 +626,14 @@ export const LiveTrackingMap = ({
                           {rider.name}
                         </p>
                         <span
-                          className={`inline-flex items-center gap-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full ${
-                            offline
+                          className={`inline-flex items-center gap-1 text-[9px] font-black uppercase px-1.5 py-0.5 rounded-full ${offline
                               ? "bg-rose-100 text-rose-700"
                               : "bg-emerald-100 text-emerald-700"
-                          }`}
+                            }`}
                         >
                           <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              offline ? "bg-rose-600" : "bg-emerald-600"
-                            }`}
+                            className={`w-1.5 h-1.5 rounded-full ${offline ? "bg-rose-600" : "bg-emerald-600"
+                              }`}
                           />
                           {offline ? "Offline" : "Online"}
                         </span>
@@ -771,31 +768,34 @@ export const LiveTrackingMap = ({
             </Marker>
           )}
 
+          {/* Selected Rider Marker in History Mode */}
           {isHistoryMode &&
             selectedRider &&
-            cleanedStopLogs.map((stop) => (
+            (historyEndPoint || selectedRiderCoords) && (
               <Marker
-                key={stop.id}
-                position={[stop.latitude, stop.longitude]}
-                icon={icons.createStopLogIcon(stop.durationMinutes)}
-                zIndexOffset={1000}
+                position={(historyEndPoint || selectedRiderCoords)!}
+                icon={icons.createRiderIcon(
+                  selectedRider.name,
+                  true,
+                  selectedRiderLiveLoc?.isStopped ?? false,
+                  isRiderOffline(selectedRider, selectedRiderLiveLoc)
+                )}
+                zIndexOffset={1100}
               >
                 <Popup>
                   <div className="p-1 space-y-1">
-                    <div className="flex items-center gap-1 text-rose-600 font-black text-xs">
-                      <MapPin className="w-3.5 h-3.5" />
-                      Stopped for {stop.durationMinutes} mins
-                    </div>
-                    <p className="text-[11px] text-slate-600 font-semibold">
-                      From: {new Date(stop.startedAt).toLocaleTimeString()}
+                    <p className="font-black text-slate-900 text-xs">
+                      {selectedRider.name}
                     </p>
-                    <p className="text-[11px] text-slate-600 font-semibold">
-                      To: {new Date(stop.endedAt).toLocaleTimeString()}
+                    <p className="text-[11px] text-slate-500 font-semibold">
+                      {historyEndPoint
+                        ? "Latest position on selected date"
+                        : "Last known live position (no pings on this date)"}
                     </p>
                   </div>
                 </Popup>
               </Marker>
-            ))}
+            )}
         </MapContainer>
       )}
     </div>

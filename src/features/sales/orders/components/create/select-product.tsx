@@ -453,7 +453,7 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                                         <FormNumberStepper
                                                             label="Items Out"
                                                             name={`items.${index}.emptiesOut`}
-                                                            min={0}
+                                                            min={1}
                                                         />
                                                     </div>
                                                     <div className="relative">

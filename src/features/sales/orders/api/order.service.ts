@@ -1,10 +1,15 @@
-import { OrderResponse, ApiResponse } from "../types/order";
+import { OrderResponse, ApiResponse, OrderStatus } from "../types/order";
 import { apiClient } from "@/lib/api-client";
 import { OrderFilterParams } from "./use-order";
 import { OrderFormValues } from "../schema/create-order-schema";
-import { OrderStatus } from "../types/order";
 
 const API = '/order/user';
+
+export interface DeleteOrderResponse {
+    deleted: boolean;
+    orderId: string;
+    orderCode: string;
+}
 
 export const orderService = {
     createOrder: async (payload: OrderFormValues): Promise<OrderResponse> => {
@@ -14,6 +19,9 @@ export const orderService = {
         return await apiClient.put(`${API}/${id}`, payload);
     },
     cancelOrder: async (id: string): Promise<OrderResponse> => {
+        return await apiClient.patch(`${API}/${id}/cancel`);
+    },
+    deleteOrder: async (id: string): Promise<DeleteOrderResponse> => {
         return await apiClient.delete(`${API}/${id}`);
     },
     updateOrderStatus: async ({ id, status }: { id: string; status: OrderStatus }): Promise<OrderResponse> => {
