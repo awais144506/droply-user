@@ -16,7 +16,7 @@ import { useBranchSettings } from "@/features/admin/settings/api/use-branch-sett
 import { useRole } from "@/lib/hooks/use-role";
 import { generateGatePassPdf } from "@/lib/utils/functions/order/gatepass-pdf";
 import ConfirmActionDialog from "@/lib/utils/components/ConfirmDialog";
-import { useCancelOrder } from "../api/use-mutate-order";
+import { useCancelOrder, useDeleteOrder } from "../api/use-mutate-order";
 
 type Props = {
   data: ApiResponse | undefined;
@@ -29,7 +29,8 @@ const OrderTable = ({ data, isFetching = false, onPageChange }: Props) => {
   const router = useRouter();
   const { branchId } = useRole();
   const { data: branchData } = useBranchSettings(branchId);
-  const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder(); // 🔥 Initialize cancel mutation
+  const { mutate: cancelOrder, isPending: isCancelling } = useCancelOrder();
+  const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
 
   const [activeModal, setActiveModal] = useState<{
     type: OrderActionType | null;
@@ -47,28 +48,42 @@ const OrderTable = ({ data, isFetching = false, onPageChange }: Props) => {
     itemsPerPage: 20,
   };
 
-  const handleOrderAction = useCallback((type: OrderActionType, order: any) => {
-    if (type === "GATE_PASS") {
-      generateGatePassPdf(order, branchData);
-      return;
-    }
-    
-    if (type === "ADJUST_ORDER") {
-      const orderId = order.id || order.orderId;
-      router.push(`/sales/orders/${orderId}/adjust`);
-      return;
-    }
+  const handleOrderAction = useCallback(
+    (type: OrderActionType, order: any) => {
+      if (type === "GATE_PASS") {
+        generateGatePassPdf(order, branchData);
+        return;
+      }
 
-    setActiveModal({ type, order });
-  }, [branchData, router]);
+      if (type === "ADJUST_ORDER") {
+        const orderId = order.id || order.orderId;
+        router.push(`/sales/orders/${orderId}/adjust`);
+        return;
+      }
 
-  // 🔥 Handle confirmed cancellation
+      setActiveModal({ type, order });
+    },
+    [branchData, router]
+  );
+
   const handleConfirmCancel = () => {
     const orderToCancel = activeModal.order;
     if (!orderToCancel) return;
 
     const orderId = orderToCancel.id || orderToCancel.orderId;
     cancelOrder(orderId, {
+      onSuccess: () => {
+        setActiveModal({ type: null, order: null });
+      },
+    });
+  };
+
+  const handleConfirmDelete = () => {
+    const orderToDelete = activeModal.order;
+    if (!orderToDelete) return;
+
+    const orderId = orderToDelete.id || orderToDelete.orderId;
+    deleteOrder(orderId, {
       onSuccess: () => {
         setActiveModal({ type: null, order: null });
       },
@@ -128,6 +143,7 @@ const OrderTable = ({ data, isFetching = false, onPageChange }: Props) => {
         }}
       />
 
+      {/* Cancel Order Confirmation */}
       <ConfirmActionDialog
         isOpen={activeModal.type === "CANCEL_ORDER"}
         onClose={() => setActiveModal({ type: null, order: null })}
@@ -136,6 +152,18 @@ const OrderTable = ({ data, isFetching = false, onPageChange }: Props) => {
         title="Cancel Order"
         description={`Are you sure you want to cancel order #${activeModal.order?.orderCode || activeModal.order?.orderId}? This will safely restore stock and reverse related ledgers.`}
         confirmText="Yes, Cancel Order"
+        confirmButtonVariant="destructive"
+      />
+
+      {/* Permanent Delete Confirmation (Cancelled Orders Only) */}
+      <ConfirmActionDialog
+        isOpen={activeModal.type === "DELETE_ORDER"}
+        onClose={() => setActiveModal({ type: null, order: null })}
+        onConfirm={handleConfirmDelete}
+        isLoading={isDeleting}
+        title="Permanently Delete Order"
+        description={`Are you sure you want to permanently delete cancelled order #${activeModal.order?.orderCode || activeModal.order?.orderId}? This action cannot be undone.`}
+        confirmText="Yes, Delete Permanently"
         confirmButtonVariant="destructive"
       />
     </div>

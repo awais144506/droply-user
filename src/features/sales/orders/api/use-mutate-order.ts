@@ -117,3 +117,23 @@ export const useCancelOrder = () => {
         },
     });
 };
+
+export const useDeleteOrder = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => orderService.deleteOrder(id),
+        onSuccess: () => {
+            toast.success("Cancelled order deleted permanently!");
+            queryClient.invalidateQueries({
+                queryKey: orderKeys.all,
+            });
+            queryClient.invalidateQueries({
+                queryKey: customerKeys.all,
+            });
+        },
+        onError: (error: Error) => {
+            toast.error(error.message || "Failed to delete order.");
+        },
+    });
+};

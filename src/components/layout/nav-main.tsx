@@ -11,8 +11,9 @@ import { useCustomerRequests } from "@/features/sales/requests/api/use-customerR
 
 export function NavMain() {
   const pathname = usePathname();
-  const { isOwner, userTier, branchId } = useRole(); 
+  const { isOwner, userTier, branchId, userEmail } = useRole();
   const isDashboardActive = pathname === "/app";
+  const isDemoAdmin = userEmail?.toLowerCase() === "droplyadmin@gmail.com";
 
   const userRole: UserRole = isOwner ? "OWNER" : "MANAGER";
   const currentTier = (userTier || "SILVER").toUpperCase() as SubscriptionTier;
@@ -52,9 +53,9 @@ export function NavMain() {
         const visibleItems = group.items.filter(
           (item) =>
             item.allowedRoles.includes(userRole) &&
-            item.allowedTiers.includes(currentTier)
+            item.allowedTiers.includes(currentTier) &&
+            !(isDemoAdmin && item.url === "/admin/staff")
         );
-
         if (visibleItems.length === 0) return null;
         const isGroupActive = visibleItems.some((item) => {
           const basePath = item.url.split('?')[0];
@@ -84,8 +85,8 @@ export function NavMain() {
               {/* Group Items */}
               <CollapsibleContent className="space-y-1 mt-1">
                 {visibleItems.map((item) => {
-                  
-                  {/* 🔥 Extract base path to determine if the specific item is active */}
+
+                  {/* 🔥 Extract base path to determine if the specific item is active */ }
                   const basePath = item.url.split('?')[0];
                   const isActive = pathname === basePath || pathname.startsWith(`${basePath}/`);
                   const Icon = item.icon;
@@ -107,7 +108,7 @@ export function NavMain() {
 
                       {/* Right-side container for Badge & Dev Dot */}
                       <div className="ml-auto flex items-center gap-2">
-                        
+
                         {/* 🔥 Ensure the badge check also uses the base path */}
                         {basePath === "/sales/requests" && pendingCount > 0 && (
                           <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white shadow-sm animate-in fade-in zoom-in duration-300">
