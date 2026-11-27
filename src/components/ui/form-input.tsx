@@ -53,18 +53,21 @@ export function FormInput({
     const inputId = useId();
 
     return (
-        <div className="space-y-1.5 w-full">
+        <div className="space-y-1.5 w-full min-w-0">
             {label && (
-                <label htmlFor={inputId} className={`flex items-center text-xs font-bold ${lableTextColor} uppercase tracking-wide cursor-pointer`}>
-                    {Icon && <Icon className={`h-3.5 w-3.5 mr-1.5 ${iconColor}`} />}
-                    {label}
-                    {required && <span className="text-rose-500 ml-1">*</span>}
+                <label
+                    htmlFor={inputId}
+                    className={`flex items-center text-xs font-bold ${lableTextColor} uppercase tracking-wide cursor-pointer min-w-0`}
+                >
+                    {Icon && <Icon className={`h-3.5 w-3.5 mr-1.5 shrink-0 ${iconColor}`} />}
+                    <span className="truncate">{label}</span>
+                    {required && <span className="text-rose-500 ml-1 shrink-0">*</span>}
                 </label>
             )}
 
-            <div className="relative">
+            <div className="relative w-full min-w-0">
                 {prefix && type !== "date" && (
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none select-none">
                         {prefix}
                     </span>
                 )}
@@ -75,22 +78,33 @@ export function FormInput({
                         control={control}
                         render={({ field }) => (
                             <Popover>
-                                <PopoverTrigger>
+                                <PopoverTrigger className="w-full">
                                     <div
                                         id={inputId}
                                         className={cn(
-                                            "w-full flex items-center px-4 h-10 rounded-xl border text-sm font-normal justify-start shadow-sm transition-colors",
+                                            "w-full min-w-0 flex items-center px-3 sm:px-4 h-10 rounded-xl border text-sm font-normal justify-start shadow-sm transition-colors",
                                             !field.value && "text-slate-500",
-                                            disabled ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed pointer-events-none" : "cursor-pointer",
-                                            error ? "border-rose-300 bg-rose-50/20 text-rose-900" : "bg-slate-50 border-slate-200 hover:bg-white text-slate-900",
+                                            disabled
+                                                ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed pointer-events-none"
+                                                : "cursor-pointer",
+                                            error
+                                                ? "border-rose-300 bg-rose-50/20 text-rose-900"
+                                                : "bg-slate-50 border-slate-200 hover:bg-white text-slate-900",
                                             className
                                         )}
                                     >
-                                        <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
-                                        {field.value ? format(new Date(field.value), "PPP") : <span>{placeholder || "Pick a date"}</span>}
+                                        <CalendarIcon className="mr-2 h-4 w-4 opacity-50 shrink-0" />
+                                        <span className="truncate">
+                                            {field.value
+                                                ? format(new Date(field.value), "PPP")
+                                                : placeholder || "Pick a date"}
+                                        </span>
                                     </div>
                                 </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0" align="start">
+                                <PopoverContent
+                                    className="w-auto max-w-[calc(100vw-2rem)] p-0"
+                                    align="start"
+                                >
                                     <Calendar
                                         mode="single"
                                         captionLayout="dropdown"
@@ -124,9 +138,9 @@ export function FormInput({
                         max={max}
                         {...register(name)}
                         aria-invalid={!!error}
-                        className={`w-full h-10 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-all shadow-sm
-                            ${prefix ? "pl-8" : "px-3"} 
-                            ${suffix ? "pr-8" : "px-3"} 
+                        className={`w-full min-w-0 h-10 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-all shadow-sm
+                            ${prefix ? "pl-8" : "pl-3"} 
+                            ${suffix ? "pr-8" : "pr-3"} 
                             ${disabled
                                 ? "bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed"
                                 : error
@@ -137,7 +151,7 @@ export function FormInput({
                 )}
 
                 {suffix && type !== "date" && (
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase">
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase pointer-events-none select-none">
                         {suffix}
                     </span>
                 )}

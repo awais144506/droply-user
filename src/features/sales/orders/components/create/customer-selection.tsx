@@ -27,8 +27,8 @@ const CustomerSelection = ({ branchId, disabled }: Props) => {
 
     return (
         <section>
-            <div className="flex items-center gap-2 mb-4">
-                <User className="h-5 w-5 text-slate-400" />
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                <User className="h-5 w-5 text-slate-400 shrink-0" />
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
                     Customer & Ledger
                 </h3>
@@ -46,13 +46,13 @@ const CustomerSelection = ({ branchId, disabled }: Props) => {
                 addButtonHref={`/manage/customers/create-customer`}
                 isClearable={true}
                 formatOptionLabel={(opt) => (
-                    <div className="flex flex-col w-full pr-1 py-0.5">
-                        <div className="flex items-center justify-between w-full">
-                            <span className="font-bold truncate mr-2">
+                    <div className="flex flex-col w-full min-w-0 pr-1 py-0.5">
+                        <div className="flex items-center justify-between gap-2 w-full min-w-0">
+                            <span className="font-bold truncate min-w-0">
                                 {opt.label}
                                 <span className="flex items-center gap-1 mt-0.5 truncate">
                                     <Phone className="h-2.5 w-2.5 shrink-0" />
-                                    <span className="text-xs opacity-70 px-1.5 py-0.5">
+                                    <span className="text-xs opacity-70 px-1.5 py-0.5 truncate">
                                         {formatPhoneNumber(opt.phone)}
                                     </span>
                                 </span>
@@ -62,9 +62,9 @@ const CustomerSelection = ({ branchId, disabled }: Props) => {
                             </span>
                         </div>
                         {opt.address && opt.address !== "No Address Provided" && (
-                            <span className="text-[10px] opacity-70 font-medium flex items-center gap-1 mt-0.5 truncate">
+                            <span className="text-[10px] opacity-70 font-medium flex items-center gap-1 mt-0.5 truncate min-w-0">
                                 <MapPin className="h-2.5 w-2.5 shrink-0" />
-                                {opt.address}
+                                <span className="truncate">{opt.address}</span>
                             </span>
                         )}
                     </div>
@@ -73,62 +73,64 @@ const CustomerSelection = ({ branchId, disabled }: Props) => {
 
             {/* The Context Banner as a Column Card */}
             {selectedCustomerLight && (
-                <div className="mt-4 bg-white border border-slate-200 rounded-2xl p-4 flex flex-col gap-4 shadow-sm transition-all animate-in fade-in slide-in-from-top-2">
+                <div className="mt-4 bg-white border border-slate-200 rounded-2xl p-3.5 sm:p-4 flex flex-col gap-3.5 sm:gap-4 shadow-sm transition-all animate-in fade-in slide-in-from-top-2">
 
                     {/* Top Section: Identity, Address, and Last Visit */}
-                    <div className="flex justify-between items-start border-b border-slate-100 pb-3">
-                        <div>
-                            <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                                {selectedCustomerLight.label}
-                                {isDetailLoading && <Loader2 className="h-3 w-3 animate-spin text-slate-400" />}
+                    <div className="flex justify-between items-start gap-2.5 border-b border-slate-100 pb-3">
+                        <div className="min-w-0 flex-1">
+                            <h4 className="text-sm font-extrabold text-slate-900 flex items-center gap-2 min-w-0">
+                                <span className="truncate">{selectedCustomerLight.label}</span>
+                                {isDetailLoading && <Loader2 className="h-3 w-3 animate-spin text-slate-400 shrink-0" />}
                             </h4>
-                            <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5">
-                                <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                                {selectedCustomerLight.address}
+                            <p className="text-xs text-slate-500 mt-1 flex items-start gap-1.5 min-w-0">
+                                <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
+                                <span className="wrap-break-word">{selectedCustomerLight.address}</span>
                             </p>
                             {selectedCustomerLight.zoneName && (
-                                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 pl-5">
+                                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1.5 pl-5 truncate">
                                     Zone: {selectedCustomerLight.zoneName}
                                 </p>
                             )}
 
                             {detailedCustomer?.lastVisitDate && (
-                                <p className="text-[10px] font-semibold text-emerald-600/80 mt-2 flex items-center gap-1.5">
-                                    <CalendarClock className="h-3.5 w-3.5" />
-                                    Last Order: {new Intl.DateTimeFormat('en-PK', {
-                                        month: 'short',
-                                        day: 'numeric',
-                                        year: 'numeric',
-                                        hour: 'numeric',
-                                        minute: 'numeric',
-                                        hour12: true
-                                    }).format(new Date(detailedCustomer.lastVisitDate))}
+                                <p className="text-[10px] font-semibold text-emerald-600/80 mt-2 flex items-start sm:items-center gap-1.5">
+                                    <CalendarClock className="h-3.5 w-3.5 shrink-0 mt-0.5 sm:mt-0" />
+                                    <span>
+                                        Last Order: {new Intl.DateTimeFormat('en-PK', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                            hour: 'numeric',
+                                            minute: 'numeric',
+                                            hour12: true
+                                        }).format(new Date(detailedCustomer.lastVisitDate))}
+                                    </span>
                                 </p>
                             )}
                         </div>
-                        <span className="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-lg shrink-0">
+                        <span className="px-2 sm:px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider rounded-lg shrink-0">
                             {selectedCustomerLight.category}
                         </span>
                     </div>
 
                     {/* Bottom Section: Dual Ledger Stats */}
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {/* Financial Ledger (Khata) */}
-                        <div className="bg-rose-50/50 border border-rose-100 rounded-xl p-3 flex flex-col">
+                        <div className="bg-rose-50/50 border border-rose-100 rounded-xl p-3 flex flex-col min-w-0">
                             <span className="text-[10px] font-bold text-rose-500 uppercase tracking-wide mb-1">
                                 Payable Ledger
                             </span>
-                            <span className="text-lg font-black text-rose-700">
+                            <span className="text-base sm:text-lg font-black text-rose-700 truncate">
                                 Rs {Number(selectedCustomerLight.customerCredit || 0).toLocaleString()}
                             </span>
                         </div>
 
                         {/* Asset Ledger (Returnables) */}
-                        <div className="bg-sky-50/50 border border-sky-100 rounded-xl p-3 flex flex-col">
+                        <div className="bg-sky-50/50 border border-sky-100 rounded-xl p-3 flex flex-col min-w-0">
                             <span className="text-[10px] font-bold text-sky-500 uppercase tracking-wide mb-1">
                                 Total Assets Held
                             </span>
-                            <span className="text-lg font-black text-sky-700">
+                            <span className="text-base sm:text-lg font-black text-sky-700">
                                 {selectedCustomerLight.assetsHeld} <span className="text-xs font-bold text-sky-600/70">items</span>
                             </span>
 
@@ -137,8 +139,8 @@ const CustomerSelection = ({ branchId, disabled }: Props) => {
                                 <div className="mt-2 pt-2 border-t border-sky-200/60 flex flex-col gap-1">
                                     <span className="text-[9px] font-bold text-sky-600/70 uppercase tracking-wider mb-0.5">Asset Breakdown</span>
                                     {detailedCustomer.returnables.map((item: any) => (
-                                        <div key={item.id} className="flex items-center justify-between text-xs font-medium text-sky-900 bg-white/60 px-2 py-1 rounded-md">
-                                            <span className="flex items-center gap-1.5 truncate">
+                                        <div key={item.id} className="flex items-center justify-between gap-2 text-xs font-medium text-sky-900 bg-white/60 px-2 py-1 rounded-md min-w-0">
+                                            <span className="flex items-center gap-1.5 truncate min-w-0">
                                                 <Package className="h-3 w-3 text-sky-500 shrink-0" />
                                                 <span className="truncate">{item.productName || "Unknown Asset"}</span>
                                             </span>

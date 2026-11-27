@@ -25,8 +25,6 @@ export default function CustomersPage() {
   const logs = data?.logs || [];
   const requests = data?.newCustomerRequest || [];
 
-  console.log(branchData)
-
   if (isLoading) return <Loading text="Loading Customers..." />;
   if (isError) return <ErrorBoundary error={error.message} />;
 
