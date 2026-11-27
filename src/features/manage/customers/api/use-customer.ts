@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, keepPreviousData } from "@tanstack/react-query";
 import { customerKeys } from "./customer-keys";
 import { customerApi } from "./customer.service";
 import { formatCurrency } from "@/lib/utils/functions/setFormat";
@@ -68,7 +68,7 @@ export function useCustomers(
         // 2. Schedule Filter (Everyday, Individual Days, On-Demand)
         if (scheduleFilter && scheduleFilter !== "all") {
           const scheduleType = (customer.deliveryScheduleType || "").toUpperCase();
-          const customerDays = customer.deliveryDays|| []; // Adjust based on your Prisma schema field name
+          const customerDays = customer.deliveryDays || []; // Adjust based on your Prisma schema field name
 
           if (scheduleFilter === "EVERYDAY") {
             if (scheduleType !== "EVERYDAY") continue;
@@ -103,7 +103,9 @@ export function useCustomers(
             adjustedSearchDigits.length > 0 &&
             phoneDigits.includes(adjustedSearchDigits);
 
-          if (!matchesName && !matchesCode && !matchesPhone) continue;
+          const addressMatch = customer.address?.toLocaleLowerCase().includes(cleanSearch);
+
+          if (!matchesName && !matchesCode && !matchesPhone && !addressMatch) continue;
         }
 
         filteredCustomers.push(customer);
@@ -130,6 +132,7 @@ export function useCustomers(
     select: selectCustomers,
     staleTime: 5 * 60 * 1000,
     enabled: Boolean(branchId),
+    placeholderData: keepPreviousData,
   });
 }
 

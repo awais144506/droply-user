@@ -51,7 +51,7 @@ export function CustomersTable({ customers, branchSettings }: CustomersTableProp
   return (
     <div>
       <DataTableFilterBar
-        searchPlaceholder="Search by customer name / phone..."
+        searchPlaceholder="Search by code / name / phone / address..."
         searchParamName="search"
         tabParamName="debt"
         tabs={FilterTabs}

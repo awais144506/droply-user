@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: 'Droply Customer',
     short_name: 'Droply',
-    description: 'Place your water and gas orders instantly',
+    description: 'Place your orders instantly',
     start_url: '/order/',
     display: 'standalone',
     background_color: '#0f172a',

@@ -87,3 +87,62 @@ Thank you for choosing *${branchName}*!`;
 
     sendWhatsAppMessage(customer.phone, message)
 }
+
+export const sendRecoveryReminderMessage = (
+    customer: CustomerDetails,
+    settings?: BranchSettingData
+) => {
+    if (!customer?.phone) return;
+
+    const branchName = (settings?.name || "Droply").trim();
+    const customerName = (customer.name || "Customer").trim();
+    const credit = Number(customer.customerCredit || 0);
+    const returnables = Number(customer.returnablesLength || 0);
+
+    if (credit <= 0 && returnables <= 0) return;
+
+    const pendingLines: string[] = [];
+    if (credit > 0) {
+        pendingLines.push(`• *Pending Amount*: Rs. ${credit.toLocaleString()}`);
+    }
+    if (returnables > 0) {
+        pendingLines.push(`• *Pending Returnable Items*: ${returnables}`);
+    }
+
+    const urduLines: string[] = [];
+    if (credit > 0) {
+        urduLines.push(`• *بقایا رقم*: Rs. ${credit.toLocaleString()}`);
+    }
+    if (returnables > 0) {
+        urduLines.push(`• *واپس کرنے والے آئٹمز*: ${returnables}`);
+    }
+
+    const branchPhone = settings?.phone
+        ? formatPhoneNumber(settings.phone) || settings.phone
+        : null;
+    const branchAddress = settings?.address?.trim();
+
+    const message = [
+        `Assalam-o-Alaikum *${customerName}*,`,
+        `This is a gentle reminder from *${branchName}* regarding your pending account balance:`,
+        ``,
+        ...pendingLines,
+        ``,
+        `Kindly arrange payment / return at your earliest convenience. Thank you!`,
+        ``,
+        `━━━━━━━━━━━━━━`,
+        `السلام علیکم *${customerName}*،`,
+        `*${branchName}* کی طرف سے آپ کے بقایا جات کی یاد دہانی:`,
+        ``,
+        ...urduLines,
+        ``,
+        `براہِ کرم جلد ادائیگی / واپسی یقینی بنائیں۔ شکریہ!`,
+        ``,
+        `━━━━━━━━━━━━━━`,
+        `*${branchName}*`,
+        ...(branchPhone ? [`• *Contact*: ${branchPhone}`] : []),
+        ...(branchAddress ? [`• *Address*: ${branchAddress}`] : []),
+    ].join("\n");
+
+    sendWhatsAppMessage(customer.phone, message);
+};
