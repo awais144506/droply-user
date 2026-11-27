@@ -7,7 +7,7 @@ export function ExpenseStats({ totalExpenses }: { totalExpenses: number }) {
 
 
   return (
-    <div className="grid grid-cols-3">
+    <div className="grid grid-cols-1 lg:grid-cols-3">
 
       <PageStatsCard
         title="Total Expenses"

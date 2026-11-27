@@ -1,8 +1,8 @@
 import {
     Truck,
     UserPlus,
-    Zap,
     ReceiptText,
+    ListChecksIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -13,10 +13,10 @@ const NavigationHeader = () => {
         <div> <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
             <div className="flex items-center gap-3">
                 <div className="h-11 w-11 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-xs">
-                    <Zap className="h-5 w-5" />
+                    <ListChecksIcon className="h-5 w-5" />
                 </div>
                 <div>
-                    <h1 className="text-lg font-bold text-slate-900">Over-the-Counter Quick Sale</h1>
+                    <h1 className="text-lg font-bold text-slate-900">Quick Sale</h1>
                     <p className="text-xs text-slate-500">
                         Select products, add custom items, and generate instant walk-in orders
                     </p>

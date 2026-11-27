@@ -101,7 +101,6 @@ export function FormCoordinatesInput({
         }
     };
 
-    // Fallback in case browser blocks navigator.clipboard and user presses Ctrl+V on the locked input
     const handleManualPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
         e.preventDefault();
         if (disabled) return;
@@ -117,23 +116,23 @@ export function FormCoordinatesInput({
 
     return (
         <div
-            className={`rounded-2xl border border-slate-200 bg-slate-50/70 p-3.5 space-y-3 ${className}`}
+            className={`rounded-2xl border border-slate-200 bg-slate-50/70 p-3 sm:p-3.5 space-y-3 ${className}`}
         >
             {/* Header Row: Label + Paste Action Button */}
-            <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center text-xs font-bold text-slate-700 uppercase tracking-wide">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div className="flex items-center text-xs font-bold text-slate-700 uppercase tracking-wide min-w-0">
                     <MapPin className="h-3.5 w-3.5 mr-1.5 text-sky-600 shrink-0" />
-                    {label}
-                    {required && <span className="text-rose-500 ml-1">*</span>}
+                    <span className="truncate">{label}</span>
+                    {required && <span className="text-rose-500 ml-1 shrink-0">*</span>}
                 </div>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 w-full sm:w-auto">
                     {hasValues && !disabled && (
                         <button
                             type="button"
                             onClick={handleClear}
                             title="Clear coordinates"
-                            className="h-7 px-2 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:border-rose-200 text-slate-500 hover:text-rose-600 text-[11px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                            className="h-8 sm:h-7 px-2.5 sm:px-2 rounded-lg border border-slate-200 bg-white hover:bg-rose-50 hover:border-rose-200 text-slate-500 hover:text-rose-600 text-[11px] font-bold flex items-center justify-center gap-1 transition-colors cursor-pointer shrink-0"
                         >
                             <X className="h-3 w-3" /> Clear
                         </button>
@@ -143,18 +142,18 @@ export function FormCoordinatesInput({
                         type="button"
                         disabled={disabled}
                         onClick={handlePasteClick}
-                        className="h-7 px-3 rounded-lg bg-sky-600 hover:bg-sky-700 active:scale-95 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 sm:flex-none h-8 sm:h-7 px-3 rounded-lg bg-sky-600 hover:bg-sky-700 active:scale-95 text-white text-[11px] font-bold flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <ClipboardPaste className="h-3.5 w-3.5" />
-                        Paste Lat & Lng
+                        <ClipboardPaste className="h-3.5 w-3.5 shrink-0" />
+                        <span>Paste Lat &amp; Lng</span>
                     </button>
                 </div>
             </div>
 
-            {/* Two Locked Inputs (Latitude & Longitude) */}
-            <div className="grid grid-cols-2 gap-3">
+            {/* Two Locked Inputs (Stacked on Mobile, Side-by-Side on sm+) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3">
                 {/* Locked Latitude Input */}
-                <div className="space-y-1">
+                <div className="space-y-1 min-w-0">
                     <label
                         htmlFor={latId}
                         className="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider"
@@ -172,18 +171,19 @@ export function FormCoordinatesInput({
                         placeholder="Locked — click Paste"
                         {...register(latName)}
                         aria-invalid={!!latError}
-                        className={`w-full h-10 px-3 rounded-xl border text-xs font-mono font-semibold select-all focus:outline-none transition-all ${latError
+                        className={`w-full h-10 px-3 rounded-xl border text-xs font-mono font-semibold select-all focus:outline-none transition-all ${
+                            latError
                                 ? "border-rose-300 bg-rose-50/30 text-rose-900"
                                 : hasValues
                                     ? "bg-white border-emerald-300 text-slate-900 shadow-xs"
                                     : "bg-slate-100/90 border-slate-200 text-slate-500 cursor-not-allowed"
-                            }`}
+                        }`}
                     />
                     {latError && <p className="text-[10px] text-rose-500">{latError}</p>}
                 </div>
 
                 {/* Locked Longitude Input */}
-                <div className="space-y-1">
+                <div className="space-y-1 min-w-0">
                     <label
                         htmlFor={lngId}
                         className="flex items-center justify-between text-[10px] font-bold text-slate-500 uppercase tracking-wider"
@@ -201,19 +201,20 @@ export function FormCoordinatesInput({
                         placeholder="Locked — click Paste"
                         {...register(lngName)}
                         aria-invalid={!!lngError}
-                        className={`w-full h-10 px-3 rounded-xl border text-xs font-mono font-semibold select-all focus:outline-none transition-all ${lngError
+                        className={`w-full h-10 px-3 rounded-xl border text-xs font-mono font-semibold select-all focus:outline-none transition-all ${
+                            lngError
                                 ? "border-rose-300 bg-rose-50/30 text-rose-900"
                                 : hasValues
                                     ? "bg-white border-emerald-300 text-slate-900 shadow-xs"
                                     : "bg-slate-100/90 border-slate-200 text-slate-500 cursor-not-allowed"
-                            }`}
+                        }`}
                     />
                     {lngError && <p className="text-[10px] text-rose-500">{lngError}</p>}
                 </div>
             </div>
 
             {/* Step-by-Step Helper Note */}
-            <div className="flex items-center justify-between gap-2 pt-0.5 text-[10px] text-slate-500">
+            <div className="pt-0.5 text-[11px] sm:text-[10px] text-slate-500">
                 <p className="leading-relaxed">
                     <span className="font-bold text-slate-700">How to copy:</span> Go to{" "}
                     <a
@@ -224,11 +225,11 @@ export function FormCoordinatesInput({
                     >
                         Google Maps <ExternalLink className="h-2.5 w-2.5" />
                     </a>{" "}
-                    &rarr; <b>Right-click</b> on pin location &rarr; Click the{" "}
+                    &rarr; <b>Right-click</b> (or long-press on mobile) on pin location &rarr; Tap the{" "}
                     <span className="font-mono bg-slate-200/70 text-slate-700 px-1 py-0.5 rounded">
                         lat, lng
                     </span>{" "}
-                    numbers at the top of the menu &rarr; Click <b>Paste Lat &amp; Lng</b>.
+                    numbers &rarr; Tap <b>Paste Lat &amp; Lng</b>.
                 </p>
             </div>
         </div>

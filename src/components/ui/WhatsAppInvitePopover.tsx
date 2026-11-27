@@ -68,7 +68,7 @@ export function WhatsAppInvitePopover({
                 title="Send Customer Details Request via WhatsApp"
             >
                 <FaWhatsapp className="h-4 w-4 text-emerald-600 shrink-0" />
-                <span className="hidden sm:inline">WhatsApp Request</span>
+                <span>WhatsApp Request</span>
             </PopoverTrigger>
 
             <PopoverContent

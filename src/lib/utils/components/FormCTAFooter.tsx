@@ -30,8 +30,8 @@ export default function FormCTAFooter({
     cancelVarient = "outline",
 }: Props) {
     return (
-        <div className="flex items-center justify-between gap-3 border-t border-slate-200 pt-6 mt-8">
-            <div>
+        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 border-t border-slate-200 pt-4 sm:pt-6 mt-6 sm:mt-8 min-w-0">
+            <div className="min-w-0">
                 {setStep && (
                     <Button
                         type="button"
@@ -43,11 +43,11 @@ export default function FormCTAFooter({
                 )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 min-w-0">
                 {isCancel && (
                     <Link
                         href={href}
-                        className={cn(buttonVariants({ variant: cancelVarient  }))}
+                        className={cn(buttonVariants({ variant: cancelVarient }))}
                     >
                         Cancel
                     </Link>
@@ -57,11 +57,14 @@ export default function FormCTAFooter({
                     type="submit"
                     variant={varient}
                     disabled={isPending || (!isDirty && isEditMode)}
+                    className="max-w-full"
                 >
                     {isPending ? (
                         <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin shrink-0" />
-                            {isEditMode ? "Saving Changes..." : "Creating Record..."}
+                            <span className="truncate">
+                                {isEditMode ? "Saving Changes..." : "Creating Record..."}
+                            </span>
                         </>
                     ) : (
                         <>
@@ -70,7 +73,9 @@ export default function FormCTAFooter({
                             ) : (
                                 ActionIcon && <ActionIcon className="mr-2 h-4 w-4 shrink-0" />
                             )}
-                            {isEditMode ? "Save Changes" : ctaText}
+                            <span className="truncate">
+                                {isEditMode ? "Save Changes" : ctaText}
+                            </span>
                         </>
                     )}
                 </Button>

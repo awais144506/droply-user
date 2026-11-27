@@ -14,6 +14,12 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Droply",
   description: "Multi-tenant route delivery & inventory control management engine.",
+  manifest: "/manifest-admin.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Droply",
+  },
 };
 
 export const viewport = {

@@ -57,7 +57,7 @@ export default function AdminTasksPage() {
   return (
     <div className="space-y-6 p-6 relative">
       <MainPageHeader
-        heading="Task Delegation"
+        heading="Tasks"
         description="Assign and track daily operations for managers and riders."
         icon={CheckSquare}
         btnText="New Task"

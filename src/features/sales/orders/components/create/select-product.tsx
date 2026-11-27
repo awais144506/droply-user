@@ -238,8 +238,8 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
 
     return (
         <section>
-            <div className="flex items-center gap-2 mb-4">
-                <Package className="h-5 w-5 text-slate-400" />
+            <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                <Package className="h-5 w-5 text-slate-400 shrink-0" />
                 <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
                     Select Products
                 </h3>
@@ -339,15 +339,15 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                     return (
                         <div
                             key={field.id}
-                            className={`p-4 border rounded-2xl transition-colors space-y-4 ${
+                            className={`p-3 sm:p-4 border rounded-2xl transition-colors space-y-4 ${
                                 isOutOfStock
                                     ? "bg-rose-50/30 border-rose-200"
                                     : "bg-white border-slate-200/80 shadow-xs"
                             }`}
                         >
-                            <div className="grid grid-cols-12 gap-4 items-start">
+                            <div className="grid grid-cols-12 gap-3 sm:gap-4 items-start">
                                 {/* Product Selection */}
-                                <div className="col-span-12 sm:col-span-4 relative">
+                                <div className="col-span-12 lg:col-span-4 lg:order-1 min-w-0">
                                     <FormSelect
                                         name={`items.${index}.productId`}
                                         label="Product"
@@ -359,8 +359,8 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                         currentIndex={index}
                                         isClearable={true}
                                         formatOptionLabel={(opt: any) => (
-                                            <div className="flex items-center justify-between w-full pr-1 py-0.5">
-                                                <div className="flex flex-col truncate mr-2">
+                                            <div className="flex items-center justify-between w-full min-w-0 pr-1 py-0.5">
+                                                <div className="flex flex-col truncate mr-2 min-w-0">
                                                     <span className="text-sm font-bold truncate">
                                                         {opt.name}
                                                     </span>
@@ -368,8 +368,8 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                                         <span className="text-[10px] font-bold text-emerald-600">
                                                             Rs {opt.price}
                                                         </span>
-                                                        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
-                                                            • {opt.category}
+                                                        <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider truncate">
+                                                            - {opt.category}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -388,7 +388,7 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                     />
                                     {selectedProductDetails && (
                                         <span
-                                            className={`absolute -bottom-5 left-1 text-[11px] font-bold flex items-center gap-1 ${
+                                            className={`mt-1.5 pl-1 text-[11px] font-bold flex items-center gap-1 ${
                                                 isOutOfStock
                                                     ? "text-rose-600"
                                                     : remainingPaidStock <=
@@ -397,7 +397,7 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                                     : "text-emerald-600"
                                             }`}
                                         >
-                                            {isOutOfStock && <AlertCircle className="h-3 w-3" />}
+                                            {isOutOfStock && <AlertCircle className="h-3 w-3 shrink-0" />}
                                             {isOutOfStock
                                                 ? "Stock Exceeded!"
                                                 : `Stock Left: ${remainingPaidStock} ( ${scale} )`}
@@ -406,7 +406,7 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                 </div>
 
                                 {/* Paid Qty */}
-                                <div className="col-span-6 sm:col-span-2">
+                                <div className="col-span-6 lg:col-span-2 lg:order-2">
                                     <FormNumberStepper
                                         label="Paid Qty"
                                         name={`items.${index}.paidQty`}
@@ -415,68 +415,8 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                     />
                                 </div>
 
-                                {/* Container Asset & Dual Empties Out / Empties In */}
-                                <div className="col-span-12 sm:col-span-4 space-y-3">
-                                    {isOutright && (
-                                        <div className="p-3 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-3">
-                                            <FormSelect
-                                                name={`items.${index}.returnableProductId`}
-                                                label="Exchange Items"
-                                                isSearchable={true}
-                                                options={returnableProductOptions}
-                                                excludeFromList={watchedItems}
-                                                excludeKey="returnableProductId"
-                                                currentIndex={index}
-                                                placeholder="Select empty shell..."
-                                                isClearable={true}
-                                                formatOptionLabel={(opt: any) => (
-                                                    <div className="flex items-center justify-between w-full pr-1 py-0.5">
-                                                        <span className="text-xs font-bold truncate mr-2">
-                                                            {opt.name}
-                                                        </span>
-                                                        <span className="shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-purple-100 text-purple-700">
-                                                            Deposit: Rs {opt.securityDeposit}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            />
-
-                                            {initialData && Boolean(selectedReturnableId) && (
-                                                <div className="text-[10px] text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200 leading-tight font-medium">
-                                                    <strong>Adjustment Note:</strong> Empties Out/In reflect the original transaction. Changing these will re-sync the customer&apos;s held container balance.
-                                                </div>
-                                            )}
-
-                                            { Boolean(selectedReturnableId) && (
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    <div className="relative">
-                                                        <FormNumberStepper
-                                                            label="Items Out"
-                                                            name={`items.${index}.emptiesOut`}
-                                                            min={1}
-                                                        />
-                                                    </div>
-                                                    <div className="relative">
-                                                        <FormNumberStepper
-                                                            label="Items In"
-                                                            name={`items.${index}.emptiesIn`}
-                                                            min={0}
-                                                            max={maxCustomerEmpties}
-                                                        />
-                                                        {selectedCustomerId && selectedReturnableId && (
-                                                            <span className="absolute -bottom-4 left-0 w-full text-center text-[9px] font-bold text-slate-500">
-                                                                Max Held: {maxCustomerEmpties}
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-
                                 {/* FOC Switch */}
-                                <div className="col-span-4 sm:col-span-1 flex flex-col items-center justify-center pt-2">
+                                <div className="col-span-4 lg:col-span-1 lg:order-4 flex flex-col items-center justify-center pt-2">
                                     <span className="text-xs font-bold uppercase tracking-wide mb-2">
                                         FOC
                                     </span>
@@ -496,7 +436,7 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                 </div>
 
                                 {/* Remove Row */}
-                                <div className="col-span-2 sm:col-span-1 flex justify-end pt-2">
+                                <div className="col-span-2 lg:col-span-1 lg:order-5 flex justify-end pt-2">
                                     <button
                                         type="button"
                                         onClick={() => remove(index)}
@@ -505,11 +445,73 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                         <Trash2 className="h-4 w-4" />
                                     </button>
                                 </div>
+
+                                {/* Container Asset & Dual Empties Out / Empties In */}
+                                {isOutright ? (
+                                    <div className="col-span-12 lg:col-span-4 lg:order-3 space-y-3 min-w-0">
+                                        <div className="p-3 rounded-xl bg-slate-50/80 border border-slate-200/80 space-y-3">
+                                            <FormSelect
+                                                name={`items.${index}.returnableProductId`}
+                                                label="Exchange Items"
+                                                isSearchable={true}
+                                                options={returnableProductOptions}
+                                                excludeFromList={watchedItems}
+                                                excludeKey="returnableProductId"
+                                                currentIndex={index}
+                                                placeholder="Select empty shell..."
+                                                isClearable={true}
+                                                formatOptionLabel={(opt: any) => (
+                                                    <div className="flex items-center justify-between w-full min-w-0 pr-1 py-0.5">
+                                                        <span className="text-xs font-bold truncate mr-2">
+                                                            {opt.name}
+                                                        </span>
+                                                        <span className="shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase bg-purple-100 text-purple-700">
+                                                            Deposit: Rs {opt.securityDeposit}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            />
+
+                                            {initialData && Boolean(selectedReturnableId) && (
+                                                <div className="text-[10px] text-amber-700 bg-amber-50 p-2 rounded-lg border border-amber-200 leading-tight font-medium">
+                                                    <strong>Adjustment Note:</strong> Empties Out/In reflect the original transaction. Changing these will re-sync the customer&apos;s held container balance.
+                                                </div>
+                                            )}
+
+                                            {Boolean(selectedReturnableId) && (
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <div className="min-w-0">
+                                                        <FormNumberStepper
+                                                            label="Items Out"
+                                                            name={`items.${index}.emptiesOut`}
+                                                            min={1}
+                                                        />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <FormNumberStepper
+                                                            label="Items In"
+                                                            name={`items.${index}.emptiesIn`}
+                                                            min={0}
+                                                            max={maxCustomerEmpties}
+                                                        />
+                                                        {selectedCustomerId && selectedReturnableId && (
+                                                            <span className="mt-1 block w-full text-center text-[9px] font-bold text-slate-500">
+                                                                Max Held: {maxCustomerEmpties}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="hidden lg:block lg:col-span-4 lg:order-3" />
+                                )}
                             </div>
 
                             {selectedProductDetails && productTiers.length > 0 && (
                                 <div
-                                    className={`mt-7 p-3 rounded-xl border transition-all ${
+                                    className={`p-3 rounded-xl border transition-all ${
                                         isFirstTimeProduct && !currentItemState.priceTierId
                                             ? "bg-amber-50/70 border-amber-200"
                                             : "bg-slate-50/80 border-slate-200/80"
@@ -518,7 +520,7 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                     <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                                         <div className="flex items-center gap-1.5">
                                             <Tag
-                                                className={`h-3.5 w-3.5 ${
+                                                className={`h-3.5 w-3.5 shrink-0 ${
                                                     isFirstTimeProduct && !currentItemState.priceTierId
                                                         ? "text-amber-600"
                                                         : "text-sky-600"
@@ -598,47 +600,49 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
 
                             {/* Nested FOC Row */}
                             {currentItemState.hasOffer && (
-                                <div className="mt-4 pl-5 pr-2 py-3 bg-emerald-50/50 border border-emerald-100 rounded-xl flex items-start gap-4">
-                                    <Gift className="h-5 w-5 text-emerald-500 shrink-0 mt-2.5" />
+                                <div className="mt-4 p-3 sm:pl-5 sm:pr-3 bg-emerald-50/50 border border-emerald-100 rounded-xl flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
+                                    <div className="flex items-start gap-2.5 flex-1 min-w-0">
+                                        <Gift className="h-5 w-5 text-emerald-500 shrink-0 mt-1 sm:mt-2.5" />
 
-                                    <div className="flex-1 space-y-1">
-                                        <label className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
-                                            Select Free Item
-                                        </label>
-                                        <FormSelect
-                                            name={`items.${index}.freeProductId`}
-                                            label=""
-                                            options={productOptions.filter(
-                                                (opt) => opt.trackingType !== "RETURNABLE"
-                                            )}
-                                            placeholder="Select free product..."
-                                            formatOptionLabel={(opt: any) => (
-                                                <div className="flex items-center justify-between w-full pr-1">
-                                                    <span className="font-medium truncate mr-2">
-                                                        {opt.name}
-                                                        <span className="text-[10px] opacity-70 font-normal ml-1">
-                                                            (Rs {opt.price})
+                                        <div className="flex-1 min-w-0 space-y-1">
+                                            <label className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
+                                                Select Free Item
+                                            </label>
+                                            <FormSelect
+                                                name={`items.${index}.freeProductId`}
+                                                label=""
+                                                options={productOptions.filter(
+                                                    (opt) => opt.trackingType !== "RETURNABLE"
+                                                )}
+                                                placeholder="Select free product..."
+                                                formatOptionLabel={(opt: any) => (
+                                                    <div className="flex items-center justify-between w-full min-w-0 pr-1">
+                                                        <span className="font-medium truncate mr-2">
+                                                            {opt.name}
+                                                            <span className="text-[10px] opacity-70 font-normal ml-1">
+                                                                (Rs {opt.price})
+                                                            </span>
                                                         </span>
-                                                    </span>
-                                                    <span className="shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm bg-indigo-500">
-                                                        {opt.trackingType}
-                                                    </span>
-                                                </div>
+                                                        <span className="shrink-0 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-wider text-white shadow-sm bg-indigo-500">
+                                                            {opt.trackingType}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            />
+                                            {freeProductDetails && (
+                                                <span
+                                                    className={`block text-[10px] font-bold ${
+                                                        isFreeOutOfStock ? "text-rose-500" : "text-emerald-600"
+                                                    }`}
+                                                >
+                                                    Stock Available: {remainingFreeStock}
+                                                </span>
                                             )}
-                                        />
-                                        {freeProductDetails && (
-                                            <span
-                                                className={`text-[10px] font-bold ${
-                                                    isFreeOutOfStock ? "text-rose-500" : "text-emerald-600"
-                                                }`}
-                                            >
-                                                Stock Available: {remainingFreeStock}
-                                            </span>
-                                        )}
+                                        </div>
                                     </div>
 
-                                    <div className="flex flex-col gap-1 w-24">
-                                        <label className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider text-center">
+                                    <div className="flex flex-col gap-1 w-full sm:w-24 shrink-0">
+                                        <label className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider sm:text-center">
                                             Qty Out
                                         </label>
                                         <FormInput
@@ -659,33 +663,35 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                             {/* Asset Deficit Warning & Deposit Toggle */}
                             {showDepositWarning && (
                                 <div
-                                    className={`mt-4 p-3 border rounded-xl flex items-start sm:items-center gap-3 transition-all animate-in fade-in ${
+                                    className={`mt-4 p-3 border rounded-xl flex flex-col sm:flex-row sm:items-center gap-3 transition-all animate-in fade-in ${
                                         isDepositCharged
                                             ? "bg-emerald-50/50 border-emerald-200"
                                             : "bg-amber-50 border-amber-200"
                                     }`}
                                 >
-                                    {isDepositCharged ? (
-                                        <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5 sm:mt-0" />
-                                    ) : (
-                                        <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 sm:mt-0" />
-                                    )}
-                                    <div className="flex-1">
-                                        <p
-                                            className={`text-[13px] font-extrabold ${
-                                                isDepositCharged ? "text-emerald-800" : "text-amber-800"
-                                            }`}
-                                        >
-                                            Deficit: {deficit} Missing Container(s)
-                                        </p>
-                                        <p
-                                            className={`text-[10px] font-medium leading-tight mt-0.5 ${
-                                                isDepositCharged ? "text-emerald-600" : "text-amber-700"
-                                            }`}
-                                        >
-                                            Deposit Required: Rs {calculatedDepositNeeded.toLocaleString()} (@ Rs{" "}
-                                            {containerDepositRate}/ea)
-                                        </p>
+                                    <div className="flex items-start sm:items-center gap-3 flex-1 min-w-0">
+                                        {isDepositCharged ? (
+                                            <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5 sm:mt-0" />
+                                        ) : (
+                                            <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 sm:mt-0" />
+                                        )}
+                                        <div className="flex-1 min-w-0">
+                                            <p
+                                                className={`text-[13px] font-extrabold ${
+                                                    isDepositCharged ? "text-emerald-800" : "text-amber-800"
+                                                }`}
+                                            >
+                                                Deficit: {deficit} Missing Container(s)
+                                            </p>
+                                            <p
+                                                className={`text-[10px] font-medium leading-tight mt-0.5 ${
+                                                    isDepositCharged ? "text-emerald-600" : "text-amber-700"
+                                                }`}
+                                            >
+                                                Deposit Required: Rs {calculatedDepositNeeded.toLocaleString()} (@ Rs{" "}
+                                                {containerDepositRate}/ea)
+                                            </p>
+                                        </div>
                                     </div>
 
                                     {isDepositCharged ? (
@@ -693,7 +699,7 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                             type="button"
                                             variant="outline"
                                             size="sm"
-                                            className="border-emerald-200 text-emerald-600 hover:bg-emerald-100 text-[10px] h-8 shrink-0 shadow-sm cursor-pointer"
+                                            className="w-full sm:w-auto border-emerald-200 text-emerald-600 hover:bg-emerald-100 text-[10px] h-9 sm:h-8 shrink-0 shadow-sm cursor-pointer"
                                             onClick={() => {
                                                 setValue(`items.${index}.isDepositCharged`, false);
                                                 setValue(`items.${index}.chargedDeposit`, 0);
@@ -705,7 +711,7 @@ const SelectProduct = ({ branchId, initialData }: Props) => {
                                         <Button
                                             type="button"
                                             size="sm"
-                                            className="bg-amber-500 hover:bg-amber-600 text-white text-[10px] h-8 shrink-0 shadow-sm cursor-pointer"
+                                            className="w-full sm:w-auto bg-amber-500 hover:bg-amber-600 text-white text-[10px] h-9 sm:h-8 shrink-0 shadow-sm cursor-pointer"
                                             onClick={() => {
                                                 setValue(`items.${index}.isDepositCharged`, true);
                                                 setValue(`items.${index}.chargedDeposit`, calculatedDepositNeeded);

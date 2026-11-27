@@ -213,18 +213,25 @@ export default function CheckoutArea({
                             </div>
                         </div>
                     </CardContent>
-
-                    <div className="p-6 bg-white border-t border-slate-200">
-                        <Button type="submit" disabled={isButtonDisabled || isBusy} className={`w-full h-14 font-bold rounded-xl shadow-sm text-base transition-all duration-300 ${buttonClass}`}>
+                    <div className="p-4 sm:p-6 bg-white border-t border-slate-200 min-w-0">
+                        <Button
+                            type="submit"
+                            disabled={isButtonDisabled || isBusy}
+                            className={`w-full max-w-full h-12 sm:h-14 px-4 font-bold rounded-xl shadow-sm text-sm sm:text-base transition-all duration-300 flex items-center justify-center min-w-0 ${buttonClass}`}
+                        >
                             {isBusy ? (
                                 <>
-                                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                                    {isUploading ? "Uploading Receipt..." : "Submitting..."}
+                                    <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin shrink-0" />
+                                    <span className="truncate">
+                                        {isUploading ? "Uploading Receipt..." : "Submitting..."}
+                                    </span>
                                 </>
                             ) : (
                                 <>
-                                    {!isButtonDisabled && requirePayment && <ShieldCheck className="w-5 h-5 mr-2" />}
-                                    {buttonText}
+                                    {!isButtonDisabled && requirePayment && (
+                                        <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 mr-2 shrink-0" />
+                                    )}
+                                    <span className="truncate">{buttonText}</span>
                                 </>
                             )}
                         </Button>

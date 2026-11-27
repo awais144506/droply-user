@@ -8,6 +8,7 @@ import { SubscriptionIndicator } from "./subscription-indicator";
 import { useBranchSettings } from "@/features/admin/settings/api/use-branch-settings";
 import { useRole } from "@/lib/hooks/use-role";
 import { Building2 } from "lucide-react"; // Fallback icon if branch image is missing
+import { SidebarTrigger } from "../ui/sidebar";
 
 function LiveClock({ tier }: { tier: string }) {
   const [mounted, setMounted] = useState(false);
@@ -80,6 +81,8 @@ export function SiteHeader() {
     <header className="relative z-2000 flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 top-0 shadow-sm">
       {/* Left side: Env mode & Subscription Indicator */}
       <div className="flex items-center gap-3 z-10">
+        <SidebarTrigger className="-ml-1 text-slate-600 hover:text-slate-900 cursor-pointer" />
+        <SubscriptionIndicator branchId={roleData.branchId} />
         {envMode !== 'production' && (
           <div className="flex items-center gap-2">
             {envMode === "development" && (
@@ -94,7 +97,7 @@ export function SiteHeader() {
             )}
           </div>
         )}
-        <SubscriptionIndicator branchId={roleData.branchId} />
+
       </div>
 
       {/* Center: Branch Name & Image (Absolutely centered so it never gets pushed off) */}

@@ -21,7 +21,7 @@ export default function PricingTierCard({ tier, price, cycle, isSelected, isCurr
     return (
         <div 
             onClick={onClick}
-            className={`relative cursor-pointer transition-all duration-300 bg-white p-4 rounded-xl flex flex-col justify-center text-center min-h-[140px] ${
+            className={`relative cursor-pointer transition-all duration-300 bg-white p-4 rounded-xl flex flex-col justify-center text-center min-h-35 ${
                 isSelected 
                     ? `border-2 shadow-lg scale-105 z-10 ${theme} ring-4` 
                     : `border border-slate-200 hover:border-slate-300 opacity-70 hover:opacity-100`
